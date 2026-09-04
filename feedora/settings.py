@@ -10,9 +10,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env_path = BASE_DIR / ".env"
 load_dotenv(dotenv_path=env_path)
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "annadata-development-key-change-in-production")
+_raw_secret = os.getenv("DJANGO_SECRET_KEY") or os.getenv("SECRET_KEY") or ""
+SECRET_KEY = _raw_secret.strip() or "django-insecure-feedora-super-secret-key-production-fallback-123456789"
 DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.vercel.app",
+    "https://*.now.sh",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -26,6 +31,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -53,20 +59,34 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "AgroFedly.wsgi.application"
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = (os.getenv("DATABASE_URL") or "").strip()
 if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.config(
             default=DATABASE_URL,
-            conn_max_age=600,
+            conn_max_age=int(os.getenv("DJANGO_CONN_MAX_AGE", "0")),
             conn_health_checks=True,
         )
     }
 else:
+    # On Vercel serverless, root filesystem is read-only.
+    # Copy db.sqlite3.backup to writable /tmp/db.sqlite3 so authentication and database queries succeed.
+    db_path = BASE_DIR / "db.sqlite3"
+    backup_db = BASE_DIR / "db.sqlite3.backup"
+    if os.getenv("VERCEL"):
+        tmp_db = Path("/tmp") / "db.sqlite3"
+        if backup_db.exists() and not tmp_db.exists():
+            import shutil
+            shutil.copy2(backup_db, tmp_db)
+        db_path = tmp_db
+    elif not db_path.exists() and backup_db.exists():
+        import shutil
+        shutil.copy2(backup_db, db_path)
+
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "NAME": db_path,
         }
     }
 
@@ -77,9 +97,10 @@ TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "login"
@@ -87,3 +108,4 @@ LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY", "")
+
