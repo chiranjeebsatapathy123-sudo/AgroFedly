@@ -10,7 +10,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env_path = BASE_DIR / ".env"
 load_dotenv(dotenv_path=env_path)
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "annadata-development-key-change-in-production")
+_raw_secret = os.getenv("DJANGO_SECRET_KEY") or os.getenv("SECRET_KEY") or ""
+SECRET_KEY = _raw_secret.strip() or "django-insecure-feedora-super-secret-key-production-fallback-123456789"
 DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*"]
 CSRF_TRUSTED_ORIGINS = [
@@ -58,7 +59,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "feedora.wsgi.application"
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = (os.getenv("DATABASE_URL") or "").strip()
 if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.config(
