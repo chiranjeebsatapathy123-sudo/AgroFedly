@@ -7,12 +7,16 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from the Annadata directory
+env_path = BASE_DIR / ".env"
+load_dotenv(dotenv_path=env_path)
+
 _raw_secret = (
     os.getenv("DJANGO_SECRET_KEY")
     or os.getenv("SECRET_KEY")
     or ""
-).strip().strip("'\"")
+).strip().strip('\'\"')
 SECRET_KEY = _raw_secret or "django-insecure-feedora-super-secret-key-production-fallback-123456789"
+
 DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*"]
 CSRF_TRUSTED_ORIGINS = [
@@ -41,7 +45,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "feedora.urls"
+ROOT_URLCONF = "AgroFedly.urls"
 
 TEMPLATES = [
     {
@@ -58,7 +62,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "feedora.wsgi.application"
+WSGI_APPLICATION = "AgroFedly.wsgi.application"
 
 DATABASE_URL = (
     os.getenv("DATABASE_URL")
@@ -78,8 +82,6 @@ if DATABASE_URL:
         )
     }
 else:
-    # On Vercel serverless, root filesystem is read-only.
-    # Copy db.sqlite3.backup to writable /tmp/db.sqlite3 so authentication and database queries succeed.
     db_path = BASE_DIR / "db.sqlite3"
     backup_db = BASE_DIR / "db.sqlite3.backup"
     if os.getenv("VERCEL"):
@@ -117,4 +119,3 @@ LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY", "")
-

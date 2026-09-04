@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="demandforecast",
             name="model_name",
-            field=models.CharField(default="FeedoraFallback", max_length=100),
+            field=models.CharField(default="AgroFedlyFallback", max_length=100),
         ),
         migrations.AlterField(
             model_name="surplusfood",
