@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Log Processing{% endblock %}
+{% block content %}
+<section class="form-page">
+    <div class="form-intro">
+        <div class="eyebrow">PROCESSING</div>
+        <h1>Log Produce Processing</h1>
+        <p>Convert raw agricultural inventory into processed outputs.</p>
+    </div>
+    <div class="form-card">
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            {% for field in form %}
+            <label>{{ field.label }}
+                {{ field }}
+                {% if field.errors %}<div class="error-box" style="margin-top:5px; padding:5px;">{{ field.errors }}</div>{% endif %}
+            </label>
+            {% endfor %}
+            <button class="btn primary full" type="submit">Process & Calculate Yield</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

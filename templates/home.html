@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow">SMART FOOD OPERATIONS PLATFORM</div>
+    <h1>Plan better meals.<br><span>Move surplus smarter.</span></h1>
+    <p>Fedly connects AI demand planning, food safety, organizations and last-mile delivery in one operational workspace.</p>
+    <div class="hero-actions">
+      {% if user.is_authenticated %}
+        <a class="btn primary" href="{% url 'dashboard' %}">Open Dashboard</a>
+        {% if user.organization_memberships.all %}<a class="btn glass" href="{% url 'delivery_list' %}">Track Deliveries</a>{% endif %}
+      {% else %}
+        <a class="btn primary" href="{% url 'organization_register' %}">Register Company / College / School / Hospital</a>
+        <a class="btn glass" href="{% url 'login' %}">Existing User Login</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="hero-panel">
+    <div class="panel-top"><span>LIVE OPERATIONS</span><b>● Operational</b></div>
+    <div class="orbit"><div class="orbit-core">🍲</div><span class="orb o1">AI</span><span class="orb o2">SAFE</span><span class="orb o3">MOVE</span></div>
+    <div class="mini-grid"><div><b>7D</b><span>Forecast</span></div><div><b>24/7</b><span>Tracking</span></div><div><b>1</b><span>Workspace</span></div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head"><div><div class="eyebrow">ONE PLATFORM</div><h2>Built for real food operations</h2></div><p>Register an organization, manage people, create safe-food deliveries and keep every movement visible.</p></div>
+  <div class="feature-grid">
+    <article class="feature-card"><div class="icon">✦</div><h3>AI Demand Planning</h3><p>Forecast meal demand from attendance, calendar and weather signals, with confidence and preparation recommendations.</p></article>
+    <article class="feature-card"><div class="icon">♢</div><h3>Food Safety</h3><p>Automatically classify stored surplus using temperature and storage-time controls before redistribution.</p></article>
+    <article class="feature-card"><div class="icon">▤</div><h3>Organization Hub</h3><p>Companies, colleges, schools, hospitals and NGOs can register and manage their own operational team.</p></article>
+    <article class="feature-card"><div class="icon">➜</div><h3>Delivery Control</h3><p>Create trackable deliveries with sender, receiver, driver, vehicle, schedule and live status workflow.</p></article>
+    <article class="feature-card"><div class="icon">◎</div><h3>Recipient Matching</h3><p>Rank verified recipients by capacity, urgency and distance for better redistribution decisions.</p></article>
+    <article class="feature-card"><div class="icon">▦</div><h3>Operational Dashboard</h3><p>See demand, surplus, redistribution, confidence and recent deliveries without hunting through pages.</p></article>
+  </div>
+</section>
+
+<section class="cta">
+  <div><div class="eyebrow">GET STARTED</div><h2>Your organization can join Fedly today.</h2><p>Registration creates the organization and its owner account together, so the form actually leads directly into the workspace.</p></div>
+  <a class="btn light" href="{% url 'organization_register' %}">Register Organization →</a>
+</section>
+{% endblock %}

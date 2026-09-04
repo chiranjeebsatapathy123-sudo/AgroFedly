@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Agriculture Dashboard{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <div class="eyebrow">AGRICULTURE MODULE</div>
+        <h1>Agriculture Dashboard</h1>
+        <p>From Farm to Plate: Track produce, processing yields, and manage agricultural supply chain.</p>
+    </div>
+</section>
+
+<div class="result-cards" style="margin-bottom:20px;">
+    <div>
+        <span>Total Registered Suppliers</span>
+        <b>{{ total_suppliers }}</b>
+    </div>
+    <div>
+        <span>Total Produce Available</span>
+        <b>{{ total_produce }} kg</b>
+    </div>
+    <div>
+        <span>Total Produce Processed</span>
+        <b>{{ total_processed }} kg</b>
+    </div>
+    <div>
+        <span>Estimated Loss Avoided</span>
+        <b style="color:var(--success);">{{ loss_avoided }} kg</b>
+    </div>
+</div>
+
+<div style="display:flex; gap:20px; flex-wrap:wrap;">
+    <!-- Recent Produce Inventory -->
+    <div class="form-card" style="flex:1; min-width:300px;">
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">Recent Harvest & Inventory</h2>
+        {% if recent_produce %}
+            <table style="width:100%; text-align:left;">
+                <tr><th style="padding-bottom:10px;">Produce</th><th style="padding-bottom:10px;">Available</th><th style="padding-bottom:10px;">Risk Level</th></tr>
+                {% for p in recent_produce %}
+                <tr>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ p.name }}</td>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ p.available_quantity }} {{ p.unit }}</td>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">
+                        {% if p.risk_level == 'High' %}
+                        <span style="color:red; font-weight:bold;">High</span>
+                        {% elif p.risk_level == 'Medium' %}
+                        <span style="color:orange; font-weight:bold;">Medium</span>
+                        {% else %}
+                        <span style="color:green; font-weight:bold;">Low</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No agricultural produce recorded yet.</p>
+        {% endif %}
+        <a href="{% url 'agri_produce_list' %}" class="btn full" style="margin-top:15px; text-align:center;">View Full Inventory</a>
+    </div>
+    
+    <!-- Recent Processing -->
+    <div class="form-card" style="flex:1; min-width:300px;">
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">Recent Processing Activities</h2>
+        {% if recent_processing %}
+            <table style="width:100%; text-align:left;">
+                <tr>
+                    <th style="padding-bottom:10px;">Input</th>
+                    <th style="padding-bottom:10px;">Output</th>
+                    <th style="padding-bottom:10px;">Yield</th>
+                </tr>
+                {% for r in recent_processing %}
+                <tr>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ r.input_quantity }} {{ r.input_produce.unit }} {{ r.input_produce.name }}</td>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ r.output_quantity }} {{ r.input_produce.unit }} {{ r.output_product }}</td>
+                    <td style="padding:8px 0; border-top:1px solid #eee; color:var(--success);">{{ r.processing_yield_percent }}%</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No processing records yet.</p>
+        {% endif %}
+        <a href="{% url 'agri_processing_list' %}" class="btn full" style="margin-top:15px; text-align:center;">View Processing Log</a>
+    </div>
+</div>
+{% endblock %}

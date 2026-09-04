@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Edit Organization{% endblock %}
+{% block content %}
+<section class="form-page single"><div class="form-card"><div class="eyebrow">ORGANIZATION SETTINGS</div><h1>Edit {{ organization.name }}</h1><form method="post" class="form-grid">{% csrf_token %}{% for field in form %}<label>{{ field.label }}{{ field }}{% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}</label>{% endfor %}<button class="btn primary">Save changes</button></form></div></section>
+{% endblock %}

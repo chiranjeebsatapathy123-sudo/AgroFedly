@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Post-Meal Logging{% endblock %}
+{% block content %}
+<section class="form-page">
+    <div class="form-intro">
+        <div class="eyebrow">GROUND TRUTH</div>
+        <h1>Actual Consumption & Waste</h1>
+        <p>Log actual prepared and consumed meals to calculate exact waste and improve future predictions.</p>
+    </div>
+    <div class="form-card">
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            <label>Date
+                {{ form.date }}
+                {{ form.date.errors }}
+            </label>
+            <label>Meal Type
+                {{ form.meal_type }}
+                {{ form.meal_type.errors }}
+            </label>
+            <label>Predicted Demand (Optional)
+                {{ form.predicted_demand }}
+                {{ form.predicted_demand.errors }}
+            </label>
+            <label>Actual Prepared Quantity
+                {{ form.meals_prepared }}
+                {{ form.meals_prepared.errors }}
+            </label>
+            <label>Actual Served/Consumed Quantity
+                {{ form.meals_consumed }}
+                {{ form.meals_consumed.errors }}
+            </label>
+            <label>Leftover Quantity (Safe)
+                {{ form.leftover_meals }}
+                {{ form.leftover_meals.errors }}
+            </label>
+            <label>Discarded/Wasted Quantity
+                {{ form.discarded_meals }}
+                {{ form.discarded_meals.errors }}
+            </label>
+            
+            {% if form.non_field_errors %}
+            <div class="error-box">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            
+            <button class="btn primary full" type="submit">Submit Ground Truth</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

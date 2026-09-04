@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Recipients{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <div class="eyebrow">RECIPIENT NETWORK</div>
+    <h1>Recipients</h1>
+    <p>Verify receiving organizations and communities before they can receive redistributed food.</p>
+  </div>
+  <a class="btn primary" href="{% url 'add_recipient' %}">＋ Add recipient</a>
+</section>
+
+<div class="stats-grid recipient-stats">
+  <div class="stat-card"><span>Total recipients</span><b>{{ recipients|length }}</b><small>Registered receiving points</small></div>
+  <div class="stat-card accent"><span>Verified</span><b>{{ verified_count }}</b><small>Available for redistribution</small></div>
+  <div class="stat-card"><span>Pending verification</span><b>{{ pending_count }}</b><small>Need review before use</small></div>
+  <div class="stat-card"><span>Ready capacity</span><b>{{ verified_capacity }}</b><small>Use individual rows for exact capacity</small></div>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead><tr><th>Name</th><th>Type</th><th>Capacity</th><th>Urgency</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for r in recipients %}
+      <tr>
+        <td><b>{{ r.name }}</b></td>
+        <td>{{ r.recipient_type }}</td>
+        <td>{{ r.capacity }}</td>
+        <td>{{ r.urgency_score }}/100</td>
+        <td>{% if r.verified %}<span class="pill safe">✓ Verified</span>{% else %}<span class="pill">Pending</span>{% endif %}</td>
+        <td>
+          {% if not r.verified %}
+          <form method="post" action="{% url 'verify_recipient' r.id %}" class="inline-form">
+            {% csrf_token %}
+            <button class="table-btn verify-btn" type="submit">✓ Verify</button>
+          </form>
+          {% else %}
+            <span class="ready-text">Ready for redistribution</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6"><div class="empty">No recipients yet. Add a recipient to begin the verification workflow.</div></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="panel recipient-help">
+  <div class="panel-title"><h2>How verification works</h2></div>
+  <div class="feature-grid">
+    <div class="feature-card"><div class="icon">1</div><h3>Register</h3><p>Add the receiving organization's name, type, capacity and urgency.</p></div>
+    <div class="feature-card"><div class="icon">2</div><h3>Verify</h3><p>Use the Verify button above. Only verified recipients appear in redistribution.</p></div>
+    <div class="feature-card"><div class="icon">3</div><h3>Redistribute</h3><p>Open SAFE surplus and choose a verified recipient from the dropdown.</p></div>
+  </div>
+</div>
+{% endblock %}

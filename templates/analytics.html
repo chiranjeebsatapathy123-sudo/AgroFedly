@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Produce Analytics{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <div class="eyebrow">ANALYTICS</div>
+        <h1>Produce Utilization & Waste</h1>
+        <p>Analyze produce consumption rates, track waste, and quantify financial impact.</p>
+    </div>
+</section>
+
+<div class="result-cards" style="margin-bottom:20px;">
+    <div>
+        <span>Produce Utilization Rate</span>
+        <b style="color:var(--primary);">{{ utilization_rate }}%</b>
+    </div>
+    <div>
+        <span>Total Produce Waste</span>
+        <b>{{ total_produce_waste }} kg</b>
+    </div>
+    <div>
+        <span>Estimated Waste Value</span>
+        <b>₹{{ monetary_value_waste }}</b>
+    </div>
+    <div>
+        <span>Estimated Savings</span>
+        <b style="color:var(--success);">₹{{ savings_value }}</b>
+    </div>
+</div>
+
+<div style="display:flex; gap:20px; flex-wrap:wrap;">
+    <!-- Top Wasted Ingredients -->
+    <div class="form-card" style="flex:1; min-width:300px;">
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">Top Wasted Ingredients</h2>
+        {% if top_wasted %}
+            <table style="width:100%; text-align:left;">
+                <tr><th style="padding-bottom:10px;">Ingredient</th><th style="padding-bottom:10px;">Waste Quantity</th><th style="padding-bottom:10px;">Value Lost</th></tr>
+                {% for ing in top_wasted %}
+                <tr>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ ing.name }}</td>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ ing.wasted_qty }} {{ ing.unit }}</td>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">₹{{ ing.waste_value }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No waste recorded yet.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Predicted vs Actual Demand -->
+    <div class="form-card" style="flex:1; min-width:300px;">
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">Predicted vs Actual Demand Trend</h2>
+        {% if chart_records %}
+            <table style="width:100%; text-align:left;">
+                <tr>
+                    <th style="padding-bottom:10px;">Date</th>
+                    <th style="padding-bottom:10px;">Predicted</th>
+                    <th style="padding-bottom:10px;">Prepared</th>
+                    <th style="padding-bottom:10px;">Consumed</th>
+                </tr>
+                {% for row in chart_records %}
+                <tr>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ row.date|date:"D, d M" }}</td>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ row.predicted_demand }}</td>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ row.meals_prepared }}</td>
+                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ row.meals_consumed }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No logged ground truth data yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+# Annadata - production/runtime Python dependencies
+# Compatible with modern Python 3.x installations.
+
+Django>=5.2,<6.1
+requests>=2.32,<3
+joblib>=1.4,<2
+numpy>=2.1,<3
+pandas>=2.2,<3
+scikit-learn>=1.6,<2
+
+# Database Requirements
+psycopg2-binary>=2.9,<3.0
+dj-database-url>=2.1,<3.0
+python-dotenv>=1.0,<2.0
+
+# Optional production web server (useful for Render/Linux deployment)
+gunicorn>=23,<24

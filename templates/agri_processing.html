@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Produce Processing{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+        <div>
+            <div class="eyebrow">PROCESSING</div>
+            <h1>Agricultural Processing Logs</h1>
+            <p>Track the conversion of raw produce to processed goods and calculate operational yield.</p>
+        </div>
+        <a href="{% url 'agri_processing_add' %}" class="btn primary">⚙️ Log Processing</a>
+    </div>
+</section>
+
+<div class="form-card" style="max-width:100%;">
+    {% if records %}
+        <table style="width:100%; text-align:left;">
+            <tr>
+                <th style="padding-bottom:10px;">Date</th>
+                <th style="padding-bottom:10px;">Raw Input Produce</th>
+                <th style="padding-bottom:10px;">Processed Output</th>
+                <th style="padding-bottom:10px;">Yield / Loss</th>
+                <th style="padding-bottom:10px;">Facility</th>
+            </tr>
+            {% for r in records %}
+            <tr>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ r.processing_date|date:"d M Y" }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">
+                    <strong>{{ r.input_quantity }} {{ r.input_produce.unit }}</strong> of {{ r.input_produce.name }}<br>
+                    <small>Type: {{ r.processing_type }}</small>
+                </td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">
+                    <strong>{{ r.output_quantity }} {{ r.input_produce.unit }}</strong> of {{ r.output_product }}<br>
+                    <small>Waste: {{ r.waste_quantity }} {{ r.input_produce.unit }}</small>
+                </td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">
+                    Yield: <span style="color:var(--success); font-weight:bold;">{{ r.processing_yield_percent }}%</span><br>
+                    Loss: <span style="color:var(--error); font-weight:bold;">{{ r.processing_loss_percent }}%</span>
+                </td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ r.processing_facility }}<br><small>{{ r.status }}</small></td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div style="text-align:center; padding:40px;">
+            <p>No processing records logged yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

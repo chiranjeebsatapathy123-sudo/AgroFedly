@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Food Safety{% endblock %}
+{% block content %}
+<section class="form-page single"><div class="form-card"><div class="eyebrow">FOOD SAFETY</div><h1>Check storage conditions</h1><form method="post" class="form-grid">{% csrf_token %}<label>Storage temperature °C<input name="storage_temperature" type="number" step="0.1" value="4" required></label><label>Storage time hours<input name="storage_time_hours" type="number" step="0.1" value="0" min="0" required></label><button class="btn primary">Check safety</button></form>{% if result == "SAFE" %}<div class="safe-box">✓ SAFE — suitable under the configured threshold.</div>{% elif result == "UNSAFE" %}<div class="error-box">! UNSAFE — do not redistribute until safety is addressed.</div>{% elif result == "ERROR" %}<div class="error-box">Enter valid storage values.</div>{% endif %}</div></section>
+{% endblock %}

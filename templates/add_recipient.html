@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Add Recipient{% endblock %}
+{% block content %}
+<section class="form-page single">
+  <div class="form-card">
+    <div class="eyebrow">RECIPIENT REGISTRATION</div>
+    <h1>Add recipient</h1>
+    <p class="form-note">Verified recipients appear immediately in the redistribution selection.</p>
+    {% if error %}<div class="error-box">{{ error }}</div>{% endif %}
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+      <label>Name<input name="name" required placeholder="e.g. Sunrise Community Kitchen"></label>
+      <label>Type<input name="recipient_type" placeholder="NGO / Shelter / Community kitchen / School" required></label>
+      <label>Capacity<input name="capacity" type="number" min="1" required placeholder="Meals they can receive"></label>
+      <div class="two">
+        <label>Distance km<input name="distance_km" type="number" step="0.1" min="0" value="0"></label>
+        <label>Urgency 0–100<input name="urgency_score" type="number" min="0" max="100" value="50"></label>
+      </div>
+      <label class="check-row">
+        <input type="checkbox" name="verify_now" value="1" checked>
+        <span><b>Verify this recipient now</b><small>Recommended when the receiving organization has already been checked.</small></span>
+      </label>
+      <div class="safe-box">✓ Verified recipients are the only recipients shown on the redistribution form.</div>
+      <button class="btn primary">Save recipient</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

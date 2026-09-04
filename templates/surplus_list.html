@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Surplus{% endblock %}
+{% block content %}
+<section class="page-head"><div><div class="eyebrow">SURPLUS CONTROL</div><h1>Surplus food</h1><p>Only SAFE quantities can move into redistribution.</p></div><a class="btn primary" href="{% url 'add_surplus' %}">＋ Add surplus</a></section>
+<div class="table-card"><table><thead><tr><th>Food</th><th>Qty</th><th>Temperature</th><th>Time</th><th>Status</th><th>Action</th></tr></thead><tbody>{% for f in surplus_foods %}<tr><td><b>{{ f.food_name }}</b></td><td>{{ f.quantity }}</td><td>{{ f.storage_temperature }}°C</td><td>{{ f.storage_time_hours }}h</td><td><span class="pill {{ f.status|lower }}">{{ f.get_status_display }}</span></td><td>{% if f.status == "SAFE" and f.quantity %}<a class="table-btn" href="{% url 'redistribute_food' f.id %}">Redistribute</a>{% endif %}</td></tr>{% empty %}<tr><td colspan="6" class="empty">No surplus records.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

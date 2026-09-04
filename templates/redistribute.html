@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Redistribute{% endblock %}
+{% block content %}
+<section class="form-page single">
+  <div class="form-card">
+    <div class="eyebrow">REDISTRIBUTION</div>
+    <h1>{{ food.food_name }}</h1>
+    <p>Available: <b>{{ food.quantity }}</b></p>
+    {% if verified_recipient_count == 0 %}
+      <div class="error-box">
+        <b>No verified recipients are available.</b>
+        <p>Add and verify a recipient first. The recipient will then appear in this dropdown.</p>
+        <a class="btn soft" href="{% url 'add_recipient' %}">＋ Add recipient</a>
+        <a class="btn primary" href="{% url 'recipient_list' %}">Review recipients</a>
+      </div>
+    {% endif %}
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="error-box">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        <label>{{ field.label }}{{ field }}{% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}</label>
+      {% endfor %}
+      <button class="btn primary" {% if verified_recipient_count == 0 %}disabled{% endif %}>Confirm Redistribution</button>
+    </form>
+  </div>
+</section>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('{% url "recipient_recommendations" food.id %}')
+        .then(res => res.json())
+        .then(data => {
+            if (data.recommendations && data.recommendations.length > 0) {
+                const container = document.createElement('div');
+                container.className = 'form-card';
+                container.style.marginTop = '16px';
+                
+                let html = '<div class="eyebrow">SMART MATCHING</div><h3>Top Recommended Recipients</h3><ul style="list-style:none; padding:0; margin:0;">';
+                data.recommendations.forEach(r => {
+                    html += `<li style="padding:12px; border-bottom:1px solid var(--border); border-radius:6px; background:var(--background-secondary); margin-bottom:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong>${r.name}</strong>
+                            <span class="badge" style="background:var(--primary); color:white; padding:4px 8px; border-radius:4px;">${r.score}% Match</span>
+                        </div>
+                        <p style="margin:4px 0 0 0; font-size:0.9em; color:var(--text-secondary);">${r.explanation}</p>
+                    </li>`;
+                });
+                html += '</ul>';
+                container.innerHTML = html;
+                document.querySelector('.form-page').appendChild(container);
+            }
+        }).catch(err => console.error("Error fetching recommendations:", err));
+});
+</script>
+{% endblock %}

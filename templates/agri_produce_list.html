@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Produce Inventory{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+        <div>
+            <div class="eyebrow">INVENTORY</div>
+            <h1>Agricultural Produce</h1>
+            <p>Track raw agricultural harvest, shelf life, and estimated post-harvest loss risks.</p>
+        </div>
+        <a href="{% url 'agri_produce_add' %}" class="btn primary">＋ Add Produce</a>
+    </div>
+</section>
+
+<div class="form-card" style="max-width:100%;">
+    {% if produce_list %}
+        <table style="width:100%; text-align:left;">
+            <tr>
+                <th style="padding-bottom:10px;">Produce Name</th>
+                <th style="padding-bottom:10px;">Supplier</th>
+                <th style="padding-bottom:10px;">Category</th>
+                <th style="padding-bottom:10px;">Location</th>
+                <th style="padding-bottom:10px;">Available</th>
+                <th style="padding-bottom:10px;">Harvest Date</th>
+                <th style="padding-bottom:10px;">Loss Risk</th>
+            </tr>
+            {% for p in produce_list %}
+            <tr>
+                <td style="padding:12px 0; border-top:1px solid #eee;"><strong>{{ p.name }}</strong><br><small>{{ p.crop_type }}</small></td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ p.supplier.name }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ p.category }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ p.location|default:"-" }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;"><strong>{{ p.available_quantity }} {{ p.unit }}</strong></td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ p.harvest_date|date:"d M Y" }}<br><small>Shelf life: {{ p.expected_shelf_life_days }} days</small></td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">
+                    {% if p.risk_level == 'High' %}
+                    <span style="color:red; font-weight:bold;">High Risk</span>
+                    <br><small>Process or supply soon!</small>
+                    {% elif p.risk_level == 'Medium' %}
+                    <span style="color:orange; font-weight:bold;">Medium Risk</span>
+                    {% else %}
+                    <span style="color:green; font-weight:bold;">Low Risk</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div style="text-align:center; padding:40px;">
+            <p>No agricultural produce registered in inventory yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

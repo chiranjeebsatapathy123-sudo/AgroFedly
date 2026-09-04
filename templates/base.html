@@ -1,0 +1,72 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}Feedora{% endblock %} · Smart Food Operations</title>
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+<style>
+  #drawer { 
+      overflow-y: scroll !important; 
+      max-height: 100vh !important;
+      scrollbar-width: thin; 
+      scrollbar-color: rgba(255,255,255,0.4) rgba(0,0,0,0.1); 
+  }
+  #drawer::-webkit-scrollbar { width: 8px !important; display: block !important; }
+  #drawer::-webkit-scrollbar-track { background: rgba(0,0,0,0.1) !important; }
+  #drawer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4) !important; border-radius: 10px !important; }
+  #drawer::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.6) !important; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn" aria-label="Open navigation">⋯</button>
+  <a class="brand" href="{% url 'home' %}"><span class="brand-mark">A</span><span>Feedora</span><small>Smart Food Operations</small></a>
+  <div class="top-actions">
+    {% if user.is_authenticated %}
+      <span class="user-chip">● {{ user.username }}</span>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="logout-mini">Logout</button></form>
+    {% else %}
+      <a class="login-mini" href="{% url 'login' %}">Login</a>
+    {% endif %}
+  </div>
+</header>
+
+<aside class="drawer" id="drawer">
+  <div class="drawer-head"><strong>Navigate</strong><button id="closeMenu">×</button></div>
+  <a href="{% url 'home' %}">⌂ <span>Home</span></a>
+  {% if user.is_authenticated %}
+    <a href="{% url 'dashboard' %}">▦ <span>Operations Dashboard</span></a>
+    <a href="{% url 'predict_demand' %}">✦ <span>AI Prediction</span></a>
+    <a href="{% url 'forecast_7_days' %}">◷ <span>7-Day Forecast</span></a>
+    <a href="{% url 'intelligence_center' %}">⌁ <span>Operations Intelligence</span></a>
+    <a href="{% url 'food_safety' %}">♢ <span>Food Safety</span></a>
+    <a href="{% url 'surplus_list' %}">▣ <span>Surplus Food</span></a>
+    <a href="{% url 'recipient_list' %}">◎ <span>Recipients</span></a>
+    <div class="drawer-label">Agriculture</div>
+    <a href="{% url 'agri_dashboard' %}">🌾 <span>Agriculture Dashboard</span></a>
+    <a href="{% url 'agri_produce_list' %}">📦 <span>Produce Inventory</span></a>
+    <a href="{% url 'agri_processing_list' %}">⚙️ <span>Produce Processing</span></a>
+    <a href="{% url 'agri_supply_matching' %}">🤝 <span>Supply Matching</span></a>
+    
+    <div class="drawer-label">Organization</div>
+    {% if user.organization_memberships.all %}
+      <a href="{% url 'organization_dashboard' %}">▤ <span>Organization</span></a>
+      <a href="{% url 'delivery_list' %}">➜ <span>Delivery System</span></a>
+    {% endif %}
+  {% else %}
+    <a class="drawer-cta" href="{% url 'organization_register' %}">＋ <span>Register Organization</span></a>
+    <a href="{% url 'login' %}">↪ <span>Login</span></a>
+  {% endif %}
+</aside>
+<div class="backdrop" id="backdrop"></div>
+
+{% if messages %}
+<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>
+{% endif %}
+
+<main>{% block content %}{% endblock %}</main>
+<footer>Feedora · AI-assisted food planning · Safety · Redistribution · Delivery</footer>
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

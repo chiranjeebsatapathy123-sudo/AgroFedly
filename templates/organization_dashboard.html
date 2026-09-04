@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Organization{% endblock %}
+{% block content %}
+<section class="page-head"><div><div class="eyebrow">ORGANIZATION WORKSPACE</div><h1>{{ organization.name }}</h1><p>{{ organization.get_organization_type_display }} · {{ membership.get_role_display }}</p></div><div class="head-actions"><a class="btn primary" href="{% url 'delivery_create' %}">＋ New Delivery</a><a class="btn soft" href="{% url 'organization_register' %}">＋ Add Organization</a><a class="btn soft" href="{% url 'organization_edit' %}">Edit Organization</a></div></section>
+<div class="panel" style="max-width:1240px;margin:0 auto 18px"><div class="panel-title"><h2>Your organizations</h2><a href="{% url 'organization_register' %}">Register another</a></div><div class="member-row"><div class="avatar">{{ organization.name|first|upper }}</div><div><b>{{ organization.name }}</b><small>Active workspace · {{ organization.get_organization_type_display }}</small></div></div>{% for m in other_memberships %}<a class="member-row" href="{% url 'organization_switch' m.organization.id %}"><div class="avatar">{{ m.organization.name|first|upper }}</div><div><b>{{ m.organization.name }}</b><small>{{ m.organization.get_organization_type_display }} · Switch workspace</small></div></a>{% endfor %}</div>
+<div class="stats-grid"><div class="stat-card"><span>Team members</span><b>{{ member_count }}</b></div><div class="stat-card"><span>Outgoing meals</span><b>{{ outgoing_quantity }}</b></div><div class="stat-card"><span>Incoming meals</span><b>{{ incoming_quantity }}</b></div><div class="stat-card"><span>Status</span><b>{% if organization.is_verified %}Verified{% else %}Active{% endif %}</b></div></div>
+
+<div class="two-panels">
+<section class="panel"><div class="panel-title"><h2>Delivery activity</h2><a href="{% url 'delivery_list' %}">View all</a></div>
+{% for d in deliveries %}<a class="list-row" href="{% url 'delivery_detail' d.id %}"><span class="status-dot {{ d.status|lower }}"></span><div><b>{{ d.food_name }}</b><small>{{ d.tracking_code }} · {{ d.receiver.name }}</small></div><strong>{{ d.quantity }}</strong></a>{% empty %}<div class="empty">No deliveries yet. Create your first delivery.</div>{% endfor %}
+</section>
+
+<section class="panel"><div class="panel-title"><h2>Team</h2>{% if membership.role == "OWNER" or membership.role == "ADMIN" %}<a href="{% url 'organization_add_member' %}">Add member</a>{% endif %}</div>
+{% for m in members %}<div class="member-row"><div class="avatar">{{ m.user.username|first|upper }}</div><div><b>{{ m.user.username }}</b><small>{{ m.get_role_display }}</small></div>{% if m.role != "OWNER" and membership.role == "OWNER" %}<form method="post" action="{% url 'organization_remove_member' m.id %}">{% csrf_token %}<button class="icon-btn">×</button></form>{% endif %}</div>{% empty %}<div class="empty">No team members.</div>{% endfor %}</section>
+</div>
+{% endblock %}

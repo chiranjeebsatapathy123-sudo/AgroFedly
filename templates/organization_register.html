@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Register Organization{% endblock %}
+{% block content %}
+<section class="form-page">
+  <div class="form-intro"><div class="eyebrow">ORGANIZATION ONBOARDING</div><h1>Register your organization</h1><p>Choose Company, College, School, Hospital, NGO or another institution. The account you create here becomes the organization owner.</p>
+    <div class="type-strip"><span>🏢 Company</span><span>🎓 College</span><span>🏫 School</span><span>🏥 Hospital</span><span>🤝 NGO</span></div>
+  </div>
+  <div class="form-card">
+    {% if form.non_field_errors %}<div class="error-box">{{ form.non_field_errors }}</div>{% endif %}
+    <form method="post" class="form-grid">{% csrf_token %}
+      {% if registering_as_authenticated_user %}
+        <div class="safe-box"><b>✓ Using your current Fedly account</b><br>Your logged-in account <strong>{{ user.username }}</strong> will become the owner of this new organization. You can manage multiple organizations from the workspace.</div>
+      {% else %}
+        <h3>Owner account</h3>
+        <div class="two"><label>Username<input name="username" required autocomplete="username"></label><label>Account email<input name="account_email" type="email" autocomplete="email"></label></div>
+        <div class="two"><label>Password<input name="password" type="password" required autocomplete="new-password"></label><label>Confirm password<input name="password2" type="password" required autocomplete="new-password"></label></div>
+      {% endif %}
+      <h3>Organization details</h3>
+      {% for field in form %}
+        <label>{{ field.label }}{{ field }}{% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}</label>
+      {% endfor %}
+      <button class="btn primary full">Create Organization & Enter Workspace</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

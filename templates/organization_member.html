@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Add Member{% endblock %}
+{% block content %}
+<section class="form-page single"><div class="form-card"><div class="eyebrow">TEAM MANAGEMENT</div><h1>Add organization member</h1><p>The user must already have an Fedly login.</p><form method="post" class="form-grid">{% csrf_token %}{{ form.as_p }}<button class="btn primary">Add / Update Member</button></form></div></section>
+{% endblock %}

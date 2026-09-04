@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}AI Prediction{% endblock %}
+{% block content %}
+<section class="form-page"><div class="form-intro"><div class="eyebrow">AI DEMAND ENGINE</div><h1>Predict today's meal demand</h1><p>Enter attendance and optional weather location. The model uses your trained bundle when available and a robust fallback when it is not.</p><div class="model-badge">✦ {{ model_name }}</div></div><div class="form-card"><form method="post" class="form-grid">{% csrf_token %}<label>Expected attendance{% if default_attendance %}<span class="badge" style="font-size:0.7em; margin-left:8px; background:var(--primary); color:white; padding:2px 6px; border-radius:4px;">ERP Synced</span>{% endif %}<input name="attendance" type="number" min="0" required placeholder="e.g. 1500" value="{% if default_attendance %}{{ default_attendance }}{% endif %}"></label><label>City for live weather<input name="city" placeholder="e.g. Bhubaneswar"></label><label>Holiday<select name="holiday"><option value="0">No</option><option value="1">Yes</option></select></label><label>Exam Day<select name="exam_day"><option value="0">No</option><option value="1">Yes</option></select></label><label>Event Flag<select name="event_flag"><option value="0">No</option><option value="1">Yes</option></select></label><button class="btn primary full">Run AI Prediction</button></form>{% if error %}<div class="error-box">{{ error }}</div>{% endif %}</div></section>
+{% if result %}<section class="result-section"><div class="result-main"><div class="eyebrow">FORECAST RESULT</div><h2>{{ result.prediction }} meals</h2><p>Recommended preparation: <b>{{ result.recommended }}</b></p><div class="range"><span>{{ result.lower }}</span><div><i style="width:{{ result.confidence }}%"></i></div><span>{{ result.upper }}</span></div></div><div class="result-cards"><div><span>Confidence</span><b>{{ result.confidence }}%</b></div><div><span>Expected surplus</span><b>{{ result.expected_surplus }}</b></div><div><span>Waste risk</span><b>{{ result.risk }}</b></div></div>
+{% if produce_requirements %}
+<div class="result-main" style="margin-top:20px;">
+  <div class="eyebrow">RAW PRODUCE REQUIREMENT</div>
+  <table style="width:100%; text-align:left; margin-top:10px;">
+    <tr><th style="padding-bottom:10px;">Ingredient</th><th style="padding-bottom:10px;">Required</th></tr>
+    {% for req in produce_requirements %}
+    <tr>
+      <td style="padding:5px 0; border-top:1px solid #eee;">{{ req.name }}</td>
+      <td style="padding:5px 0; border-top:1px solid #eee;"><b>{{ req.required }} {{ req.unit }}</b></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+<div class="result-main" style="margin-top:20px;">
+  <div class="eyebrow">TOMORROW'S PRODUCE REQUISITION</div>
+  <table style="width:100%; text-align:left; margin-top:10px;">
+    <tr><th style="padding-bottom:10px;">Ingredient</th><th style="padding-bottom:10px;">Recommended Target</th></tr>
+    {% for req in produce_requirements %}
+    <tr>
+      <td style="padding:5px 0; border-top:1px solid #eee;">{{ req.name }}</td>
+      <td style="padding:5px 0; border-top:1px solid #eee;"><b>{{ req.required }}–{{ req.recommended }} {{ req.unit }}</b> <span style="font-size:0.8em; color:var(--text-light);">(Safety Buffer: +{{ req.buffer }} {{ req.unit }})</span></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+</section>{% endif %}
+{% endblock %}

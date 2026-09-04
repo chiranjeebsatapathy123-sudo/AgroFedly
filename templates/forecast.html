@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}7-Day Forecast{% endblock %}
+{% block content %}
+<section class="page-head"><div><div class="eyebrow">PLANNING OUTLOOK</div><h1>7-Day demand forecast</h1><p>Scenario planning for the coming week.</p></div></section>
+<div class="form-card compact"><form method="post" class="inline-form">{% csrf_token %}<label>Daily attendance<input name="attendance" type="number" min="1" required></label><label>Today is holiday?<select name="holiday"><option value="0">No</option><option value="1">Yes</option></select></label><button class="btn primary">Generate</button></form></div>
+{% if forecasts %}<div class="forecast-grid">{% for f in forecasts %}<article class="forecast-card"><span>{{ f.date|date:"D, d M" }}</span><b>{{ f.prediction }}</b><small>Prepare {{ f.recommended }} · {{ f.confidence }}%</small><em class="{{ f.risk|lower }}">{{ f.risk }} risk</em>{% if f.produce_requirements %}<div style="margin-top:10px; font-size:0.85em; border-top:1px solid #eee; padding-top:10px; text-align:left; color:var(--text-light);"><strong>Produce Req:</strong><br>{% for req in f.produce_requirements %}{{ req.name }}: {{ req.required }} {{ req.unit }}<br>{% endfor %}</div>{% endif %}</article>{% endfor %}</div>{% endif %}
+{% endblock %}

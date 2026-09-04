@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}{{ delivery.tracking_code }}{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <div class="eyebrow">SHIPMENT TRACKING</div>
+    <h1>{{ delivery.tracking_code }}</h1>
+    <p>{{ delivery.food_name }} · {{ delivery.quantity }} meals · {{ delivery.sender.name }} → {{ delivery.receiver.name }}</p>
+  </div>
+  <span class="pill {{ delivery.status|lower }} large-pill">{{ delivery.get_status_display }}</span>
+</section>
+
+<div class="two-panels">
+<section class="panel">
+  <div class="panel-title"><h2>Live delivery timeline</h2><span class="track">{{ delivery.tracking_code }}</span></div>
+  <div class="timeline">
+    <div class="timeline-step done"><span>✓</span><div><b>Requested</b><small>Shipment created {{ delivery.created_at|date:"d M Y, H:i" }}</small></div></div>
+    <div class="timeline-step {% if delivery.status == 'ASSIGNED' or delivery.status == 'PICKED_UP' or delivery.status == 'IN_TRANSIT' or delivery.status == 'DELIVERED' %}done{% endif %}"><span>2</span><div><b>Driver assigned</b><small>{% if delivery.driver_name %}{{ delivery.driver_name }}{% else %}Waiting for driver{% endif %}</small></div></div>
+    <div class="timeline-step {% if delivery.status == 'PICKED_UP' or delivery.status == 'IN_TRANSIT' or delivery.status == 'DELIVERED' %}done{% endif %}"><span>3</span><div><b>Picked up</b><small>Food collected from origin</small></div></div>
+    <div class="timeline-step {% if delivery.status == 'IN_TRANSIT' or delivery.status == 'DELIVERED' %}done{% endif %}"><span>4</span><div><b>In transit</b><small>Shipment is moving to destination</small></div></div>
+    <div class="timeline-step {% if delivery.status == 'DELIVERED' %}done{% endif %}"><span>5</span><div><b>Delivered</b><small>{% if delivery.delivered_at %}Confirmed {{ delivery.delivered_at|date:"d M Y, H:i" }}{% else %}Awaiting confirmation{% endif %}</small></div></div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-title"><h2>Update shipment</h2></div>
+  <form method="post" action="{% url 'delivery_update_status' delivery.id %}" class="form-grid">
+    {% csrf_token %}
+    <label>Next status
+      <select name="status">
+        {% for value,label in delivery.STATUS_CHOICES %}
+          <option value="{{ value }}" {% if value == delivery.status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="btn primary">Update delivery status</button>
+  </form>
+  <div class="detail-list">
+    <div><span>Driver</span><b>{{ delivery.driver_name|default:"Unassigned" }}</b></div>
+    <div><span>Vehicle</span><b>{{ delivery.vehicle_number|default:"Not assigned" }}</b></div>
+    <div><span>Contact</span><b>{{ delivery.recipient_contact|default:"Not provided" }}</b></div>
+    <div><span>Scheduled</span><b>{{ delivery.scheduled_at|date:"d M Y, H:i"|default:"Not scheduled" }}</b></div>
+    <div><span>Delivered</span><b>{{ delivery.delivered_at|date:"d M Y, H:i"|default:"—" }}</b></div>
+  </div>
+</section>
+</div>
+
+<div class="two-panels">
+<section class="panel">
+  <div class="panel-title"><h2>Sender information</h2><span class="track">ORIGIN</span></div>
+  <div class="detail-list">
+    <div><span>Organization</span><b>{{ delivery.sender.name }}</b></div>
+    <div><span>Type</span><b>{{ delivery.sender.get_organization_type_display }}</b></div>
+    <div><span>Phone</span><b>{{ delivery.sender.phone|default:"Not provided" }}</b></div>
+    <div><span>Email</span><b>{{ delivery.sender.email|default:"Not provided" }}</b></div>
+    <div><span>Address</span><b>{{ delivery.sender.address|default:"Not provided" }}{% if delivery.sender.city %}, {{ delivery.sender.city }}{% endif %}</b></div>
+    <div><span>Created by</span><b>{{ delivery.created_by.get_full_name|default:delivery.created_by.username|default:"System" }}</b></div>
+  </div>
+</section>
+<section class="panel">
+  <div class="panel-title"><h2>Receiver information</h2><span class="track">DESTINATION</span></div>
+  <div class="detail-list">
+    <div><span>Organization</span><b>{{ delivery.receiver.name }}</b></div>
+    <div><span>Type</span><b>{{ delivery.receiver.get_organization_type_display }}</b></div>
+    <div><span>Phone</span><b>{{ delivery.receiver.phone|default:"Not provided" }}</b></div>
+    <div><span>Email</span><b>{{ delivery.receiver.email|default:"Not provided" }}</b></div>
+    <div><span>Address</span><b>{{ delivery.receiver.address|default:"Not provided" }}{% if delivery.receiver.city %}, {{ delivery.receiver.city }}{% endif %}</b></div>
+    <div><span>Recipient contact</span><b>{{ delivery.recipient_contact|default:"Not provided" }}</b></div>
+  </div>
+</section>
+</div>
+
+<div class="two-panels">
+<section class="panel">
+  <div class="panel-title"><h2>Route & contacts</h2></div>
+  <div class="route-detail">
+    <div class="route-stop"><span>ORIGIN</span><b>{{ delivery.sender.name }}</b><p>{{ delivery.pickup_address }}</p></div>
+    <div class="route-arrow">↓</div>
+    <div class="route-stop"><span>DESTINATION</span><b>{{ delivery.receiver.name }}</b><p>{{ delivery.delivery_address }}</p></div>
+  </div>
+</section>
+<section class="panel">
+  <div class="panel-title"><h2>Shipment information</h2></div>
+  <div class="detail-list">
+    <div><span>Food</span><b>{{ delivery.food_name }}</b></div>
+    <div><span>Quantity</span><b>{{ delivery.quantity }} meals</b></div>
+    <div><span>Linked surplus</span><b>{% if delivery.surplus %}{{ delivery.surplus.food_name }}{% else %}None{% endif %}</b></div>
+    <div><span>Notes</span><b>{{ delivery.notes|default:"No special instructions" }}</b></div>
+  </div>
+</section>
+</div>
+
+<div class="delivery-actions">
+  <a class="btn soft" href="{% url 'delivery_list' %}">← Back to deliveries</a>
+  {% if delivery.status == "REQUESTED" %}
+    <form method="post" action="{% url 'delivery_update_status' delivery.id %}">{% csrf_token %}<input type="hidden" name="status" value="ASSIGNED"><button class="btn primary">Assign driver</button></form>
+  {% elif delivery.status == "ASSIGNED" %}
+    <form method="post" action="{% url 'delivery_update_status' delivery.id %}">{% csrf_token %}<input type="hidden" name="status" value="PICKED_UP"><button class="btn primary">Mark picked up</button></form>
+  {% elif delivery.status == "PICKED_UP" %}
+    <form method="post" action="{% url 'delivery_update_status' delivery.id %}">{% csrf_token %}<input type="hidden" name="status" value="IN_TRANSIT"><button class="btn primary">Start transit</button></form>
+  {% elif delivery.status == "IN_TRANSIT" %}
+    <form method="post" action="{% url 'delivery_update_status' delivery.id %}">{% csrf_token %}<input type="hidden" name="status" value="DELIVERED"><button class="btn primary">✓ Confirm delivered</button></form>
+  {% endif %}
+</div>
+{% endblock %}
