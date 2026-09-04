@@ -11,7 +11,7 @@ env_path = BASE_DIR / ".env"
 load_dotenv(dotenv_path=env_path)
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "annadata-development-key-change-in-production")
-DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
+DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*"]
 
 INSTALLED_APPS = [
