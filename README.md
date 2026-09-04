@@ -16,6 +16,33 @@ A Django-based food-demand forecasting, surplus management, organization registr
 - Responsive UI with left three-dot navigation drawer
 - SQLite database for local development
 
+## Architecture Flow: User to Delivery
+
+The application follows a Django request flow from the user interface through validation, food-safety checks, organization matching, and delivery tracking:
+
+```mermaid
+flowchart TD
+   A[User] --> B[Web browser]
+   B --> C[feedora URL router]
+   C --> D[feedly views and forms]
+   D --> E{Authenticated and active organization?}
+   E -- No --> F[Login or organization registration]
+   F --> B
+   E -- Yes --> G[Create surplus food]
+   G --> H[Food safety evaluation]
+   H --> I{Safe for redistribution?}
+   I -- No --> J[Safety warning or rejection]
+   I -- Yes --> K[Find verified recipient organization]
+   K --> L[Create delivery request]
+   L --> M[(SQLite or Neon PostgreSQL)]
+   M --> N[Delivery tracking code]
+   N --> O[Delivery status updates]
+   O --> P[Picked up -> In transit -> Delivered]
+   P --> Q[Sender and receiver dashboards]
+```
+
+At the application layer, `feedora` routes requests to `feedly`; views use Django forms and models to enforce permissions and business rules. Surplus food is linked to its source organization, checked for temperature and storage-time safety, and matched with a verified receiving organization. A delivery stores sender, receiver, surplus, quantity, addresses, contact details, and status, while its tracking code is generated automatically when the record is saved.
+
 ### Setup Instructions
 
 1. **Clone the repository:**
