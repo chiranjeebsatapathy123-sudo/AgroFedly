@@ -23,7 +23,7 @@ The application follows a Django request flow from the user interface through va
 ```mermaid
 flowchart TD
    A[User] --> B[Web browser]
-   B --> C[feedora URL router]
+   B --> C[AgroFedly URL router]
    C --> D[feedly views and forms]
    D --> E{Authenticated and active organization?}
    E -- No --> F[Login or organization registration]
@@ -41,7 +41,7 @@ flowchart TD
    P --> Q[Sender and receiver dashboards]
 ```
 
-At the application layer, `feedora` routes requests to `feedly`; views use Django forms and models to enforce permissions and business rules. Surplus food is linked to its source organization, checked for temperature and storage-time safety, and matched with a verified receiving organization. A delivery stores sender, receiver, surplus, quantity, addresses, contact details, and status, while its tracking code is generated automatically when the record is saved.
+At the application layer, `AgroFedly` routes requests to `feedly`; views use Django forms and models to enforce permissions and business rules. Surplus food is linked to its source organization, checked for temperature and storage-time safety, and matched with a verified receiving organization. A delivery stores sender, receiver, surplus, quantity, addresses, contact details, and status, while its tracking code is generated automatically when the record is saved.
 
 ### Setup Instructions
 

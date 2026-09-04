@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>{% block title %}Feedora{% endblock %} · Smart Food Operations</title>
+<title>{% block title %}AgroFedly{% endblock %} · Smart Food Operations</title>
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
 <style>
   #drawer { 
@@ -21,7 +21,7 @@
 <body>
 <header class="topbar">
   <button class="menu-btn" id="menuBtn" aria-label="Open navigation">⋯</button>
-  <a class="brand" href="{% url 'home' %}"><span class="brand-mark">A</span><span>Feedora</span><small>Smart Food Operations</small></a>
+  <a class="brand" href="{% url 'home' %}"><span class="brand-mark">A</span><span>AgroFedly</span><small>Smart Food Operations</small></a>
   <div class="top-actions">
     {% if user.is_authenticated %}
       <span class="user-chip">● {{ user.username }}</span>
@@ -66,7 +66,7 @@
 {% endif %}
 
 <main>{% block content %}{% endblock %}</main>
-<footer>Feedora · AI-assisted food planning · Safety · Redistribution · Delivery</footer>
+<footer>AgroFedly · AI-assisted food planning · Safety · Redistribution · Delivery</footer>
 <script src="{% static 'js/app.js' %}"></script>
 </body>
 </html>
