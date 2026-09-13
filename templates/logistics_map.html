@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Logistics Command Center" %}{% endblock %}
+
+{% block head %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+    .map-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .map-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--surface);
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+    }
+    
+    .map-stats {
+        display: flex;
+        gap: 2rem;
+    }
+    
+    .stat-pip {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        color: var(--text-muted);
+    }
+    
+    .pip-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+    
+    .pip-indicator.active { background: #10b981; box-shadow: 0 0 10px #10b981; }
+    .pip-indicator.pending { background: #f59e0b; }
+    
+    #fleetMap {
+        height: 600px;
+        width: 100%;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        z-index: 1; /* Keep below modal/toast */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="map-container">
+    <div class="map-header">
+        <div>
+            <h1>{% trans "Fleet Logistics Center" %}</h1>
+            <p class="text-muted">{% trans "Live heatmap and tracking of active surplus food deliveries." %}</p>
+        </div>
+        <div class="map-stats">
+            <div class="stat-pip">
+                <div class="pip-indicator active"></div>
+                <span><span id="activeCount">0</span> {% trans "In Transit" %}</span>
+            </div>
+            <div class="stat-pip">
+                <div class="pip-indicator pending"></div>
+                <span><span id="pendingCount">0</span> {% trans "Scheduled" %}</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="fleetMap"></div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const rawData = '{{ deliveries_json|escapejs }}';
+    const deliveries = JSON.parse(rawData);
+    
+    const baseLat = {{ base_lat }};
+    const baseLng = {{ base_lng }};
+    
+    // Initialize map
+    const map = L.map('fleetMap').setView([baseLat, baseLng], 12);
+    
+    // Dark theme map tiles for that "Command Center" feel
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+    }).addTo(map);
+
+    // Custom Icons
+    const truckIconActive = L.divIcon({
+        className: 'custom-icon',
+        html: '<div style="background:#10b981; width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow: 0 0 15px #10b981;"></div>',
+        iconSize: [16, 16]
+    });
+    
+    const truckIconPending = L.divIcon({
+        className: 'custom-icon',
+        html: '<div style="background:#f59e0b; width:12px; height:12px; border-radius:50%; border:2px solid white;"></div>',
+        iconSize: [12, 12]
+    });
+
+    let active = 0;
+    let pending = 0;
+
+    deliveries.forEach(d => {
+        let icon = d.status === 'IN_TRANSIT' ? truckIconActive : truckIconPending;
+        if (d.status === 'IN_TRANSIT') active++;
+        if (d.status === 'SCHEDULED') pending++;
+        
+        let popupContent = `
+            <div style="font-family:var(--font-primary);">
+                <b style="color:var(--primary); font-size:1.1rem;">Delivery #${d.id}</b><br/>
+                <b>Food:</b> ${d.food_name} (${d.quantity} units)<br/>
+                <b>Status:</b> ${d.status}<br/>
+                <b>Driver:</b> ${d.driver}
+            </div>
+        `;
+        
+        L.marker([d.lat, d.lng], {icon: icon})
+            .bindPopup(popupContent)
+            .addTo(map);
+    });
+
+    document.getElementById('activeCount').innerText = active;
+    document.getElementById('pendingCount').innerText = pending;
+    
+    // Add central Hub marker
+    L.marker([baseLat, baseLng]).bindPopup("<b>{% trans 'Your Organization HQ' %}</b>").addTo(map);
+});
+</script>
+{% endblock %}

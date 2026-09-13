@@ -1,14 +1,15 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Produce Processing{% endblock %}
 {% block content %}
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
         <div>
-            <div class="eyebrow">PROCESSING</div>
-            <h1>Agricultural Processing Logs</h1>
-            <p>Track the conversion of raw produce to processed goods and calculate operational yield.</p>
+            <div class="eyebrow">{% trans "PROCESSING" %}</div>
+            <h1>{% trans "Agricultural Processing Logs" %}</h1>
+            <p>{% trans "Track the conversion of raw produce to processed goods and calculate operational yield." %}</p>
         </div>
-        <a href="{% url 'agri_processing_add' %}" class="btn primary">⚙️ Log Processing</a>
+        <a href="{% url 'agri_processing_add' %}" class="btn primary">{% trans "⚙️ Log Processing" %}</a>
     </div>
 </section>
 
@@ -16,11 +17,11 @@
     {% if records %}
         <table style="width:100%; text-align:left;">
             <tr>
-                <th style="padding-bottom:10px;">Date</th>
-                <th style="padding-bottom:10px;">Raw Input Produce</th>
-                <th style="padding-bottom:10px;">Processed Output</th>
-                <th style="padding-bottom:10px;">Yield / Loss</th>
-                <th style="padding-bottom:10px;">Facility</th>
+                <th style="padding-bottom:10px;">{% trans "Date" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Raw Input Produce" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Processed Output" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Yield / Loss" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Facility" %}</th>
             </tr>
             {% for r in records %}
             <tr>
@@ -34,8 +35,8 @@
                     <small>Waste: {{ r.waste_quantity }} {{ r.input_produce.unit }}</small>
                 </td>
                 <td style="padding:12px 0; border-top:1px solid #eee;">
-                    Yield: <span style="color:var(--success); font-weight:bold;">{{ r.processing_yield_percent }}%</span><br>
-                    Loss: <span style="color:var(--error); font-weight:bold;">{{ r.processing_loss_percent }}%</span>
+                    {% trans "Yield:" %} <span style="color:var(--success); font-weight:bold;">{{ r.processing_yield_percent }}%</span><br>
+                    {% trans "Loss:" %} <span style="color:var(--error); font-weight:bold;">{{ r.processing_loss_percent }}%</span>
                 </td>
                 <td style="padding:12px 0; border-top:1px solid #eee;">{{ r.processing_facility }}<br><small>{{ r.status }}</small></td>
             </tr>
@@ -43,7 +44,7 @@
         </table>
     {% else %}
         <div style="text-align:center; padding:40px;">
-            <p>No processing records logged yet.</p>
+            <p>{% trans "No processing records logged yet." %}</p>
         </div>
     {% endif %}
 </div>

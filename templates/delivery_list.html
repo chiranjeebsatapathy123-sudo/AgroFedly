@@ -1,27 +1,28 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Delivery System{% endblock %}
 {% block content %}
 <section class="page-head">
   <div>
-    <div class="eyebrow">LAST-MILE LOGISTICS</div>
-    <h1>Delivery system</h1>
+    <div class="eyebrow">{% trans "LAST-MILE LOGISTICS" %}</div>
+    <h1>{% trans "Delivery system" %}</h1>
     <p>{{ organization.name }} · Track every food shipment from request to confirmed delivery.</p>
   </div>
-  <a class="btn primary" href="{% url 'delivery_create' %}">＋ Create delivery</a>
+  <a class="btn primary" href="{% url 'delivery_create' %}">{% trans "＋ Create delivery" %}</a>
 </section>
 
 <div class="stats-grid delivery-stats">
-  <div class="stat-card"><span>Total shipments</span><b>{{ total_deliveries }}</b><small>All incoming and outgoing</small></div>
-  <div class="stat-card accent"><span>Active</span><b>{{ active_deliveries }}</b><small>Currently moving or assigned</small></div>
-  <div class="stat-card"><span>Delivered</span><b>{{ delivered_deliveries }}</b><small>Completed shipments</small></div>
-  <div class="stat-card"><span>Requested</span><b>{{ status_counts.REQUESTED }}</b><small>Awaiting assignment</small></div>
+  <div class="stat-card"><span>{% trans "Total shipments" %}</span><b>{{ total_deliveries }}</b><small>{% trans "All incoming and outgoing" %}</small></div>
+  <div class="stat-card accent"><span>{% trans "Active" %}</span><b>{{ active_deliveries }}</b><small>{% trans "Currently moving or assigned" %}</small></div>
+  <div class="stat-card"><span>{% trans "Delivered" %}</span><b>{{ delivered_deliveries }}</b><small>{% trans "Completed shipments" %}</small></div>
+  <div class="stat-card"><span>{% trans "Requested" %}</span><b>{{ status_counts.REQUESTED }}</b><small>{% trans "Awaiting assignment" %}</small></div>
 </div>
 
 <section class="delivery-tools">
   <form method="get" class="delivery-search">
     <input name="q" value="{{ search }}" placeholder="Search tracking code, food, organization, driver or vehicle">
     <select name="status">
-      <option value="">All statuses</option>
+      <option value="">{% trans "All statuses" %}</option>
       <option value="REQUESTED" {% if active_status == "REQUESTED" %}selected{% endif %}>Requested ({{ status_counts.REQUESTED }})</option>
       <option value="ASSIGNED" {% if active_status == "ASSIGNED" %}selected{% endif %}>Driver Assigned ({{ status_counts.ASSIGNED }})</option>
       <option value="PICKED_UP" {% if active_status == "PICKED_UP" %}selected{% endif %}>Picked Up ({{ status_counts.PICKED_UP }})</option>
@@ -29,8 +30,8 @@
       <option value="DELIVERED" {% if active_status == "DELIVERED" %}selected{% endif %}>Delivered ({{ status_counts.DELIVERED }})</option>
       <option value="CANCELLED" {% if active_status == "CANCELLED" %}selected{% endif %}>Cancelled ({{ status_counts.CANCELLED }})</option>
     </select>
-    <button class="btn primary" type="submit">Search</button>
-    {% if search or active_status %}<a class="btn soft" href="{% url 'delivery_list' %}">Clear</a>{% endif %}
+    <button class="btn primary" type="submit">{% trans "Search" %}</button>
+    {% if search or active_status %}<a class="btn soft" href="{% url 'delivery_list' %}">{% trans "Clear" %}</a>{% endif %}
   </form>
 </section>
 
@@ -41,10 +42,10 @@
     <span class="track">{{ d.tracking_code }}</span>
     <span class="pill {{ d.status|lower }}">{{ d.get_status_display }}</span>
     <div class="delivery-actions" style="display: flex; gap: 6px; align-items: center;">
-      <a href="{% url 'delivery_detail' d.id %}" class="table-btn">View</a>
-      <a href="{% url 'delivery_live_tracking' d.id %}" class="table-btn" style="background:#e8f4fb; color:#1d6f93;">Track</a>
+      <a href="{% url 'delivery_detail' d.id %}" class="table-btn">{% trans "View" %}</a>
+      <a href="{% url 'delivery_live_tracking' d.id %}" class="table-btn" style="background:#e8f4fb; color:#1d6f93;">{% trans "Track" %}</a>
       {% if d.status != "DELIVERED" and request.user.is_superuser %}
-          <a href="{% url 'delivery_proof' d.id %}" class="table-btn" style="background:#fff6dd; color:#8b6400;">PoD</a>
+          <a href="{% url 'delivery_proof' d.id %}" class="table-btn" style="background:#fff6dd; color:#8b6400;">{% trans "PoD" %}</a>
       {% endif %}
     </div>
   </div>
@@ -52,6 +53,6 @@
   <div class="route"><div><b>{{ d.sender.name }}</b><span>{{ d.sender.phone|default:d.sender.email|default:"Sender contact not provided" }}</span><span>{{ d.pickup_address|truncatechars:55 }}</span></div><i>→</i><div><b>{{ d.receiver.name }}</b><span>{{ d.receiver.phone|default:d.receiver.email|default:"Receiver contact not provided" }}</span><span>{{ d.delivery_address|truncatechars:55 }}</span></div></div>
   <div class="delivery-meta"><span>Sender: {{ d.sender.city|default:"—" }}</span><span>Receiver: {{ d.receiver.city|default:"—" }}</span><span>Driver: {{ d.driver_name|default:"Unassigned" }}</span><span>{{ d.scheduled_at|date:"d M Y, H:i"|default:"Schedule pending" }}</span></div>
 </div>
-{% empty %}<div class="empty large">No deliveries match your search. Create a shipment or clear the filters.</div>{% endfor %}
+{% empty %}<div class="empty large">{% trans "No deliveries match your search. Create a shipment or clear the filters." %}</div>{% endfor %}
 </div>
 {% endblock %}

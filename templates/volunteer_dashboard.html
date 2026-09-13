@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% block title %}Volunteer Dashboard{% endblock %}
 {% block content %}
 <div class="panel">
@@ -9,7 +10,7 @@
 
 <div class="grid-2">
   <div class="panel">
-    <h3>Available Deliveries</h3>
+    <h3>{% trans "Available Deliveries" %}</h3>
     {% if available_deliveries %}
       <ul class="surplus-list">
       {% for delivery in available_deliveries %}
@@ -21,30 +22,30 @@
             {% csrf_token %}
             <input type="hidden" name="delivery_id" value="{{ delivery.id }}">
             <input type="hidden" name="action" value="accept">
-            <button type="submit" class="btn btn-primary btn-sm">Accept Delivery</button>
+            <button type="submit" class="btn btn-primary btn-sm">{% trans "Accept Delivery" %}</button>
           </form>
         </li>
       {% endfor %}
       </ul>
     {% else %}
-      <p class="empty-state">No pending deliveries right now.</p>
+      <p class="empty-state">{% trans "No pending deliveries right now." %}</p>
     {% endif %}
   </div>
   
   <div class="panel">
-    <h3>My Assigned Deliveries</h3>
+    <h3>{% trans "My Assigned Deliveries" %}</h3>
     {% if my_deliveries %}
       <ul class="surplus-list">
       {% for delivery in my_deliveries %}
         <li>
           <strong>{{ delivery.tracking_code }} - {{ delivery.food_name }}</strong>
-          <p>Status: <span class="badge badge-{{ delivery.status|lower }}">{{ delivery.get_status_display }}</span></p>
-          <a href="{% url 'delivery_detail' delivery.id %}" class="btn btn-secondary btn-sm">View Details</a>
+          <p>{% trans "Status:" %} <span class="badge badge-{{ delivery.status|lower }}">{{ delivery.get_status_display }}</span></p>
+          <a href="{% url 'delivery_detail' delivery.id %}" class="btn btn-secondary btn-sm">{% trans "View Details" %}</a>
         </li>
       {% endfor %}
       </ul>
     {% else %}
-      <p class="empty-state">You haven't been assigned any deliveries yet.</p>
+      <p class="empty-state">{% trans "You haven't been assigned any deliveries yet." %}</p>
     {% endif %}
   </div>
 </div>

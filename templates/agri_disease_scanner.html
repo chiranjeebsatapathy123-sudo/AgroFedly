@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}AI Disease Scanner{% endblock %}
 {% block content %}
 <section class="page-head">
     <div>
-        <div class="eyebrow">COMPUTER VISION</div>
-        <h1>Crop Disease Scanner</h1>
-        <p>Upload a photo of your crop to get an instant AI diagnosis and treatment plan.</p>
+        <div class="eyebrow">{% trans "COMPUTER VISION" %}</div>
+        <h1>{% trans "Crop Disease Scanner" %}</h1>
+        <p>{% trans "Upload a photo of your crop to get an instant AI diagnosis and treatment plan." %}</p>
     </div>
 </section>
 
@@ -20,11 +21,11 @@
             <p style="color:var(--muted); margin-bottom:20px;">Crop: {{ scan.crop_name }} &bull; Confidence: {{ scan.confidence }}%</p>
             
             <div style="background:var(--soft); padding:20px; border-radius:15px; border:1px solid var(--line); text-align:left;">
-                <h3 style="margin-top:0;">Recommended Action</h3>
+                <h3 style="margin-top:0;">{% trans "Recommended Action" %}</h3>
                 <p style="margin:0; font-size:1.1rem; line-height:1.6;">{{ scan.recommended_treatment }}</p>
             </div>
             
-            <a href="{% url 'agri_disease_scanner' %}" class="btn primary" style="margin-top:30px;">Scan Another Crop</a>
+            <a href="{% url 'agri_disease_scanner' %}" class="btn primary" style="margin-top:30px;">{% trans "Scan Another Crop" %}</a>
         </div>
     {% else %}
         <!-- Upload Form -->
@@ -33,22 +34,22 @@
                 {% csrf_token %}
                 
                 <div style="margin-bottom:15px;">
-                    <label style="display:block; margin-bottom:5px; font-weight:bold;">Analysis Type</label>
+                    <label style="display:block; margin-bottom:5px; font-weight:bold;">{% trans "Analysis Type" %}</label>
                     <div style="display:flex; gap:15px;">
-                        <label><input type="radio" name="scan_type" value="disease" checked> Disease Diagnosis</label>
-                        <label><input type="radio" name="scan_type" value="grading"> Quality Grading</label>
+                        <label><input type="radio" name="scan_type" value="disease" checked> {% trans "Disease Diagnosis" %}</label>
+                        <label><input type="radio" name="scan_type" value="grading"> {% trans "Quality Grading" %}</label>
                     </div>
                 </div>
                 
                 <label style="display:block; margin-bottom:15px;">
-                    Crop Name
+                    {% trans "Crop Name" %}
                     <input type="text" name="crop_name" required placeholder="e.g. Tomato, Wheat" style="width:100%; padding:10px; margin-top:5px; border:1px solid var(--line); border-radius:5px; background:var(--surface); color:var(--ink);">
                 </label>
                 
                 <div style="border:2px dashed var(--line); border-radius:15px; padding:40px 20px; text-align:center; cursor:pointer;" onclick="document.getElementById('fileInput').click()">
                     <div style="font-size:40px; color:var(--muted); margin-bottom:10px;">📸</div>
-                    <h3 style="margin:0 0 5px;">Upload Crop Photo</h3>
-                    <p style="color:var(--muted); font-size:0.9rem; margin:0;">Tap to open camera or select a file</p>
+                    <h3 style="margin:0 0 5px;">{% trans "Upload Crop Photo" %}</h3>
+                    <p style="color:var(--muted); font-size:0.9rem; margin:0;">{% trans "Tap to open camera or select a file" %}</p>
                     <input type="file" id="fileInput" name="image" accept="image/*" style="display:none;" onchange="previewImage(event)">
                 </div>
                 
@@ -57,7 +58,7 @@
                 </div>
 
                 <div style="margin-top:30px;">
-                    <button type="submit" class="btn primary full" id="submitBtn" style="font-size:1.1rem;">Run AI Analysis</button>
+                    <button type="submit" class="btn primary full" id="submitBtn" style="font-size:1.1rem;">{% trans "Run AI Analysis" %}</button>
                 </div>
             </form>
         </div>
@@ -66,10 +67,10 @@
         <div id="scanningOverlay" style="display:none; text-align:center; padding:60px 20px;">
             <div class="orbit" style="transform:scale(0.8); margin-bottom:20px;">
                 <div class="orbit-core" style="background:var(--primary); color:white;">🔍</div>
-                <div class="orb o1">Analyzing...</div>
+                <div class="orb o1">{% trans "Analyzing..." %}</div>
             </div>
-            <h2>Running Neural Network...</h2>
-            <p style="color:var(--muted);">Comparing patterns against 100,000+ disease signatures.</p>
+            <h2>{% trans "Running Neural Network..." %}</h2>
+            <p style="color:var(--muted);">{% trans "Comparing patterns against 100,000+ disease signatures." %}</p>
         </div>
         
         <script>

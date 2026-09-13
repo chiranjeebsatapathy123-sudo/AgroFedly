@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Quality Control Inspection{% endblock %}
 {% block content %}
 <section class="form-page">
     <div class="form-intro">
-        <div class="eyebrow">QUALITY CONTROL</div>
-        <h1>Log Inspection</h1>
-        <p>Record a quality inspection for agricultural produce.</p>
+        <div class="eyebrow">{% trans "QUALITY CONTROL" %}</div>
+        <h1>{% trans "Log Inspection" %}</h1>
+        <p>{% trans "Record a quality inspection for agricultural produce." %}</p>
     </div>
     <div class="form-card">
         <form method="post" class="form-grid">
@@ -16,7 +17,7 @@
                 {% if field.errors %}<div class="error-box" style="margin-top:5px; padding:5px;">{{ field.errors }}</div>{% endif %}
             </label>
             {% endfor %}
-            <button class="btn primary full" type="submit">Submit Report</button>
+            <button class="btn primary full" type="submit">{% trans "Submit Report" %}</button>
         </form>
     </div>
 </section>

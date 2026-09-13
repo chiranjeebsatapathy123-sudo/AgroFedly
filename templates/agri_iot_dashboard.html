@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}IoT Live Dashboard{% endblock %}
 {% block content %}
 <section class="page-head" style="background:#111; color:white; margin:-20px -20px 20px -20px; padding:40px 20px;">
     <div>
-        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px;">LIVE TELEMETRY</div>
-        <h1 style="color:white; margin:10px 0;">Cold Chain IoT Monitor</h1>
-        <p style="color:#aaa;">Real-time temperature streams for all active transit vehicles.</p>
+        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px;">{% trans "LIVE TELEMETRY" %}</div>
+        <h1 style="color:white; margin:10px 0;">{% trans "Cold Chain IoT Monitor" %}</h1>
+        <p style="color:#aaa;">{% trans "Real-time temperature streams for all active transit vehicles." %}</p>
     </div>
 </section>
 
@@ -14,19 +15,19 @@
     <div class="form-card" style="background:#1a1a1a; border:1px solid #333; color:white;" id="card-{{ shipment.tracking_code }}">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 style="margin:0; font-family:monospace; color:#ccc;">{{ shipment.tracking_code }}</h3>
-            <span class="pill" id="status-{{ shipment.tracking_code }}" style="background:#333; color:#ccc;">Connecting...</span>
+            <span class="pill" id="status-{{ shipment.tracking_code }}" style="background:#333; color:#ccc;">{% trans "Connecting..." %}</span>
         </div>
         
         <div style="text-align:center; padding:20px 0;">
             <div style="font-size:3rem; font-family:monospace; font-weight:bold; color:var(--primary);" id="temp-{{ shipment.tracking_code }}">
                 {{ shipment.current_temperature|default:"--" }} °C
             </div>
-            <p style="color:#888; font-size:0.8rem; margin:5px 0 0 0;">Current Temperature</p>
+            <p style="color:#888; font-size:0.8rem; margin:5px 0 0 0;">{% trans "Current Temperature" %}</p>
         </div>
     </div>
     {% empty %}
     <div class="form-card" style="grid-column:1/-1; text-align:center; padding:40px; background:#1a1a1a; color:#888;">
-        <h2>No active shipments in transit.</h2>
+        <h2>{% trans "No active shipments in transit." %}</h2>
     </div>
     {% endfor %}
 </div>
@@ -35,8 +36,7 @@
     // Fetch live data every 2 seconds
     setInterval(function() {
         fetch("{% url 'api_iot_live_stream' %}")
-            .then(response => response.json())
-            .then(data => {
+            .then(response => {% trans "response.json()) .then(data =" %}> {
                 if(data.status === "success") {
                     data.data.forEach(item => {
                         const tempEl = document.getElementById(`temp-${item.tracking_code}`);

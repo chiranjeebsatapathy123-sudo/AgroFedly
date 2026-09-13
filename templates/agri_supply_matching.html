@@ -1,18 +1,19 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Agricultural Supply Matching{% endblock %}
 {% block content %}
 <section class="page-head">
     <div>
-        <div class="eyebrow">SUPPLY CHAIN</div>
-        <h1>Agricultural Supply Matching</h1>
-        <p>Dynamic Marketplace: Connect buyer demands with supplier produce availability.</p>
+        <div class="eyebrow">{% trans "SUPPLY CHAIN" %}</div>
+        <h1>{% trans "Agricultural Supply Matching" %}</h1>
+        <p>{% trans "Dynamic Marketplace: Connect buyer demands with supplier produce availability." %}</p>
     </div>
 </section>
 
 <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
     <!-- Create Demand Form -->
     <div class="form-card" style="flex:1; min-width:300px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">Create Buyer Demand</h2>
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "Create Buyer Demand" %}</h2>
         <form method="post" class="form-grid">
             {% csrf_token %}
             <input type="hidden" name="action" value="create_demand">
@@ -21,21 +22,21 @@
                 {{ field }}
             </label>
             {% endfor %}
-            <button class="btn primary full" type="submit" style="margin-top:10px;">Create Demand</button>
+            <button class="btn primary full" type="submit" style="margin-top:10px;">{% trans "Create Demand" %}</button>
         </form>
     </div>
     
     <!-- Active Demands -->
     <div class="form-card" style="flex:2; min-width:300px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">Active Buyer Demands</h2>
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "Active Buyer Demands" %}</h2>
         {% if demands %}
             <table style="width:100%; text-align:left;">
                 <tr>
-                    <th style="padding-bottom:10px;">Produce</th>
-                    <th style="padding-bottom:10px;">Required Qty</th>
-                    <th style="padding-bottom:10px;">Quality</th>
-                    <th style="padding-bottom:10px;">Location</th>
-                    <th style="padding-bottom:10px;">Action</th>
+                    <th style="padding-bottom:10px;">{% trans "Produce" %}</th>
+                    <th style="padding-bottom:10px;">{% trans "Required Qty" %}</th>
+                    <th style="padding-bottom:10px;">{% trans "Quality" %}</th>
+                    <th style="padding-bottom:10px;">{% trans "Location" %}</th>
+                    <th style="padding-bottom:10px;">{% trans "Action" %}</th>
                 </tr>
                 {% for d in demands %}
                 <tr>
@@ -48,29 +49,29 @@
                             {% csrf_token %}
                             <input type="hidden" name="action" value="find_matches">
                             <input type="hidden" name="demand_id" value="{{ d.id }}">
-                            <button type="submit" class="btn" style="padding:4px 8px; font-size:0.8rem; background:var(--primary); color:white;">Find Matches</button>
+                            <button type="submit" class="btn" style="padding:4px 8px; font-size:0.8rem; background:var(--primary); color:white;">{% trans "Find Matches" %}</button>
                         </form>
                     </td>
                 </tr>
                 {% endfor %}
             </table>
         {% else %}
-            <p>No active buyer demands.</p>
+            <p>{% trans "No active buyer demands." %}</p>
         {% endif %}
     </div>
 </div>
 
 <div class="form-card" style="max-width:100%;">
-    <h2 style="font-size:1.2rem; margin-bottom:10px;">Recommended Supply Matches (Pending)</h2>
+    <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "Recommended Supply Matches (Pending)" %}</h2>
     {% if matches %}
         <table style="width:100%; text-align:left;">
             <tr>
-                <th style="padding-bottom:10px;">Demand</th>
-                <th style="padding-bottom:10px;">Matched Produce</th>
-                <th style="padding-bottom:10px;">Matched Qty</th>
-                <th style="padding-bottom:10px;">Match Score</th>
-                <th style="padding-bottom:10px;">Explanation</th>
-                <th style="padding-bottom:10px;">Action</th>
+                <th style="padding-bottom:10px;">{% trans "Demand" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Matched Produce" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Matched Qty" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Match Score" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Explanation" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Action" %}</th>
             </tr>
             {% for match in matches %}
             <tr>
@@ -99,7 +100,7 @@
                         {% csrf_token %}
                         <input type="hidden" name="action" value="accept_match">
                         <input type="hidden" name="match_id" value="{{ match.id }}">
-                        <button type="submit" class="btn" style="padding:6px 12px; font-size:0.9rem; background:var(--success); color:white; width:100%;">Accept Match</button>
+                        <button type="submit" class="btn" style="padding:6px 12px; font-size:0.9rem; background:var(--success); color:white; width:100%;">{% trans "Accept Match" %}</button>
                     </form>
                 </td>
             </tr>
@@ -107,7 +108,7 @@
         </table>
     {% else %}
         <div style="text-align:center; padding:30px;">
-            <p>No matches calculated yet. Click "Find Matches" on an active demand.</p>
+            <p>{% trans "No matches calculated yet. Click \"Find Matches\" on an active demand." %}</p>
         </div>
     {% endif %}
 </div>

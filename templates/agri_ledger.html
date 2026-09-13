@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Payments Ledger{% endblock %}
 {% block content %}
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
         <div>
-            <div class="eyebrow">FINANCE</div>
-            <h1>Transactions Ledger</h1>
-            <p>Track payments and invoices for your agricultural supply matches.</p>
+            <div class="eyebrow">{% trans "FINANCE" %}</div>
+            <h1>{% trans "Transactions Ledger" %}</h1>
+            <p>{% trans "Track payments and invoices for your agricultural supply matches." %}</p>
         </div>
     </div>
 </section>
@@ -15,13 +16,13 @@
     {% if transactions %}
         <table style="width:100%; text-align:left;">
             <tr>
-                <th style="padding-bottom:10px;">ID</th>
-                <th style="padding-bottom:10px;">Date</th>
-                <th style="padding-bottom:10px;">Sender</th>
-                <th style="padding-bottom:10px;">Receiver</th>
-                <th style="padding-bottom:10px;">Amount</th>
-                <th style="padding-bottom:10px;">Escrow Status</th>
-                <th style="padding-bottom:10px;">Status</th>
+                <th style="padding-bottom:10px;">{% trans "ID" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Date" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Sender" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Receiver" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Amount" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Escrow Status" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Status" %}</th>
             </tr>
             {% for t in transactions %}
             <tr>
@@ -50,11 +51,11 @@
                 </td>
                 <td style="padding:12px 0; border-top:1px solid #eee;">
                     {% if t.escrow_status == 'HELD' %}
-                        <span class="pill" style="background:#fff6dd; color:#8b6400;">🔒 Escrow</span>
+                        <span class="pill" style="background:#fff6dd; color:#8b6400;">{% trans "🔒 Escrow" %}</span>
                     {% elif t.escrow_status == 'RELEASED' %}
-                        <span class="pill" style="background:#e7f7ec; color:#08713b;">🔓 Released</span>
+                        <span class="pill" style="background:#e7f7ec; color:#08713b;">{% trans "🔓 Released" %}</span>
                     {% else %}
-                        <span class="pill">Direct</span>
+                        <span class="pill">{% trans "Direct" %}</span>
                     {% endif %}
                 </td>
                 <td style="padding:12px 0; border-top:1px solid #eee;">
@@ -71,7 +72,7 @@
         </table>
     {% else %}
         <div style="text-align:center; padding:40px;">
-            <p>No transactions found for your organization.</p>
+            <p>{% trans "No transactions found for your organization." %}</p>
         </div>
     {% endif %}
 </div>

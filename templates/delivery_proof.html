@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% block title %}Proof of Delivery | {{ delivery.tracking_code }}{% endblock %}
 
 {% block content %}
 <div class="page-head">
     <div>
-        <h1>✅ Proof of Delivery</h1>
+        <h1>{% trans "✅ Proof of Delivery" %}</h1>
         <p>Complete the delivery for {{ delivery.tracking_code }} by capturing recipient signature and proof image.</p>
     </div>
 </div>
@@ -15,22 +16,22 @@
             {% csrf_token %}
             
             <div style="grid-column: 1 / -1; margin-bottom:15px;">
-                <label style="display:block; margin-bottom:8px; font-weight:bold;">Delivery Photo</label>
+                <label style="display:block; margin-bottom:8px; font-weight:bold;">{% trans "Delivery Photo" %}</label>
                 <input type="file" name="proof_image" accept="image/*" capture="environment" style="width:100%; padding:10px; border:1px dashed var(--line); border-radius:8px;">
-                <small style="color:var(--muted); display:block; margin-top:5px;">Take a photo of the delivered goods.</small>
+                <small style="color:var(--muted); display:block; margin-top:5px;">{% trans "Take a photo of the delivered goods." %}</small>
             </div>
             
             <div style="grid-column: 1 / -1; margin-bottom:15px;">
-                <label style="display:block; margin-bottom:8px; font-weight:bold;">Recipient Signature</label>
+                <label style="display:block; margin-bottom:8px; font-weight:bold;">{% trans "Recipient Signature" %}</label>
                 <!-- Simple canvas for signature drawing -->
                 <canvas id="sig-canvas" width="100%" height="200" style="border:1px solid var(--line); border-radius:10px; background:#fff; touch-action: none; width:100%;"></canvas>
                 <input type="hidden" name="recipient_signature" id="sig-dataUrl">
                 <div style="text-align:right; margin-top:8px;">
-                    <button type="button" class="btn soft" id="sig-clearBtn" style="padding:6px 12px; font-size:11px;">Clear Signature</button>
+                    <button type="button" class="btn soft" id="sig-clearBtn" style="padding:6px 12px; font-size:11px;">{% trans "Clear Signature" %}</button>
                 </div>
             </div>
             
-            <button type="submit" class="btn primary full" id="submit-btn">Complete Delivery</button>
+            <button type="submit" class="btn primary full" id="submit-btn">{% trans "Complete Delivery" %}</button>
         </form>
     </div>
 </div>

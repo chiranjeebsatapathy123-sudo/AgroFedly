@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Add Agricultural Produce{% endblock %}
 {% block content %}
 <section class="form-page">
     <div class="form-intro">
-        <div class="eyebrow">AGRICULTURE</div>
-        <h1>Add Harvested Produce</h1>
-        <p>Register new raw agricultural produce into inventory.</p>
+        <div class="eyebrow">{% trans "AGRICULTURE" %}</div>
+        <h1>{% trans "Add Harvested Produce" %}</h1>
+        <p>{% trans "Register new raw agricultural produce into inventory." %}</p>
     </div>
     <div class="form-card">
         <form method="post" class="form-grid">
@@ -16,7 +17,7 @@
                 {% if field.errors %}<div class="error-box" style="margin-top:5px; padding:5px;">{{ field.errors }}</div>{% endif %}
             </label>
             {% endfor %}
-            <button class="btn primary full" type="submit">Add Produce</button>
+            <button class="btn primary full" type="submit">{% trans "Add Produce" %}</button>
         </form>
     </div>
 </section>

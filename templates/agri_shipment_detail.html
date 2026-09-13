@@ -1,49 +1,50 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Shipment Detail{% endblock %}
 {% block content %}
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
         <div>
             <div class="eyebrow">SHIPMENT {{ shipment.tracking_code }}</div>
-            <h1>Logistics Detail</h1>
+            <h1>{% trans "Logistics Detail" %}</h1>
         </div>
-        <a href="{% url 'agri_shipment_list' %}" class="btn">Back to Shipments</a>
+        <a href="{% url 'agri_shipment_list' %}" class="btn">{% trans "Back to Shipments" %}</a>
     </div>
 </section>
 
 <div class="form-card" style="max-width:800px;">
-    <h2>Details</h2>
+    <h2>{% trans "Details" %}</h2>
     <table style="width:100%; text-align:left; margin-top:20px;">
         <tr>
-            <th style="padding:10px 0;">Produce</th>
+            <th style="padding:10px 0;">{% trans "Produce" %}</th>
             <td style="padding:10px 0;">{{ shipment.supply_match.produce.name }}</td>
         </tr>
         <tr>
-            <th style="padding:10px 0;">Quantity</th>
+            <th style="padding:10px 0;">{% trans "Quantity" %}</th>
             <td style="padding:10px 0;">{{ shipment.supply_match.matched_quantity }} kg</td>
         </tr>
         <tr>
-            <th style="padding:10px 0;">Status</th>
+            <th style="padding:10px 0;">{% trans "Status" %}</th>
             <td style="padding:10px 0;"><strong>{{ shipment.get_status_display }}</strong></td>
         </tr>
         <tr>
-            <th style="padding:10px 0;">IoT Temperature</th>
+            <th style="padding:10px 0;">{% trans "IoT Temperature" %}</th>
             <td style="padding:10px 0;">
                 {% if shipment.current_temperature %}
                 <span style="{% if shipment.current_temperature > 5 %}color:red;{% else %}color:green;{% endif %} font-weight:bold;">
                     {{ shipment.current_temperature }} °C
                 </span>
                 {% else %}
-                <span style="color:gray;">No IoT Sensor Linked</span>
+                <span style="color:gray;">{% trans "No IoT Sensor Linked" %}</span>
                 {% endif %}
             </td>
         </tr>
         <tr>
-            <th style="padding:10px 0;">Dispatched At</th>
+            <th style="padding:10px 0;">{% trans "Dispatched At" %}</th>
             <td style="padding:10px 0;">{{ shipment.dispatched_at|date:"d M Y, H:i"|default:"Not dispatched" }}</td>
         </tr>
         <tr>
-            <th style="padding:10px 0;">Delivered At</th>
+            <th style="padding:10px 0;">{% trans "Delivered At" %}</th>
             <td style="padding:10px 0;">{{ shipment.delivered_at|date:"d M Y, H:i"|default:"Not delivered" }}</td>
         </tr>
     </table>
@@ -52,25 +53,25 @@
     
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-            <h3 style="margin:0 0 5px;">Public Traceability</h3>
-            <p style="margin:0; font-size:0.9rem; color:var(--muted);">Generate a QR code for buyers or consumers to verify this shipment.</p>
+            <h3 style="margin:0 0 5px;">{% trans "Public Traceability" %}</h3>
+            <p style="margin:0; font-size:0.9rem; color:var(--muted);">{% trans "Generate a QR code for buyers or consumers to verify this shipment." %}</p>
         </div>
-        <button onclick="document.getElementById('qr-modal').style.display='block'" class="btn primary">Generate QR</button>
+        <button onclick="document.getElementById('qr-modal').style.display='block'" class="btn primary">{% trans "Generate QR" %}</button>
     </div>
 </div>
 
 <!-- QR Modal -->
 <div id="qr-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; padding:40px;">
     <div style="background:#fff; max-width:400px; margin:auto; border-radius:15px; padding:30px; text-align:center; position:relative;">
-        <button onclick="document.getElementById('qr-modal').style.display='none'" style="position:absolute; right:15px; top:15px; border:0; background:none; font-size:1.5rem; cursor:pointer;">&times;</button>
-        <h2>Shipment QR</h2>
-        <p style="color:var(--muted); font-size:0.9rem;">Scan to view farm-to-fork traceability.</p>
+        <button onclick="document.getElementById('qr-modal').style.display='none'" style="position:absolute; right:15px; top:15px; border:0; background:none; font-size:1.5rem; cursor:pointer;">{% trans "&times;" %}</button>
+        <h2>{% trans "Shipment QR" %}</h2>
+        <p style="color:var(--muted); font-size:0.9rem;">{% trans "Scan to view farm-to-fork traceability." %}</p>
         
         <div style="margin:20px 0;">
             <canvas id="qr-code"></canvas>
         </div>
         
-        <a href="{% url 'agri_traceability' shipment.tracking_code %}" target="_blank" class="btn" style="width:100%; justify-content:center;">Open Traceability Page</a>
+        <a href="{% url 'agri_traceability' shipment.tracking_code %}" target="_blank" class="btn" style="width:100%; justify-content:center;">{% trans "Open Traceability Page" %}</a>
     </div>
 </div>
 

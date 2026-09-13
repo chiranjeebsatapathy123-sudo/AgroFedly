@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% block title %}Impact Dashboard{% endblock %}
 {% block content %}
 <div class="panel">
-  <h2>Impact Dashboard 🌍</h2>
-  <p>Track the real-world impact of your food redistribution efforts.</p>
+  <h2>{% trans "Impact Dashboard 🌍" %}</h2>
+  <p>{% trans "Track the real-world impact of your food redistribution efforts." %}</p>
   
   {% if active_org %}
     <div class="impact-card" style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bbf7d0;">
@@ -11,32 +12,67 @@
       <div style="display: flex; gap: 20px; margin-top: 15px;">
         <div style="flex: 1; text-align: center; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <div style="font-size: 24px; font-weight: bold; color: #166534;">{{ my_impact.total_meals_saved|default:0 }}</div>
-          <div style="font-size: 14px; color: #4b5563;">Meals Saved</div>
+          <div style="font-size: 14px; color: #4b5563;">{% trans "Meals Saved" %}</div>
         </div>
         <div style="flex: 1; text-align: center; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <div style="font-size: 24px; font-weight: bold; color: #166534;">{{ my_impact.total_co2_reduced_kg|default:0|floatformat:1 }} kg</div>
-          <div style="font-size: 14px; color: #4b5563;">CO₂ Reduced</div>
+          <div style="font-size: 14px; color: #4b5563;">{% trans "CO₂ Reduced" %}</div>
         </div>
         <div style="flex: 1; text-align: center; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <div style="font-size: 24px; font-weight: bold; color: #166534;">🏆 {{ my_impact.impact_points|default:0 }}</div>
-          <div style="font-size: 14px; color: #4b5563;">Impact Points</div>
+          <div style="font-size: 14px; color: #4b5563;">{% trans "Impact Points" %}</div>
         </div>
       </div>
     </div>
+    
+    <div class="impact-chart" style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <h3>{% trans "Recent Redistribution Trends" %}</h3>
+      <canvas id="impactChart" height="100"></canvas>
+    </div>
   {% else %}
-    <p class="empty-state">Select an active organization from your workspace to view personal impact.</p>
+    <p class="empty-state">{% trans "Select an active organization from your workspace to view personal impact." %}</p>
   {% endif %}
 
-  <h3>Top Contributors Leaderboard</h3>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const labels = {{ chart_labels|safe|default:"[]" }};
+      const dataPoints = {{ chart_data|safe|default:"[]" }};
+      
+      if (labels.length > 0) {
+        const ctx = document.getElementById('impactChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Meals Redistributed',
+              data: dataPoints,
+              backgroundColor: '#166534',
+              borderRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+      }
+    });
+  </script>
+
+  <h3>{% trans "Top Contributors Leaderboard" %}</h3>
   {% if all_impacts %}
     <table class="data-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
       <thead>
         <tr style="background: #f3f4f6; text-align: left;">
-          <th style="padding: 10px;">Rank</th>
-          <th style="padding: 10px;">Organization</th>
-          <th style="padding: 10px;">Meals Saved</th>
-          <th style="padding: 10px;">CO₂ Reduced</th>
-          <th style="padding: 10px;">Points</th>
+          <th style="padding: 10px;">{% trans "Rank" %}</th>
+          <th style="padding: 10px;">{% trans "Organization" %}</th>
+          <th style="padding: 10px;">{% trans "Meals Saved" %}</th>
+          <th style="padding: 10px;">{% trans "CO₂ Reduced" %}</th>
+          <th style="padding: 10px;">{% trans "Points" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -52,7 +88,7 @@
       </tbody>
     </table>
   {% else %}
-    <p class="empty-state">No impact data available yet.</p>
+    <p class="empty-state">{% trans "No impact data available yet." %}</p>
   {% endif %}
 </div>
 {% endblock %}

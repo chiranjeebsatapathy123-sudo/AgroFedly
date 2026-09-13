@@ -1,14 +1,15 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Supply Requests{% endblock %}
 {% block content %}
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
         <div>
-            <div class="eyebrow">AGRICULTURE</div>
-            <h1>Supply Requests</h1>
-            <p>Track external requests for agricultural produce and their fulfillment status.</p>
+            <div class="eyebrow">{% trans "AGRICULTURE" %}</div>
+            <h1>{% trans "Supply Requests" %}</h1>
+            <p>{% trans "Track external requests for agricultural produce and their fulfillment status." %}</p>
         </div>
-        <a href="{% url 'agri_supply_request_add' %}" class="btn primary">＋ Request Supply</a>
+        <a href="{% url 'agri_supply_request_add' %}" class="btn primary">{% trans "＋ Request Supply" %}</a>
     </div>
 </section>
 
@@ -16,11 +17,11 @@
     {% if requests %}
         <table style="width:100%; text-align:left;">
             <tr>
-                <th style="padding-bottom:10px;">Requester</th>
-                <th style="padding-bottom:10px;">Produce Requested</th>
-                <th style="padding-bottom:10px;">Quantity</th>
-                <th style="padding-bottom:10px;">Status</th>
-                <th style="padding-bottom:10px;">Date Requested</th>
+                <th style="padding-bottom:10px;">{% trans "Requester" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Produce Requested" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Quantity" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Status" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Date Requested" %}</th>
             </tr>
             {% for r in requests %}
             <tr>
@@ -44,7 +45,7 @@
         </table>
     {% else %}
         <div style="text-align:center; padding:40px;">
-            <p>No supply requests have been made yet.</p>
+            <p>{% trans "No supply requests have been made yet." %}</p>
         </div>
     {% endif %}
 </div>

@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Post-Meal Logging{% endblock %}
 {% block content %}
 <section class="form-page">
     <div class="form-intro">
-        <div class="eyebrow">GROUND TRUTH</div>
-        <h1>Actual Consumption & Waste</h1>
-        <p>Log actual prepared and consumed meals to calculate exact waste and improve future predictions.</p>
+        <div class="eyebrow">{% trans "GROUND TRUTH" %}</div>
+        <h1>{% trans "Actual Consumption & Waste" %}</h1>
+        <p>{% trans "Log actual prepared and consumed meals to calculate exact waste and improve future predictions." %}</p>
     </div>
     <div class="form-card">
         <form method="post" class="form-grid">
@@ -45,7 +46,7 @@
             </div>
             {% endif %}
             
-            <button class="btn primary full" type="submit">Submit Ground Truth</button>
+            <button class="btn primary full" type="submit">{% trans "Submit Ground Truth" %}</button>
         </form>
     </div>
 </section>

@@ -155,6 +155,12 @@ class SurplusFood(models.Model):
     storage_temperature = models.FloatField(default=4.0)
     storage_time_hours = models.FloatField(default=0.0, validators=[MinValueValidator(0)])
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
+    
+    # AI Quality Control fields
+    quality_image = models.ImageField(upload_to="surplus_quality/", null=True, blank=True)
+    ai_freshness_score = models.IntegerField(null=True, blank=True, help_text="AI calculated freshness out of 100")
+    ai_quality_notes = models.TextField(blank=True, help_text="AI vision analysis notes")
+    
     is_safe = models.BooleanField(default=False)
     safety_alert = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -473,3 +479,23 @@ class CropYieldPrediction(models.Model):
     predicted_yield_tons = models.DecimalField(max_digits=10, decimal_places=2)
     estimated_revenue = models.DecimalField(max_digits=12, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class FoodLedger(models.Model):
+    """Immutable blockchain-style ledger for tracing food chain of custody"""
+    surplus_food = models.ForeignKey('SurplusFood', on_delete=models.CASCADE, related_name='ledger_entries')
+    action_type = models.CharField(max_length=50, help_text="e.g. LOGGED, DISPATCHED, DELIVERED, TEMPERATURE_CHECK")
+    performed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    previous_hash = models.CharField(max_length=64, blank=True)
+    block_hash = models.CharField(max_length=64, blank=True)
+    details = models.TextField(blank=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.block_hash:
+            import hashlib
+            last_entry = FoodLedger.objects.filter(surplus_food=self.surplus_food).order_by('-timestamp').first()
+            self.previous_hash = last_entry.block_hash if last_entry else "0" * 64
+            
+            data_string = f"{self.surplus_food.id}{self.action_type}{self.details}{self.previous_hash}".encode('utf-8')
+            self.block_hash = hashlib.sha256(data_string).hexdigest()
+        super().save(*args, **kwargs)

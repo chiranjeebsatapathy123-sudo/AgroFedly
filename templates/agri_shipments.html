@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Logistics & Shipments{% endblock %}
 {% block content %}
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
         <div>
-            <div class="eyebrow">LOGISTICS</div>
-            <h1>Shipment Tracking</h1>
-            <p>Track agricultural supply shipments and monitor cold-chain temperatures.</p>
+            <div class="eyebrow">{% trans "LOGISTICS" %}</div>
+            <h1>{% trans "Shipment Tracking" %}</h1>
+            <p>{% trans "Track agricultural supply shipments and monitor cold-chain temperatures." %}</p>
         </div>
     </div>
 </section>
@@ -15,11 +16,11 @@
     {% if shipments %}
         <table style="width:100%; text-align:left;">
             <tr>
-                <th style="padding-bottom:10px;">Tracking Code</th>
-                <th style="padding-bottom:10px;">Produce</th>
-                <th style="padding-bottom:10px;">Status</th>
-                <th style="padding-bottom:10px;">Current Temp</th>
-                <th style="padding-bottom:10px;">Actions</th>
+                <th style="padding-bottom:10px;">{% trans "Tracking Code" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Produce" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Status" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Current Temp" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Actions" %}</th>
             </tr>
             {% for s in shipments %}
             <tr>
@@ -36,14 +37,14 @@
                     {% endif %}
                 </td>
                 <td style="padding:12px 0; border-top:1px solid #eee;">
-                    <a href="{% url 'agri_shipment_detail' s.id %}" class="btn" style="padding:5px 10px; font-size:0.9rem;">View</a>
+                    <a href="{% url 'agri_shipment_detail' s.id %}" class="btn" style="padding:5px 10px; font-size:0.9rem;">{% trans "View" %}</a>
                 </td>
             </tr>
             {% endfor %}
         </table>
     {% else %}
         <div style="text-align:center; padding:40px;">
-            <p>No shipments have been dispatched yet.</p>
+            <p>{% trans "No shipments have been dispatched yet." %}</p>
         </div>
     {% endif %}
 </div>

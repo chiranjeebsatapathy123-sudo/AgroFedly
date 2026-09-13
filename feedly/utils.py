@@ -53,3 +53,29 @@ def get_osrm_route(start_lat, start_lng, end_lat, end_lng):
         print(f"OSRM routing error: {e}")
         
     return None
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+def notify_delivery_update(delivery):
+    """
+    Send WebSocket push notifications to members of the receiving organization
+    when a delivery status updates.
+    """
+    channel_layer = get_channel_layer()
+    if not channel_layer:
+        return
+        
+    # Notify receiver organization members
+    for member in delivery.receiver.members.all():
+        try:
+            async_to_sync(channel_layer.group_send)(
+                f"user_{member.user.id}",
+                {
+                    "type": "notification",
+                    "message": f"Delivery {delivery.tracking_code} is now {delivery.get_status_display()}."
+                }
+            )
+        except Exception as e:
+            print(f"Failed to send notification: {e}")
+

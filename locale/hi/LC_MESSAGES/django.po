@@ -12,28 +12,2134 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "Navigate"
-msgstr "???????"
+msgstr "नेविगेट करें"
 
 msgid "Home"
-msgstr "???"
+msgstr "होम"
 
 msgid "Operations Dashboard"
-msgstr "?????? ????????"
+msgstr "संचालन डैशबोर्ड"
 
 msgid "AI Prediction"
-msgstr "??? ??????????"
+msgstr "एआई भविष्यवाणी"
 
 msgid "7-Day Forecast"
-msgstr "7-??? ?? ???????????"
+msgstr "7-दिन का पूर्वानुमान"
 
 msgid "Operations Intelligence"
-msgstr "?????? ???????????"
+msgstr "संचालन बुद्धिमत्ता"
 
 msgid "Food Safety"
-msgstr "????? ???????"
+msgstr "खाद्य सुरक्षा"
 
 msgid "Surplus Food"
-msgstr "?????? ????"
+msgstr "अतिरिक्त भोजन"
 
 msgid "Recipients"
-msgstr "????????????"
+msgstr "प्राप्तकर्ता"
+
+msgid "Smart Food Operations"
+msgstr "स्मार्ट फूड ऑपरेशंस"
+
+msgid "Login"
+msgstr "लॉगिन"
+
+msgid "Logout"
+msgstr "लॉगआउट"
+
+msgid "ONE PLATFORM"
+msgstr "एक मंच"
+
+msgid "Open Dashboard"
+msgstr "डैशबोर्ड खोलें"
+
+msgid ""
+"Rank verified recipients by capacity, urgency and distance for better "
+"redistribution decisions."
+msgstr ""
+"बेहतर पुनर्वितरण निर्णयों के लिए क्षमता, तात्कालिकता और दूरी के अनुसार "
+"सत्यापित प्राप्तकर्ताओं को रैंक करें।"
+
+msgid "Delivery Control"
+msgstr "वितरण नियंत्रण"
+
+msgid "Forecast"
+msgstr "पूर्वानुमान"
+
+msgid "Tracking"
+msgstr "ट्रैकिंग"
+
+msgid "Workspace"
+msgstr "कार्यक्षेत्र"
+
+msgid "Register Organization →"
+msgstr "संगठन पंजीकृत करें →"
+
+msgid "LIVE OPERATIONS"
+msgstr "लाइव ऑपरेशंस"
+
+msgid "Register Company / College / School / Hospital"
+msgstr "कंपनी / कॉलेज / स्कूल / अस्पताल पंजीकृत करें"
+
+msgid "Built for real food operations"
+msgstr "वास्तविक खाद्य संचालन के लिए निर्मित"
+
+msgid "MOVE"
+msgstr "स्थानांतरित"
+
+msgid "Move surplus smarter."
+msgstr "अधिशेष को समझदारी से ले जाएं।"
+
+msgid ""
+"Registration creates the organization and its owner account together, so the"
+" form actually leads directly into the workspace."
+msgstr ""
+"पंजीकरण संगठन और उसके मालिक खाते को एक साथ बनाता है, इसलिए फॉर्म सीधे "
+"कार्यक्षेत्र में ले जाता है।"
+
+msgid ""
+"Create trackable deliveries with sender, receiver, driver, vehicle, schedule"
+" and live status workflow."
+msgstr ""
+"प्रेषक, रिसीवर, ड्राइवर, वाहन, शेड्यूल और लाइव स्टेटस वर्कफ़्लो के साथ ट्रैक"
+" करने योग्य डिलीवरी बनाएं।"
+
+msgid "Your organization can join Fedly today."
+msgstr "आपका संगठन आज ही फेडली से जुड़ सकता है।"
+
+msgid ""
+"Fedly connects AI demand planning, food safety, organizations and last-mile "
+"delivery in one operational workspace."
+msgstr ""
+"फेडली एआई मांग नियोजन, खाद्य सुरक्षा, संगठनों और अंतिम-मील वितरण को एक "
+"कार्यक्षेत्र में जोड़ता है।"
+
+msgid "Plan better meals."
+msgstr "बेहतर भोजन की योजना बनाएं।"
+
+msgid "SMART FOOD OPERATIONS PLATFORM"
+msgstr "स्मार्ट फूड ऑपरेशंस प्लेटफॉर्म"
+
+msgid "Recipient Matching"
+msgstr "प्राप्तकर्ता मिलान"
+
+msgid "SAFE"
+msgstr "सुरक्षित"
+
+msgid ""
+"Forecast meal demand from attendance, calendar and weather signals, with "
+"confidence and preparation recommendations."
+msgstr ""
+"उपस्थिति, कैलेंडर और मौसम संकेतों से भोजन की मांग का पूर्वानुमान लगाएं, "
+"विश्वास और तैयारी की सिफारिशों के साथ।"
+
+msgid "Existing User Login"
+msgstr "मौजूदा उपयोगकर्ता लॉगिन"
+
+msgid ""
+"Automatically classify stored surplus using temperature and storage-time "
+"controls before redistribution."
+msgstr ""
+"पुनर्वितरण से पहले तापमान और भंडारण-समय नियंत्रणों का उपयोग करके संग्रहीत "
+"अधिशेष को स्वचालित रूप से वर्गीकृत करें।"
+
+msgid "Organization Hub"
+msgstr "संगठन हब"
+
+msgid "Track Deliveries"
+msgstr "डिलीवरी ट्रैक करें"
+
+msgid ""
+"See demand, surplus, redistribution, confidence and recent deliveries "
+"without hunting through pages."
+msgstr ""
+"पृष्ठों के माध्यम से शिकार किए बिना मांग, अधिशेष, पुनर्वितरण, विश्वास और हाल"
+" की डिलीवरी देखें।"
+
+msgid "AI"
+msgstr "एआई"
+
+msgid "Operational Dashboard"
+msgstr "परिचालन डैशबोर्ड"
+
+msgid ""
+"Register an organization, manage people, create safe-food deliveries and "
+"keep every movement visible."
+msgstr ""
+"संगठन पंजीकृत करें, लोगों का प्रबंधन करें, सुरक्षित भोजन वितरण बनाएं और हर "
+"गतिविधि को दृश्यमान रखें।"
+
+msgid "GET STARTED"
+msgstr "शुरू करें"
+
+msgid ""
+"Companies, colleges, schools, hospitals and NGOs can register and manage "
+"their own operational team."
+msgstr ""
+"कंपनियां, कॉलेज, स्कूल, अस्पताल और एनजीओ पंजीकृत कर सकते हैं और अपनी परिचालन"
+" टीम का प्रबंधन कर सकते हैं।"
+
+msgid "Operational"
+msgstr "परिचालन"
+
+msgid "AI Demand Planning"
+msgstr "एआई मांग नियोजन"
+
+msgid "Quality Grading"
+msgstr "गुणवत्ता ग्रेडिंग"
+
+msgid "Accept Match"
+msgstr "मिलान स्वीकार करें"
+
+msgid "Recommend"
+msgstr "अनुशंसा करना"
+
+msgid "Value Lost"
+msgstr "मूल्य खो गया"
+
+msgid "Receiver"
+msgstr "रिसीवर"
+
+msgid "Qty"
+msgstr "मात्रा"
+
+msgid "In transit"
+msgstr "पारगमन में"
+
+msgid "No agricultural produce registered in inventory yet."
+msgstr "अभी तक कोई भी कृषि उपज सूची में पंजीकृत नहीं है।"
+
+msgid "Accept Delivery"
+msgstr "डिलीवरी स्वीकार करें"
+
+msgid "Rent Now"
+msgstr "अभी किराए पर लें"
+
+msgid "AGRICULTURE"
+msgstr "कृषि"
+
+msgid "Title"
+msgstr "शीर्षक"
+
+msgid "QUICK SCAN"
+msgstr "त्वरित स्कैन"
+
+msgid "Shipment QR Code"
+msgstr "शिपमेंट क्यूआर कोड"
+
+msgid "SUPPLY CHAIN"
+msgstr "आपूर्ति श्रृंखला"
+
+msgid "Details"
+msgstr "विवरण"
+
+msgid "No forecasts yet."
+msgstr "अभी तक कोई पूर्वानुमान नहीं है."
+
+msgid "Estimate today's demand"
+msgstr "आज की मांग का अनुमान लगाएं"
+
+msgid "Field Name"
+msgstr "फ़ील्ड का नाम"
+
+msgid "Surplus food"
+msgstr "अधिशेष भोजन"
+
+msgid "✓ Verify"
+msgstr "✓ सत्यापित करें"
+
+msgid "Verify"
+msgstr "सत्यापित करें"
+
+msgid "SURPLUS CONTROL"
+msgstr "अधिशेष नियंत्रण"
+
+msgid "Tracked waste"
+msgstr "ट्रैक किया गया कचरा"
+
+msgid "Available Near You"
+msgstr "आपके निकट उपलब्ध"
+
+msgid ""
+"to another registered organization. The system generates a unique tracking "
+"code automatically."
+msgstr ""
+"किसी अन्य पंजीकृत संगठन को। सिस्टम स्वचालित रूप से एक अद्वितीय ट्रैकिंग कोड "
+"उत्पन्न करता है।"
+
+msgid "✅ Proof of Delivery"
+msgstr "✅डिलीवरी का प्रमाण"
+
+msgid "＋ Register Receiving Organization"
+msgstr "＋ प्राप्तकर्ता संगठन का पंजीकरण करें"
+
+msgid "Combines tracked waste, forecast surplus and current surplus volume."
+msgstr ""
+"ट्रैक किए गए अपशिष्ट, पूर्वानुमानित अधिशेष और वर्तमान अधिशेष मात्रा को "
+"संयोजित करता है।"
+
+msgid "Matched Qty"
+msgstr "मिलान मात्रा"
+
+msgid "Clear Signature"
+msgstr "साफ़ हस्ताक्षर"
+
+msgid "No pending deliveries right now."
+msgstr "अभी कोई लंबित डिलीवरी नहीं है."
+
+msgid "Date"
+msgstr "तारीख"
+
+msgid "🚚 3. Logistics & Cold Chain"
+msgstr "🚚 3. लॉजिस्टिक्स एवं कोल्ड चेन"
+
+msgid "PoD"
+msgstr "फली"
+
+msgid "Matched Produce"
+msgstr "मिलानयुक्त उत्पादन"
+
+msgid "Recent Harvest & Inventory"
+msgstr "हालिया फसल और सूची"
+
+msgid "Register another"
+msgstr "दूसरा रजिस्टर करें"
+
+msgid "Linked surplus"
+msgstr "जुड़ा हुआ अधिशेष"
+
+msgid "COMPUTER VISION"
+msgstr "कंप्यूटर दृष्टि"
+
+msgid "Record consumption"
+msgstr "रिकॉर्ड खपत"
+
+msgid ""
+"Current safe/pending surplus locations are exposed as live operational "
+"points."
+msgstr ""
+"वर्तमान सुरक्षित/लंबित अधिशेष स्थानों को लाइव परिचालन बिंदुओं के रूप में "
+"उजागर किया जाता है।"
+
+msgid "Dispatched:"
+msgstr "भेजा गया:"
+
+msgid ""
+"Add and verify a recipient first. The recipient will then appear in this "
+"dropdown."
+msgstr ""
+"पहले किसी प्राप्तकर्ता को जोड़ें और सत्यापित करें. फिर प्राप्तकर्ता इस "
+"ड्रॉपडाउन में दिखाई देगा।"
+
+msgid "Facility"
+msgstr "सुविधा"
+
+msgid "Market & Supply"
+msgstr "बाज़ार एवं आपूर्ति"
+
+msgid "Top Contributors Leaderboard"
+msgstr "शीर्ष योगदानकर्ता लीडरबोर्ड"
+
+msgid "Check storage conditions"
+msgstr "भंडारण की स्थिति की जाँच करें"
+
+msgid "Crop Market Trends"
+msgstr "फसल बाज़ार के रुझान"
+
+msgid "Recent Forecasts"
+msgstr "हाल के पूर्वानुमान"
+
+msgid "Record QC Inspection"
+msgstr "क्यूसी निरीक्षण रिकॉर्ड करें"
+
+msgid "Cost savings"
+msgstr "लागत बचत"
+
+msgid "Predict today's meal demand"
+msgstr "आज के भोजन की मांग का अनुमान लगाएं"
+
+msgid "SMART MATCHING"
+msgstr "स्मार्ट मिलान"
+
+msgid "Actual Consumption"
+msgstr "वास्तविक खपत"
+
+msgid "Points"
+msgstr "अंक"
+
+msgid "Register"
+msgstr "पंजीकरण करवाना"
+
+msgid "Start transit"
+msgstr "पारगमन प्रारंभ करें"
+
+msgid "Mark picked up"
+msgstr "मार्क ने उठाया"
+
+msgid "PROCESSING"
+msgstr "प्रसंस्करण"
+
+msgid "Total recipients"
+msgstr "कुल प्राप्तकर्ता"
+
+msgid "SECURE ACCESS"
+msgstr "सुरक्षित पहुंच"
+
+msgid "Save recipient"
+msgstr "प्राप्तकर्ता सहेजें"
+
+msgid "Tracking Code"
+msgstr "नज़र रखने की कूट संख्या"
+
+msgid "Only SAFE quantities can move into redistribution."
+msgstr "केवल सुरक्षित मात्राएँ ही पुनर्वितरण में जा सकती हैं।"
+
+msgid "Current surplus"
+msgstr "वर्तमान अधिशेष"
+
+msgid "Team"
+msgstr "टीम"
+
+msgid "Medium Risk"
+msgstr "मध्यम जोखिम"
+
+msgid "Apply Now"
+msgstr "अभी अप्लाई करें"
+
+msgid "IMPACT"
+msgstr "प्रभाव"
+
+msgid "Output"
+msgstr "उत्पादन"
+
+msgid "LIVE TELEMETRY"
+msgstr "लाइव टेलीमेट्री"
+
+msgid "✓ Using your current Fedly account"
+msgstr "✓ अपने वर्तमान फेडली खाते का उपयोग करना"
+
+msgid "&times;"
+msgstr "×"
+
+msgid "Create Buyer Demand"
+msgstr "खरीदार की मांग बनाएं"
+
+msgid "Shipment information"
+msgstr "लदान की जानकारी"
+
+msgid "No impact data available yet."
+msgstr "अभी तक कोई प्रभाव डेटा उपलब्ध नहीं है."
+
+msgid "Complete Delivery"
+msgstr "पूर्ण वितरण"
+
+msgid "Command dashboard"
+msgstr "कमांड डैशबोर्ड"
+
+msgid "Logistics Detail"
+msgstr "रसद विवरण"
+
+msgid "Ready for redistribution"
+msgstr "पुनर्वितरण के लिए तैयार"
+
+msgid "TEAM MANAGEMENT"
+msgstr "टीम प्रबंधन"
+
+msgid "GROUND TRUTH"
+msgstr "सच्चाई"
+
+msgid "Field Geometry"
+msgstr "फ़ील्ड ज्यामिति"
+
+msgid "Total Registered Suppliers"
+msgstr "कुल पंजीकृत आपूर्तिकर्ता"
+
+msgid "No team members."
+msgstr "कोई टीम सदस्य नहीं."
+
+msgid "Location"
+msgstr "जगह"
+
+msgid "Clay (Medium Yield)"
+msgstr "मिट्टी (मध्यम उपज)"
+
+msgid ""
+"Submit the latest cold-chain temperature reading and immediately flag "
+"readings outside the safe 0–5°C range."
+msgstr ""
+"नवीनतम कोल्ड-चेन तापमान रीडिंग सबमिट करें और तुरंत सुरक्षित 0-5 डिग्री "
+"सेल्सियस रेंज के बाहर फ्लैग रीडिंग करें।"
+
+msgid "FINANCE"
+msgstr "वित्त"
+
+msgid "CO₂ Reduced"
+msgstr "CO₂ कम हो गया"
+
+msgid "Run AI Prediction"
+msgstr "एआई भविष्यवाणी चलाएँ"
+
+msgid ""
+"Delivery tracking remains available separately so the intelligence workspace"
+" stays focused on prevention and impact."
+msgstr ""
+"डिलीवरी ट्रैकिंग अलग से उपलब्ध रहती है इसलिए खुफिया कार्यक्षेत्र रोकथाम और "
+"प्रभाव पर केंद्रित रहता है।"
+
+msgid "Risk Level"
+msgstr "जोखिम स्तर"
+
+msgid "Comparing patterns against 100,000+ disease signatures."
+msgstr "100,000+ रोग हस्ताक्षरों के विरुद्ध पैटर्न की तुलना करना।"
+
+msgid "No logged ground truth data yet."
+msgstr "अभी तक कोई जमीनी सच्चाई का डेटा लॉग नहीं हुआ है।"
+
+msgid "Confirm Delivered (Recipient)"
+msgstr "डिलीवर की पुष्टि करें (प्राप्तकर्ता)"
+
+msgid "Prediction vs. Actual Accuracy"
+msgstr "भविष्यवाणी बनाम वास्तविक सटीकता"
+
+msgid "Event Flag"
+msgstr "घटना ध्वज"
+
+msgid "acres"
+msgstr "एकड़"
+
+msgid "No processing records logged yet."
+msgstr "अभी तक कोई प्रोसेसिंग रिकॉर्ड लॉग नहीं किया गया है."
+
+msgid "Estimated Savings"
+msgstr "अनुमानित बचत"
+
+msgid "Publish"
+msgstr "प्रकाशित करना"
+
+msgid "Current Temp"
+msgstr "वर्तमान तापमान"
+
+msgid "Check back later or list your own machinery!"
+msgstr "बाद में दोबारा जाँचें या अपनी स्वयं की मशीनरी सूचीबद्ध करें!"
+
+msgid "No shipments have been dispatched yet."
+msgstr "अभी तक कोई शिपमेंट नहीं भेजा गया है."
+
+msgid "Post Comment"
+msgstr "तेज़ी से टिप्पणी करना"
+
+msgid "No waste recorded yet."
+msgstr "अभी तक कोई बर्बादी दर्ज नहीं की गई है।"
+
+msgid "ERP Synced"
+msgstr "ईआरपी सिंक किया गया"
+
+msgid "Input"
+msgstr "इनपुट"
+
+msgid "Request Agricultural Supply"
+msgstr "कृषि आपूर्ति का अनुरोध करें"
+
+msgid "Calculate Prediction"
+msgstr "भविष्यवाणी की गणना करें"
+
+msgid "Carbon savings"
+msgstr "कार्बन की बचत"
+
+msgid "DRONE MAPPING"
+msgstr "ड्रोन मैपिंग"
+
+msgid "Verify Receipt & Release Funds"
+msgstr "रसीद और रिलीज फंड सत्यापित करें"
+
+msgid "AI DEMAND ENGINE"
+msgstr "एआई डिमांड इंजन"
+
+msgid "Receiver information"
+msgstr "प्राप्तकर्ता सूचना"
+
+msgid "● Operational"
+msgstr "● परिचालन"
+
+msgid "PLANNING"
+msgstr "योजना"
+
+msgid "Confirm password"
+msgstr "पासवर्ड की पुष्टि कीजिये"
+
+msgid "Route optimization"
+msgstr "मार्ग अनुकूलन"
+
+msgid "All calculations use your stored operational data"
+msgstr "सभी गणनाएँ आपके संग्रहीत परिचालन डेटा का उपयोग करती हैं"
+
+msgid "Emergency surplus detection"
+msgstr "आपातकालीन अधिशेष का पता लगाना"
+
+msgid "Recorded"
+msgstr "रिकॉर्डेड"
+
+msgid "Low"
+msgstr "कम"
+
+msgid "Type"
+msgstr "प्रकार"
+
+msgid "Advice Needed"
+msgstr "सलाह की आवश्यकता"
+
+msgid "ERP / IoT integrations"
+msgstr "ईआरपी/आईओटी एकीकरण"
+
+msgid "Supply Requests"
+msgstr "आपूर्ति अनुरोध"
+
+msgid "No verified recipients are available."
+msgstr "कोई सत्यापित प्राप्तकर्ता उपलब्ध नहीं है."
+
+msgid "Estimated avoided meal cost"
+msgstr "अनुमानित टाले गए भोजन की लागत"
+
+msgid "New organization?"
+msgstr "नया संगठन?"
+
+msgid "🎯 Highly Recommended Matches"
+msgstr "🎯अत्यधिक अनुशंसित मिलान"
+
+msgid "Rice"
+msgstr "चावल"
+
+msgid "New Prediction"
+msgstr "नई भविष्यवाणी"
+
+msgid ""
+"✓ Verified recipients are the only recipients shown on the redistribution "
+"form."
+msgstr ""
+"✓ सत्यापित प्राप्तकर्ता ही पुनर्वितरण फॉर्म पर दिखाए गए एकमात्र प्राप्तकर्ता"
+" हैं।"
+
+msgid "98% Match"
+msgstr "98% मिलान"
+
+msgid "Plan → Assign → Track"
+msgstr "योजना → असाइन करें → ट्रैक करें"
+
+msgid ""
+"From Farm to Plate: Track produce, processing yields, and manage "
+"agricultural supply chain."
+msgstr ""
+"खेत से प्लेट तक: उपज पर नज़र रखें, उपज का प्रसंस्करण करें और कृषि आपूर्ति "
+"श्रृंखला का प्रबंधन करें।"
+
+msgid "Create delivery"
+msgstr "डिलीवरी बनाएं"
+
+msgid "Temperature"
+msgstr "तापमान"
+
+msgid "Produce Utilization Rate"
+msgstr "उत्पादन उपयोग दर"
+
+msgid "Your organizations"
+msgstr "आपके संगठन"
+
+msgid "Scenario planning for the coming week."
+msgstr "आगामी सप्ताह के लिए परिदृश्य योजना।"
+
+msgid "Analytics, routes, alerts & integrations"
+msgstr "विश्लेषिकी, मार्ग, अलर्ट और एकीकरण"
+
+msgid "Meals Saved"
+msgstr "भोजन बच गया"
+
+msgid "Organization"
+msgstr "संगठन"
+
+msgid ""
+"No deliveries match your search. Create a shipment or clear the filters."
+msgstr ""
+"कोई भी डिलीवरी आपकी खोज से मेल नहीं खाती. शिपमेंट बनाएं या फ़िल्टर साफ़ "
+"करें."
+
+msgid "Edit Organization"
+msgstr "संगठन संपादित करें"
+
+msgid "Match Score"
+msgstr "मैच का स्कोर"
+
+msgid "The user must already have an Fedly login."
+msgstr "उपयोगकर्ता के पास पहले से ही फेडली लॉगिन होना चाहिए।"
+
+msgid "Track quality inspections and cold-chain shipments."
+msgstr "गुणवत्ता निरीक्षण और कोल्ड-चेन शिपमेंट को ट्रैक करें।"
+
+msgid "Sync attendance"
+msgstr "उपस्थिति सिंक करें"
+
+msgid ""
+"Verify receiving organizations and communities before they can receive "
+"redistributed food."
+msgstr ""
+"पुनर्वितरित भोजन प्राप्त करने से पहले प्राप्तकर्ता संगठनों और समुदायों को "
+"सत्यापित करें।"
+
+msgid "View"
+msgstr "देखना"
+
+msgid "Ready capacity"
+msgstr "तैयार क्षमता"
+
+msgid "Impact Dashboard 🌍"
+msgstr "इम्पैक्ट डैशबोर्ड 🌍"
+
+msgid "Available:"
+msgstr "उपलब्ध:"
+
+msgid "🏥 Hospital"
+msgstr "🏥अस्पताल"
+
+msgid "IoT temperature sensor"
+msgstr "IoT तापमान सेंसर"
+
+msgid "Date:"
+msgstr "तारीख:"
+
+msgid "Vehicle"
+msgstr "वाहन"
+
+msgid "Supply Matching"
+msgstr "आपूर्ति मिलान"
+
+msgid "cost savings"
+msgstr "लागत बचत"
+
+msgid "Input field parameters to generate an AI forecast."
+msgstr "एआई पूर्वानुमान उत्पन्न करने के लिए इनपुट फ़ील्ड पैरामीटर।"
+
+msgid "document.addEventListener('DOMContentLoaded', () ="
+msgstr "document.addEventListener('DOMContentLoaded', () ="
+
+msgid "7-Day demand forecast"
+msgstr "7-दिन की मांग का पूर्वानुमान"
+
+msgid "Food"
+msgstr "खाना"
+
+msgid "AI PREDICTIONS"
+msgstr "एआई भविष्यवाणियाँ"
+
+msgid "Submit Proof of Delivery"
+msgstr "डिलीवरी का प्रमाण जमा करें"
+
+msgid "Current IoT Temp:"
+msgstr "वर्तमान IoT तापमान:"
+
+msgid "Actions"
+msgstr "कार्रवाई"
+
+msgid "Eligible Crops:"
+msgstr "योग्य फसलें:"
+
+msgid "Global Leaderboard 🏆"
+msgstr "वैश्विक लीडरबोर्ड 🏆"
+
+msgid ""
+"Choose Company, College, School, Hospital, NGO or another institution. The "
+"account you create here becomes the organization owner."
+msgstr ""
+"कंपनी, कॉलेज, स्कूल, अस्पताल, एनजीओ या अन्य संस्थान चुनें। आपके द्वारा यहां "
+"बनाया गया खाता संगठन का स्वामी बन जाता है।"
+
+msgid "Submit Report"
+msgstr "रिपोर्ट सबमिट करें"
+
+msgid "Subsidy & Grant Finder"
+msgstr "सब्सिडी और अनुदान खोजक"
+
+msgid "Tomatoes"
+msgstr "टमाटर"
+
+msgid "Preparation & consumption"
+msgstr "तैयारी एवं खपत"
+
+msgid "Address"
+msgstr "पता"
+
+msgid "Use individual rows for exact capacity"
+msgstr "सटीक क्षमता के लिए अलग-अलग पंक्तियों का उपयोग करें"
+
+msgid "No IoT Sensor Linked"
+msgstr "कोई IoT सेंसर लिंक नहीं है"
+
+msgid "Units available for redistribution"
+msgstr "पुनर्वितरण के लिए इकाइयाँ उपलब्ध हैं"
+
+msgid "No supply requests have been made yet."
+msgstr "अभी तक कोई आपूर्ति अनुरोध नहीं किया गया है."
+
+msgid "No active shipments in transit."
+msgstr "पारगमन में कोई सक्रिय शिपमेंट नहीं."
+
+msgid "Grade:"
+msgstr "श्रेणी:"
+
+msgid "Storage temperature °C"
+msgstr "भंडारण तापमान डिग्री सेल्सियस"
+
+msgid "ORGANIZATION ONBOARDING"
+msgstr "संगठन में शामिल होना"
+
+msgid "Consumed"
+msgstr "ग्रहण किया हुआ"
+
+msgid "Today is holiday?"
+msgstr "आज छुट्टी है?"
+
+msgid "Recorded food"
+msgstr "रिकॉर्ड किया गया खाना"
+
+msgid "Open all"
+msgstr "सब खोलो"
+
+msgid "No"
+msgstr "नहीं"
+
+msgid "Surplus quantity"
+msgstr "अधिशेष मात्रा"
+
+msgid "Waste Quantity"
+msgstr "अपशिष्ट मात्रा"
+
+msgid "Draw your field boundaries to calculate acreage and plan yields."
+msgstr ""
+"एकड़ की गणना करने और उपज की योजना बनाने के लिए अपने क्षेत्र की सीमाएँ बनाएं।"
+
+msgid "✓ Confirm delivered"
+msgstr "✓ डिलीवर की पुष्टि करें"
+
+msgid "Add member"
+msgstr "सदस्य जोड़ें"
+
+msgid "ID"
+msgstr "पहचान"
+
+msgid "Username"
+msgstr "उपयोगकर्ता नाम"
+
+msgid "Content"
+msgstr "सामग्री"
+
+msgid "Prepared"
+msgstr "तैयार"
+
+msgid "Crop Disease Scanner"
+msgstr "फसल रोग स्कैनर"
+
+msgid "My Active Rentals"
+msgstr "मेरे सक्रिय किराये"
+
+msgid "Predicted meals"
+msgstr "अनुमानित भोजन"
+
+msgid "No emergency surplus detected."
+msgstr "कोई आपातकालीन अधिशेष नहीं पाया गया."
+
+msgid "No agricultural produce recorded yet."
+msgstr "अभी तक कोई कृषि उपज दर्ज नहीं की गई है।"
+
+msgid "Email"
+msgstr "ईमेल"
+
+msgid "● Intelligence online"
+msgstr "● इंटेलिजेंस ऑनलाइन"
+
+msgid "Assign driver"
+msgstr "ड्राइवर नियुक्त करें"
+
+msgid "+ Draw New Field"
+msgstr "+ नया फ़ील्ड बनाएं"
+
+msgid "Dispatched At"
+msgstr "पर भेजा गया"
+
+msgid "Produce Utilization & Waste"
+msgstr "उपयोग और अपशिष्ट का उत्पादन करें"
+
+msgid "Loamy (High Yield)"
+msgstr "दोमट (उच्च उपज)"
+
+msgid "Active"
+msgstr "सक्रिय"
+
+msgid "Submit Ground Truth"
+msgstr "जमीनी सच्चाई प्रस्तुत करें"
+
+msgid "Produce Requested"
+msgstr "उत्पादन का अनुरोध किया गया"
+
+msgid "Password"
+msgstr "पासवर्ड"
+
+msgid "Food collected from origin"
+msgstr "मूल से एकत्र किया गया भोजन"
+
+msgid "Meals moved"
+msgstr "भोजन ले जाया गया"
+
+msgid "Verify this recipient now"
+msgstr "अब इस प्राप्तकर्ता को सत्यापित करें"
+
+msgid "🏢 Company"
+msgstr "🏢कंपनी"
+
+msgid "Register new raw agricultural produce into inventory."
+msgstr "नई कच्ची कृषि उपज को सूची में पंजीकृत करें।"
+
+msgid "Route to Destination"
+msgstr "गंतव्य के लिए मार्ग"
+
+msgid "SHIPMENT TRACKING"
+msgstr "शिपमेंट ट्रैकिंग"
+
+msgid "Data Log"
+msgstr "डेटा लॉग"
+
+msgid "Crop Name"
+msgstr "फसल का नाम"
+
+msgid "Analyzing..."
+msgstr "विश्लेषण कर रहा हूँ..."
+
+msgid "Pending verification"
+msgstr "सत्यापन लंबित है"
+
+msgid "Picked up"
+msgstr "उठाया"
+
+msgid "Max Funding:"
+msgstr "अधिकतम फ़ंडिंग:"
+
+msgid "✓ SAFE — suitable under the configured threshold."
+msgstr "✓ सुरक्षित - कॉन्फ़िगर सीमा के तहत उपयुक्त।"
+
+msgid "Open Traceability Page"
+msgstr "ट्रैसेबिलिटी पेज खोलें"
+
+msgid "Recommended preparation:"
+msgstr "अनुशंसित तैयारी:"
+
+msgid ""
+"Track external requests for agricultural produce and their fulfillment "
+"status."
+msgstr "कृषि उपज के लिए बाहरी अनुरोधों और उनकी पूर्ति की स्थिति पर नज़र रखें।"
+
+msgid "Add Produce"
+msgstr "उत्पादन जोड़ें"
+
+msgid "Team members"
+msgstr "टीम के सदस्य"
+
+msgid "Current Temperature"
+msgstr "वर्तमान तापमान"
+
+msgid "You haven't been assigned any deliveries yet."
+msgstr "आपको अभी तक कोई डिलीवरी नहीं सौंपी गई है."
+
+msgid "Sign in to your Fedly workspace."
+msgstr "अपने फेडली कार्यक्षेत्र में साइन इन करें।"
+
+msgid "response.json()) .then(data ="
+msgstr "प्रतिक्रिया.json()) .then(डेटा ="
+
+msgid "No surplus records."
+msgstr "कोई अधिशेष रिकॉर्ड नहीं."
+
+msgid "Assumptions: ₹35/meal and 0.65 kg CO₂e/meal."
+msgstr "अनुमान: ₹35/भोजन और 0.65 किग्रा CO₂e/भोजन।"
+
+msgid "All incoming and outgoing"
+msgstr "सभी इनकमिंग और आउटगोइंग"
+
+msgid "Route & contacts"
+msgstr "मार्ग एवं संपर्क"
+
+msgid "+ New Post"
+msgstr "+ नई पोस्ट"
+
+msgid "Store sensor reading"
+msgstr "सेंसर रीडिंग स्टोर करें"
+
+msgid "No active buyer demands."
+msgstr "कोई सक्रिय खरीदार मांग नहीं करता."
+
+msgid "Harvest Date"
+msgstr "फसल की तारीख"
+
+msgid "Next status"
+msgstr "अगली स्थिति"
+
+msgid "No posts yet."
+msgstr "अब तक कोई पोस्ट नहीं।"
+
+msgid "Check safety"
+msgstr "सुरक्षा की जाँच करें"
+
+msgid "TOMORROW'S PRODUCE REQUISITION"
+msgstr "कल की उत्पादन आवश्यकता"
+
+msgid "Payments Ledger"
+msgstr "भुगतान बही"
+
+msgid "Knowledge Hub"
+msgstr "नॉलेज हब"
+
+msgid "Log Produce Processing"
+msgstr "लॉग उत्पादन प्रसंस्करण"
+
+msgid "Confidence"
+msgstr "आत्मविश्वास"
+
+msgid "Welcome back"
+msgstr "वापसी पर स्वागत है"
+
+msgid "Crop"
+msgstr "काटना"
+
+msgid "Recommended Action"
+msgstr "अनुशंसित कार्रवाई"
+
+msgid "Consumption tracking"
+msgstr "उपभोग ट्रैकिंग"
+
+msgid "Total shipments"
+msgstr "कुल शिपमेंट"
+
+msgid "🔓 Released"
+msgstr "🔓 जारी किया गया"
+
+msgid "Yield / Loss"
+msgstr "उपज/हानि"
+
+msgid "FINANCIAL AID"
+msgstr "वित्तीय सहायता"
+
+msgid "Delivered:"
+msgstr "पहुंचा दिया:"
+
+msgid "View Processing Log"
+msgstr "प्रोसेसिंग लॉग देखें"
+
+msgid ""
+"Dynamic Marketplace: Connect buyer demands with supplier produce "
+"availability."
+msgstr ""
+"गतिशील बाज़ार: खरीदार की माँगों को आपूर्तिकर्ता की उपज की उपलब्धता से "
+"जोड़ें।"
+
+msgid "Redistributed food is converted into operational impact estimates."
+msgstr "पुनर्वितरित भोजन को परिचालन प्रभाव अनुमान में परिवर्तित किया जाता है।"
+
+msgid "INVENTORY"
+msgstr "भंडार"
+
+msgid "QR Code no longer active."
+msgstr "QR कोड अब सक्रिय नहीं है."
+
+msgid ""
+"Track agricultural supply shipments and monitor cold-chain temperatures."
+msgstr ""
+"कृषि आपूर्ति शिपमेंट को ट्रैक करें और कोल्ड-चेन तापमान की निगरानी करें।"
+
+msgid "Demand"
+msgstr "माँग"
+
+msgid "No processing records yet."
+msgstr "अभी तक कोई प्रसंस्करण रिकॉर्ड नहीं है."
+
+msgid "Find Matches"
+msgstr "मिलान खोजें"
+
+msgid "FOOD SAFETY"
+msgstr "खाद्य सुरक्षा"
+
+msgid ""
+"Verified recipients appear immediately in the redistribution selection."
+msgstr "सत्यापित प्राप्तकर्ता पुनर्वितरण चयन में तुरंत दिखाई देते हैं।"
+
+msgid "SHARING ECONOMY"
+msgstr "साझा अर्थव्यवस्था"
+
+msgid "! UNSAFE — do not redistribute until safety is addressed."
+msgstr ""
+"! असुरक्षित - जब तक सुरक्षा का समाधान न हो जाए तब तक पुनर्वितरण न करें।"
+
+msgid "＋ Request Supply"
+msgstr "＋आपूर्ति का अनुरोध करें"
+
+msgid "Amount"
+msgstr "मात्रा"
+
+msgid "No crops found. Add fields or inventory first."
+msgstr "कोई फसल नहीं मिली. पहले फ़ील्ड या इन्वेंट्री जोड़ें."
+
+msgid "Delivery Photo"
+msgstr "डिलिवरी फोटो"
+
+msgid "Need review before use"
+msgstr "उपयोग से पहले समीक्षा की आवश्यकता है"
+
+msgid "+ List Equipment"
+msgstr "+ सूची उपकरण"
+
+msgid "No recipients yet. Add a recipient to begin the verification workflow."
+msgstr ""
+"अभी तक कोई प्राप्तकर्ता नहीं. सत्यापन वर्कफ़्लो शुरू करने के लिए एक "
+"प्राप्तकर्ता जोड़ें।"
+
+msgid "Waste analytics & impact calculation"
+msgstr "अपशिष्ट विश्लेषण एवं प्रभाव गणना"
+
+msgid "Save Field"
+msgstr "फ़ील्ड सहेजें"
+
+msgid "🔒 Escrow"
+msgstr "🔒 एस्क्रो"
+
+msgid "Delivered"
+msgstr "पहुंचा दिया"
+
+msgid "Process & Calculate Yield"
+msgstr "प्रक्रिया एवं उपज की गणना करें"
+
+msgid "Create Organization & Enter Workspace"
+msgstr "संगठन बनाएं और कार्यक्षेत्र दर्ज करें"
+
+msgid "Explanation"
+msgstr "स्पष्टीकरण"
+
+msgid "RECIPIENT NETWORK"
+msgstr "प्राप्तकर्ता नेटवर्क"
+
+msgid "Crop Type"
+msgstr "फसल का प्रकार"
+
+msgid "7-day view"
+msgstr "7 दिन का दृश्य"
+
+msgid "✓ PASSED"
+msgstr "✓ उत्तीर्ण"
+
+msgid "Record a quality inspection for agricultural produce."
+msgstr "कृषि उपज के लिए गुणवत्ता निरीक्षण रिकॉर्ड करें।"
+
+msgid "Raw Input Produce"
+msgstr "कच्चा इनपुट उत्पादन"
+
+msgid "Farm/Supplier:"
+msgstr "फार्म/आपूर्तिकर्ता:"
+
+msgid "Registered receiving points"
+msgstr "पंजीकृत प्राप्ति अंक"
+
+msgid "Market Trends"
+msgstr "बाज़ार के रुझान"
+
+msgid "Exam Day"
+msgstr "परीक्षा का दिन"
+
+msgid "Recipient Signature"
+msgstr "प्राप्तकर्ता के हस्ताक्षर"
+
+msgid ""
+"Estimate harvest volume and market revenue using our advanced ML models and "
+"real-time pricing data."
+msgstr ""
+"हमारे उन्नत एमएल मॉडल और वास्तविक समय मूल्य निर्धारण डेटा का उपयोग करके फसल "
+"की मात्रा और बाजार राजस्व का अनुमान लगाएं।"
+
+msgid "General Discussion"
+msgstr "सामान्य चर्चा"
+
+msgid "Convert raw agricultural inventory into processed outputs."
+msgstr "कच्ची कृषि सूची को प्रसंस्कृत आउटपुट में परिवर्तित करें।"
+
+msgid "Action"
+msgstr "कार्रवाई"
+
+msgid "Harvest Location:"
+msgstr "फसल कटाई का स्थान:"
+
+msgid "📄 Download Receipt"
+msgstr "📄 रसीद डाउनलोड करें"
+
+msgid "Estimated Loss Avoided"
+msgstr "अनुमानित नुकसान टाला गया"
+
+msgid "Total Produce Available"
+msgstr "कुल उत्पादन उपलब्ध"
+
+msgid "Daily attendance"
+msgstr "दैनिक उपस्थिति"
+
+msgid "Transactions Ledger"
+msgstr "लेन-देन बही"
+
+msgid ""
+"Demand planning, surplus prevention, redistribution and delivery — in one "
+"view."
+msgstr "मांग योजना, अधिशेष रोकथाम, पुनर्वितरण और वितरण - एक दृष्टिकोण में।"
+
+msgid "No equipment currently available."
+msgstr "वर्तमान में कोई उपकरण उपलब्ध नहीं है."
+
+msgid "＋ New Delivery"
+msgstr "＋ नई डिलीवरी"
+
+msgid "← BACK TO FORUM"
+msgstr "← फोरम पर वापस जाएँ"
+
+msgid ""
+"Your current organization is the only active organization in Fedly. Register"
+" a College, School, Hospital, Company, NGO or another institution to receive"
+" this delivery."
+msgstr ""
+"आपका वर्तमान संगठन फेडली में एकमात्र सक्रिय संगठन है। इस डिलीवरी को प्राप्त "
+"करने के लिए एक कॉलेज, स्कूल, अस्पताल, कंपनी, एनजीओ या अन्य संस्थान को "
+"पंजीकृत करें।"
+
+msgid "Name"
+msgstr "नाम"
+
+msgid "Update shipment"
+msgstr "शिपमेंट अद्यतन करें"
+
+msgid "Emergency surplus & predictive waste alerts"
+msgstr "आपातकालीन अधिशेष और पूर्वानुमानित अपशिष्ट अलर्ट"
+
+msgid "RECIPIENT REGISTRATION"
+msgstr "प्राप्तकर्ता पंजीकरण"
+
+msgid "Pending"
+msgstr "लंबित"
+
+msgid "ORGANIZATION WORKSPACE"
+msgstr "संगठन कार्यस्थल"
+
+msgid ""
+"Generate a recommended preparation quantity from attendance and the existing"
+" demand model."
+msgstr "उपस्थिति और मौजूदा मांग मॉडल से अनुशंसित तैयारी मात्रा उत्पन्न करें।"
+
+msgid "Sandy (Low Yield)"
+msgstr "सैंडी (कम उपज)"
+
+msgid "Wheat"
+msgstr "गेहूँ"
+
+msgid "＋ Add recipient"
+msgstr "＋प्राप्तकर्ता जोड़ें"
+
+msgid "Move food to another organization"
+msgstr "भोजन को दूसरे संगठन में ले जाएं"
+
+msgid "RAW PRODUCE REQUIREMENT"
+msgstr "कच्चे उत्पाद की आवश्यकता"
+
+msgid "IoT Temperature"
+msgstr "IoT तापमान"
+
+msgid "Produce Name"
+msgstr "उत्पादन का नाम"
+
+msgid "Run AI prediction"
+msgstr "एआई भविष्यवाणी चलाएँ"
+
+msgid "Scan to view farm-to-fork traceability."
+msgstr "फार्म-टू-फोर्क ट्रैसेबिलिटी देखने के लिए स्कैन करें।"
+
+msgid "Scan this code to easily update delivery status"
+msgstr "डिलीवरी स्थिति को आसानी से अपडेट करने के लिए इस कोड को स्कैन करें"
+
+msgid "View Full Inventory"
+msgstr "पूरी सूची देखें"
+
+msgid "Create Post"
+msgstr "पोस्ट बनाएं"
+
+msgid "Back to Shipments"
+msgstr "शिपमेंट पर वापस जाएँ"
+
+msgid "Shipment is moving to destination"
+msgstr "शिपमेंट गंतव्य की ओर बढ़ रहा है"
+
+msgid ""
+"Log actual prepared and consumed meals to calculate exact waste and improve "
+"future predictions."
+msgstr ""
+"सटीक बर्बादी की गणना करने और भविष्य की भविष्यवाणियों में सुधार करने के लिए "
+"वास्तविक तैयार और उपभोग किए गए भोजन को लॉग करें।"
+
+msgid "Automatically matching your crops with available government schemes."
+msgstr "उपलब्ध सरकारी योजनाओं के साथ अपनी फसलों का स्वचालित मिलान।"
+
+msgid "Recommended when the receiving organization has already been checked."
+msgstr ""
+"इसकी अनुशंसा तब की जाती है जब प्राप्तकर्ता संगठन की पहले ही जाँच कर ली गई "
+"हो।"
+
+msgid "No market trend data available yet."
+msgstr "अभी तक कोई बाजार रुझान डेटा उपलब्ध नहीं है।"
+
+msgid "How verification works"
+msgstr "सत्यापन कैसे काम करता है"
+
+msgid "Scheduled"
+msgstr "अनुसूचित"
+
+msgid "No medium/high predictive waste alerts."
+msgstr "कोई मध्यम/उच्च पूर्वानुमानित अपशिष्ट अलर्ट नहीं।"
+
+msgid "Search"
+msgstr "खोज"
+
+msgid "Total Produce Processed"
+msgstr "कुल संसाधित उत्पाद"
+
+msgid "Add the receiving organization's name, type, capacity and urgency."
+msgstr "प्राप्तकर्ता संगठन का नाम, प्रकार, क्षमता और तात्कालिकता जोड़ें।"
+
+msgid "Public Traceability"
+msgstr "सार्वजनिक पता लगाने की क्षमता"
+
+msgid "Review recipients"
+msgstr "प्राप्तकर्ताओं की समीक्षा करें"
+
+msgid "Waste risk"
+msgstr "बर्बादी का जोखिम"
+
+msgid ""
+"Enter attendance and optional weather location. The model uses your trained "
+"bundle when available and a robust fallback when it is not."
+msgstr ""
+"उपस्थिति और वैकल्पिक मौसम स्थान दर्ज करें। उपलब्ध होने पर मॉडल आपके "
+"प्रशिक्षित बंडल का उपयोग करता है और उपलब्ध न होने पर मजबूत फ़ॉलबैक का उपयोग "
+"करता है।"
+
+msgid "Delivered At"
+msgstr "पर सुपुर्दगी"
+
+msgid "Save & Check Safety"
+msgstr "सहेजें और सुरक्षा जांचें"
+
+msgid "Available"
+msgstr "उपलब्ध"
+
+msgid "Price (per kg)"
+msgstr "कीमत (प्रति किलो)"
+
+msgid ""
+"Verified public ledger for tracking origin, quality, and cold-chain "
+"integrity."
+msgstr ""
+"उत्पत्ति, गुणवत्ता और कोल्ड-चेन अखंडता पर नज़र रखने के लिए सत्यापित "
+"सार्वजनिक खाता।"
+
+msgid "🤝 NGO"
+msgstr "🤝एनजीओ"
+
+msgid "Agricultural Produce"
+msgstr "कृषि उपज"
+
+msgid "No matches calculated yet. Click \"Find Matches\" on an active demand."
+msgstr ""
+"अभी तक किसी मिलान की गणना नहीं की गई है. सक्रिय मांग पर \"मिलान खोजें\" पर "
+"क्लिक करें।"
+
+msgid "Organization details"
+msgstr "संगठन विवरण"
+
+msgid "View Details"
+msgstr "विवरण देखें"
+
+msgid "AGRICULTURE MODULE"
+msgstr "कृषि मॉड्यूल"
+
+msgid "Incoming meals"
+msgstr "आने वाला भोजन"
+
+msgid "Status:"
+msgstr "स्थिति:"
+
+msgid "Contact"
+msgstr "संपर्क"
+
+msgid "Sensor"
+msgstr "सेंसर"
+
+msgid "Corn"
+msgstr "भुट्टा"
+
+msgid "Add Harvested Produce"
+msgstr "कटी हुई उपज जोड़ें"
+
+msgid "Available Deliveries"
+msgstr "उपलब्ध डिलिवरी"
+
+msgid "Medium"
+msgstr "मध्यम"
+
+msgid "Tap to open camera or select a file"
+msgstr "कैमरा खोलने या फ़ाइल चुनने के लिए टैप करें"
+
+msgid "Capacity"
+msgstr "क्षमता"
+
+msgid "Create a shipment from"
+msgstr "से एक शिपमेंट बनाएं"
+
+msgid "Recent Redistribution Trends"
+msgstr "हालिया पुनर्वितरण रुझान"
+
+msgid "Sender"
+msgstr "प्रेषक"
+
+msgid "🔐 Smart Contract Escrow"
+msgstr "🔐 स्मार्ट कॉन्ट्रैक्ट एस्क्रो"
+
+msgid "Agricultural Supply Matching"
+msgstr "कृषि आपूर्ति मिलान"
+
+msgid "⚠ No receiving organization yet"
+msgstr "⚠अभी तक कोई प्राप्तकर्ता संगठन नहीं"
+
+msgid "EARLY WARNING"
+msgstr "प्रारंभिक चेतावनी"
+
+msgid ""
+"By clicking verify, you authorize the blockchain ledger to release the held "
+"funds to the farmer."
+msgstr ""
+"सत्यापित पर क्लिक करके, आप ब्लॉकचैन लेजर को किसान को रोकी गई धनराशि जारी "
+"करने के लिए अधिकृत करते हैं।"
+
+msgid "Start Transit (Driver)"
+msgstr "ट्रांज़िट प्रारंभ करें (ड्राइवर)"
+
+msgid "🌱 1. Origin & Produce"
+msgstr "🌱 1. उत्पत्ति एवं निर्माण"
+
+msgid "Open SAFE surplus and choose a verified recipient from the dropdown."
+msgstr "सेफ सरप्लस खोलें और ड्रॉपडाउन से सत्यापित प्राप्तकर्ता चुनें।"
+
+msgid "Historical and forecasted market pricing for agricultural produce."
+msgstr "कृषि उपज के लिए ऐतिहासिक और पूर्वानुमानित बाज़ार मूल्य निर्धारण।"
+
+msgid "No direct matches found for your current crops."
+msgstr "आपकी वर्तमान फ़सलों के लिए कोई सीधा मिलान नहीं मिला।"
+
+msgid "AI Predicted Demand"
+msgstr "एआई अनुमानित मांग"
+
+msgid "Ready to start transit?"
+msgstr "पारगमन शुरू करने के लिए तैयार हैं?"
+
+msgid "Track the real-world impact of your food redistribution efforts."
+msgstr ""
+"अपने खाद्य पुनर्वितरण प्रयासों के वास्तविक दुनिया पर प्रभाव को ट्रैक करें।"
+
+msgid ""
+"One workspace for preparation, consumption, waste prevention, impact, "
+"routing and live operational signals."
+msgstr ""
+"तैयारी, उपभोग, अपशिष्ट निवारण, प्रभाव, रूटिंग और लाइव परिचालन संकेतों के लिए"
+" एक कार्यक्षेत्र।"
+
+msgid "PLANNING OUTLOOK"
+msgstr "योजना दृष्टिकोण"
+
+msgid "FARM-TO-FORK TRACEABILITY"
+msgstr "फार्म-टू-फोर्क ट्रैसेबिलिटी"
+
+msgid "Area (Hectares)"
+msgstr "क्षेत्रफल (हेक्टेयर)"
+
+msgid "Holiday"
+msgstr "छुट्टी"
+
+msgid "AI PREDICTION RESULT"
+msgstr "एआई भविष्यवाणी परिणाम"
+
+msgid "No other schemes available right now."
+msgstr "अभी कोई अन्य योजना उपलब्ध नहीं है."
+
+msgid "Waste rate"
+msgstr "बर्बादी दर"
+
+msgid "🎓 College"
+msgstr "🎓कॉलेज"
+
+msgid "Processed Output"
+msgstr "संसाधित आउटपुट"
+
+msgid "Required Qty"
+msgstr "आवश्यक मात्रा"
+
+msgid "Top Recommended Recipients"
+msgstr "शीर्ष अनुशंसित प्राप्तकर्ता"
+
+msgid ""
+"Compare recent AI demand forecasts against actual tracked consumption to "
+"measure model performance."
+msgstr ""
+"मॉडल प्रदर्शन को मापने के लिए वास्तविक ट्रैक की गई खपत के मुकाबले हाल के एआई"
+" मांग पूर्वानुमानों की तुलना करें।"
+
+msgid "OPERATIONS & AI"
+msgstr "संचालन एवं एआई"
+
+msgid "CONNECTED OPERATIONS"
+msgstr "जुड़े हुए संचालन"
+
+msgid "Calculated Area:"
+msgstr "परिकलित क्षेत्र:"
+
+msgid "Available for redistribution"
+msgstr "पुनर्वितरण के लिए उपलब्ध है"
+
+msgid "Connecting..."
+msgstr "कनेक्ट हो रहा है..."
+
+msgid "Generate QR"
+msgstr "QR जनरेट करें"
+
+msgid "Leave a Comment"
+msgstr "एक टिप्पणी छोड़ें"
+
+msgid "🔍 2. Quality Control & Safety"
+msgstr "🔍 2. गुणवत्ता नियंत्रण एवं सुरक्षा"
+
+msgid "Live surplus map"
+msgstr "लाइव अधिशेष मानचित्र"
+
+msgid "High Risk"
+msgstr "भारी जोखिम"
+
+msgid "Recent forecasts"
+msgstr "हालिया पूर्वानुमान"
+
+msgid "Route optimization & live surplus map"
+msgstr "मार्ग अनुकूलन और लाइव अधिशेष मानचित्र"
+
+msgid ""
+"Analyze produce consumption rates, track waste, and quantify financial "
+"impact."
+msgstr ""
+"उत्पादन की खपत दरों का विश्लेषण करें, बर्बादी पर नज़र रखें और वित्तीय प्रभाव"
+" की मात्रा निर्धारित करें।"
+
+msgid "Impact calculation"
+msgstr "प्रभाव गणना"
+
+msgid "Time"
+msgstr "समय"
+
+msgid ""
+"Track raw agricultural harvest, shelf life, and estimated post-harvest loss "
+"risks."
+msgstr ""
+"कच्ची कृषि फसल, शेल्फ जीवन और फसल के बाद के अनुमानित नुकसान के जोखिमों पर "
+"नज़र रखें।"
+
+msgid "Urgency"
+msgstr "तात्कालिकता"
+
+msgid "Estimated avoided emissions"
+msgstr "अनुमानित उत्सर्जन से बचा गया"
+
+msgid "Redistribute"
+msgstr "फिर से विभाजित करना"
+
+msgid ""
+"Record an attendance payload using the same operational data model an ERP "
+"connector can call."
+msgstr ""
+"उसी परिचालन डेटा मॉडल का उपयोग करके उपस्थिति पेलोड रिकॉर्ड करें जिसे ईआरपी "
+"कनेक्टर कॉल कर सकता है।"
+
+msgid "＋ Add surplus"
+msgstr "＋ अधिशेष जोड़ें"
+
+msgid "DELIVERY CREATION"
+msgstr "वितरण निर्माण"
+
+msgid "Produce"
+msgstr "उत्पादन करना"
+
+msgid "High"
+msgstr "उच्च"
+
+msgid "← Back to deliveries"
+msgstr "← डिलीवरी पर वापस जाएँ"
+
+msgid "Update delivery status"
+msgstr "वितरण स्थिति अद्यतन करें"
+
+msgid ""
+"The organization is attached automatically. Safety is checked after saving."
+msgstr ""
+"संगठन स्वचालित रूप से संलग्न है. सेव करने के बाद सुरक्षा की जाँच की जाती है।"
+
+msgid "Register your organization"
+msgstr "अपना संगठन पंजीकृत करें"
+
+msgid "Recent Processing Activities"
+msgstr "हाल की प्रसंस्करण गतिविधियाँ"
+
+msgid "Quantity"
+msgstr "मात्रा"
+
+msgid "Track payments and invoices for your agricultural supply matches."
+msgstr "अपने कृषि आपूर्ति मिलान के लिए भुगतान और चालान ट्रैक करें।"
+
+msgid "Learn More"
+msgstr "और अधिक जानें"
+
+msgid ""
+"Upload a photo of your crop to get an instant AI diagnosis and treatment "
+"plan."
+msgstr ""
+"तत्काल एआई निदान और उपचार योजना प्राप्त करने के लिए अपनी फसल की एक तस्वीर "
+"अपलोड करें।"
+
+msgid "No sensor data"
+msgstr "कोई सेंसर डेटा नहीं"
+
+msgid "Awaiting assignment"
+msgstr "असाइनमेंट की प्रतीक्षा में"
+
+msgid "Expected surplus"
+msgstr "अपेक्षित अधिशेष"
+
+msgid "No transactions found for your organization."
+msgstr "आपके संगठन के लिए कोई लेनदेन नहीं मिला."
+
+msgid "Track"
+msgstr "रास्ता"
+
+msgid "Currently moving or assigned"
+msgstr "वर्तमान में चल रहा है या सौंपा गया है"
+
+msgid "Log Inspection"
+msgstr "लॉग निरीक्षण"
+
+msgid "Delivery system"
+msgstr "वितरण प्रणाली"
+
+msgid "Deadline:"
+msgstr "अंतिम तारीख:"
+
+msgid "Estimated Revenue"
+msgstr "अनुमानित राजस्व"
+
+msgid "Receiving organization"
+msgstr "प्राप्तकर्ता संगठन"
+
+msgid "Confirm Redistribution"
+msgstr "पुनर्वितरण की पुष्टि करें"
+
+msgid "Yes"
+msgstr "हाँ"
+
+msgid "Ingredient"
+msgstr "घटक"
+
+msgid "Your logged-in account"
+msgstr "आपका लॉग-इन खाता"
+
+msgid "Shipment Tracking"
+msgstr "शिपमेंट ट्रैकिंग"
+
+msgid "Sender information"
+msgstr "प्रेषक की जानकारी"
+
+msgid "'; data.recommendations.forEach(r ="
+msgstr "'; data.recommendations.forEach(r ="
+
+msgid "No verified quality inspections found for this produce."
+msgstr "इस उत्पाद के लिए कोई सत्यापित गुणवत्ता निरीक्षण नहीं मिला।"
+
+msgid "Live delivery timeline"
+msgstr "लाइव डिलीवरी टाइमलाइन"
+
+msgid "Preparation recommendation"
+msgstr "तैयारी की सिफ़ारिश"
+
+msgid "Actual Consumption & Waste"
+msgstr "वास्तविक उपभोग एवं बर्बादी"
+
+msgid "Clear"
+msgstr "स्पष्ट"
+
+msgid "SMART FOOD OPERATIONS"
+msgstr "स्मार्ट भोजन संचालन"
+
+msgid "Escrow Status"
+msgstr "एस्क्रो स्थिति"
+
+msgid ""
+"will become the owner of this new organization. You can manage multiple "
+"organizations from the workspace."
+msgstr ""
+"इस नए संगठन का मालिक बन जाएगा. आप कार्यक्षेत्र से अनेक संगठनों का प्रबंधन कर"
+" सकते हैं."
+
+msgid "Generate a QR code for buyers or consumers to verify this shipment."
+msgstr ""
+"इस शिपमेंट को सत्यापित करने के लिए खरीदारों या उपभोक्ताओं के लिए एक क्यूआर "
+"कोड जेनरेट करें।"
+
+msgid "Real-time temperature streams for all active transit vehicles."
+msgstr "सभी सक्रिय पारगमन वाहनों के लिए वास्तविक समय तापमान धाराएँ।"
+
+msgid "Notes"
+msgstr "टिप्पणियाँ"
+
+msgid "FORECAST RESULT"
+msgstr "पूर्वानुमान परिणाम"
+
+msgid "Submit Request"
+msgstr "अनुरोध सबमिट करें"
+
+msgid "Manage buyer demands and supply requests for produce."
+msgstr "उत्पाद के लिए खरीदार की मांगों और आपूर्ति अनुरोधों को प्रबंधित करें।"
+
+msgid "✓ Verified"
+msgstr "✓ सत्यापित"
+
+msgid "Top Wasted Ingredients"
+msgstr "शीर्ष बर्बाद सामग्री"
+
+msgid "ERP / attendance integration"
+msgstr "ईआरपी/उपस्थिति एकीकरण"
+
+msgid "Supplier"
+msgstr "देने वाला"
+
+msgid "Check safety automatically"
+msgstr "सुरक्षा की स्वचालित रूप से जाँच करें"
+
+msgid "Produce Req:"
+msgstr "उत्पादन अनुरोध:"
+
+msgid "Driver"
+msgstr "चालक"
+
+msgid "Estimated Waste Value"
+msgstr "अनुमानित अपशिष्ट मूल्य"
+
+msgid "My Assigned Deliveries"
+msgstr "मेरी नियत डिलीवरी"
+
+msgid "Status"
+msgstr "स्थिति"
+
+msgid "Cost:"
+msgstr "लागत:"
+
+msgid "Add organization member"
+msgstr "संगठन सदस्य जोड़ें"
+
+msgid "＋ Create delivery"
+msgstr "＋ डिलीवरी बनाएं"
+
+msgid "DESTINATION"
+msgstr "गंतव्य"
+
+msgid "Impact Points"
+msgstr "प्रभाव बिंदु"
+
+msgid "Total Produce Waste"
+msgstr "कुल उत्पादन अपशिष्ट"
+
+msgid "Loss Risk"
+msgstr "हानि जोखिम"
+
+msgid "Completed shipments"
+msgstr "पूर्ण शिपमेंट"
+
+msgid "No deliveries yet. Create your first delivery."
+msgstr "अभी तक कोई डिलीवरी नहीं हुई. अपनी पहली डिलीवरी बनाएं."
+
+msgid "Add recipient"
+msgstr "प्राप्तकर्ता को जोड़ें"
+
+msgid "res.json()) .then(data ="
+msgstr "res.json()) .then(डेटा ="
+
+msgid "Predicted vs Actual Demand Trend"
+msgstr "अनुमानित बनाम वास्तविक मांग प्रवृत्ति"
+
+msgid "Shipment QR"
+msgstr "शिपमेंट क्यूआर"
+
+msgid "Other Available Schemes"
+msgstr "अन्य उपलब्ध योजनाएँ"
+
+msgid "Actual"
+msgstr "वास्तविक"
+
+msgid "Confirm Delivery?"
+msgstr "डिलिवरी की पुष्टि?"
+
+msgid "Distance km"
+msgstr "दूरी किमी"
+
+msgid "Yield"
+msgstr "उपज"
+
+msgid "Scan Another Crop"
+msgstr "किसी अन्य फसल को स्कैन करें"
+
+msgid "Active Buyer Demands"
+msgstr "सक्रिय क्रेता मांगें"
+
+msgid "Soil Type"
+msgstr "मिट्टी का प्रकार"
+
+msgid "🌾 Crop Yield Predictor"
+msgstr "🌾 फसल उपज पूर्वानुमानक"
+
+msgid "Save Field Geometry"
+msgstr "फ़ील्ड ज्यामिति सहेजें"
+
+msgid "Be the first to start a discussion!"
+msgstr "एक चर्चा शुरू करने वाले प्रथम बनिए!"
+
+msgid "⚙️ Log Processing"
+msgstr "⚙️ लॉग प्रोसेसिंग"
+
+msgid "SURPLUS FOOD"
+msgstr "अधिशेष भोजन"
+
+msgid "＋ Add Produce"
+msgstr "＋ उत्पादन जोड़ें"
+
+msgid "Verified recipients are ranked by capacity fit, distance and urgency."
+msgstr ""
+"सत्यापित प्राप्तकर्ताओं को क्षमता फिट, दूरी और तात्कालिकता के आधार पर "
+"क्रमबद्ध किया जाता है।"
+
+msgid "Agriculture Dashboard"
+msgstr "कृषि डैशबोर्ड"
+
+msgid "Predictive waste alerts"
+msgstr "पूर्वानुमानित अपशिष्ट अलर्ट"
+
+msgid ""
+"Select an active organization from your workspace to view personal impact."
+msgstr ""
+"व्यक्तिगत प्रभाव देखने के लिए अपने कार्यक्षेत्र से एक सक्रिय संगठन का चयन "
+"करें।"
+
+msgid "Category"
+msgstr "वर्ग"
+
+msgid "Analysis Type"
+msgstr "विश्लेषण प्रकार"
+
+msgid "Recommended Supply Matches (Pending)"
+msgstr "अनुशंसित आपूर्ति मिलान (लंबित)"
+
+msgid "QUALITY CONTROL"
+msgstr "गुणवत्ता नियंत्रण"
+
+msgid "Rank"
+msgstr "पद"
+
+msgid "Success Story"
+msgstr "सफलता की कहानी"
+
+msgid "Register here"
+msgstr "यहां रजिस्टर करें"
+
+msgid "Yield:"
+msgstr "उपज:"
+
+msgid "ORGANIZATION SETTINGS"
+msgstr "संगठन सेटिंग"
+
+msgid "Recommended Target"
+msgstr "अनुशंसित लक्ष्य"
+
+msgid "View all"
+msgstr "सभी को देखें"
+
+msgid "Submit a request for available agricultural produce."
+msgstr "उपलब्ध कृषि उपज के लिए अनुरोध सबमिट करें।"
+
+msgid "Outgoing meals"
+msgstr "बाहर जाने वाला भोजन"
+
+msgid "Verified"
+msgstr "सत्यापित"
+
+msgid "＋ Add Organization"
+msgstr "＋संगठन जोड़ें"
+
+msgid "ETA: ~45 mins"
+msgstr "ईटीए: ~45 मिनट"
+
+msgid "REDISTRIBUTION"
+msgstr "पुनर्विभाजन"
+
+msgid "Low Risk"
+msgstr "कम जोखिम"
+
+msgid ""
+"Track the conversion of raw produce to processed goods and calculate "
+"operational yield."
+msgstr ""
+"कच्चे उत्पाद से प्रसंस्कृत माल में रूपांतरण को ट्रैक करें और परिचालन उपज की "
+"गणना करें।"
+
+msgid "Upload Crop Photo"
+msgstr "क्रॉप फ़ोटो अपलोड करें"
+
+msgid "LOGISTICS"
+msgstr "रसद"
+
+msgid "Tons"
+msgstr "टन"
+
+msgid "Quality & Logistics"
+msgstr "गुणवत्ता एवं रसद"
+
+msgid "Created by"
+msgstr "के द्वारा बनाई गई"
+
+msgid "Add / Update Member"
+msgstr "सदस्य जोड़ें/अद्यतन करें"
+
+msgid "✗ FAILED"
+msgstr "✗ विफल"
+
+msgid "/hr"
+msgstr "/घंटा"
+
+msgid "Connect with other farmers, share advice, and discuss market trends."
+msgstr ""
+"अन्य किसानों से जुड़ें, सलाह साझा करें और बाज़ार के रुझानों पर चर्चा करें।"
+
+msgid "Account email"
+msgstr "खाता ई - मेल"
+
+msgid "LAST-MILE LOGISTICS"
+msgstr "अंतिम मील रसद"
+
+msgid "Agricultural Processing Logs"
+msgstr "कृषि प्रसंस्करण लॉग"
+
+msgid "Disease Diagnosis"
+msgstr "रोग निदान"
+
+msgid "Create Trackable Delivery"
+msgstr "ट्रैक करने योग्य डिलीवरी बनाएं"
+
+msgid "Phone"
+msgstr "फ़ोन"
+
+msgid "Open delivery operations"
+msgstr "ओपन डिलीवरी ऑपरेशन"
+
+msgid "Requester"
+msgstr "अनुरोधकर्ता"
+
+msgid "Move food safely"
+msgstr "भोजन को सुरक्षित रूप से ले जाएँ"
+
+msgid "Sign in"
+msgstr "दाखिल करना"
+
+msgid "Cold Chain IoT Monitor"
+msgstr "कोल्ड चेन IoT मॉनिटर"
+
+msgid "Enter valid storage values."
+msgstr "मान्य संग्रहण मान दर्ज करें."
+
+msgid "ERP / attendance & IoT temperature integrations"
+msgstr "ईआरपी/उपस्थिति एवं IoT तापमान एकीकरण"
+
+msgid "Run AI Analysis"
+msgstr "एआई विश्लेषण चलाएँ"
+
+msgid "All statuses"
+msgstr "सभी स्थितियाँ"
+
+msgid "Record surplus"
+msgstr "रिकॉर्ड अधिशेष"
+
+msgid ""
+"Rent tractors, drones, and harvesters from nearby farmers, or list your own."
+msgstr ""
+"आस-पास के किसानों से ट्रैक्टर, ड्रोन और हार्वेस्टर किराए पर लें, या अपनी खुद"
+" की सूची बनाएं।"
+
+msgid "Equipment Hub"
+msgstr "उपकरण हब"
+
+msgid "Owner account"
+msgstr "स्वामी खाता"
+
+msgid "ORIGIN"
+msgstr "मूल"
+
+msgid "Volunteer Driver Registration"
+msgstr "स्वयंसेवी चालक पंजीकरण"
+
+msgid "Ranking of organizations based on their impact."
+msgstr "उनके प्रभाव के आधार पर संगठनों की रैंकिंग।"
+
+msgid ""
+"Use the Verify button above. Only verified recipients appear in "
+"redistribution."
+msgstr ""
+"ऊपर सत्यापित करें बटन का उपयोग करें. पुनर्वितरण में केवल सत्यापित "
+"प्राप्तकर्ता ही दिखाई देते हैं।"
+
+msgid "Lower is better"
+msgstr "कम बेहतर है"
+
+msgid "Market Trends (AI Pricing)"
+msgstr "बाज़ार के रुझान (एआई मूल्य निर्धारण)"
+
+msgid "Integration health"
+msgstr "एकीकरण स्वास्थ्य"
+
+msgid "Recipient contact"
+msgstr "प्राप्तकर्ता संपर्क"
+
+msgid "Required"
+msgstr "आवश्यक"
+
+msgid "Date Requested"
+msgstr "अनुरोधित तिथि"
+
+msgid "Region"
+msgstr "क्षेत्र"
+
+msgid "Accuracy Score"
+msgstr "सटीकता स्कोर"
+
+msgid "Add verified recipients to generate routes."
+msgstr "मार्ग बनाने के लिए सत्यापित प्राप्तकर्ता जोड़ें।"
+
+msgid "Driver assigned"
+msgstr "ड्राइवर को नियुक्त किया गया"
+
+msgid "Waste analytics"
+msgstr "अपशिष्ट विश्लेषण"
+
+msgid "Quality"
+msgstr "गुणवत्ता"
+
+msgid "Sign up to deliver surplus food and reduce waste."
+msgstr "अधिशेष भोजन वितरित करने और बर्बादी कम करने के लिए साइन अप करें।"
+
+msgid "Take a photo of the delivered goods."
+msgstr "डिलीवर किए गए सामान की फ़ोटो लें."
+
+msgid "No active surplus points."
+msgstr "कोई सक्रिय अधिशेष अंक नहीं."
+
+msgid "ANALYTICS"
+msgstr "एनालिटिक्स"
+
+msgid "City for live weather"
+msgstr "लाइव मौसम के लिए शहर"
+
+msgid "Delivery contact"
+msgstr "डिलिवरी संपर्क"
+
+msgid "Storage time hours"
+msgstr "भंडारण समय घंटे"
+
+msgid "Organization Workspace"
+msgstr "संगठन कार्यक्षेत्र"
+
+msgid "Save changes"
+msgstr "परिवर्तनों को सुरक्षित करें"
+
+msgid "Food redistributed"
+msgstr "भोजन पुनः वितरित किया गया"
+
+msgid "Process or supply soon!"
+msgstr "प्रक्रिया या आपूर्ति शीघ्र!"
+
+msgid "Generate"
+msgstr "उत्पन्न"
+
+msgid "Register / Update Profile"
+msgstr "प्रोफ़ाइल पंजीकृत/अद्यतन करें"
+
+msgid "Produce:"
+msgstr "उत्पादन करना:"
+
+msgid "carbon savings"
+msgstr "कार्बन बचत"
+
+msgid "Create Demand"
+msgstr "मांग पैदा करें"
+
+msgid ""
+"Record prepared and consumed meals to continuously measure actual waste."
+msgstr ""
+"वास्तविक अपशिष्ट को लगातार मापने के लिए तैयार और उपभोग किए गए भोजन को "
+"रिकॉर्ड करें।"
+
+msgid "Your Profile"
+msgstr "आपकी प्रोफ़ाइल"
+
+msgid "Operations intelligence"
+msgstr "संचालन खुफिया"
+
+msgid "Urgency 0–100"
+msgstr "अत्यावश्यकता 0-100"
+
+msgid "Waste risk score"
+msgstr "बर्बाद जोखिम स्कोर"
+
+msgid "Requested"
+msgstr "अनुरोध किया"
+
+msgid "Direct"
+msgstr "प्रत्यक्ष"
+
+msgid "🏫 School"
+msgstr "🏫स्कूल"
+
+msgid "Delivery activity"
+msgstr "वितरण गतिविधि"
+
+msgid "⚠️ Active Weather Advisories"
+msgstr "⚠️ सक्रिय मौसम संबंधी सलाह"
+
+msgid "Back to Delivery"
+msgstr "डिलिवरी पर वापस जाएँ"
+
+msgid "Loss:"
+msgstr "नुकसान:"
+
+msgid "Inspector:"
+msgstr "इंस्पेक्टर:"
+
+msgid "Running Neural Network..."
+msgstr "न्यूरल नेटवर्क चल रहा है..."
+
+msgid "We analyzed your Farm Fields and Inventory to find active crops:"
+msgstr ""
+"सक्रिय फसलों को खोजने के लिए हमने आपके फार्म फील्ड और इन्वेंटरी का विश्लेषण "
+"किया:"
+
+msgid "COMMUNITY"
+msgstr "समुदाय"

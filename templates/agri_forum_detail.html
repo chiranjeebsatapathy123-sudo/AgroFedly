@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}{{ post.title }}{% endblock %}
 {% block content %}
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
         <div>
-            <div class="eyebrow"><a href="{% url 'agri_forum' %}" style="color:inherit; text-decoration:none;">← BACK TO FORUM</a></div>
+            <div class="eyebrow"><a href="{% url 'agri_forum' %}" style="color:inherit; text-decoration:none;">{% trans "← BACK TO FORUM" %}</a></div>
             <h1 style="margin-bottom:10px;">{{ post.title }}</h1>
             <span class="pill" style="background:var(--soft);">{{ post.get_category_display }}</span>
         </div>
@@ -44,12 +45,12 @@
         
         <!-- Add Comment -->
         <div class="form-card" style="border:1px dashed var(--line);">
-            <h4>Leave a Comment</h4>
+            <h4>{% trans "Leave a Comment" %}</h4>
             <form method="post" action="{% url 'agri_forum_detail' post.id %}">
                 {% csrf_token %}
                 <textarea name="content" required rows="3" placeholder="Share your thoughts..." style="width:100%; padding:15px; margin:10px 0; border:1px solid var(--line); border-radius:5px; font-family:inherit;"></textarea>
                 <div style="text-align:right;">
-                    <button type="submit" class="btn primary">Post Comment</button>
+                    <button type="submit" class="btn primary">{% trans "Post Comment" %}</button>
                 </div>
             </form>
         </div>

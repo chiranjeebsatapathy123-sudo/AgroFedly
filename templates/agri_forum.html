@@ -1,14 +1,15 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Knowledge Hub - Forum{% endblock %}
 {% block content %}
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
         <div>
-            <div class="eyebrow">COMMUNITY</div>
-            <h1>Knowledge Hub</h1>
-            <p>Connect with other farmers, share advice, and discuss market trends.</p>
+            <div class="eyebrow">{% trans "COMMUNITY" %}</div>
+            <h1>{% trans "Knowledge Hub" %}</h1>
+            <p>{% trans "Connect with other farmers, share advice, and discuss market trends." %}</p>
         </div>
-        <button class="btn primary" onclick="document.getElementById('postModal').style.display='flex'">+ New Post</button>
+        <button class="btn primary" onclick="document.getElementById('postModal').style.display='flex'">{% trans "+ New Post" %}</button>
     </div>
 </section>
 
@@ -35,8 +36,8 @@
     </div>
     {% empty %}
     <div class="form-card" style="grid-column:1/-1; text-align:center; padding:40px;">
-        <h2>No posts yet.</h2>
-        <p style="color:var(--muted);">Be the first to start a discussion!</p>
+        <h2>{% trans "No posts yet." %}</h2>
+        <p style="color:var(--muted);">{% trans "Be the first to start a discussion!" %}</p>
     </div>
     {% endfor %}
 </div>
@@ -45,29 +46,29 @@
 <div id="postModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
     <div class="form-card" style="width:500px; max-width:90%;">
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <h2 style="margin:0;">Create Post</h2>
+            <h2 style="margin:0;">{% trans "Create Post" %}</h2>
             <button class="btn" style="padding:5px 10px;" onclick="document.getElementById('postModal').style.display='none'">✕</button>
         </div>
         <form method="post" action="{% url 'agri_forum' %}">
             {% csrf_token %}
             <label style="display:block; margin-bottom:15px;">
-                Title
+                {% trans "Title" %}
                 <input type="text" name="title" required style="width:100%; padding:10px; margin-top:5px; border:1px solid var(--line); border-radius:5px;">
             </label>
             <label style="display:block; margin-bottom:15px;">
-                Category
+                {% trans "Category" %}
                 <select name="category" style="width:100%; padding:10px; margin-top:5px; border:1px solid var(--line); border-radius:5px;">
-                    <option value="DISCUSSION">General Discussion</option>
-                    <option value="ADVICE">Advice Needed</option>
-                    <option value="MARKET">Market Trends</option>
-                    <option value="SUCCESS">Success Story</option>
+                    <option value="DISCUSSION">{% trans "General Discussion" %}</option>
+                    <option value="ADVICE">{% trans "Advice Needed" %}</option>
+                    <option value="MARKET">{% trans "Market Trends" %}</option>
+                    <option value="SUCCESS">{% trans "Success Story" %}</option>
                 </select>
             </label>
             <label style="display:block; margin-bottom:15px;">
-                Content
+                {% trans "Content" %}
                 <textarea name="content" required rows="5" style="width:100%; padding:10px; margin-top:5px; border:1px solid var(--line); border-radius:5px;"></textarea>
             </label>
-            <button type="submit" class="btn primary full">Publish</button>
+            <button type="submit" class="btn primary full">{% trans "Publish" %}</button>
         </form>
     </div>
 </div>

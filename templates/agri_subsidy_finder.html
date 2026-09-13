@@ -1,72 +1,73 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Government Subsidy Finder{% endblock %}
 {% block content %}
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
         <div>
-            <div class="eyebrow">FINANCIAL AID</div>
-            <h1>Subsidy & Grant Finder</h1>
-            <p>Automatically matching your crops with available government schemes.</p>
+            <div class="eyebrow">{% trans "FINANCIAL AID" %}</div>
+            <h1>{% trans "Subsidy & Grant Finder" %}</h1>
+            <p>{% trans "Automatically matching your crops with available government schemes." %}</p>
         </div>
     </div>
 </section>
 
 <div style="margin-bottom:30px; padding:20px; background:var(--surface); border:1px solid var(--line); border-radius:10px;">
-    <h3 style="margin-top:0;">Your Profile</h3>
-    <p style="margin:5px 0;">We analyzed your Farm Fields and Inventory to find active crops:</p>
+    <h3 style="margin-top:0;">{% trans "Your Profile" %}</h3>
+    <p style="margin:5px 0;">{% trans "We analyzed your Farm Fields and Inventory to find active crops:" %}</p>
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
         {% for crop in my_crops %}
         <span class="pill" style="background:var(--primary); color:white; font-size:1rem; padding:5px 15px;">{{ crop|title }}</span>
         {% empty %}
-        <span class="pill" style="background:var(--soft);">No crops found. Add fields or inventory first.</span>
+        <span class="pill" style="background:var(--soft);">{% trans "No crops found. Add fields or inventory first." %}</span>
         {% endfor %}
     </div>
 </div>
 
-<h2 style="color:var(--primary);">🎯 Highly Recommended Matches</h2>
+<h2 style="color:var(--primary);">{% trans "🎯 Highly Recommended Matches" %}</h2>
 <div class="form-grid" style="margin-bottom:40px;">
     {% for scheme in matched_schemes %}
     <div class="form-card" style="border:2px solid var(--primary); display:flex; flex-direction:column; justify-content:space-between;">
         <div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <h3 style="margin:0 0 10px 0;">{{ scheme.name }}</h3>
-                <span class="pill" style="background:#e7f7ec; color:var(--primary);">98% Match</span>
+                <span class="pill" style="background:#e7f7ec; color:var(--primary);">{% trans "98% Match" %}</span>
             </div>
             <p style="color:var(--muted); font-size:0.95rem; margin-bottom:15px;">{{ scheme.description }}</p>
             <div style="margin-bottom:20px;">
-                <div style="font-size:0.9rem; margin-bottom:5px;"><strong>Eligible Crops:</strong> {{ scheme.eligible_crops }}</div>
+                <div style="font-size:0.9rem; margin-bottom:5px;"><strong>{% trans "Eligible Crops:" %}</strong> {{ scheme.eligible_crops }}</div>
                 {% if scheme.max_funding %}
-                <div style="font-size:0.9rem; margin-bottom:5px;"><strong>Max Funding:</strong> ₹{{ scheme.max_funding }}</div>
+                <div style="font-size:0.9rem; margin-bottom:5px;"><strong>{% trans "Max Funding:" %}</strong> ₹{{ scheme.max_funding }}</div>
                 {% endif %}
                 {% if scheme.deadline %}
-                <div style="font-size:0.9rem; color:#ff4444;"><strong>Deadline:</strong> {{ scheme.deadline|date:"M d, Y" }}</div>
+                <div style="font-size:0.9rem; color:#ff4444;"><strong>{% trans "Deadline:" %}</strong> {{ scheme.deadline|date:"M d, Y" }}</div>
                 {% endif %}
             </div>
         </div>
-        <a href="{{ scheme.application_link|default:'#' }}" class="btn primary" style="text-align:center; display:block;" target="_blank">Apply Now</a>
+        <a href="{{ scheme.application_link|default:'#' }}" class="btn primary" style="text-align:center; display:block;" target="_blank">{% trans "Apply Now" %}</a>
     </div>
     {% empty %}
     <div class="form-card" style="grid-column:1/-1; text-align:center; padding:40px;">
-        <p style="color:var(--muted); margin:0;">No direct matches found for your current crops.</p>
+        <p style="color:var(--muted); margin:0;">{% trans "No direct matches found for your current crops." %}</p>
     </div>
     {% endfor %}
 </div>
 
-<h2>Other Available Schemes</h2>
+<h2>{% trans "Other Available Schemes" %}</h2>
 <div class="form-grid">
     {% for scheme in other_schemes %}
     <div class="form-card">
         <h3 style="margin:0 0 10px 0;">{{ scheme.name }}</h3>
         <p style="color:var(--muted); font-size:0.95rem; margin-bottom:15px;">{{ scheme.description }}</p>
-        <div style="font-size:0.9rem; margin-bottom:5px;"><strong>Eligible Crops:</strong> {{ scheme.eligible_crops }}</div>
+        <div style="font-size:0.9rem; margin-bottom:5px;"><strong>{% trans "Eligible Crops:" %}</strong> {{ scheme.eligible_crops }}</div>
         {% if scheme.deadline %}
-        <div style="font-size:0.9rem; margin-bottom:15px;"><strong>Deadline:</strong> {{ scheme.deadline|date:"M d, Y" }}</div>
+        <div style="font-size:0.9rem; margin-bottom:15px;"><strong>{% trans "Deadline:" %}</strong> {{ scheme.deadline|date:"M d, Y" }}</div>
         {% endif %}
-        <a href="{{ scheme.application_link|default:'#' }}" class="btn" style="text-align:center; display:block; width:100%;" target="_blank">Learn More</a>
+        <a href="{{ scheme.application_link|default:'#' }}" class="btn" style="text-align:center; display:block; width:100%;" target="_blank">{% trans "Learn More" %}</a>
     </div>
     {% empty %}
     <div class="form-card" style="grid-column:1/-1; text-align:center; padding:40px;">
-        <p style="color:var(--muted); margin:0;">No other schemes available right now.</p>
+        <p style="color:var(--muted); margin:0;">{% trans "No other schemes available right now." %}</p>
     </div>
     {% endfor %}
 </div>

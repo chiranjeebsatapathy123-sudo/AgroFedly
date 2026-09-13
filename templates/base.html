@@ -22,7 +22,7 @@
 <body>
 <header class="topbar">
   <button class="menu-btn" id="menuBtn" aria-label="Open navigation">⋯</button>
-  <a class="brand" href="{% url 'home' %}"><span class="brand-mark">A</span><span>AgroFedly</span><small>Smart Food Operations</small></a>
+  <a class="brand" href="{% url 'home' %}"><span class="brand-mark">A</span><span>AgroFedly</span><small>{% trans "Smart Food Operations" %}</small></a>
   <div class="top-actions">
     <form action="{% url 'set_language' %}" method="post" style="display:inline-block; margin-right:10px;">
       {% csrf_token %}
@@ -40,9 +40,9 @@
     </form>
     {% if user.is_authenticated %}
       <span class="user-chip">● {{ user.username }}</span>
-      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="logout-mini">Logout</button></form>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="logout-mini">{% trans "Logout" %}</button></form>
     {% else %}
-      <a class="login-mini" href="{% url 'login' %}">Login</a>
+      <a class="login-mini" href="{% url 'login' %}">{% trans "Login" %}</a>
     {% endif %}
   </div>
 </header>
@@ -67,6 +67,7 @@
     <div class="drawer-label">Organization</div>
     {% if user.organization_memberships.all %}
       <a href="{% url 'organization_dashboard' %}">▤ <span>Organization</span></a>
+      <a href="{% url 'logistics_map' %}">🗺️ <span>Fleet Map</span></a>
       <a href="{% url 'delivery_list' %}">➜ <span>Delivery System</span></a>
     {% endif %}
   {% else %}

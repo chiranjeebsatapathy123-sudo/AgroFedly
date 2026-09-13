@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Leaderboard{% endblock %}
+{% block content %}
+<div class="panel">
+  <h2>{% trans "Global Leaderboard 🏆" %}</h2>
+  <p>{% trans "Ranking of organizations based on their impact." %}</p>
+  
+  {% if top_orgs %}
+    <table class="data-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+      <thead>
+        <tr style="background: #f3f4f6; text-align: left;">
+          <th style="padding: 10px;">{% trans "Rank" %}</th>
+          <th style="padding: 10px;">{% trans "Organization" %}</th>
+          <th style="padding: 10px;">{% trans "Meals Saved" %}</th>
+          <th style="padding: 10px;">{% trans "CO₂ Reduced" %}</th>
+          <th style="padding: 10px;">{% trans "Points" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for impact in top_orgs %}
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+          <td style="padding: 10px;">
+            {% if forloop.counter == 1 %}🥇
+            {% elif forloop.counter == 2 %}🥈
+            {% elif forloop.counter == 3 %}🥉
+            {% else %}#{{ forloop.counter }}
+            {% endif %}
+          </td>
+          <td style="padding: 10px;"><strong>{{ impact.organization.name }}</strong></td>
+          <td style="padding: 10px;">{{ impact.total_meals_saved }}</td>
+          <td style="padding: 10px;">{{ impact.total_co2_reduced_kg|floatformat:1 }} kg</td>
+          <td style="padding: 10px; color: #ea580c; font-weight: bold;">{{ impact.impact_points }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty-state">{% trans "No impact data available yet." %}</p>
+  {% endif %}
+</div>
+{% endblock %}

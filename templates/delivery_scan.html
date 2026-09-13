@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Scan Delivery {{ delivery.tracking_code }}{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <div class="eyebrow">{% trans "QUICK SCAN" %}</div>
+    <h1>{{ delivery.tracking_code }}</h1>
+    <p>{{ delivery.food_name }} · {{ delivery.quantity }} meals</p>
+  </div>
+  <span class="pill {{ delivery.status|lower }} large-pill">{{ delivery.get_status_display }}</span>
+</section>
+
+<div class="panel" style="max-width: 600px; margin: 40px auto; text-align: center; padding: 40px;">
+  {% if delivery.status == "REQUESTED" or delivery.status == "ASSIGNED" %}
+    <h2 style="margin-bottom: 20px;">{% trans "Ready to start transit?" %}</h2>
+    <form method="post">
+      {% csrf_token %}
+      <button class="btn primary" style="width: 100%; padding: 15px; font-size: 1.2rem;">{% trans "Start Transit (Driver)" %}</button>
+    </form>
+  {% elif delivery.status == "IN_TRANSIT" %}
+    <h2 style="margin-bottom: 20px;">{% trans "Confirm Delivery?" %}</h2>
+    <p style="margin-bottom: 30px; color: #9ca3af;">By confirming, you verify that {{ delivery.quantity }} meals were safely delivered to {{ delivery.receiver.name }}.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button class="btn primary" style="width: 100%; padding: 15px; font-size: 1.2rem; background: #16a34a;">{% trans "Confirm Delivered (Recipient)" %}</button>
+    </form>
+  {% else %}
+    <h2>This delivery is already {{ delivery.status|lower }}.</h2>
+    <p style="margin-top: 20px;"><a href="{% url 'delivery_detail' delivery.id %}" class="btn soft">{% trans "View Details" %}</a></p>
+  {% endif %}
+</div>
+{% endblock %}

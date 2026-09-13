@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% block title %}Live Tracking | {{ delivery.tracking_code }}{% endblock %}
 
 {% block content %}
@@ -8,7 +9,7 @@
         <p>Driver: {{ delivery.driver_name|default:"Unassigned" }} | Vehicle: {{ delivery.vehicle_number|default:"Unknown" }}</p>
     </div>
     <div class="head-actions">
-        <a href="{% url 'delivery_detail' delivery.id %}" class="btn glass">Back to Delivery</a>
+        <a href="{% url 'delivery_detail' delivery.id %}" class="btn glass">{% trans "Back to Delivery" %}</a>
     </div>
 </div>
 
@@ -19,12 +20,12 @@
         
         <div style="padding:20px; display:flex; justify-content:space-between; align-items:center;">
             <div>
-                <strong style="display:block; font-size:16px;">Route to Destination</strong>
-                <span style="color:var(--muted); font-size:12px;">ETA: ~45 mins</span>
+                <strong style="display:block; font-size:16px;">{% trans "Route to Destination" %}</strong>
+                <span style="color:var(--muted); font-size:12px;">{% trans "ETA: ~45 mins" %}</span>
             </div>
             {% if delivery.status != "DELIVERED" and request.user.is_superuser %}
             <!-- Mock driver action -->
-            <a href="{% url 'delivery_proof' delivery.id %}" class="btn primary">Submit Proof of Delivery</a>
+            <a href="{% url 'delivery_proof' delivery.id %}" class="btn primary">{% trans "Submit Proof of Delivery" %}</a>
             {% endif %}
         </div>
     </div>

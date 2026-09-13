@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Market Trends{% endblock %}
 {% block content %}
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
         <div>
-            <div class="eyebrow">AI PREDICTIONS</div>
-            <h1>Crop Market Trends</h1>
-            <p>Historical and forecasted market pricing for agricultural produce.</p>
+            <div class="eyebrow">{% trans "AI PREDICTIONS" %}</div>
+            <h1>{% trans "Crop Market Trends" %}</h1>
+            <p>{% trans "Historical and forecasted market pricing for agricultural produce." %}</p>
         </div>
     </div>
 </section>
@@ -63,14 +64,14 @@
             });
         </script>
         
-        <h3 style="margin-top:20px;">Data Log</h3>
+        <h3 style="margin-top:20px;">{% trans "Data Log" %}</h3>
         <table style="width:100%; text-align:left; margin-top:10px;">
             <tr>
-                <th style="padding-bottom:10px;">Crop</th>
-                <th style="padding-bottom:10px;">Date</th>
-                <th style="padding-bottom:10px;">Price (per kg)</th>
-                <th style="padding-bottom:10px;">Region</th>
-                <th style="padding-bottom:10px;">Type</th>
+                <th style="padding-bottom:10px;">{% trans "Crop" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Date" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Price (per kg)" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Region" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Type" %}</th>
             </tr>
             {% for t in trends %}
             <tr>
@@ -80,9 +81,9 @@
                 <td style="padding:12px 0; border-top:1px solid #eee;">{{ t.region|default:"General" }}</td>
                 <td style="padding:12px 0; border-top:1px solid #eee;">
                     {% if t.is_forecast %}
-                    <span style="color:var(--primary); font-weight:bold;">Forecast</span>
+                    <span style="color:var(--primary); font-weight:bold;">{% trans "Forecast" %}</span>
                     {% else %}
-                    <span style="color:gray;">Actual</span>
+                    <span style="color:gray;">{% trans "Actual" %}</span>
                     {% endif %}
                 </td>
             </tr>
@@ -90,7 +91,7 @@
         </table>
     {% else %}
         <div style="text-align:center; padding:40px;">
-            <p>No market trend data available yet.</p>
+            <p>{% trans "No market trend data available yet." %}</p>
         </div>
     {% endif %}
 </div>

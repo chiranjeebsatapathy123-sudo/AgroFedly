@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Field Geometry Map{% endblock %}
 {% block content %}
 <!-- Leaflet CSS/JS -->
@@ -10,11 +11,11 @@
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
         <div>
-            <div class="eyebrow">DRONE MAPPING</div>
-            <h1>Field Geometry</h1>
-            <p>Draw your field boundaries to calculate acreage and plan yields.</p>
+            <div class="eyebrow">{% trans "DRONE MAPPING" %}</div>
+            <h1>{% trans "Field Geometry" %}</h1>
+            <p>{% trans "Draw your field boundaries to calculate acreage and plan yields." %}</p>
         </div>
-        <button class="btn primary" onclick="document.getElementById('drawModal').style.display='flex'">+ Draw New Field</button>
+        <button class="btn primary" onclick="document.getElementById('drawModal').style.display='flex'">{% trans "+ Draw New Field" %}</button>
     </div>
 </section>
 
@@ -26,7 +27,7 @@
 <div id="drawModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
     <div class="form-card" style="width:400px; max-width:90%;">
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <h2 style="margin:0;">Save Field Geometry</h2>
+            <h2 style="margin:0;">{% trans "Save Field Geometry" %}</h2>
             <button class="btn" style="padding:5px 10px;" onclick="document.getElementById('drawModal').style.display='none'">✕</button>
         </div>
         <form method="post" action="{% url 'agri_field_map' %}">
@@ -35,16 +36,16 @@
             <input type="hidden" name="area_acres" id="area_input">
             
             <label style="display:block; margin-bottom:15px;">
-                Field Name
+                {% trans "Field Name" %}
                 <input type="text" name="name" required placeholder="e.g. North Plot A" style="width:100%; padding:10px; margin-top:5px; border:1px solid var(--line); border-radius:5px;">
             </label>
             <label style="display:block; margin-bottom:15px;">
-                Crop Type
+                {% trans "Crop Type" %}
                 <input type="text" name="crop_type" required placeholder="e.g. Wheat" style="width:100%; padding:10px; margin-top:5px; border:1px solid var(--line); border-radius:5px;">
             </label>
-            <p style="margin:0 0 20px 0; font-size:0.9rem; color:var(--muted);">Calculated Area: <strong id="display_area" style="color:var(--primary);">0</strong> acres</p>
+            <p style="margin:0 0 20px 0; font-size:0.9rem; color:var(--muted);">{% trans "Calculated Area:" %} <strong id="display_area" style="color:var(--primary);">0</strong> {% trans "acres" %}</p>
             
-            <button type="submit" class="btn primary full">Save Field</button>
+            <button type="submit" class="btn primary full">{% trans "Save Field" %}</button>
         </form>
     </div>
 </div>

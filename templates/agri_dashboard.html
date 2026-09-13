@@ -1,29 +1,30 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}Agriculture Dashboard{% endblock %}
 {% block content %}
 <section class="page-head">
     <div>
-        <div class="eyebrow">AGRICULTURE MODULE</div>
-        <h1>Agriculture Dashboard</h1>
-        <p>From Farm to Plate: Track produce, processing yields, and manage agricultural supply chain.</p>
+        <div class="eyebrow">{% trans "AGRICULTURE MODULE" %}</div>
+        <h1>{% trans "Agriculture Dashboard" %}</h1>
+        <p>{% trans "From Farm to Plate: Track produce, processing yields, and manage agricultural supply chain." %}</p>
     </div>
 </section>
 
 <div class="result-cards" style="margin-bottom:20px;">
     <div>
-        <span>Total Registered Suppliers</span>
+        <span>{% trans "Total Registered Suppliers" %}</span>
         <b>{{ total_suppliers }}</b>
     </div>
     <div>
-        <span>Total Produce Available</span>
+        <span>{% trans "Total Produce Available" %}</span>
         <b>{{ total_produce }} kg</b>
     </div>
     <div>
-        <span>Total Produce Processed</span>
+        <span>{% trans "Total Produce Processed" %}</span>
         <b>{{ total_processed }} kg</b>
     </div>
     <div>
-        <span>Estimated Loss Avoided</span>
+        <span>{% trans "Estimated Loss Avoided" %}</span>
         <b style="color:var(--success);">{{ loss_avoided }} kg</b>
     </div>
 </div>
@@ -31,41 +32,41 @@
 <div style="display:flex; gap:20px; flex-wrap:wrap;">
     <!-- Recent Produce Inventory -->
     <div class="form-card" style="flex:1; min-width:300px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">Recent Harvest & Inventory</h2>
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "Recent Harvest & Inventory" %}</h2>
         {% if recent_produce %}
             <table style="width:100%; text-align:left;">
-                <tr><th style="padding-bottom:10px;">Produce</th><th style="padding-bottom:10px;">Available</th><th style="padding-bottom:10px;">Risk Level</th></tr>
+                <tr><th style="padding-bottom:10px;">{% trans "Produce" %}</th><th style="padding-bottom:10px;">{% trans "Available" %}</th><th style="padding-bottom:10px;">{% trans "Risk Level" %}</th></tr>
                 {% for p in recent_produce %}
                 <tr>
                     <td style="padding:8px 0; border-top:1px solid #eee;">{{ p.name }}</td>
                     <td style="padding:8px 0; border-top:1px solid #eee;">{{ p.available_quantity }} {{ p.unit }}</td>
                     <td style="padding:8px 0; border-top:1px solid #eee;">
                         {% if p.risk_level == 'High' %}
-                        <span style="color:red; font-weight:bold;">High</span>
+                        <span style="color:red; font-weight:bold;">{% trans "High" %}</span>
                         {% elif p.risk_level == 'Medium' %}
-                        <span style="color:orange; font-weight:bold;">Medium</span>
+                        <span style="color:orange; font-weight:bold;">{% trans "Medium" %}</span>
                         {% else %}
-                        <span style="color:green; font-weight:bold;">Low</span>
+                        <span style="color:green; font-weight:bold;">{% trans "Low" %}</span>
                         {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </table>
         {% else %}
-            <p>No agricultural produce recorded yet.</p>
+            <p>{% trans "No agricultural produce recorded yet." %}</p>
         {% endif %}
-        <a href="{% url 'agri_produce_list' %}" class="btn full" style="margin-top:15px; text-align:center;">View Full Inventory</a>
+        <a href="{% url 'agri_produce_list' %}" class="btn full" style="margin-top:15px; text-align:center;">{% trans "View Full Inventory" %}</a>
     </div>
     
     <!-- Recent Processing -->
     <div class="form-card" style="flex:1; min-width:300px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">Recent Processing Activities</h2>
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "Recent Processing Activities" %}</h2>
         {% if recent_processing %}
             <table style="width:100%; text-align:left;">
                 <tr>
-                    <th style="padding-bottom:10px;">Input</th>
-                    <th style="padding-bottom:10px;">Output</th>
-                    <th style="padding-bottom:10px;">Yield</th>
+                    <th style="padding-bottom:10px;">{% trans "Input" %}</th>
+                    <th style="padding-bottom:10px;">{% trans "Output" %}</th>
+                    <th style="padding-bottom:10px;">{% trans "Yield" %}</th>
                 </tr>
                 {% for r in recent_processing %}
                 <tr>
@@ -76,31 +77,31 @@
                 {% endfor %}
             </table>
         {% else %}
-            <p>No processing records yet.</p>
+            <p>{% trans "No processing records yet." %}</p>
         {% endif %}
-        <a href="{% url 'agri_processing_list' %}" class="btn full" style="margin-top:15px; text-align:center;">View Processing Log</a>
+        <a href="{% url 'agri_processing_list' %}" class="btn full" style="margin-top:15px; text-align:center;">{% trans "View Processing Log" %}</a>
     </div>
     <!-- Supply Requests & Matching -->
     <div class="form-card" style="flex:1; min-width:300px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">Market & Supply</h2>
-        <p style="margin-bottom:15px; color:var(--text-light);">Manage buyer demands and supply requests for produce.</p>
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "Market & Supply" %}</h2>
+        <p style="margin-bottom:15px; color:var(--text-light);">{% trans "Manage buyer demands and supply requests for produce." %}</p>
         
         <div style="display:flex; flex-direction:column; gap:10px;">
-            <a href="{% url 'agri_market_trends' %}" class="btn" style="text-align:center;">Market Trends (AI Pricing)</a>
-            <a href="{% url 'agri_supply_matching' %}" class="btn" style="text-align:center;">Supply Matching</a>
-            <a href="{% url 'agri_supply_requests_list' %}" class="btn" style="text-align:center;">Supply Requests</a>
-            <a href="{% url 'agri_ledger' %}" class="btn" style="text-align:center;">Payments Ledger</a>
+            <a href="{% url 'agri_market_trends' %}" class="btn" style="text-align:center;">{% trans "Market Trends (AI Pricing)" %}</a>
+            <a href="{% url 'agri_supply_matching' %}" class="btn" style="text-align:center;">{% trans "Supply Matching" %}</a>
+            <a href="{% url 'agri_supply_requests_list' %}" class="btn" style="text-align:center;">{% trans "Supply Requests" %}</a>
+            <a href="{% url 'agri_ledger' %}" class="btn" style="text-align:center;">{% trans "Payments Ledger" %}</a>
         </div>
     </div>
     
     <!-- Quality & Logistics -->
     <div class="form-card" style="flex:1; min-width:300px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">Quality & Logistics</h2>
-        <p style="margin-bottom:15px; color:var(--text-light);">Track quality inspections and cold-chain shipments.</p>
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "Quality & Logistics" %}</h2>
+        <p style="margin-bottom:15px; color:var(--text-light);">{% trans "Track quality inspections and cold-chain shipments." %}</p>
         
         <div style="display:flex; flex-direction:column; gap:10px;">
-            <a href="{% url 'agri_inspection_add' %}" class="btn" style="text-align:center;">Record QC Inspection</a>
-            <a href="{% url 'agri_shipment_list' %}" class="btn" style="text-align:center;">Shipment Tracking</a>
+            <a href="{% url 'agri_inspection_add' %}" class="btn" style="text-align:center;">{% trans "Record QC Inspection" %}</a>
+            <a href="{% url 'agri_shipment_list' %}" class="btn" style="text-align:center;">{% trans "Shipment Tracking" %}</a>
         </div>
     </div>
 </div>
@@ -108,14 +109,14 @@
 {% if advisories %}
 <div class="form-card" style="margin-top:20px; border-left:4px solid var(--primary);">
     <h2 style="font-size:1.2rem; margin-bottom:10px; display:flex; align-items:center; gap:10px;">
-        ⚠️ Active Weather Advisories
+        {% trans "⚠️ Active Weather Advisories" %}
     </h2>
     <ul style="list-style:none; padding:0; margin:0;">
         {% for a in advisories %}
         <li style="padding:10px 0; border-bottom:1px solid #eee;">
             <strong>{{ a.location }}:</strong> {{ a.advisory_text }}
             <span style="font-size:0.8rem; color:var(--text-light); margin-left:10px;">
-                Severity: {% if a.severity == 'HIGH' %}<span style="color:red;">High</span>{% else %}{{ a.severity }}{% endif %}
+                Severity: {% if a.severity == 'HIGH' %}<span style="color:red;">{% trans "High" %}</span>{% else %}{{ a.severity }}{% endif %}
             </span>
         </li>
         {% endfor %}

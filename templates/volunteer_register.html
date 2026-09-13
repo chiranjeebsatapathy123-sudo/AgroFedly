@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% block title %}Volunteer Registration{% endblock %}
 {% block content %}
 <div class="panel">
-  <h2>Volunteer Driver Registration</h2>
-  <p>Sign up to deliver surplus food and reduce waste.</p>
+  <h2>{% trans "Volunteer Driver Registration" %}</h2>
+  <p>{% trans "Sign up to deliver surplus food and reduce waste." %}</p>
   <form method="post" class="standard-form">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Register / Update Profile</button>
+    <button type="submit" class="btn btn-primary">{% trans "Register / Update Profile" %}</button>
   </form>
 </div>
 {% endblock %}

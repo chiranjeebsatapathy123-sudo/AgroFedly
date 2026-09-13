@@ -29,12 +29,13 @@ class OrganizationForm(forms.ModelForm):
 class SurplusFoodForm(forms.ModelForm):
     class Meta:
         model = SurplusFood
-        fields = ["food_name", "quantity", "storage_temperature", "storage_time_hours"]
+        fields = ["food_name", "quantity", "storage_temperature", "storage_time_hours", "quality_image"]
         widgets = {
             "food_name": forms.TextInput(attrs={"placeholder": "e.g. Cooked rice"}),
             "quantity": forms.NumberInput(attrs={"min": 1}),
             "storage_temperature": forms.NumberInput(attrs={"step": "0.1", "placeholder": "°C"}),
             "storage_time_hours": forms.NumberInput(attrs={"step": "0.1", "min": 0}),
+            "quality_image": forms.FileInput(attrs={"accept": "image/*"}),
         }
 
 

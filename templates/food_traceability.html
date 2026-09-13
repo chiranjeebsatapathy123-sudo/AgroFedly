@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Traceability Ledger" %} - {{ food.food_name }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <div class="eyebrow">{% trans "IMMUTABLE AUDIT TRAIL" %}</div>
+        <h1>{% trans "Chain of Custody" %}: {{ food.food_name }}</h1>
+        <p>{% trans "Cryptographically secure record of this food's journey." %}</p>
+    </div>
+    <a class="btn" href="{% url 'surplus_list' %}">← {% trans "Back to Surplus" %}</a>
+</section>
+
+<div class="ledger-container" style="max-width: 800px; margin: 0 auto;">
+    {% for entry in ledger_entries %}
+    <div class="ledger-block" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; position: relative;">
+        
+        <div style="display:flex; justify-content: space-between; margin-bottom: 1rem;">
+            <div style="font-weight: 700; color: var(--primary); font-size: 1.2rem;">{{ entry.action_type }}</div>
+            <div class="text-muted">{{ entry.timestamp|date:"M d, Y H:i:s" }}</div>
+        </div>
+        
+        <p style="margin-bottom: 1rem;">{{ entry.details }}</p>
+        
+        <div style="background: var(--bg); padding: 1rem; border-radius: 4px; font-family: monospace; font-size: 0.85rem; overflow-wrap: break-word;">
+            <div style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                <strong>Previous Hash:</strong><br>
+                {{ entry.previous_hash }}
+            </div>
+            <div style="color: #10b981;">
+                <strong>Block Hash:</strong><br>
+                {{ entry.block_hash }}
+            </div>
+        </div>
+        
+        {% if not forloop.last %}
+        <div style="position: absolute; bottom: -1.5rem; left: 50%; transform: translateX(-50%); color: var(--border); font-size: 1.5rem;">
+            ↓
+        </div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div class="empty">{% trans "No ledger records found for this food item." %}</div>
+    {% endfor %}
+</div>
+{% endblock %}
