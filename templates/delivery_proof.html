@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Proof of Delivery | {{ delivery.tracking_code }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>✅ Proof of Delivery</h1>
+        <p>Complete the delivery for {{ delivery.tracking_code }} by capturing recipient signature and proof image.</p>
+    </div>
+</div>
+
+<div class="form-page single">
+    <div class="form-card">
+        <form method="post" enctype="multipart/form-data" class="form-grid">
+            {% csrf_token %}
+            
+            <div style="grid-column: 1 / -1; margin-bottom:15px;">
+                <label style="display:block; margin-bottom:8px; font-weight:bold;">Delivery Photo</label>
+                <input type="file" name="proof_image" accept="image/*" capture="environment" style="width:100%; padding:10px; border:1px dashed var(--line); border-radius:8px;">
+                <small style="color:var(--muted); display:block; margin-top:5px;">Take a photo of the delivered goods.</small>
+            </div>
+            
+            <div style="grid-column: 1 / -1; margin-bottom:15px;">
+                <label style="display:block; margin-bottom:8px; font-weight:bold;">Recipient Signature</label>
+                <!-- Simple canvas for signature drawing -->
+                <canvas id="sig-canvas" width="100%" height="200" style="border:1px solid var(--line); border-radius:10px; background:#fff; touch-action: none; width:100%;"></canvas>
+                <input type="hidden" name="recipient_signature" id="sig-dataUrl">
+                <div style="text-align:right; margin-top:8px;">
+                    <button type="button" class="btn soft" id="sig-clearBtn" style="padding:6px 12px; font-size:11px;">Clear Signature</button>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn primary full" id="submit-btn">Complete Delivery</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Simple Signature Canvas Logic
+    const canvas = document.getElementById('sig-canvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    // Adjust canvas size to match CSS width
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth - 2;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: (evt.clientX || evt.touches[0].clientX) - rect.left,
+            y: (evt.clientY || evt.touches[0].clientY) - rect.top
+        };
+    }
+
+    function startDrawing(e) {
+        drawing = true;
+        ctx.beginPath();
+        var pos = getMousePos(canvas, e);
+        ctx.moveTo(pos.x, pos.y);
+        e.preventDefault();
+    }
+
+    function draw(e) {
+        if (!drawing) return;
+        var pos = getMousePos(canvas, e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.strokeStyle = "#083b24";
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.stroke();
+        e.preventDefault();
+    }
+
+    function stopDrawing(e) {
+        drawing = false;
+        document.getElementById('sig-dataUrl').value = canvas.toDataURL();
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    
+    canvas.addEventListener('touchstart', startDrawing, {passive: false});
+    canvas.addEventListener('touchmove', draw, {passive: false});
+    canvas.addEventListener('touchend', stopDrawing);
+
+    document.getElementById('sig-clearBtn').addEventListener('click', function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById('sig-dataUrl').value = "";
+    });
+    
+    // Ensure data URL is set on submit even if they just drew a dot and didn't trigger mouseout
+    document.getElementById('submit-btn').addEventListener('click', function() {
+        document.getElementById('sig-dataUrl').value = canvas.toDataURL();
+    });
+</script>
+{% endblock %}

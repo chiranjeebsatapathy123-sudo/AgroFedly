@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Traceability - {{ shipment.tracking_code }}{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+        <div>
+            <div class="eyebrow">FARM-TO-FORK TRACEABILITY</div>
+            <h1>Shipment {{ shipment.tracking_code }}</h1>
+            <p>Verified public ledger for tracking origin, quality, and cold-chain integrity.</p>
+        </div>
+    </div>
+</section>
+
+<div class="form-page single" style="max-width:800px; padding-top:20px;">
+    <!-- Origin Data -->
+    <div class="form-card" style="margin-bottom:20px;">
+        <h2 style="font-size:1.2rem; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+            🌱 1. Origin & Produce
+        </h2>
+        <div style="background:#f4f8f5; padding:15px; border-radius:10px; border:1px solid #dce8e1;">
+            <p style="margin:5px 0;"><strong>Farm/Supplier:</strong> {{ shipment.supply_match.produce.supplier.name }}</p>
+            <p style="margin:5px 0;"><strong>Produce:</strong> {{ shipment.supply_match.produce.name }} ({{ shipment.supply_match.matched_quantity }} kg)</p>
+            <p style="margin:5px 0;"><strong>Harvest Location:</strong> {{ shipment.supply_match.produce.supplier.city }}, {{ shipment.supply_match.produce.supplier.state }}</p>
+        </div>
+    </div>
+
+    <!-- Quality Control -->
+    <div class="form-card" style="margin-bottom:20px;">
+        <h2 style="font-size:1.2rem; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+            🔍 2. Quality Control & Safety
+        </h2>
+        {% if inspections %}
+            {% for insp in inspections %}
+            <div style="background:#fff; padding:15px; border-radius:10px; border:1px solid #dce8e1; margin-bottom:10px;">
+                <p style="margin:5px 0;"><strong>Grade:</strong> <span style="color:var(--primary); font-weight:bold;">{{ insp.get_grade_display }}</span></p>
+                <p style="margin:5px 0;"><strong>Inspector:</strong> {{ insp.inspector_name }}</p>
+                <p style="margin:5px 0;"><strong>Date:</strong> {{ insp.inspection_date|date:"d M Y, H:i" }}</p>
+                {% if insp.notes %}
+                <p style="margin:5px 0; color:var(--muted); font-size:0.9rem;"><em>"{{ insp.notes }}"</em></p>
+                {% endif %}
+                <div style="margin-top:10px;">
+                    {% if insp.passed %}
+                    <span style="background:#e7f7ec; color:#08713b; padding:5px 10px; border-radius:5px; font-size:0.8rem; font-weight:bold;">✓ PASSED</span>
+                    {% else %}
+                    <span style="background:#fff0f1; color:#c7353d; padding:5px 10px; border-radius:5px; font-size:0.8rem; font-weight:bold;">✗ FAILED</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--muted);">No verified quality inspections found for this produce.</p>
+        {% endif %}
+    </div>
+
+    <!-- Logistics -->
+    <div class="form-card" style="margin-bottom:20px;">
+        <h2 style="font-size:1.2rem; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+            🚚 3. Logistics & Cold Chain
+        </h2>
+        <div style="background:var(--soft); padding:15px; border-radius:10px; border:1px solid var(--line);">
+            <p style="margin:5px 0;"><strong>Status:</strong> {{ shipment.get_status_display }}</p>
+            <p style="margin:5px 0;"><strong>Current IoT Temp:</strong> 
+                {% if shipment.current_temperature %}
+                    <span style="font-weight:bold; {% if shipment.current_temperature > 5 %}color:var(--danger);{% else %}color:var(--primary);{% endif %}">{{ shipment.current_temperature }} °C</span>
+                {% else %}
+                    <span style="color:var(--muted);">No sensor data</span>
+                {% endif %}
+            </p>
+            <p style="margin:5px 0;"><strong>Dispatched:</strong> {{ shipment.dispatched_at|date:"d M Y, H:i"|default:"Pending" }}</p>
+            <p style="margin:5px 0;"><strong>Delivered:</strong> {{ shipment.delivered_at|date:"d M Y, H:i"|default:"Pending" }}</p>
+        </div>
+    </div>
+    
+    <!-- Smart Contracts Escrow -->
+    {% if user.is_authenticated and shipment.status == 'DELIVERED' %}
+    <div class="form-card" style="margin-bottom:20px; text-align:center; border:2px solid var(--primary);">
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">🔐 Smart Contract Escrow</h2>
+        <p style="color:var(--muted); font-size:0.9rem; margin-bottom:15px;">By clicking verify, you authorize the blockchain ledger to release the held funds to the farmer.</p>
+        <form method="post" action="{% url 'agri_release_escrow' shipment.tracking_code %}">
+            {% csrf_token %}
+            <button class="btn primary full">Verify Receipt & Release Funds</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

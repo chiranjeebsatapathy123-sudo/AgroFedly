@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Request Supply{% endblock %}
+{% block content %}
+<section class="form-page">
+    <div class="form-intro">
+        <div class="eyebrow">AGRICULTURE</div>
+        <h1>Request Agricultural Supply</h1>
+        <p>Submit a request for available agricultural produce.</p>
+    </div>
+    <div class="form-card">
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            {% for field in form %}
+            <label>{{ field.label }}
+                {{ field }}
+                {% if field.errors %}<div class="error-box" style="margin-top:5px; padding:5px;">{{ field.errors }}</div>{% endif %}
+            </label>
+            {% endfor %}
+            <button class="btn primary full" type="submit">Submit Request</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

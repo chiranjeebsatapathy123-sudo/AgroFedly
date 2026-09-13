@@ -60,8 +60,9 @@ def generate_synthetic_data(num_records=500):
     return pd.DataFrame(data)
 
 def main():
-    print("Generating synthetic data for ML training...")
-    df = generate_synthetic_data()
+    dataset_path = r"C:\Users\chira\Downloads\Annadata_Clean_Dataset_10Million_ML\01_ml_demand_training_10000000.csv"
+    print(f"Loading data from {dataset_path}...")
+    df = pd.read_csv(dataset_path)
     
     features = [
         "attendance", "temperature", "rainfall", "holiday", 
@@ -76,7 +77,7 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     print("Training RandomForestRegressor...")
-    model = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
+    model = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42, n_jobs=-1)
     model.fit(X_train, y_train)
     
     # Evaluate model

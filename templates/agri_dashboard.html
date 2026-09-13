@@ -80,5 +80,46 @@
         {% endif %}
         <a href="{% url 'agri_processing_list' %}" class="btn full" style="margin-top:15px; text-align:center;">View Processing Log</a>
     </div>
+    <!-- Supply Requests & Matching -->
+    <div class="form-card" style="flex:1; min-width:300px;">
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">Market & Supply</h2>
+        <p style="margin-bottom:15px; color:var(--text-light);">Manage buyer demands and supply requests for produce.</p>
+        
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <a href="{% url 'agri_market_trends' %}" class="btn" style="text-align:center;">Market Trends (AI Pricing)</a>
+            <a href="{% url 'agri_supply_matching' %}" class="btn" style="text-align:center;">Supply Matching</a>
+            <a href="{% url 'agri_supply_requests_list' %}" class="btn" style="text-align:center;">Supply Requests</a>
+            <a href="{% url 'agri_ledger' %}" class="btn" style="text-align:center;">Payments Ledger</a>
+        </div>
+    </div>
+    
+    <!-- Quality & Logistics -->
+    <div class="form-card" style="flex:1; min-width:300px;">
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">Quality & Logistics</h2>
+        <p style="margin-bottom:15px; color:var(--text-light);">Track quality inspections and cold-chain shipments.</p>
+        
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <a href="{% url 'agri_inspection_add' %}" class="btn" style="text-align:center;">Record QC Inspection</a>
+            <a href="{% url 'agri_shipment_list' %}" class="btn" style="text-align:center;">Shipment Tracking</a>
+        </div>
+    </div>
 </div>
+
+{% if advisories %}
+<div class="form-card" style="margin-top:20px; border-left:4px solid var(--primary);">
+    <h2 style="font-size:1.2rem; margin-bottom:10px; display:flex; align-items:center; gap:10px;">
+        ⚠️ Active Weather Advisories
+    </h2>
+    <ul style="list-style:none; padding:0; margin:0;">
+        {% for a in advisories %}
+        <li style="padding:10px 0; border-bottom:1px solid #eee;">
+            <strong>{{ a.location }}:</strong> {{ a.advisory_text }}
+            <span style="font-size:0.8rem; color:var(--text-light); margin-left:10px;">
+                Severity: {% if a.severity == 'HIGH' %}<span style="color:red;">High</span>{% else %}{{ a.severity }}{% endif %}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
 {% endblock %}

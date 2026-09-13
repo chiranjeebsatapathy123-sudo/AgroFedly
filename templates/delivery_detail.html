@@ -78,6 +78,42 @@
     <div class="route-arrow">↓</div>
     <div class="route-stop"><span>DESTINATION</span><b>{{ delivery.receiver.name }}</b><p>{{ delivery.delivery_address }}</p></div>
   </div>
+  {% if route_data %}
+  <div style="margin-top:20px;">
+    <div style="display:flex; gap:10px; margin-bottom:10px;">
+      <span class="pill soft">Distance: {{ route_data.distance_km }} km</span>
+      <span class="pill soft">Est. Time: {{ route_data.duration_mins }} mins</span>
+    </div>
+    <div id="routeMap" style="height: 300px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);"></div>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/polyline/1.0.2/polyline.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const start = [{{ start_coords.lat }}, {{ start_coords.lng }}];
+        const end = [{{ end_coords.lat }}, {{ end_coords.lng }}];
+        
+        const map = L.map('routeMap').setView(start, 13);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        }).addTo(map);
+        
+        L.marker(start).addTo(map).bindPopup("Origin");
+        L.marker(end).addTo(map).bindPopup("Destination");
+        
+        // Decode polyline geometry string from OSRM
+        const geomStr = "{{ route_data.geometry }}";
+        if(geomStr) {
+          try {
+            const coordinates = polyline.decode(geomStr);
+            const routeLine = L.polyline(coordinates, {color: '#4ade80', weight: 5}).addTo(map);
+            map.fitBounds(routeLine.getBounds(), {padding: [20, 20]});
+          } catch(e) { console.error("Error decoding polyline", e); }
+        }
+      });
+    </script>
+  </div>
+  {% endif %}
 </section>
 <section class="panel">
   <div class="panel-title"><h2>Shipment information</h2></div>
@@ -100,6 +136,8 @@
     <form method="post" action="{% url 'delivery_update_status' delivery.id %}">{% csrf_token %}<input type="hidden" name="status" value="IN_TRANSIT"><button class="btn primary">Start transit</button></form>
   {% elif delivery.status == "IN_TRANSIT" %}
     <form method="post" action="{% url 'delivery_update_status' delivery.id %}">{% csrf_token %}<input type="hidden" name="status" value="DELIVERED"><button class="btn primary">✓ Confirm delivered</button></form>
+  {% elif delivery.status == "DELIVERED" %}
+    <a class="btn primary" href="{% url 'generate_donation_receipt' delivery.id %}">📄 Download Receipt</a>
   {% endif %}
 </div>
 {% endblock %}

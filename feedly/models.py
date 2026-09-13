@@ -77,6 +77,16 @@ class Organization(models.Model):
         return self.name
 
 
+class OrganizationImpact(models.Model):
+    organization = models.OneToOneField(Organization, on_delete=models.CASCADE, related_name="impact")
+    total_meals_saved = models.PositiveIntegerField(default=0)
+    total_co2_reduced_kg = models.FloatField(default=0.0)
+    impact_points = models.PositiveIntegerField(default=0)
+    
+    def __str__(self):
+        return f"{self.organization.name} Impact"
+
+
 class OrganizationMember(models.Model):
     ROLE_CHOICES = [
         ("OWNER", "Owner"),
@@ -102,6 +112,18 @@ class OrganizationMember(models.Model):
 
     def __str__(self):
         return f"{self.user.username} — {self.organization.name}"
+
+
+class VolunteerProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="volunteer_profile")
+    phone = models.CharField(max_length=30, blank=True)
+    vehicle_type = models.CharField(max_length=50, blank=True, help_text="e.g., Bike, Car, Van")
+    vehicle_number = models.CharField(max_length=50, blank=True)
+    is_available = models.BooleanField(default=True)
+    total_deliveries = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user.get_full_name() or self.user.username} (Volunteer)"
 
 
 class Recipient(models.Model):
@@ -208,7 +230,12 @@ class Delivery(models.Model):
     delivery_address = models.TextField()
     recipient_contact = models.CharField(max_length=50, blank=True)
     driver_name = models.CharField(max_length=100, blank=True)
+    volunteer_driver = models.ForeignKey('VolunteerProfile', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_deliveries')
     vehicle_number = models.CharField(max_length=50, blank=True)
+    current_lat = models.FloatField(null=True, blank=True)
+    current_lng = models.FloatField(null=True, blank=True)
+    proof_image = models.ImageField(upload_to="delivery_proofs/", null=True, blank=True)
+    recipient_signature = models.TextField(blank=True, help_text="Base64 encoded signature image data")
     scheduled_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="REQUESTED")
@@ -352,3 +379,97 @@ class SupplyMatch(models.Model):
         return f"Match: {self.demand.produce_name} ({self.match_score}%)"
 
 
+
+class QualityInspection(models.Model):
+    inspector_name = models.CharField(max_length=150)
+    inspection_date = models.DateTimeField(auto_now_add=True)
+    grade = models.CharField(max_length=20)
+    notes = models.TextField(blank=True)
+    passed = models.BooleanField(default=True)
+    produce = models.ForeignKey('AgriculturalProduce', on_delete=models.CASCADE, related_name='inspections')
+
+class CropDiseaseScan(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    crop_name = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='disease_scans/', null=True, blank=True)
+    detected_disease = models.CharField(max_length=150)
+    confidence = models.FloatField()
+    recommended_treatment = models.TextField()
+    scanned_at = models.DateTimeField(auto_now_add=True)
+
+class AgriculturalShipment(models.Model):
+    tracking_code = models.CharField(unique=True, max_length=20)
+    supply_match = models.ForeignKey('SupplyMatch', on_delete=models.CASCADE, related_name='shipments')
+    status = models.CharField(max_length=20, default='IN_TRANSIT')
+    current_temperature = models.FloatField(blank=True, null=True)
+    dispatched_at = models.DateTimeField(blank=True, null=True)
+    delivered_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class GovernmentScheme(models.Model):
+    name = models.CharField(max_length=250)
+    description = models.TextField()
+    eligible_crops = models.CharField(max_length=250)
+    max_funding = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    deadline = models.DateField(blank=True, null=True)
+    application_link = models.URLField(blank=True)
+
+class Equipment(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=150)
+    equipment_type = models.CharField(max_length=100)
+    hourly_rate = models.DecimalField(max_digits=10, decimal_places=2)
+    location = models.CharField(max_length=150)
+    is_available = models.BooleanField(default=True)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='equipment/', null=True, blank=True)
+
+class EquipmentRental(models.Model):
+    equipment = models.ForeignKey('Equipment', on_delete=models.CASCADE, related_name='rentals')
+    renter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='equipment_rentals')
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    total_cost = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=20, default='REQUESTED')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class FarmField(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=150)
+    crop_type = models.CharField(max_length=100)
+    area_acres = models.FloatField()
+    geojson_data = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class WeatherAdvisory(models.Model):
+    location = models.CharField(max_length=150)
+    advisory_text = models.TextField()
+    severity = models.CharField(max_length=50)
+    issued_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+class CropMarketTrend(models.Model):
+    crop_name = models.CharField(max_length=150)
+    record_date = models.DateField()
+    price_per_kg = models.FloatField()
+    region = models.CharField(max_length=150)
+    is_forecast = models.BooleanField(default=False)
+
+class LedgerTransaction(models.Model):
+    sender_org = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='sent_transactions')
+    receiver_org = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='received_transactions')
+    supply_match = models.ForeignKey('SupplyMatch', on_delete=models.SET_NULL, null=True, blank=True)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default='COMPLETED')
+    reference_id = models.CharField(max_length=100, unique=True)
+    escrow_status = models.CharField(max_length=20, default='RELEASED')
+
+class CropYieldPrediction(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='yield_predictions')
+    crop_type = models.CharField(max_length=100)
+    area_hectares = models.DecimalField(max_digits=10, decimal_places=2)
+    soil_type = models.CharField(max_length=100)
+    predicted_yield_tons = models.DecimalField(max_digits=10, decimal_places=2)
+    estimated_revenue = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Equipment Sharing Economy{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+        <div>
+            <div class="eyebrow">SHARING ECONOMY</div>
+            <h1>Equipment Hub</h1>
+            <p>Rent tractors, drones, and harvesters from nearby farmers, or list your own.</p>
+        </div>
+        <button class="btn primary" onclick="alert('In a real app, this would open a listing form.')">+ List Equipment</button>
+    </div>
+</section>
+
+{% if my_rentals %}
+<div style="margin-bottom:30px;">
+    <h2>My Active Rentals</h2>
+    <div class="form-grid">
+        {% for rental in my_rentals %}
+        <div class="form-card" style="border:2px solid var(--primary);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <h3 style="margin:0;">{{ rental.equipment.name }}</h3>
+                <span class="pill" style="background:#e7f7ec; color:var(--primary);">{{ rental.status }}</span>
+            </div>
+            <p style="margin:5px 0;"><strong>Cost:</strong> ₹{{ rental.total_cost }}</p>
+            <p style="margin:5px 0; color:var(--muted); font-size:0.9rem;">From {{ rental.start_time|date:"M d" }} to {{ rental.end_time|date:"M d" }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<h2>Available Near You</h2>
+<div class="form-grid">
+    {% for eq in equipment_list %}
+    <div class="form-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0 0 10px 0; font-size:1.3rem;">{{ eq.name }}</h3>
+                <span class="pill" style="background:var(--soft);">{{ eq.get_equipment_type_display }}</span>
+            </div>
+            <p style="color:var(--muted); font-size:0.9rem; margin-bottom:15px;">📍 {{ eq.location }} &bull; Owned by {{ eq.owner.username }}</p>
+            <p style="font-weight:bold; font-size:1.5rem; color:var(--primary); margin-bottom:20px;">₹{{ eq.hourly_rate }}<span style="font-size:0.9rem; font-weight:normal; color:var(--muted);">/hr</span></p>
+        </div>
+        
+        <form method="post" action="{% url 'agri_rent_equipment' eq.id %}">
+            {% csrf_token %}
+            <div style="display:flex; gap:10px;">
+                <input type="number" name="hours" min="1" max="72" value="4" style="width:70px; padding:10px; border:1px solid var(--line); border-radius:5px;" required>
+                <button type="submit" class="btn primary" style="flex:1;">Rent Now</button>
+            </div>
+        </form>
+    </div>
+    {% empty %}
+    <div class="form-card" style="grid-column:1/-1; text-align:center; padding:40px;">
+        <h2>No equipment currently available.</h2>
+        <p style="color:var(--muted);">Check back later or list your own machinery!</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

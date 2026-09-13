@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Market Trends{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+        <div>
+            <div class="eyebrow">AI PREDICTIONS</div>
+            <h1>Crop Market Trends</h1>
+            <p>Historical and forecasted market pricing for agricultural produce.</p>
+        </div>
+    </div>
+</section>
+
+<div class="form-card" style="max-width:100%;">
+    {% if trends %}
+        <div style="width: 100%; height: 400px; margin-bottom:30px;">
+            <canvas id="marketChart"></canvas>
+        </div>
+        
+        <script>
+            // Serialize data for Chart.js
+            const labels = [];
+            const dataPoints = [];
+            {% for t in trends %}
+                // Iterate in reverse if we want oldest to newest, but let's just push them
+                labels.unshift("{{ t.record_date|date:'d M' }} ({{ t.crop_name }})");
+                dataPoints.unshift({{ t.price_per_kg }});
+            {% endfor %}
+
+            const ctx = document.getElementById('marketChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Market Price (₹ per kg)',
+                        data: dataPoints,
+                        borderColor: '#159653',
+                        backgroundColor: 'rgba(21,150,83,0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#0c4b2d',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: true, position: 'top' }
+                    }
+                }
+            });
+        </script>
+        
+        <h3 style="margin-top:20px;">Data Log</h3>
+        <table style="width:100%; text-align:left; margin-top:10px;">
+            <tr>
+                <th style="padding-bottom:10px;">Crop</th>
+                <th style="padding-bottom:10px;">Date</th>
+                <th style="padding-bottom:10px;">Price (per kg)</th>
+                <th style="padding-bottom:10px;">Region</th>
+                <th style="padding-bottom:10px;">Type</th>
+            </tr>
+            {% for t in trends %}
+            <tr>
+                <td style="padding:12px 0; border-top:1px solid #eee;"><strong>{{ t.crop_name }}</strong></td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ t.record_date|date:"d M Y" }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">₹{{ t.price_per_kg }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ t.region|default:"General" }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">
+                    {% if t.is_forecast %}
+                    <span style="color:var(--primary); font-weight:bold;">Forecast</span>
+                    {% else %}
+                    <span style="color:gray;">Actual</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div style="text-align:center; padding:40px;">
+            <p>No market trend data available yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

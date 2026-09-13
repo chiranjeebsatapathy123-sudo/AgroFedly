@@ -1,7 +1,7 @@
 from django import forms
 from .models import (
     Delivery, Organization, OrganizationMember, Recipient,
-    Redistribution, SurplusFood,
+    Redistribution, SurplusFood, VolunteerProfile,
 )
 
 
@@ -216,3 +216,22 @@ class BuyerDemandForm(forms.ModelForm):
             "required_quantity": forms.NumberInput(attrs={"min": 0.1, "step": "0.1"}),
         }
 
+from .models import QualityInspection
+
+class QualityInspectionForm(forms.ModelForm):
+    class Meta:
+        model = QualityInspection
+        fields = ["produce", "inspector_name", "grade", "notes", "passed"]
+        widgets = {
+            "notes": forms.Textarea(attrs={"rows": 3}),
+        }
+
+class VolunteerProfileForm(forms.ModelForm):
+    class Meta:
+        model = VolunteerProfile
+        fields = ["phone", "vehicle_type", "vehicle_number", "is_available"]
+        widgets = {
+            "phone": forms.TextInput(attrs={"placeholder": "Contact number"}),
+            "vehicle_type": forms.TextInput(attrs={"placeholder": "e.g., Bike, Car, Van"}),
+            "vehicle_number": forms.TextInput(attrs={"placeholder": "Vehicle registration number"}),
+        }

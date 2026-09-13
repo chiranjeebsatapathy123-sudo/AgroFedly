@@ -52,22 +52,53 @@
     <div class="form-card" style="flex:1; min-width:300px;">
         <h2 style="font-size:1.2rem; margin-bottom:10px;">Predicted vs Actual Demand Trend</h2>
         {% if chart_records %}
-            <table style="width:100%; text-align:left;">
-                <tr>
-                    <th style="padding-bottom:10px;">Date</th>
-                    <th style="padding-bottom:10px;">Predicted</th>
-                    <th style="padding-bottom:10px;">Prepared</th>
-                    <th style="padding-bottom:10px;">Consumed</th>
-                </tr>
+            <div style="width: 100%; height: 300px;">
+                <canvas id="demandChart"></canvas>
+            </div>
+            <script>
+                const dLabels = [];
+                const dPredicted = [];
+                const dPrepared = [];
+                const dConsumed = [];
                 {% for row in chart_records %}
-                <tr>
-                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ row.date|date:"D, d M" }}</td>
-                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ row.predicted_demand }}</td>
-                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ row.meals_prepared }}</td>
-                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ row.meals_consumed }}</td>
-                </tr>
+                    dLabels.unshift("{{ row.date|date:'d M' }}");
+                    dPredicted.unshift({{ row.predicted_demand|default:0 }});
+                    dPrepared.unshift({{ row.meals_prepared|default:0 }});
+                    dConsumed.unshift({{ row.meals_consumed|default:0 }});
                 {% endfor %}
-            </table>
+
+                const dCtx = document.getElementById('demandChart').getContext('2d');
+                new Chart(dCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: dLabels,
+                        datasets: [
+                            {
+                                label: 'Predicted',
+                                data: dPredicted,
+                                backgroundColor: '#9bd85a'
+                            },
+                            {
+                                label: 'Prepared',
+                                data: dPrepared,
+                                backgroundColor: '#159653'
+                            },
+                            {
+                                label: 'Consumed',
+                                data: dConsumed,
+                                backgroundColor: '#087f78'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            </script>
         {% else %}
             <p>No logged ground truth data yet.</p>
         {% endif %}

@@ -25,12 +25,14 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "channels",
     "feedly",
 ]
 
@@ -38,6 +40,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -63,6 +66,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "AgroFedly.wsgi.application"
+ASGI_APPLICATION = "AgroFedly.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 DATABASE_URL = (
     os.getenv("DATABASE_URL")
@@ -103,10 +113,31 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = []
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en"
 TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('hi', 'Hindi'),
+    ('or', 'Odia'),
+]
+
+import django.conf.locale
+EXTRA_LANG_INFO = {
+    'or': {
+        'bidi': False,
+        'code': 'or',
+        'name': 'Odia',
+        'name_local': 'ଓଡ଼ିଆ',
+    },
+}
+django.conf.locale.LANG_INFO.update(EXTRA_LANG_INFO)
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -119,3 +150,4 @@ LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")

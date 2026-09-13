@@ -1048,7 +1048,24 @@ def delivery_detail(request, delivery_id):
     if delivery.sender_id != request.organization.id and delivery.receiver_id != request.organization.id:
         messages.error(request, "You do not have access to this delivery.")
         return redirect("delivery_list")
-    return render(request, "delivery_detail.html", {"delivery": delivery, "organization": request.organization})
+        
+    # Route Optimization
+    from .utils import geocode_address, get_osrm_route
+    route_data = None
+    
+    start_lat, start_lng = geocode_address(f"{delivery.pickup_address}, {delivery.sender.city}")
+    end_lat, end_lng = geocode_address(f"{delivery.delivery_address}, {delivery.receiver.city}")
+    
+    if start_lat and end_lat:
+        route_data = get_osrm_route(start_lat, start_lng, end_lat, end_lng)
+        
+    return render(request, "delivery_detail.html", {
+        "delivery": delivery, 
+        "organization": request.organization,
+        "route_data": route_data,
+        "start_coords": {"lat": start_lat, "lng": start_lng} if start_lat else None,
+        "end_coords": {"lat": end_lat, "lng": end_lng} if end_lat else None
+    })
 
 
 @_organization_required
@@ -1095,21 +1112,6 @@ def delivery_update_status(request, delivery_id):
     if new_status not in {"CANCELLED", "DELIVERED"} and new_rank < current_rank:
         messages.error(request, "Delivery status cannot move backwards.")
         return redirect("delivery_detail", delivery_id=delivery.id)
-
-    delivery.status = new_status
-
-    if new_status == "DELIVERED":
-        delivery.delivered_at = delivery.delivered_at or timezone.now()
-    elif new_status == "CANCELLED":
-        delivery.delivered_at = None
-
-    delivery.save(update_fields=["status", "delivered_at", "updated_at"])
-    messages.success(request, f"Delivery {delivery.tracking_code} updated to {valid[new_status]}.")
-    return redirect("delivery_detail", delivery_id=delivery.id)
-
-# ============================================================
-# LIVE WEATHER JSON ENDPOINT
-# ============================================================
 
 @login_required
 def weather_data(request):
@@ -1439,13 +1441,18 @@ def agri_dashboard(request):
     # Assuming any produce that was processed was saved from potential loss.
     loss_avoided = total_processed
     
+    # Generate advisory for a default location or org location
+    generate_weather_advisory("Bhubaneswar")
+    active_advisories = WeatherAdvisory.objects.filter(expires_at__gt=timezone.now()).order_by('-issued_at')
+    
     context = {
         "total_suppliers": Organization.objects.filter(organization_type="SUPPLIER").count(),
         "total_produce": total_produce,
         "total_processed": total_processed,
         "loss_avoided": loss_avoided,
         "recent_produce": produce.order_by('-created_at')[:5],
-        "recent_processing": processing.order_by('-processing_date')[:5]
+        "recent_processing": processing.order_by('-processing_date')[:5],
+        "advisories": active_advisories
     }
     return render(request, "agri_dashboard.html", context)
 
@@ -1618,3 +1625,585 @@ def agri_supply_matching(request):
         "demands": active_demands,
         "matches": matches,
     })
+
+@login_required
+def agri_supply_requests_list(request):
+    requests = AgriculturalSupplyRequest.objects.all().order_by('-created_at')
+    return render(request, "agri_supply_requests_list.html", {"requests": requests})
+
+@login_required
+def agri_supply_request_add(request):
+    org = request.user.organization_memberships.first()
+    if request.method == "POST":
+        form = AgriculturalSupplyRequestForm(request.POST)
+        if form.is_valid():
+            supply_request = form.save(commit=False)
+            supply_request.requester = org.organization if org else None
+            supply_request.save()
+            messages.success(request, "Supply request created successfully.")
+            return redirect('agri_supply_requests_list')
+    else:
+        form = AgriculturalSupplyRequestForm()
+    return render(request, "agri_supply_request_form.html", {"form": form})
+
+from .models import CropMarketTrend, WeatherAdvisory, AgriculturalShipment, QualityInspection, LedgerTransaction
+from .forms import QualityInspectionForm
+
+def generate_weather_advisory(city):
+    weather = _weather(city)
+    if not weather:
+        return None
+    
+    advisory_text = None
+    severity = "LOW"
+    
+    if weather["rainfall"] > 10:
+        advisory_text = f"Heavy rainfall ({weather['rainfall']}mm) expected. Delay harvesting to prevent post-harvest loss."
+        severity = "HIGH"
+    elif weather["temperature"] > 38:
+        advisory_text = f"Extreme heat ({weather['temperature']}°C). Ensure adequate irrigation and shade for sensitive crops."
+        severity = "HIGH"
+    elif weather["temperature"] < 5:
+        advisory_text = f"Frost warning ({weather['temperature']}°C). Protect vulnerable crops."
+        severity = "MEDIUM"
+        
+    if advisory_text:
+        # Create advisory for the next 24 hours
+        from datetime import timedelta
+        advisory, created = WeatherAdvisory.objects.get_or_create(
+            location=city,
+            advisory_text=advisory_text,
+            defaults={
+                "severity": severity,
+                "expires_at": timezone.now() + timedelta(days=1)
+            }
+        )
+        # If it wasn't created, update expiration if it's the same advisory text
+        if not created:
+            advisory.expires_at = timezone.now() + timedelta(days=1)
+            advisory.save()
+            
+        return advisory
+    return None
+
+@login_required
+def agri_market_trends(request):
+    trends = CropMarketTrend.objects.all().order_by('-record_date')
+    # Simple forecast generation if needed
+    return render(request, "agri_market_trends.html", {"trends": trends})
+
+@login_required
+def agri_shipment_list(request):
+    shipments = AgriculturalShipment.objects.all().order_by('-created_at')
+    return render(request, "agri_shipments.html", {"shipments": shipments})
+
+@login_required
+def agri_shipment_detail(request, shipment_id):
+    shipment = get_object_or_404(AgriculturalShipment, id=shipment_id)
+    return render(request, "agri_shipment_detail.html", {"shipment": shipment})
+
+@login_required
+def agri_inspection_add(request):
+    if request.method == "POST":
+        form = QualityInspectionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Quality inspection recorded successfully.")
+            return redirect('agri_dashboard')
+    else:
+        form = QualityInspectionForm()
+    return render(request, "agri_inspection_form.html", {"form": form})
+
+@login_required
+def agri_ledger(request):
+    org = request.user.organization_memberships.first()
+    if not org:
+        messages.error(request, "You must belong to an organization to view the ledger.")
+        return redirect('agri_dashboard')
+    
+    # Get all transactions where this org is either sender or receiver
+    transactions = LedgerTransaction.objects.filter(Q(sender_org=org.organization) | Q(receiver_org=org.organization)).order_by('-transaction_date')
+    
+    return render(request, "agri_ledger.html", {"transactions": transactions})
+
+
+def agri_traceability(request, tracking_code):
+    """Public view for tracing a shipment from farm to fork."""
+    shipment = get_object_or_404(AgriculturalShipment, tracking_code=tracking_code)
+    inspections = shipment.supply_match.produce.inspections.all().order_by('-inspection_date')
+    return render(request, "agri_traceability.html", {
+        "shipment": shipment,
+        "inspections": inspections
+    })
+
+@login_required
+def agri_release_escrow(request, tracking_code):
+    if request.method == "POST":
+        shipment = get_object_or_404(AgriculturalShipment, tracking_code=tracking_code)
+        match = shipment.supply_match
+        
+        # Find pending transactions for this match
+        transaction = LedgerTransaction.objects.filter(supply_match=match, escrow_status="HELD").first()
+        if transaction:
+            transaction.escrow_status = "RELEASED"
+            transaction.status = "COMPLETED"
+            transaction.save()
+            messages.success(request, f"Funds (₹{transaction.amount}) released to {transaction.receiver_org.name} successfully.")
+        else:
+            messages.info(request, "No pending escrow transactions found for this shipment.")
+            
+    return redirect('agri_traceability', tracking_code=tracking_code)
+
+import random
+@login_required
+def agri_disease_scanner(request):
+    if request.method == "POST":
+        crop_name = request.POST.get("crop_name", "Unknown Crop")
+        scan_type = request.POST.get("scan_type", "disease")
+        
+        if scan_type == "grading":
+            # Simulate Quality Grading AI
+            grades = [
+                ("Grade A (Export Quality)", 98.2, "Optimal size, color, and zero blemishes. Premium pricing recommended."),
+                ("Grade B (Local Market)", 89.4, "Minor superficial blemishes. Standard market pricing."),
+                ("Grade C (Processing/Juicing)", 92.1, "Substandard shape or color. Recommend selling for processing.")
+            ]
+            disease, confidence, treatment = random.choice(grades)
+            msg = f"Grading complete! Result: {disease}"
+        else:
+            # Simulate Disease AI
+            diseases = [
+                ("Healthy", 95.5, "No action needed. Continue normal irrigation."),
+                ("Leaf Blight", 88.2, "Apply copper-based fungicide and ensure adequate spacing for airflow."),
+                ("Rust", 91.0, "Remove infected leaves and apply sulfur fungicide."),
+                ("Aphid Infestation", 94.3, "Introduce ladybugs or apply neem oil spray immediately.")
+            ]
+            disease, confidence, treatment = random.choice(diseases)
+            msg = f"Scan complete! Diagnosis: {disease}"
+            
+        scan = CropDiseaseScan.objects.create(
+            farmer=request.user,
+            crop_name=crop_name,
+            detected_disease=disease,
+            confidence=confidence,
+            recommended_treatment=treatment
+        )
+        messages.success(request, msg)
+        return render(request, "agri_disease_scanner.html", {"scan": scan})
+        
+    return render(request, "agri_disease_scanner.html")
+
+@login_required
+def agri_yield_predictor(request):
+    if request.method == "POST":
+        crop_type = request.POST.get("crop_type", "Wheat")
+        area = float(request.POST.get("area_hectares", 1.0))
+        soil_type = request.POST.get("soil_type", "Loamy")
+        
+        # Simple ML heuristic mock
+        base_yield = {"Wheat": 3.5, "Rice": 4.0, "Corn": 5.2, "Tomatoes": 40.0}.get(crop_type, 4.0)
+        soil_modifier = {"Loamy": 1.1, "Clay": 0.9, "Sandy": 0.8}.get(soil_type, 1.0)
+        
+        # Simulate slight randomness for weather/etc
+        weather_factor = random.uniform(0.9, 1.15)
+        
+        predicted_yield = base_yield * area * soil_modifier * weather_factor
+        
+        # Mock price per ton
+        price_per_ton = {"Wheat": 22000, "Rice": 28000, "Corn": 18000, "Tomatoes": 15000}.get(crop_type, 20000)
+        estimated_revenue = predicted_yield * price_per_ton
+        
+        prediction = CropYieldPrediction.objects.create(
+            farmer=request.user,
+            crop_type=crop_type,
+            area_hectares=area,
+            soil_type=soil_type,
+            predicted_yield_tons=round(predicted_yield, 2),
+            estimated_revenue=round(estimated_revenue, 2)
+        )
+        messages.success(request, "Yield prediction calculated successfully.")
+        return render(request, "agri_yield_predictor.html", {"prediction": prediction})
+        
+    history = CropYieldPrediction.objects.filter(farmer=request.user).order_by("-created_at")[:5]
+    return render(request, "agri_yield_predictor.html", {"history": history})
+
+@login_required
+def agri_iot_dashboard(request):
+    active_shipments = AgriculturalShipment.objects.filter(status="IN_TRANSIT")
+    return render(request, "agri_iot_dashboard.html", {"active_shipments": active_shipments})
+
+def api_iot_live_stream(request):
+    """Simulates live temperature stream for active shipments"""
+    active_shipments = AgriculturalShipment.objects.filter(status="IN_TRANSIT")
+    data = []
+    for shipment in active_shipments:
+        # Simulate slight temperature fluctuation
+        current = shipment.current_temperature or 4.0
+        fluctuation = random.uniform(-0.5, 0.5)
+        new_temp = round(current + fluctuation, 1)
+        shipment.current_temperature = new_temp
+        shipment.save(update_fields=['current_temperature'])
+        
+        data.append({
+            "tracking_code": shipment.tracking_code,
+            "temperature": new_temp,
+            "status": "Warning" if new_temp > 6.0 or new_temp < 0.0 else "Normal"
+        })
+    return JsonResponse({"status": "success", "data": data})
+
+import json
+@login_required
+def agri_field_map(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        crop_type = request.POST.get("crop_type")
+        area_acres = request.POST.get("area_acres")
+        geojson = request.POST.get("geojson_data")
+        
+        FarmField.objects.create(
+            farmer=request.user,
+            name=name,
+            crop_type=crop_type,
+            area_acres=float(area_acres) if area_acres else 0.0,
+            geojson_data=geojson
+        )
+        messages.success(request, f"Field '{name}' saved successfully!")
+        return redirect("agri_field_map")
+        
+    fields = FarmField.objects.filter(farmer=request.user)
+    # Convert fields to JSON list for the template
+    fields_json = []
+    for f in fields:
+        if f.geojson_data:
+            fields_json.append({
+                "id": f.id,
+                "name": f.name,
+                "crop": f.crop_type,
+                "area": f.area_acres,
+                "geojson": json.loads(f.geojson_data)
+            })
+            
+    return render(request, "agri_field_map.html", {
+        "fields": fields,
+        "fields_json": json.dumps(fields_json)
+    })
+
+@login_required
+def agri_equipment_hub(request):
+    equipment_list = Equipment.objects.filter(is_available=True).exclude(owner=request.user)
+    my_equipment = Equipment.objects.filter(owner=request.user)
+    my_rentals = EquipmentRental.objects.filter(renter=request.user)
+    
+    return render(request, "agri_equipment_hub.html", {
+        "equipment_list": equipment_list,
+        "my_equipment": my_equipment,
+        "my_rentals": my_rentals
+    })
+
+@login_required
+def agri_rent_equipment(request, equipment_id):
+    equipment = get_object_or_404(Equipment, id=equipment_id)
+    if request.method == "POST":
+        hours = int(request.POST.get("hours", 1))
+        total_cost = hours * equipment.hourly_rate
+        
+        # In a real app we'd ask for start/end times via a calendar picker. 
+        from django.utils import timezone
+        import datetime
+        start_time = timezone.now() + datetime.timedelta(days=1)
+        end_time = start_time + datetime.timedelta(hours=hours)
+        
+        EquipmentRental.objects.create(
+            equipment=equipment,
+            renter=request.user,
+            start_time=start_time,
+            end_time=end_time,
+            total_cost=total_cost,
+            status="APPROVED"
+        )
+        
+        messages.success(request, f"Successfully rented {equipment.name} for {hours} hours (₹{total_cost}).")
+        return redirect("agri_equipment_hub")
+
+@login_required
+def agri_forum(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        content = request.POST.get("content")
+        category = request.POST.get("category", "DISCUSSION")
+        
+        ForumPost.objects.create(
+            author=request.user,
+            title=title,
+            content=content,
+            category=category
+        )
+        messages.success(request, "Post created successfully!")
+        return redirect("agri_forum")
+        
+    posts = ForumPost.objects.all()
+    return render(request, "agri_forum.html", {"posts": posts})
+
+@login_required
+def agri_forum_detail(request, post_id):
+    post = get_object_or_404(ForumPost, id=post_id)
+    if request.method == "POST":
+        content = request.POST.get("content")
+        ForumComment.objects.create(
+            post=post,
+            author=request.user,
+            content=content
+        )
+        messages.success(request, "Comment added.")
+        return redirect("agri_forum_detail", post_id=post.id)
+        
+    return render(request, "agri_forum_detail.html", {"post": post})
+
+@login_required
+def agri_subsidy_finder(request):
+    # Get farmer's crops from fields or inventory
+    fields = FarmField.objects.filter(farmer=request.user)
+    my_crop_types = [f.crop_type.lower() for f in fields]
+    
+    # We could also get crops from AgriculturalProduce
+    produce = AgriculturalProduce.objects.filter(producer=request.user.organization_memberships.first().organization if request.user.organization_memberships.exists() else None)
+    my_crop_types.extend([p.name.lower() for p in produce])
+    my_crop_types = set(my_crop_types)
+    
+    all_schemes = GovernmentScheme.objects.all()
+    
+    # Simple matching algorithm
+    matched_schemes = []
+    other_schemes = []
+    
+    for scheme in all_schemes:
+        eligible_crops = [c.strip().lower() for c in scheme.eligible_crops.split(',')]
+        # If any of the farmer's crops match the scheme's eligible crops (or if scheme applies to "all")
+        if "all" in eligible_crops or any(c in eligible_crops for c in my_crop_types):
+            matched_schemes.append(scheme)
+        else:
+            other_schemes.append(scheme)
+            
+    return render(request, "agri_subsidy_finder.html", {
+        "matched_schemes": matched_schemes,
+        "other_schemes": other_schemes,
+        "my_crops": list(my_crop_types)
+    })
+    
+    return redirect("agri_equipment_hub")
+
+
+from django.utils import timezone
+
+@login_required
+def delivery_live_tracking(request, delivery_id):
+    delivery = get_object_or_404(Delivery, id=delivery_id)
+    lat = delivery.current_lat or 12.9716
+    lng = delivery.current_lng or 77.5946
+    return render(request, 'delivery_live_tracking.html', {'delivery': delivery, 'lat': lat, 'lng': lng})
+
+@login_required
+def delivery_proof(request, delivery_id):
+    delivery = get_object_or_404(Delivery, id=delivery_id)
+    if request.method == 'POST':
+        proof_image = request.FILES.get('proof_image')
+        signature = request.POST.get('recipient_signature')
+        
+        if proof_image:
+            delivery.proof_image = proof_image
+        if signature:
+            delivery.recipient_signature = signature
+            
+        delivery.status = 'DELIVERED'
+        delivery.delivered_at = timezone.now()
+        delivery.save()
+        
+        # Update Impact Dashboard
+        if delivery.sender:
+            from .models import OrganizationImpact
+            impact, _ = OrganizationImpact.objects.get_or_create(organization=delivery.sender)
+            impact.total_meals_saved += delivery.quantity
+            impact.total_co2_reduced_kg += delivery.quantity * 2.5  # assuming 2.5kg CO2 per meal
+            impact.impact_points += delivery.quantity * 10
+            impact.save()
+            
+        # Update Volunteer Driver total_deliveries
+        if delivery.volunteer_driver:
+            delivery.volunteer_driver.total_deliveries += 1
+            delivery.volunteer_driver.save()
+            
+        messages.success(request, 'Proof of Delivery saved successfully!')
+        return redirect('delivery_detail', delivery_id=delivery.id)
+        
+    return render(request, 'delivery_proof.html', {'delivery': delivery})
+
+from .forms import VolunteerProfileForm
+from .models import VolunteerProfile, OrganizationImpact
+
+@login_required
+def volunteer_register(request):
+    try:
+        profile = request.user.volunteer_profile
+    except VolunteerProfile.DoesNotExist:
+        profile = None
+        
+    if request.method == "POST":
+        form = VolunteerProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            volunteer = form.save(commit=False)
+            volunteer.user = request.user
+            volunteer.save()
+            messages.success(request, "Volunteer profile updated successfully!")
+            return redirect("volunteer_dashboard")
+    else:
+        form = VolunteerProfileForm(instance=profile)
+        
+    return render(request, "volunteer_register.html", {"form": form})
+
+@login_required
+def volunteer_dashboard(request):
+    try:
+        profile = request.user.volunteer_profile
+    except VolunteerProfile.DoesNotExist:
+        messages.info(request, "Please register as a volunteer first.")
+        return redirect("volunteer_register")
+        
+    available_deliveries = Delivery.objects.filter(status="REQUESTED", volunteer_driver__isnull=True).order_by("-created_at")
+    my_deliveries = Delivery.objects.filter(volunteer_driver=profile).order_by("-created_at")
+    
+    if request.method == "POST":
+        delivery_id = request.POST.get("delivery_id")
+        action = request.POST.get("action")
+        if delivery_id and action == "accept":
+            delivery = get_object_or_404(Delivery, id=delivery_id)
+            if delivery.status == "REQUESTED" and not delivery.volunteer_driver:
+                delivery.volunteer_driver = profile
+                delivery.status = "ASSIGNED"
+                delivery.save()
+                messages.success(request, f"You have been assigned to delivery {delivery.tracking_code}.")
+                return redirect("volunteer_dashboard")
+                
+    return render(request, "volunteer_dashboard.html", {
+        "profile": profile,
+        "available_deliveries": available_deliveries,
+        "my_deliveries": my_deliveries,
+    })
+
+@login_required
+def impact_dashboard(request):
+    # Determine the organization context if any
+    org_id = request.session.get("active_organization_id")
+    active_org = None
+    if org_id:
+        active_org = Organization.objects.filter(id=org_id).first()
+        
+    all_impacts = OrganizationImpact.objects.all().order_by("-impact_points")[:10]
+    
+    my_impact = None
+    if active_org:
+        my_impact, _ = OrganizationImpact.objects.get_or_create(organization=active_org)
+        
+    return render(request, "impact_dashboard.html", {
+        "active_org": active_org,
+        "my_impact": my_impact,
+        "all_impacts": all_impacts,
+    })
+
+import io
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+
+@login_required
+def generate_donation_receipt(request, delivery_id):
+    delivery = get_object_or_404(Delivery, id=delivery_id)
+    
+    # Check permissions
+    if not request.user.is_superuser:
+        if delivery.sender not in request.user.organization_memberships.values_list('organization', flat=True):
+            messages.error(request, "You do not have permission to view this receipt.")
+            return redirect('delivery_list')
+            
+    if delivery.status != "DELIVERED":
+        messages.error(request, "Receipts are only available for delivered items.")
+        return redirect('delivery_detail', delivery_id=delivery.id)
+        
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    
+    # Draw Header
+    p.setFont("Helvetica-Bold", 24)
+    p.setFillColor(colors.HexColor("#166534"))
+    p.drawString(50, height - 80, "Official Donation Receipt")
+    
+    p.setFont("Helvetica", 12)
+    p.setFillColor(colors.black)
+    p.drawString(50, height - 110, f"Receipt ID: {delivery.tracking_code}")
+    p.drawString(50, height - 130, f"Date Delivered: {delivery.delivered_at.strftime('%Y-%m-%d %H:%M') if delivery.delivered_at else 'N/A'}")
+    
+    # Draw Donor Information
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(50, height - 170, "Donor Information")
+    p.setFont("Helvetica", 12)
+    p.drawString(50, height - 190, f"Organization: {delivery.sender.name}")
+    p.drawString(50, height - 210, f"Registration No: {delivery.sender.registration_number or 'N/A'}")
+    p.drawString(50, height - 230, f"Address: {delivery.sender.address}, {delivery.sender.city}")
+    
+    # Draw Recipient Information
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(300, height - 170, "Recipient Information")
+    p.setFont("Helvetica", 12)
+    p.drawString(300, height - 190, f"Organization: {delivery.receiver.name}")
+    p.drawString(300, height - 210, f"Registration No: {delivery.receiver.registration_number or 'N/A'}")
+    
+    # Draw Donation Details
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(50, height - 270, "Donation Details")
+    p.rect(50, height - 350, 500, 70)
+    
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(60, height - 300, "Item Name")
+    p.drawString(400, height - 300, "Quantity (Meals)")
+    
+    p.setFont("Helvetica", 12)
+    p.drawString(60, height - 330, str(delivery.food_name))
+    p.drawString(400, height - 330, str(delivery.quantity))
+    
+    # Footer
+    p.setFont("Helvetica-Oblique", 10)
+    p.drawString(50, 100, "Thank you for your generous contribution. This receipt is automatically generated")
+    p.drawString(50, 85, "and serves as proof of your donation for tax or reporting purposes.")
+    
+    p.showPage()
+    p.save()
+    
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename=f"Receipt_{delivery.tracking_code}.pdf")
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .copilot import generate_copilot_response
+
+@csrf_exempt
+@_organization_required
+def copilot_chat(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_message = data.get("message", "")
+            
+            if not user_message:
+                return JsonResponse({"error": "No message provided"}, status=400)
+                
+            # Get AI response
+            ai_response = generate_copilot_response(user_message, request.organization)
+            
+            return JsonResponse({"response": ai_response})
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+            
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+

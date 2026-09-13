@@ -36,12 +36,22 @@
 
 <div class="delivery-board">
 {% for d in deliveries %}
-<a class="delivery-card" href="{% url 'delivery_detail' d.id %}">
-  <div class="delivery-top"><span class="track">{{ d.tracking_code }}</span><span class="pill {{ d.status|lower }}">{{ d.get_status_display }}</span></div>
+<div class="delivery-card">
+  <div class="delivery-top">
+    <span class="track">{{ d.tracking_code }}</span>
+    <span class="pill {{ d.status|lower }}">{{ d.get_status_display }}</span>
+    <div class="delivery-actions" style="display: flex; gap: 6px; align-items: center;">
+      <a href="{% url 'delivery_detail' d.id %}" class="table-btn">View</a>
+      <a href="{% url 'delivery_live_tracking' d.id %}" class="table-btn" style="background:#e8f4fb; color:#1d6f93;">Track</a>
+      {% if d.status != "DELIVERED" and request.user.is_superuser %}
+          <a href="{% url 'delivery_proof' d.id %}" class="table-btn" style="background:#fff6dd; color:#8b6400;">PoD</a>
+      {% endif %}
+    </div>
+  </div>
   <h3>{{ d.food_name }} <small>× {{ d.quantity }}</small></h3>
   <div class="route"><div><b>{{ d.sender.name }}</b><span>{{ d.sender.phone|default:d.sender.email|default:"Sender contact not provided" }}</span><span>{{ d.pickup_address|truncatechars:55 }}</span></div><i>→</i><div><b>{{ d.receiver.name }}</b><span>{{ d.receiver.phone|default:d.receiver.email|default:"Receiver contact not provided" }}</span><span>{{ d.delivery_address|truncatechars:55 }}</span></div></div>
   <div class="delivery-meta"><span>Sender: {{ d.sender.city|default:"—" }}</span><span>Receiver: {{ d.receiver.city|default:"—" }}</span><span>Driver: {{ d.driver_name|default:"Unassigned" }}</span><span>{{ d.scheduled_at|date:"d M Y, H:i"|default:"Schedule pending" }}</span></div>
-</a>
+</div>
 {% empty %}<div class="empty large">No deliveries match your search. Create a shipment or clear the filters.</div>{% endfor %}
 </div>
 {% endblock %}

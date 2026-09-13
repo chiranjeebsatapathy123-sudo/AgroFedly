@@ -1,10 +1,11 @@
-{% load static %}
+{% load static i18n %}
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <title>{% block title %}AgroFedly{% endblock %} · Smart Food Operations</title>
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
+<link rel="stylesheet" href="{% static 'css/copilot.css' %}">
 <style>
   #drawer { 
       overflow-y: scroll !important; 
@@ -23,6 +24,20 @@
   <button class="menu-btn" id="menuBtn" aria-label="Open navigation">⋯</button>
   <a class="brand" href="{% url 'home' %}"><span class="brand-mark">A</span><span>AgroFedly</span><small>Smart Food Operations</small></a>
   <div class="top-actions">
+    <form action="{% url 'set_language' %}" method="post" style="display:inline-block; margin-right:10px;">
+      {% csrf_token %}
+      <input name="next" type="hidden" value="{{ request.path }}">
+      <select name="language" onchange="this.form.submit()" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc;">
+        {% get_current_language as LANGUAGE_CODE %}
+        {% get_available_languages as LANGUAGES %}
+        {% get_language_info_list for LANGUAGES as languages %}
+        {% for language in languages %}
+          <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+            {{ language.name_local }}
+          </option>
+        {% endfor %}
+      </select>
+    </form>
     {% if user.is_authenticated %}
       <span class="user-chip">● {{ user.username }}</span>
       <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="logout-mini">Logout</button></form>
@@ -33,10 +48,10 @@
 </header>
 
 <aside class="drawer" id="drawer">
-  <div class="drawer-head"><strong>Navigate</strong><button id="closeMenu">×</button></div>
-  <a href="{% url 'home' %}">⌂ <span>Home</span></a>
+  <div class="drawer-head"><strong>{% trans "Navigate" %}</strong><button id="closeMenu">×</button></div>
+  <a href="{% url 'home' %}">⌂ <span>{% trans "Home" %}</span></a>
   {% if user.is_authenticated %}
-    <a href="{% url 'dashboard' %}">▦ <span>Operations Dashboard</span></a>
+    <a href="{% url 'dashboard' %}">▦ <span>{% trans "Operations Dashboard" %}</span></a>
     <a href="{% url 'predict_demand' %}">✦ <span>AI Prediction</span></a>
     <a href="{% url 'forecast_7_days' %}">◷ <span>7-Day Forecast</span></a>
     <a href="{% url 'intelligence_center' %}">⌁ <span>Operations Intelligence</span></a>
@@ -66,7 +81,62 @@
 {% endif %}
 
 <main>{% block content %}{% endblock %}</main>
+
+<!-- AI Copilot Widget -->
+{% if user.is_authenticated %}
+<div id="copilot-widget" class="copilot-widget collapsed">
+  <div class="copilot-header">
+    <span>AgroFedly AI</span>
+    <button id="copilot-toggle-btn" class="copilot-btn-icon">💬</button>
+  </div>
+  <div class="copilot-body">
+    <div id="copilot-messages" class="copilot-messages">
+      <div class="copilot-msg ai-msg">Hi! I'm your AgroFedly AI assistant. How can I help you today?</div>
+    </div>
+    <div class="copilot-input-area">
+      <input type="text" id="copilot-input" placeholder="Type or speak...">
+      <button id="copilot-voice-btn" class="copilot-btn-icon" title="Hold to speak">🎤</button>
+      <button id="copilot-send-btn" class="copilot-btn-icon">➤</button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <footer>AgroFedly · AI-assisted food planning · Safety · Redistribution · Delivery</footer>
 <script src="{% static 'js/app.js' %}"></script>
+<script src="{% static 'js/copilot.js' %}"></script>
+{% if user.is_authenticated %}
+<script>
+  const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+  const notificationSocket = new WebSocket(wsProtocol + window.location.host + '/ws/notifications/');
+
+  notificationSocket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      if(data.message) {
+          // Create a toast notification
+          const messagesContainer = document.querySelector('.messages') || (() => {
+              const div = document.createElement('div');
+              div.className = 'messages';
+              document.body.insertBefore(div, document.querySelector('main'));
+              return div;
+          })();
+          
+          const msgDiv = document.createElement('div');
+          msgDiv.className = 'message success';
+          msgDiv.innerText = '🔔 ' + data.message;
+          messagesContainer.appendChild(msgDiv);
+          
+          setTimeout(() => {
+              msgDiv.style.opacity = '0';
+              setTimeout(() => msgDiv.remove(), 500);
+          }, 5000);
+      }
+  };
+
+  notificationSocket.onclose = function(e) {
+      console.error('Notification socket closed unexpectedly');
+  };
+</script>
+{% endif %}
 </body>
 </html>

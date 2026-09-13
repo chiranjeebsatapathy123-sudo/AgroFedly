@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Yield Predictor | AgroFedly{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>🌾 Crop Yield Predictor</h1>
+        <p>Estimate harvest volume and market revenue using our advanced ML models and real-time pricing data.</p>
+    </div>
+</div>
+
+<div class="form-page">
+    <div class="form-card">
+        <h3>New Prediction</h3>
+        <p style="color:var(--muted); font-size:12px; margin-bottom:20px;">Input field parameters to generate an AI forecast.</p>
+        
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            <label>
+                Crop Type
+                <select name="crop_type" required>
+                    <option value="Wheat">Wheat</option>
+                    <option value="Rice">Rice</option>
+                    <option value="Corn">Corn</option>
+                    <option value="Tomatoes">Tomatoes</option>
+                </select>
+            </label>
+            
+            <label>
+                Area (Hectares)
+                <input type="number" step="0.1" name="area_hectares" value="1.0" required>
+            </label>
+            
+            <label style="grid-column: 1 / -1;">
+                Soil Type
+                <select name="soil_type" required>
+                    <option value="Loamy">Loamy (High Yield)</option>
+                    <option value="Clay">Clay (Medium Yield)</option>
+                    <option value="Sandy">Sandy (Low Yield)</option>
+                </select>
+            </label>
+            
+            <button type="submit" class="btn primary" style="grid-column: 1 / -1; margin-top: 10px;">Calculate Prediction</button>
+        </form>
+    </div>
+
+    <div>
+        {% if prediction %}
+        <div class="result-main" style="margin-bottom:20px;">
+            <div style="font-size:11px; font-weight:900; letter-spacing:1px; color:#c8dfd1; margin-bottom:5px;">AI PREDICTION RESULT</div>
+            <h2 style="font-size:38px; margin:0;">{{ prediction.predicted_yield_tons }} <span style="font-size:16px;">Tons</span></h2>
+            <div style="margin-top:15px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.2);">
+                <div style="font-size:11px; color:#c8dfd1; margin-bottom:2px;">Estimated Revenue</div>
+                <b style="font-size:24px;">₹ {{ prediction.estimated_revenue }}</b>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if history %}
+        <div class="form-card">
+            <h3 style="margin:0 0 15px;">Recent Forecasts</h3>
+            {% for p in history %}
+            <div class="list-row">
+                <div>
+                    <b>{{ p.crop_type }}</b>
+                    <small>{{ p.area_hectares }} Ha • {{ p.soil_type }}</small>
+                </div>
+                <div style="text-align:right;">
+                    <strong>{{ p.predicted_yield_tons }}t</strong>
+                    <small>₹ {{ p.estimated_revenue }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

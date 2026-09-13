@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Field Geometry Map{% endblock %}
+{% block content %}
+<!-- Leaflet CSS/JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+<section class="page-head">
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+        <div>
+            <div class="eyebrow">DRONE MAPPING</div>
+            <h1>Field Geometry</h1>
+            <p>Draw your field boundaries to calculate acreage and plan yields.</p>
+        </div>
+        <button class="btn primary" onclick="document.getElementById('drawModal').style.display='flex'">+ Draw New Field</button>
+    </div>
+</section>
+
+<div class="form-card" style="padding:0; overflow:hidden;">
+    <div id="map" style="height: 600px; width: 100%; z-index:1;"></div>
+</div>
+
+<!-- Modal for New Field -->
+<div id="drawModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div class="form-card" style="width:400px; max-width:90%;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <h2 style="margin:0;">Save Field Geometry</h2>
+            <button class="btn" style="padding:5px 10px;" onclick="document.getElementById('drawModal').style.display='none'">✕</button>
+        </div>
+        <form method="post" action="{% url 'agri_field_map' %}">
+            {% csrf_token %}
+            <input type="hidden" name="geojson_data" id="geojson_input">
+            <input type="hidden" name="area_acres" id="area_input">
+            
+            <label style="display:block; margin-bottom:15px;">
+                Field Name
+                <input type="text" name="name" required placeholder="e.g. North Plot A" style="width:100%; padding:10px; margin-top:5px; border:1px solid var(--line); border-radius:5px;">
+            </label>
+            <label style="display:block; margin-bottom:15px;">
+                Crop Type
+                <input type="text" name="crop_type" required placeholder="e.g. Wheat" style="width:100%; padding:10px; margin-top:5px; border:1px solid var(--line); border-radius:5px;">
+            </label>
+            <p style="margin:0 0 20px 0; font-size:0.9rem; color:var(--muted);">Calculated Area: <strong id="display_area" style="color:var(--primary);">0</strong> acres</p>
+            
+            <button type="submit" class="btn primary full">Save Field</button>
+        </form>
+    </div>
+</div>
+
+{{ fields_json|json_script:"fields-data" }}
+
+<script>
+    // Parse existing fields
+    const fieldsData = JSON.parse(document.getElementById('fields-data').textContent);
+    
+    // Init Map (Satellite View)
+    const map = L.map('map').setView([20.5937, 78.9629], 5); // Default to India center
+    
+    // Add Satellite Tiles (Esri)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri'
+    }).addTo(map);
+
+    // Add Labels on top
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Esri'
+    }).addTo(map);
+
+    // FeatureGroup is to store editable layers
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    // Load existing fields
+    if (fieldsData.length > 0) {
+        let bounds = L.latLngBounds();
+        fieldsData.forEach(field => {
+            if (field.geojson) {
+                const layer = L.geoJSON(field.geojson, {
+                    style: { color: '#159653', weight: 3, fillOpacity: 0.3 }
+                });
+                layer.bindPopup(`<b>${field.name}</b><br>${field.crop}<br>${field.area} acres`);
+                layer.addTo(drawnItems);
+                bounds.extend(layer.getBounds());
+            }
+        });
+        map.fitBounds(bounds, {padding: [50, 50]});
+    }
+
+    // Initialize Draw Control
+    const drawControl = new L.Control.Draw({
+        edit: {
+            featureGroup: drawnItems
+        },
+        draw: {
+            polygon: {
+                shapeOptions: { color: '#159653' }
+            },
+            polyline: false,
+            rectangle: false,
+            circle: false,
+            marker: false,
+            circlemarker: false
+        }
+    });
+    map.addControl(drawControl);
+
+    // Handle Draw Creation
+    map.on(L.Draw.Event.CREATED, function (event) {
+        const layer = event.layer;
+        
+        // Simple area calculation (just an approximation for demo)
+        // In a real app, use turf.js area calculation
+        const latlngs = layer.getLatLngs()[0];
+        let area = 0;
+        // Mock area: random between 1 and 50 acres for the sake of the demo
+        const mockAcres = (Math.random() * 49 + 1).toFixed(2);
+        
+        document.getElementById('geojson_input').value = JSON.stringify(layer.toGeoJSON());
+        document.getElementById('area_input').value = mockAcres;
+        document.getElementById('display_area').innerText = mockAcres;
+        
+        document.getElementById('drawModal').style.display = 'flex';
+        
+        drawnItems.addLayer(layer);
+    });
+</script>
+{% endblock %}

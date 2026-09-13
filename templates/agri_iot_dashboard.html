@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}IoT Live Dashboard{% endblock %}
+{% block content %}
+<section class="page-head" style="background:#111; color:white; margin:-20px -20px 20px -20px; padding:40px 20px;">
+    <div>
+        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px;">LIVE TELEMETRY</div>
+        <h1 style="color:white; margin:10px 0;">Cold Chain IoT Monitor</h1>
+        <p style="color:#aaa;">Real-time temperature streams for all active transit vehicles.</p>
+    </div>
+</section>
+
+<div class="form-grid">
+    {% for shipment in active_shipments %}
+    <div class="form-card" style="background:#1a1a1a; border:1px solid #333; color:white;" id="card-{{ shipment.tracking_code }}">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0; font-family:monospace; color:#ccc;">{{ shipment.tracking_code }}</h3>
+            <span class="pill" id="status-{{ shipment.tracking_code }}" style="background:#333; color:#ccc;">Connecting...</span>
+        </div>
+        
+        <div style="text-align:center; padding:20px 0;">
+            <div style="font-size:3rem; font-family:monospace; font-weight:bold; color:var(--primary);" id="temp-{{ shipment.tracking_code }}">
+                {{ shipment.current_temperature|default:"--" }} °C
+            </div>
+            <p style="color:#888; font-size:0.8rem; margin:5px 0 0 0;">Current Temperature</p>
+        </div>
+    </div>
+    {% empty %}
+    <div class="form-card" style="grid-column:1/-1; text-align:center; padding:40px; background:#1a1a1a; color:#888;">
+        <h2>No active shipments in transit.</h2>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Fetch live data every 2 seconds
+    setInterval(function() {
+        fetch("{% url 'api_iot_live_stream' %}")
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === "success") {
+                    data.data.forEach(item => {
+                        const tempEl = document.getElementById(`temp-${item.tracking_code}`);
+                        const statusEl = document.getElementById(`status-${item.tracking_code}`);
+                        const cardEl = document.getElementById(`card-${item.tracking_code}`);
+                        
+                        if(tempEl) {
+                            tempEl.innerText = item.temperature.toFixed(1) + " °C";
+                            
+                            // Visual alerts
+                            if(item.status === "Warning") {
+                                tempEl.style.color = "#ff4444";
+                                statusEl.innerText = "WARNING";
+                                statusEl.style.background = "#ff444433";
+                                statusEl.style.color = "#ff4444";
+                                cardEl.style.borderColor = "#ff4444";
+                                cardEl.style.boxShadow = "0 0 15px rgba(255, 68, 68, 0.2)";
+                            } else {
+                                tempEl.style.color = "var(--primary)";
+                                statusEl.innerText = "NORMAL";
+                                statusEl.style.background = "#15965333";
+                                statusEl.style.color = "var(--primary)";
+                                cardEl.style.borderColor = "#333";
+                                cardEl.style.boxShadow = "none";
+                            }
+                        }
+                    });
+                }
+            });
+    }, 2000);
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Live Tracking | {{ delivery.tracking_code }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>🚚 Live Tracking: {{ delivery.tracking_code }}</h1>
+        <p>Driver: {{ delivery.driver_name|default:"Unassigned" }} | Vehicle: {{ delivery.vehicle_number|default:"Unknown" }}</p>
+    </div>
+    <div class="head-actions">
+        <a href="{% url 'delivery_detail' delivery.id %}" class="btn glass">Back to Delivery</a>
+    </div>
+</div>
+
+<div class="form-page" style="grid-template-columns:1fr;">
+    <div class="form-card" style="padding:0; overflow:hidden;">
+        <!-- Leaflet Map Container -->
+        <div id="map" style="height:500px; width:100%; background:#e9ecef;"></div>
+        
+        <div style="padding:20px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <strong style="display:block; font-size:16px;">Route to Destination</strong>
+                <span style="color:var(--muted); font-size:12px;">ETA: ~45 mins</span>
+            </div>
+            {% if delivery.status != "DELIVERED" and request.user.is_superuser %}
+            <!-- Mock driver action -->
+            <a href="{% url 'delivery_proof' delivery.id %}" class="btn primary">Submit Proof of Delivery</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Include Leaflet CSS/JS for map simulation -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var map = L.map('map').setView([{{ lat }}, {{ lng }}], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        var truckIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/2765/2765061.png',
+            iconSize: [38, 38],
+            iconAnchor: [19, 19]
+        });
+
+        var marker = L.marker([{{ lat }}, {{ lng }}], {icon: truckIcon}).addTo(map)
+            .bindPopup('Delivery Truck {{ delivery.vehicle_number }}')
+            .openPopup();
+            
+        // Simulate live movement
+        var lat = {{ lat }};
+        var lng = {{ lng }};
+        setInterval(function(){
+            lat += 0.0005;
+            lng += 0.0005;
+            marker.setLatLng([lat, lng]);
+            map.panTo([lat, lng]);
+        }, 3000);
+    });
+</script>
+{% endblock %}

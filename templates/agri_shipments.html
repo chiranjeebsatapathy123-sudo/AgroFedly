@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Logistics & Shipments{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+        <div>
+            <div class="eyebrow">LOGISTICS</div>
+            <h1>Shipment Tracking</h1>
+            <p>Track agricultural supply shipments and monitor cold-chain temperatures.</p>
+        </div>
+    </div>
+</section>
+
+<div class="form-card" style="max-width:100%;">
+    {% if shipments %}
+        <table style="width:100%; text-align:left;">
+            <tr>
+                <th style="padding-bottom:10px;">Tracking Code</th>
+                <th style="padding-bottom:10px;">Produce</th>
+                <th style="padding-bottom:10px;">Status</th>
+                <th style="padding-bottom:10px;">Current Temp</th>
+                <th style="padding-bottom:10px;">Actions</th>
+            </tr>
+            {% for s in shipments %}
+            <tr>
+                <td style="padding:12px 0; border-top:1px solid #eee;"><strong>{{ s.tracking_code }}</strong></td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ s.supply_match.produce.name }} ({{ s.supply_match.matched_quantity }} kg)</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">
+                    <span style="font-weight:bold;">{{ s.get_status_display }}</span>
+                </td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">
+                    {% if s.current_temperature %}
+                        {{ s.current_temperature }} °C
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">
+                    <a href="{% url 'agri_shipment_detail' s.id %}" class="btn" style="padding:5px 10px; font-size:0.9rem;">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div style="text-align:center; padding:40px;">
+            <p>No shipments have been dispatched yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

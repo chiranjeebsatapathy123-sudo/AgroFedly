@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Supply Requests{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+        <div>
+            <div class="eyebrow">AGRICULTURE</div>
+            <h1>Supply Requests</h1>
+            <p>Track external requests for agricultural produce and their fulfillment status.</p>
+        </div>
+        <a href="{% url 'agri_supply_request_add' %}" class="btn primary">＋ Request Supply</a>
+    </div>
+</section>
+
+<div class="form-card" style="max-width:100%;">
+    {% if requests %}
+        <table style="width:100%; text-align:left;">
+            <tr>
+                <th style="padding-bottom:10px;">Requester</th>
+                <th style="padding-bottom:10px;">Produce Requested</th>
+                <th style="padding-bottom:10px;">Quantity</th>
+                <th style="padding-bottom:10px;">Status</th>
+                <th style="padding-bottom:10px;">Date Requested</th>
+            </tr>
+            {% for r in requests %}
+            <tr>
+                <td style="padding:12px 0; border-top:1px solid #eee;"><strong>{{ r.requester.name|default:"Unknown" }}</strong></td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ r.produce.name }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;"><strong>{{ r.requested_quantity }} {{ r.produce.unit }}</strong></td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">
+                    {% if r.status == 'COMPLETED' or r.status == 'SUPPLIED' %}
+                    <span style="color:green; font-weight:bold;">{{ r.status }}</span>
+                    {% elif r.status == 'PENDING' %}
+                    <span style="color:orange; font-weight:bold;">{{ r.status }}</span>
+                    {% elif r.status == 'CANCELLED' %}
+                    <span style="color:red; font-weight:bold;">{{ r.status }}</span>
+                    {% else %}
+                    <span style="font-weight:bold;">{{ r.status }}</span>
+                    {% endif %}
+                </td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ r.created_at|date:"d M Y" }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div style="text-align:center; padding:40px;">
+            <p>No supply requests have been made yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
