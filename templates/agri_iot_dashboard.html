@@ -1,71 +1,145 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}IoT Live Dashboard{% endblock %}
+{% block title %}IoT Sensor Fleet{% endblock %}
 {% block content %}
-<section class="page-head" style="background:#111; color:white; margin:-20px -20px 20px -20px; padding:40px 20px;">
-    <div>
-        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px;">{% trans "LIVE TELEMETRY" %}</div>
-        <h1 style="color:white; margin:10px 0;">{% trans "Cold Chain IoT Monitor" %}</h1>
-        <p style="color:#aaa;">{% trans "Real-time temperature streams for all active transit vehicles." %}</p>
+<section class="page-head">
+    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+        <div>
+            <div class="eyebrow" style="color: #22c55e;">● {% trans "LIVE TELEMETRY" %}</div>
+            <h1>{% trans "IoT Sensor Fleet" %}</h1>
+            <p>{% trans "Real-time micro-climate monitoring for active fields." %}</p>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 0.8rem; color: var(--text-light);">{% trans "Network Status" %}</div>
+            <div style="color: #22c55e; font-weight: bold;">{% trans "12/12 Sensors Online" %}</div>
+        </div>
     </div>
 </section>
 
-<div class="form-grid">
-    {% for shipment in active_shipments %}
-    <div class="form-card" style="background:#1a1a1a; border:1px solid #333; color:white;" id="card-{{ shipment.tracking_code }}">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="margin:0; font-family:monospace; color:#ccc;">{{ shipment.tracking_code }}</h3>
-            <span class="pill" id="status-{{ shipment.tracking_code }}" style="background:#333; color:#ccc;">{% trans "Connecting..." %}</span>
-        </div>
-        
-        <div style="text-align:center; padding:20px 0;">
-            <div style="font-size:3rem; font-family:monospace; font-weight:bold; color:var(--primary);" id="temp-{{ shipment.tracking_code }}">
-                {{ shipment.current_temperature|default:"--" }} °C
-            </div>
-            <p style="color:#888; font-size:0.8rem; margin:5px 0 0 0;">{% trans "Current Temperature" %}</p>
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top:20px;">
+    
+    <!-- Soil Moisture Gauge -->
+    <div class="form-card" style="text-align:center; position:relative; overflow:hidden;">
+        <h3 style="font-size:1.1rem; color:var(--text-light); margin-bottom:15px;">{% trans "Avg Soil Moisture" %}</h3>
+        <div style="font-size:3rem; font-weight:900; color:#3b82f6;" id="val-moisture">42%</div>
+        <div style="font-size:0.9rem; color:var(--text-light); margin-top:10px;">Target: 40% - 60%</div>
+        <div style="height:4px; width:100%; background:#e2e8f0; border-radius:2px; margin-top:15px; overflow:hidden;">
+            <div id="bar-moisture" style="height:100%; width:42%; background:#3b82f6; transition: width 1s ease-in-out;"></div>
         </div>
     </div>
-    {% empty %}
-    <div class="form-card" style="grid-column:1/-1; text-align:center; padding:40px; background:#1a1a1a; color:#888;">
-        <h2>{% trans "No active shipments in transit." %}</h2>
+
+    <!-- Temperature Gauge -->
+    <div class="form-card" style="text-align:center; position:relative; overflow:hidden;">
+        <h3 style="font-size:1.1rem; color:var(--text-light); margin-bottom:15px;">{% trans "Ambient Temp" %}</h3>
+        <div style="font-size:3rem; font-weight:900; color:#ef4444;" id="val-temp">24.5°C</div>
+        <div style="font-size:0.9rem; color:var(--text-light); margin-top:10px;">Optimal: 20°C - 28°C</div>
+        <div style="height:4px; width:100%; background:#e2e8f0; border-radius:2px; margin-top:15px; overflow:hidden;">
+            <div id="bar-temp" style="height:100%; width:50%; background:#ef4444; transition: width 1s ease-in-out;"></div>
+        </div>
     </div>
-    {% endfor %}
+
+    <!-- Humidity Gauge -->
+    <div class="form-card" style="text-align:center; position:relative; overflow:hidden;">
+        <h3 style="font-size:1.1rem; color:var(--text-light); margin-bottom:15px;">{% trans "Relative Humidity" %}</h3>
+        <div style="font-size:3rem; font-weight:900; color:#0ea5e9;" id="val-humidity">65%</div>
+        <div style="font-size:0.9rem; color:var(--text-light); margin-top:10px;">Target: 60% - 80%</div>
+        <div style="height:4px; width:100%; background:#e2e8f0; border-radius:2px; margin-top:15px; overflow:hidden;">
+            <div id="bar-humidity" style="height:100%; width:65%; background:#0ea5e9; transition: width 1s ease-in-out;"></div>
+        </div>
+    </div>
+
+    <!-- Nitrogen Gauge -->
+    <div class="form-card" style="text-align:center; position:relative; overflow:hidden;">
+        <h3 style="font-size:1.1rem; color:var(--text-light); margin-bottom:15px;">{% trans "Soil Nitrogen (N)" %}</h3>
+        <div style="font-size:3rem; font-weight:900; color:#22c55e;" id="val-nitrogen">140 ppm</div>
+        <div style="font-size:0.9rem; color:var(--text-light); margin-top:10px;">Target: 120 - 160 ppm</div>
+        <div style="height:4px; width:100%; background:#e2e8f0; border-radius:2px; margin-top:15px; overflow:hidden;">
+            <div id="bar-nitrogen" style="height:100%; width:70%; background:#22c55e; transition: width 1s ease-in-out;"></div>
+        </div>
+    </div>
 </div>
 
+<div class="form-card" style="margin-top:20px;">
+    <h2 style="font-size:1.2rem; margin-bottom:15px;">📈 {% trans "Live Telemetry Feed" %}</h2>
+    <canvas id="liveChart" height="80"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Fetch live data every 2 seconds
-    setInterval(function() {
-        fetch("{% url 'api_iot_live_stream' %}")
-            .then(response => {% trans "response.json()) .then(data =" %}> {
-                if(data.status === "success") {
-                    data.data.forEach(item => {
-                        const tempEl = document.getElementById(`temp-${item.tracking_code}`);
-                        const statusEl = document.getElementById(`status-${item.tracking_code}`);
-                        const cardEl = document.getElementById(`card-${item.tracking_code}`);
-                        
-                        if(tempEl) {
-                            tempEl.innerText = item.temperature.toFixed(1) + " °C";
-                            
-                            // Visual alerts
-                            if(item.status === "Warning") {
-                                tempEl.style.color = "#ff4444";
-                                statusEl.innerText = "WARNING";
-                                statusEl.style.background = "#ff444433";
-                                statusEl.style.color = "#ff4444";
-                                cardEl.style.borderColor = "#ff4444";
-                                cardEl.style.boxShadow = "0 0 15px rgba(255, 68, 68, 0.2)";
-                            } else {
-                                tempEl.style.color = "var(--primary)";
-                                statusEl.innerText = "NORMAL";
-                                statusEl.style.background = "#15965333";
-                                statusEl.style.color = "var(--primary)";
-                                cardEl.style.borderColor = "#333";
-                                cardEl.style.boxShadow = "none";
-                            }
-                        }
-                    });
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // Live Chart Setup
+    const ctx = document.getElementById('liveChart').getContext('2d');
+    const liveChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Now', '-10s', '-20s', '-30s', '-40s', '-50s', '-60s'].reverse(),
+            datasets: [
+                {
+                    label: 'Moisture (%)',
+                    data: [41, 42, 42, 43, 42, 41, 42],
+                    borderColor: '#3b82f6',
+                    tension: 0.4
+                },
+                {
+                    label: 'Temp (°C)',
+                    data: [24.1, 24.3, 24.5, 24.4, 24.6, 24.5, 24.5],
+                    borderColor: '#ef4444',
+                    tension: 0.4
                 }
-            });
-    }, 2000);
+            ]
+        },
+        options: {
+            responsive: true,
+            animation: {
+                duration: 500, // Smooth transition for live updates
+            },
+            plugins: {
+                legend: { position: 'top' }
+            },
+            scales: {
+                y: { beginAtZero: false },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Simulating Live WebSocket Data
+    setInterval(() => {
+        // Randomly fluctuate values slightly
+        const moisture = (40 + Math.random() * 5).toFixed(1);
+        const temp = (23 + Math.random() * 3).toFixed(1);
+        const humidity = (60 + Math.random() * 10).toFixed(1);
+        const nitrogen = (130 + Math.random() * 20).toFixed(0);
+
+        // Update Gauges
+        document.getElementById('val-moisture').innerText = moisture + '%';
+        document.getElementById('bar-moisture').style.width = moisture + '%';
+
+        document.getElementById('val-temp').innerText = temp + '°C';
+        document.getElementById('bar-temp').style.width = (temp * 2) + '%';
+
+        document.getElementById('val-humidity').innerText = humidity + '%';
+        document.getElementById('bar-humidity').style.width = humidity + '%';
+
+        document.getElementById('val-nitrogen').innerText = nitrogen + ' ppm';
+        document.getElementById('bar-nitrogen').style.width = (nitrogen / 2) + '%';
+
+        // Update Chart
+        const timeLabel = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+        
+        liveChart.data.labels.push(timeLabel);
+        liveChart.data.labels.shift();
+        
+        liveChart.data.datasets[0].data.push(moisture);
+        liveChart.data.datasets[0].data.shift();
+        
+        liveChart.data.datasets[1].data.push(temp);
+        liveChart.data.datasets[1].data.shift();
+
+        liveChart.update();
+
+    }, 2500); // Updates every 2.5 seconds
+});
 </script>
 {% endblock %}

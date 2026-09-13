@@ -22,6 +22,7 @@
                 <th style="padding-bottom:10px;">{% trans "Quantity" %}</th>
                 <th style="padding-bottom:10px;">{% trans "Status" %}</th>
                 <th style="padding-bottom:10px;">{% trans "Date Requested" %}</th>
+                <th style="padding-bottom:10px; text-align:right;">{% trans "Actions" %}</th>
             </tr>
             {% for r in requests %}
             <tr>
@@ -29,7 +30,7 @@
                 <td style="padding:12px 0; border-top:1px solid #eee;">{{ r.produce.name }}</td>
                 <td style="padding:12px 0; border-top:1px solid #eee;"><strong>{{ r.requested_quantity }} {{ r.produce.unit }}</strong></td>
                 <td style="padding:12px 0; border-top:1px solid #eee;">
-                    {% if r.status == 'COMPLETED' or r.status == 'SUPPLIED' %}
+                    {% if r.status == 'COMPLETED' or r.status == 'SUPPLIED' or r.status == 'ACCEPTED' %}
                     <span style="color:green; font-weight:bold;">{{ r.status }}</span>
                     {% elif r.status == 'PENDING' %}
                     <span style="color:orange; font-weight:bold;">{{ r.status }}</span>
@@ -40,6 +41,18 @@
                     {% endif %}
                 </td>
                 <td style="padding:12px 0; border-top:1px solid #eee;">{{ r.created_at|date:"d M Y" }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee; text-align:right;">
+                    {% if r.status == 'PENDING' %}
+                        {% if user.organization_memberships.first.organization == r.produce.supplier %}
+                        <form method="post" action="{% url 'agri_supply_request_accept' r.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn" style="padding:4px 8px; font-size:0.8rem;">{% trans "Accept" %}</button>
+                        </form>
+                        {% else %}
+                        <span style="font-size:0.8rem; color:var(--text-light);">{% trans "Awaiting Supplier" %}</span>
+                        {% endif %}
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </table>

@@ -480,6 +480,30 @@ class CropYieldPrediction(models.Model):
     estimated_revenue = models.DecimalField(max_digits=12, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
+class CarbonCredit(models.Model):
+    """Tokenization engine for sustainable agricultural practices."""
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='carbon_credits')
+    practice_type = models.CharField(max_length=100, help_text="e.g. Cover Crops, No-Till Farming, Methane Reduction")
+    acres_applied = models.DecimalField(max_digits=8, decimal_places=2)
+    co2_sequestered_tons = models.DecimalField(max_digits=8, decimal_places=2, help_text="Calculated CO2 offset")
+    status = models.CharField(
+        max_length=20, 
+        choices=[('PENDING', 'Pending Verification'), ('MINTED', 'Minted/Verified'), ('SOLD', 'Sold')],
+        default='PENDING'
+    )
+    verification_hash = models.CharField(max_length=64, blank=True, help_text="Cryptographic hash proving ledger entry")
+    logged_at = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.co2_sequestered_tons:
+            # Simple heuristic: 1 acre of cover crops ~ 0.5 tons of CO2 sequestered per year
+            self.co2_sequestered_tons = float(self.acres_applied) * 0.5
+        if self.status == 'MINTED' and not self.verification_hash:
+            import hashlib
+            data = f"{self.organization.id}{self.practice_type}{self.co2_sequestered_tons}".encode('utf-8')
+            self.verification_hash = hashlib.sha256(data).hexdigest()
+        super().save(*args, **kwargs)
+
 class FoodLedger(models.Model):
     """Immutable blockchain-style ledger for tracing food chain of custody"""
     surplus_food = models.ForeignKey('SurplusFood', on_delete=models.CASCADE, related_name='ledger_entries')

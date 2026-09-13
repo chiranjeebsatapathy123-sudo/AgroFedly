@@ -236,3 +236,14 @@ class VolunteerProfileForm(forms.ModelForm):
             "vehicle_type": forms.TextInput(attrs={"placeholder": "e.g., Bike, Car, Van"}),
             "vehicle_number": forms.TextInput(attrs={"placeholder": "Vehicle registration number"}),
         }
+
+from .models import CarbonCredit
+
+class CarbonCreditForm(forms.ModelForm):
+    class Meta:
+        model = CarbonCredit
+        fields = ["practice_type", "acres_applied"]
+        widgets = {
+            "practice_type": forms.TextInput(attrs={"placeholder": "e.g. Cover Crops, No-Till Farming"}),
+            "acres_applied": forms.NumberInput(attrs={"step": "0.1", "placeholder": "100.5"}),
+        }

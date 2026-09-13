@@ -15,7 +15,10 @@
             <h1>{% trans "Field Geometry" %}</h1>
             <p>{% trans "Draw your field boundaries to calculate acreage and plan yields." %}</p>
         </div>
-        <button class="btn primary" onclick="document.getElementById('drawModal').style.display='flex'">{% trans "+ Draw New Field" %}</button>
+        <div style="display:flex; gap: 10px;">
+            <button class="btn" style="border:1px solid var(--primary); color:var(--primary);" onclick="runDroneSimulation()">🚁 {% trans "Simulate Drone NDVI" %}</button>
+            <button class="btn primary" onclick="document.getElementById('drawModal').style.display='flex'">{% trans "+ Draw New Field" %}</button>
+        </div>
     </div>
 </section>
 
@@ -126,5 +129,52 @@
         
         drawnItems.addLayer(layer);
     });
+
+    // Phase 9: Drone NDVI Simulation Logic
+    function runDroneSimulation() {
+        if (drawnItems.getLayers().length === 0) {
+            alert("{% trans 'Please draw at least one field before running the drone simulation.' %}");
+            return;
+        }
+        
+        // Alert user
+        alert("{% trans 'Deploying Precision Ag Drone... scanning NDVI field health.' %}");
+        
+        // Iterate through all drawn fields
+        drawnItems.eachLayer(function(layer) {
+            // Pick a random health status
+            const r = Math.random();
+            let color, health;
+            
+            if (r > 0.6) {
+                // Optimal Health (Green)
+                color = '#22c55e';
+                health = 'Optimal Health (NDVI: 0.82)';
+            } else if (r > 0.2) {
+                // Moderate Health (Yellow)
+                color = '#eab308';
+                health = 'Moderate Stress (NDVI: 0.45)';
+            } else {
+                // Low Health (Red)
+                color = '#ef4444';
+                health = 'Low Health Zone Detected (NDVI: 0.15) - Requires immediate nitrogen/water';
+            }
+            
+            // Update polygon styles
+            layer.setStyle({
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.7,
+                weight: 4
+            });
+            
+            // Update popup
+            if (layer._popup) {
+                const currentContent = layer.getPopup().getContent();
+                const newContent = currentContent + `<br><hr><strong style="color:${color};">${health}</strong>`;
+                layer.setPopupContent(newContent);
+            }
+        });
+    }
 </script>
 {% endblock %}

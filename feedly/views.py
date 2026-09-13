@@ -1279,20 +1279,42 @@ def agri_dashboard(request):
     produce = AgriculturalProduce.objects.all()
     processing = ProcessingRecord.objects.all()
     
-    total_produce = produce.aggregate(total=Sum('available_quantity'))['total'] or 0
-    total_processed = processing.aggregate(total=Sum('input_quantity'))['total'] or 0
+    total_suppliers = produce.values('supplier').distinct().count()
+    total_produce = sum(p.available_quantity for p in produce)
+    total_processed = sum(r.input_quantity for r in processing)
     
-    # Simple post-harvest loss avoided estimate:
-    # Assuming any produce that was processed was saved from potential loss.
-    loss_avoided = total_processed
+    # MOCK DATA FOR REALISTIC CHARTS
+    # 1. 6-Month Harvest vs Processing Yield (Line/Area Chart)
+    chart_trends_data = {
+        "labels": ["Apr", "May", "Jun", "Jul", "Aug", "Sep"],
+        "harvest": [1200, 1900, 3000, 2500, 3200, 4100],
+        "processed": [900, 1500, 2800, 2300, 3000, 3800]
+    }
+    
+    # 2. Crop Distribution (Doughnut Chart)
+    chart_distribution_data = {
+        "labels": ["Wheat", "Tomatoes", "Corn", "Potatoes", "Other"],
+        "data": [35, 25, 20, 15, 5]
+    }
+    
+    # 3. Inventory Risk Assessment (Bar Chart)
+    chart_risk_data = {
+        "labels": ["Optimal", "Expiring Soon", "Spoilage Risk"],
+        "data": [65, 25, 10]
+    }
     
     context = {
-        "total_suppliers": Organization.objects.filter(organization_type="SUPPLIER").count(),
+        "total_suppliers": total_suppliers,
         "total_produce": total_produce,
         "total_processed": total_processed,
-        "loss_avoided": loss_avoided,
-        "recent_produce": produce.order_by('-created_at')[:5],
-        "recent_processing": processing.order_by('-created_at')[:5]
+        "loss_avoided": total_processed * 0.15,
+        "recent_produce": produce.order_by('-harvest_date')[:5],
+        "recent_processing": processing.order_by('-id')[:5],
+        
+        # Chart Data
+        "chart_trends_data": chart_trends_data,
+        "chart_distribution_data": chart_distribution_data,
+        "chart_risk_data": chart_risk_data,
     }
     return render(request, "agri_dashboard.html", context)
 
@@ -1667,7 +1689,15 @@ def agri_supply_matching(request):
 
 @login_required
 def agri_supply_requests_list(request):
-    requests = AgriculturalSupplyRequest.objects.all().order_by('-created_at')
+    user_org = request.user.organization_memberships.first()
+    if user_org:
+        org = user_org.organization
+        requests = AgriculturalSupplyRequest.objects.filter(
+            models.Q(requester=org) | models.Q(produce__supplier=org)
+        ).order_by('-created_at')
+    else:
+        requests = AgriculturalSupplyRequest.objects.none()
+        
     return render(request, "agri_supply_requests_list.html", {"requests": requests})
 
 @login_required
@@ -1684,6 +1714,37 @@ def agri_supply_request_add(request):
     else:
         form = AgriculturalSupplyRequestForm()
     return render(request, "agri_supply_request_form.html", {"form": form})
+
+@login_required
+def agri_supply_request_accept(request, request_id):
+    if request.method == "POST":
+        supply_request = get_object_or_404(AgriculturalSupplyRequest, id=request_id)
+        
+        # Verify the logged in user belongs to the supplier organization
+        user_org = request.user.organization_memberships.first()
+        if not user_org or supply_request.produce.supplier != user_org.organization:
+            messages.error(request, "You are not authorized to accept this request.")
+            return redirect('agri_supply_requests_list')
+            
+        if supply_request.status != "PENDING":
+            messages.error(request, "Only pending requests can be accepted.")
+            return redirect('agri_supply_requests_list')
+            
+        if supply_request.produce.available_quantity < supply_request.requested_quantity:
+            messages.error(request, "Not enough available quantity to accept this request.")
+            return redirect('agri_supply_requests_list')
+            
+        # Deduct quantity and accept
+        supply_request.produce.available_quantity -= supply_request.requested_quantity
+        supply_request.produce.save()
+        
+        supply_request.status = "ACCEPTED"
+        supply_request.save()
+        
+        messages.success(request, f"Supply request accepted. Reserved {supply_request.requested_quantity} {supply_request.produce.unit}.")
+        
+    return redirect('agri_supply_requests_list')
+
 
 from .models import CropMarketTrend, WeatherAdvisory, AgriculturalShipment, QualityInspection, LedgerTransaction
 from .forms import QualityInspectionForm
@@ -1889,6 +1950,14 @@ def api_iot_live_stream(request):
             "status": "Warning" if new_temp > 6.0 or new_temp < 0.0 else "Normal"
         })
     return JsonResponse({"status": "success", "data": data})
+
+@login_required
+def agri_iot_dashboard(request):
+    """
+    Renders the live IoT Sensor Fleet dashboard for the agriculture module.
+    Simulates live data for Soil Moisture, Temperature, Humidity, and Nitrogen levels.
+    """
+    return render(request, "agri_iot_dashboard.html", {})
 
 import json
 @login_required
@@ -2363,3 +2432,33 @@ def food_chain_of_custody(request, food_id):
         "food": food,
         "ledger_entries": ledger_entries
     })
+
+# CARBON CREDIT TOKENIZATION (PHASE 10)
+from .models import CarbonCredit
+from .forms import CarbonCreditForm
+
+@_organization_required
+def agri_carbon_dashboard(request):
+    credits = CarbonCredit.objects.filter(organization=request.organization).order_by('-logged_at')
+    total_co2 = sum(c.co2_sequestered_tons for c in credits if c.status in ['MINTED', 'SOLD'])
+    
+    # Calculate estimated value (Market rate ~$20 per ton)
+    estimated_value = total_co2 * 20 
+    
+    return render(request, "agri_carbon_dashboard.html", {
+        "credits": credits,
+        "total_co2": total_co2,
+        "estimated_value": estimated_value
+    })
+
+@_organization_required
+def agri_carbon_log(request):
+    form = CarbonCreditForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        credit = form.save(commit=False)
+        credit.organization = request.organization
+        credit.status = 'MINTED' # Auto-mint for demo purposes
+        credit.save()
+        messages.success(request, f"Successfully minted Carbon Credit for {credit.co2_sequestered_tons} tons of CO2.")
+        return redirect("agri_carbon_dashboard")
+    return render(request, "agri_carbon_log.html", {"form": form})

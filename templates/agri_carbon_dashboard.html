@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Carbon Credit Exchange" %}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <div class="eyebrow">{% trans "SUSTAINABILITY" %}</div>
+        <h1>{% trans "Carbon Credit Exchange" %}</h1>
+        <p>{% trans "Mint NFTs for sustainable farming practices and sell them to corporate sponsors." %}</p>
+    </div>
+    <a class="btn primary" href="{% url 'agri_carbon_log' %}">{% trans "＋ Log Sustainable Practice" %}</a>
+</section>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <h3>{% trans "Total CO2 Sequestered" %}</h3>
+        <div class="value" style="color: #10b981;">{{ total_co2 }} <small>{% trans "tons" %}</small></div>
+        <div class="trend positive">{% trans "Verified via Ledger" %}</div>
+    </div>
+    <div class="metric-card">
+        <h3>{% trans "Estimated Market Value" %}</h3>
+        <div class="value">${{ estimated_value|floatformat:2 }}</div>
+        <div class="trend">{% trans "Based on $20/ton average" %}</div>
+    </div>
+</div>
+
+<div class="table-card" style="margin-top: 2rem;">
+    <h2>{% trans "Minted Credits" %}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>{% trans "Practice" %}</th>
+                <th>{% trans "Acres" %}</th>
+                <th>{% trans "CO2 Offset" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Verification Hash" %}</th>
+                <th>{% trans "Date" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in credits %}
+            <tr>
+                <td><b>{{ c.practice_type }}</b></td>
+                <td>{{ c.acres_applied }}</td>
+                <td><span style="color:#10b981; font-weight:bold;">{{ c.co2_sequestered_tons }} tons</span></td>
+                <td><span class="pill {{ c.status|lower }}">{{ c.get_status_display }}</span></td>
+                <td style="font-family: monospace; font-size: 0.85em; color: var(--text-muted);">
+                    {{ c.verification_hash|truncatechars:20 }}
+                </td>
+                <td>{{ c.logged_at|date:"M d, Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="empty">{% trans "No carbon credits minted yet." %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

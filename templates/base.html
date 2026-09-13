@@ -63,6 +63,13 @@
     <a href="{% url 'agri_produce_list' %}">📦 <span>Produce Inventory</span></a>
     <a href="{% url 'agri_processing_list' %}">⚙️ <span>Produce Processing</span></a>
     <a href="{% url 'agri_supply_matching' %}">🤝 <span>Supply Matching</span></a>
+    <a href="{% url 'agri_supply_requests_list' %}">📥 <span>Supply Requests</span></a>
+    <a href="{% url 'agri_market_trends' %}">📊 <span>Market Trends (AI)</span></a>
+    <a href="{% url 'agri_ledger' %}">🛡️ <span>Payments Ledger</span></a>
+    <a href="{% url 'agri_disease_scanner' %}">🔬 <span>AI Disease Scanner</span></a>
+    <a href="{% url 'agri_yield_predictor' %}">📈 <span>Yield Predictor</span></a>
+    <a href="{% url 'agri_iot_dashboard' %}">📡 <span>IoT Sensor Fleet</span></a>
+    <a href="{% url 'agri_carbon_dashboard' %}">💰 <span>Carbon Credit Exchange</span></a>
     
     <div class="drawer-label">Organization</div>
     {% if user.organization_memberships.all %}
@@ -95,8 +102,8 @@
       <div class="copilot-msg ai-msg">Hi! I'm your AgroFedly AI assistant. How can I help you today?</div>
     </div>
     <div class="copilot-input-area">
-      <input type="text" id="copilot-input" placeholder="Type or speak...">
-      <button id="copilot-voice-btn" class="copilot-btn-icon" title="Hold to speak">🎤</button>
+      <input type="text" id="copilot-input" placeholder="{% trans 'Ask about yields, weather, etc...' %}">
+      <button id="copilot-voice-btn" class="copilot-btn-icon" title="Hold to speak">🎙️</button>
       <button id="copilot-send-btn" class="copilot-btn-icon">➤</button>
     </div>
   </div>

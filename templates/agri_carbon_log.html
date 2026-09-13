@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Log Sustainable Practice" %}{% endblock %}
+
+{% block content %}
+<section class="form-page single">
+    <div class="form-card">
+        <div class="eyebrow">{% trans "CARBON OFFSET" %}</div>
+        <h1>{% trans "Log Sustainable Practice" %}</h1>
+        <p>{% trans "Record your eco-friendly farming practices to calculate and mint carbon credits." %}</p>
+        
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            {% for field in form %}
+            <label>
+                {{ field.label }}
+                {{ field }}
+                {% if field.errors %}
+                <small class="field-error">{{ field.errors|striptags }}</small>
+                {% endif %}
+            </label>
+            {% endfor %}
+            <button class="btn primary full">{% trans "Calculate & Mint Credits" %}</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
