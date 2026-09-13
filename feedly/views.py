@@ -2355,3 +2355,11 @@ def delivery_scan_qr(request, delivery_id):
         return redirect("delivery_detail", delivery_id=delivery.id)
         
     return render(request, "delivery_scan.html", {"delivery": delivery})
+
+def food_chain_of_custody(request, food_id):
+    food = get_object_or_404(SurplusFood, id=food_id)
+    ledger_entries = FoodLedger.objects.filter(surplus_food=food).order_by('timestamp')
+    return render(request, "food_traceability.html", {
+        "food": food,
+        "ledger_entries": ledger_entries
+    })
