@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Login{% endblock %}
+{% block title %}{% if persona %}{{ persona|title }} {% endif %}Login{% endblock %}
 {% block content %}
 <section class="auth-wrap"><div class="auth-card">
-  <div class="eyebrow">{% trans "SECURE ACCESS" %}</div><h1>{% trans "Welcome back" %}</h1><p>{% trans "Sign in to your Fedly workspace." %}</p>
+  <div class="eyebrow">{% if persona %}{% trans "SECURE ACCESS FOR" %} {{ persona|upper }}{% else %}{% trans "SECURE ACCESS" %}{% endif %}</div>
+  <h1>{% if persona %}{% trans "Login as" %} {{ persona|title }}{% else %}{% trans "Welcome back" %}{% endif %}</h1>
+  <p>{% trans "Sign in to your Fedly workspace." %}</p>
   <form method="post" class="form-grid">{% csrf_token %}
     <label>{% trans "Username" %}<input name="username" required autocomplete="username"></label>
     <label>{% trans "Password" %}<input name="password" type="password" required autocomplete="current-password"></label>

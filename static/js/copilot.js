@@ -128,6 +128,19 @@ document.addEventListener("DOMContentLoaded", () => {
         appendMessage(text, "user");
         inputField.value = "";
         
+        // --- PHASE 2: Voice-First Intent Parsing for Farmers ---
+        const lowerText = text.toLowerCase();
+        if (lowerText.includes("list") || lowerText.includes("rent") || lowerText.includes("add")) {
+            if (lowerText.includes("tractor") || lowerText.includes("equipment") || lowerText.includes("machine")) {
+                appendMessage("Navigating you to the Equipment Listing page...", "ai");
+                speakText("Navigating you to the Equipment Listing page.");
+                setTimeout(() => {
+                    window.location.href = "/agriculture/equipment/add/";
+                }, 1500);
+                return;
+            }
+        }
+        
         // Show typing indicator
         const typingDiv = document.createElement("div");
         typingDiv.className = "copilot-typing";

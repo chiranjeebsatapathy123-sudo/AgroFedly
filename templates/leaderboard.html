@@ -9,7 +9,7 @@
   {% if top_orgs %}
     <table class="data-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
       <thead>
-        <tr style="background: #f3f4f6; text-align: left;">
+        <tr style="background: var(--soft); text-align: left;">
           <th style="padding: 10px;">{% trans "Rank" %}</th>
           <th style="padding: 10px;">{% trans "Organization" %}</th>
           <th style="padding: 10px;">{% trans "Meals Saved" %}</th>
@@ -19,7 +19,7 @@
       </thead>
       <tbody>
         {% for impact in top_orgs %}
-        <tr style="border-bottom: 1px solid #e5e7eb;">
+        <tr style="border-bottom: 1px solid var(--line);">
           <td style="padding: 10px;">
             {% if forloop.counter == 1 %}🥇
             {% elif forloop.counter == 2 %}🥈

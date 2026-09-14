@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Agri_Comms: SMS Alerts{% endblock %}
+{% block content %}
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: #0f172a; color: white; border-radius: 20px; margin-bottom: 40px;">
+    <div class="eyebrow" style="color:#38bdf8; font-weight:bold; letter-spacing:2px;">{% trans "AGRI_COMMS" %}</div>
+    <h1 style="font-size:3rem; margin:10px 0; color: white;">{% trans "Offline-First SMS Alerts" %}</h1>
+    <p style="font-size:1.2rem; color:#94a3b8; max-width:600px; margin:0 auto;">{% trans "Configure automated localized weather and pest warnings sent directly to your basic feature phone." %}</p>
+</section>
+
+<div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
+    
+    <!-- Left Column: Configure Alerts -->
+    <div style="flex:1; min-width:300px;">
+        <h2 style="font-size:1.5rem; margin-bottom:20px;">⚙️ {% trans "Configure Triggers" %}</h2>
+        <div class="form-card">
+            
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:15px; border:1px solid var(--line); border-radius:10px; margin-bottom:15px;">
+                <div>
+                    <h4 style="margin:0 0 5px;">Frost Warnings</h4>
+                    <p style="margin:0; font-size:0.85rem; color:var(--muted);">Triggered when temp drops below 4°C</p>
+                </div>
+                <!-- Toggle switch mockup -->
+                <div style="width:40px; height:20px; background:#10b981; border-radius:10px; position:relative;">
+                    <div style="width:16px; height:16px; background: var(--surface); border-radius:50%; position:absolute; right:2px; top:2px;"></div>
+                </div>
+            </div>
+            
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:15px; border:1px solid var(--line); border-radius:10px; margin-bottom:15px;">
+                <div>
+                    <h4 style="margin:0 0 5px;">Pest Outbreaks (Locusts)</h4>
+                    <p style="margin:0; font-size:0.85rem; color:var(--muted);">Based on satellite/drone reports</p>
+                </div>
+                <div style="width:40px; height:20px; background:#10b981; border-radius:10px; position:relative;">
+                    <div style="width:16px; height:16px; background: var(--surface); border-radius:50%; position:absolute; right:2px; top:2px;"></div>
+                </div>
+            </div>
+            
+            <!-- Simulate Incoming Alert -->
+            <hr style="border:0; border-top:1px solid var(--line); margin:20px 0;">
+            <h3 style="margin-top:0;">📍 Alert Geofence Mapping</h3>
+            <div style="width:100%; height:250px; background:#1e293b; border-radius:10px; position:relative; overflow:hidden; margin-bottom:20px;">
+                <!-- Map Background -->
+                <div style="position:absolute; inset:0; opacity:0.2; background: repeating-linear-gradient(45deg, transparent, transparent 10px, #3b82f6 10px, #3b82f6 20px);"></div>
+                
+                <!-- Geofence 1 -->
+                <div style="position:absolute; top:20%; left:30%; width:100px; height:100px; background:rgba(239,68,68,0.3); border:2px dashed #ef4444; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                    <span style="background:#ef4444; color: white; font-size:0.7rem; padding:2px 5px; border-radius:4px;">Frost Risk</span>
+                </div>
+                
+                <!-- Geofence 2 -->
+                <div style="position:absolute; bottom:15%; right:20%; width:150px; height:80px; background:rgba(245,158,11,0.3); border:2px dashed #f59e0b; border-radius:30px; display:flex; align-items:center; justify-content:center;">
+                    <span style="background:#f59e0b; color: white; font-size:0.7rem; padding:2px 5px; border-radius:4px;">Locust Swarm</span>
+                </div>
+            </div>
+
+            <h3 style="margin-top:0;">Simulate Incoming Alert</h3>
+            <form method="post" style="display:flex; flex-direction:column; gap:10px;">
+                {% csrf_token %}
+                <select name="alert_type" required style="padding:10px; border-radius:8px; border:1px solid var(--line);">
+                    <option value="WEATHER_WARNING">Weather Warning</option>
+                    <option value="PEST_ALERT">Pest Alert</option>
+                    <option value="MARKET_PRICE">Market Price Surge</option>
+                </select>
+                <textarea name="message" required placeholder="Alert content..." style="padding:10px; border-radius:8px; border:1px solid var(--line); height:80px; resize:none;">WARNING: Heavy frost expected tonight. Cover tender crops. - AgroFedly AI</textarea>
+                <button type="submit" class="btn outline full" style="color:var(--primary); border-color:var(--primary);">Trigger Mock SMS</button>
+            </form>
+            
+        </div>
+    </div>
+    
+    <!-- Right Column: Phone Mockup & History -->
+    <div style="flex:1.5; min-width:300px; display:flex; justify-content:center;">
+        
+        <!-- Feature Phone Mockup -->
+        <div style="width:300px; height:600px; background:#111; border-radius:40px; padding:20px; box-shadow:0 20px 50px rgba(0,0,0,0.5); position:relative; border:4px solid #333;">
+            <div style="width:100%; height:45%; background:#cce2ff; border-radius:10px; padding:15px; box-sizing:border-box; overflow-y:auto; font-family:monospace; font-size:0.9rem; border:2px solid #555;">
+                <div style="text-align:center; font-weight:bold; margin-bottom:15px; color: var(--ink);">💬 Messages</div>
+                
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    {% for alert in alerts %}
+                    <div style="background: var(--surface); padding:10px; border-radius:5px; border:1px solid #999; box-shadow:2px 2px 0px rgba(0,0,0,0.1);">
+                        <div style="font-size:0.7rem; color: var(--muted); margin-bottom:3px;">AgroFedly • {{ alert.timestamp|date:"H:i" }}</div>
+                        <div style="color: var(--ink);">{{ alert.message }}</div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align:center; color: var(--muted); margin-top:20px;">No messages.</div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Keypad Mockup -->
+            <div style="margin-top:20px; display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">1</div>
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">2</div>
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">3</div>
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">4</div>
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">5</div>
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">6</div>
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">7</div>
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">8</div>
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">9</div>
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">*</div>
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">0</div>
+                <div style="background:#222; height:35px; border-radius:5px; display:flex; align-items:center; justify-content:center; color: white; font-weight:bold;">#</div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

@@ -450,7 +450,7 @@ def intelligence_center(request):
                     sensor_name=sensor_name, food_name=food_name, temperature=temperature,
                     location=location, status="SAFE" if safe else "ALERT"
                 )
-                messages.success(request, f"IoT reading #{reading.id} stored: {temperature:.1f}°C — {'SAFE' if safe else 'CHECK STORAGE'} for {food_name}.")
+                messages.success(request, f"IoT reading #{reading.id} stored: {temperature:.1f}Â°C â€” {'SAFE' if safe else 'CHECK STORAGE'} for {food_name}.")
             elif action == "preparation":
                 attendance = int(request.POST.get("attendance", 0))
                 if attendance < 0:
@@ -736,7 +736,7 @@ def add_surplus_food(request):
             surplus_food=food,
             action_type="LOGGED",
             performed_by=request.user,
-            details=f"Surplus food logged. Qty: {food.quantity}. Temp: {food.storage_temperature}°C."
+            details=f"Surplus food logged. Qty: {food.quantity}. Temp: {food.storage_temperature}Â°C."
         )
         
         messages.success(request, "Surplus recorded and AI safety status calculated.")
@@ -1600,27 +1600,27 @@ def agri_supply_matching(request):
                 # Type match (40%)
                 if demand.produce_name.lower() in produce.name.lower() or produce.name.lower() in demand.produce_name.lower():
                     score += 40
-                    reasons.append("✓ Same produce")
+                    reasons.append("âœ“ Same produce")
                 else:
                     # check similarity
                     sim = difflib.SequenceMatcher(None, demand.produce_name.lower(), produce.name.lower()).ratio()
                     if sim > 0.6:
                         score += 20
-                        reasons.append("✓ Similar produce")
+                        reasons.append("âœ“ Similar produce")
                         
                 # Quantity available (30%)
                 if produce.available_quantity >= demand.required_quantity:
                     score += 30
-                    reasons.append("✓ Quantity available")
+                    reasons.append("âœ“ Quantity available")
                 elif produce.available_quantity >= demand.required_quantity * 0.5:
                     score += 15
-                    reasons.append("✓ Partial quantity available")
+                    reasons.append("âœ“ Partial quantity available")
                     
                 # Quality match (15%)
                 if demand.quality_requirement and produce.quality_status:
                     if demand.quality_requirement.lower() == produce.quality_status.lower():
                         score += 15
-                        reasons.append("✓ Quality requirement satisfied")
+                        reasons.append("âœ“ Quality requirement satisfied")
                 else:
                     score += 10 # Default partial score if not specified
                     
@@ -1628,7 +1628,7 @@ def agri_supply_matching(request):
                 if demand.location and produce.location:
                     if demand.location.lower() == produce.location.lower():
                         score += 15
-                        reasons.append("✓ Nearby location")
+                        reasons.append("âœ“ Nearby location")
                 else:
                     score += 10 # Default partial score
                     
@@ -1761,10 +1761,10 @@ def generate_weather_advisory(city):
         advisory_text = f"Heavy rainfall ({weather['rainfall']}mm) expected. Delay harvesting to prevent post-harvest loss."
         severity = "HIGH"
     elif weather["temperature"] > 38:
-        advisory_text = f"Extreme heat ({weather['temperature']}°C). Ensure adequate irrigation and shade for sensitive crops."
+        advisory_text = f"Extreme heat ({weather['temperature']}Â°C). Ensure adequate irrigation and shade for sensitive crops."
         severity = "HIGH"
     elif weather["temperature"] < 5:
-        advisory_text = f"Frost warning ({weather['temperature']}°C). Protect vulnerable crops."
+        advisory_text = f"Frost warning ({weather['temperature']}Â°C). Protect vulnerable crops."
         severity = "MEDIUM"
         
     if advisory_text:
@@ -1848,7 +1848,7 @@ def agri_release_escrow(request, tracking_code):
             transaction.escrow_status = "RELEASED"
             transaction.status = "COMPLETED"
             transaction.save()
-            messages.success(request, f"Funds (₹{transaction.amount}) released to {transaction.receiver_org.name} successfully.")
+            messages.success(request, f"Funds (â‚¹{transaction.amount}) released to {transaction.receiver_org.name} successfully.")
         else:
             messages.info(request, "No pending escrow transactions found for this shipment.")
             
@@ -2030,7 +2030,7 @@ def agri_rent_equipment(request, equipment_id):
             status="APPROVED"
         )
         
-        messages.success(request, f"Successfully rented {equipment.name} for {hours} hours (₹{total_cost}).")
+        messages.success(request, f"Successfully rented {equipment.name} for {hours} hours (â‚¹{total_cost}).")
         return redirect("agri_equipment_hub")
 
 @login_required
@@ -2306,28 +2306,19 @@ def logistics_map(request):
     )
     
     delivery_data = []
-    # Mock some central coordinates if missing to ensure map works beautifully out of the box
-    base_lat, base_lng = 19.0760, 72.8777 # Mumbai center
-    
     for d in deliveries:
-        lat = d.current_lat if d.current_lat else (base_lat + random.uniform(-0.05, 0.05))
-        lng = d.current_lng if d.current_lng else (base_lng + random.uniform(-0.05, 0.05))
-        
+        # Mock coordinates for demo
+        lat = 18.5204 + random.uniform(-0.05, 0.05)
+        lng = 73.8567 + random.uniform(-0.05, 0.05)
         delivery_data.append({
-            'id': d.id,
-            'food_name': d.food_name,
-            'quantity': d.quantity,
-            'status': d.status,
-            'lat': lat,
-            'lng': lng,
-            'driver': d.driver_name or "Unassigned"
+            "id": d.id,
+            "tracking_code": d.tracking_code,
+            "status": d.status,
+            "lat": lat,
+            "lng": lng
         })
         
-    return render(request, "logistics_map.html", {
-        "deliveries_json": json.dumps(delivery_data),
-        "base_lat": base_lat,
-        "base_lng": base_lng
-    })
+    return render(request, "logistics_map.html", {"deliveries_json": json.dumps(delivery_data)})
 
 @login_required
 @_organization_required
@@ -2462,3 +2453,510 @@ def agri_carbon_log(request):
         messages.success(request, f"Successfully minted Carbon Credit for {credit.co2_sequestered_tons} tons of CO2.")
         return redirect("agri_carbon_dashboard")
     return render(request, "agri_carbon_log.html", {"form": form})
+
+# --- MISSING PHASE 1 VIEWS ---
+@login_required
+def agri_equipment_add(request):
+    if request.method == "POST":
+        from .models import Equipment
+        name = request.POST.get("name")
+        eq_type = request.POST.get("equipment_type")
+        rate = request.POST.get("hourly_rate")
+        loc = request.POST.get("location")
+        Equipment.objects.create(owner=request.user, name=name, equipment_type=eq_type, hourly_rate=rate, location=loc)
+        messages.success(request, "Equipment listed successfully!")
+        return redirect("agri_equipment_hub")
+    return render(request, "agri_equipment_add.html")
+
+@login_required
+def agri_rent_equipment(request, equipment_id):
+    from .models import Equipment, EquipmentRental
+    eq = get_object_or_404(Equipment, id=equipment_id)
+    if request.method == "POST":
+        hours = int(request.POST.get("hours", 1))
+        from django.utils import timezone
+        import datetime
+        start = timezone.now()
+        end = start + datetime.timedelta(hours=hours)
+        total = eq.hourly_rate * hours
+        EquipmentRental.objects.create(equipment=eq, renter=request.user, start_time=start, end_time=end, total_cost=total)
+        messages.success(request, f"Requested rental for {hours} hours!")
+        return redirect("agri_equipment_hub")
+    return redirect("agri_equipment_hub")
+
+# --- PHASE 2 VIEWS ---
+@login_required
+def agri_ai_advisor(request):
+    from .models import MarketPricePrediction
+    predictions = MarketPricePrediction.objects.all().order_by('-updated_at')
+    if not predictions.exists():
+        MarketPricePrediction.objects.bulk_create([
+            MarketPricePrediction(crop_name="Wheat", current_price_per_kg=22.50, predicted_price_next_week=24.00, predicted_price_month=28.50, confidence_score=85, recommendation="HOLD"),
+            MarketPricePrediction(crop_name="Rice", current_price_per_kg=35.00, predicted_price_next_week=34.50, predicted_price_month=31.00, confidence_score=92, recommendation="SELL_NOW")
+        ])
+        predictions = MarketPricePrediction.objects.all().order_by('-updated_at')
+    return render(request, "agri_ai_advisor.html", {"predictions": predictions})
+
+@login_required
+def agri_finance_portal(request):
+    from .models import MicroLoan, CropInsurance
+    loans = MicroLoan.objects.filter(farmer=request.user)
+    policies = CropInsurance.objects.filter(farmer=request.user)
+    if request.method == "POST":
+        action = request.POST.get("action")
+        if action == "apply_loan":
+            MicroLoan.objects.create(farmer=request.user, amount=request.POST.get("amount"), purpose=request.POST.get("purpose"), interest_rate=4.5)
+            messages.success(request, "Loan application submitted!")
+        elif action == "buy_insurance":
+            CropInsurance.objects.create(farmer=request.user, crop_name=request.POST.get("crop_name"), acres=request.POST.get("acres"), premium_paid=500, payout_amount=10000, trigger_condition="Drought")
+            messages.success(request, "Insurance active!")
+        return redirect("agri_finance_portal")
+    return render(request, "agri_finance_portal.html", {"loans": loans, "policies": policies})
+
+@login_required
+def agri_csa_marketplace(request):
+    from .models import CSABox, CSASubscription
+    boxes = CSABox.objects.filter(is_active=True)
+    subs = CSASubscription.objects.filter(consumer=request.user)
+    if request.method == "POST":
+        if request.POST.get("action") == "subscribe":
+            box = get_object_or_404(CSABox, id=request.POST.get("box_id"))
+            CSASubscription.objects.create(consumer=request.user, box=box)
+            messages.success(request, f"Subscribed to {box.name}!")
+        return redirect("agri_csa_marketplace")
+    return render(request, "agri_csa_marketplace.html", {"boxes": boxes, "my_subscriptions": subs})
+
+@login_required
+def agri_warehousing(request):
+    from .models import Warehouse, WarehouseBooking
+    warehouses = Warehouse.objects.filter(is_active=True)
+    bookings = WarehouseBooking.objects.filter(farmer=request.user)
+    if not warehouses.exists():
+        Warehouse.objects.create(owner=request.user, name="Pune Cold Storage", location="Pune", total_palettes=500, available_palettes=120, price_per_palette_day=15.00, current_temp_celsius=2.5)
+        warehouses = Warehouse.objects.filter(is_active=True)
+    if request.method == "POST":
+        warehouse = get_object_or_404(Warehouse, id=request.POST.get("warehouse_id"))
+        palettes = int(request.POST.get("palettes", 1))
+        if warehouse.available_palettes >= palettes:
+            from django.utils import timezone
+            import datetime
+            WarehouseBooking.objects.create(farmer=request.user, warehouse=warehouse, palettes=palettes, start_date=timezone.now().date(), end_date=timezone.now().date() + datetime.timedelta(days=7))
+            warehouse.available_palettes -= palettes
+            warehouse.save()
+            messages.success(request, f"Booked {palettes} palettes!")
+        return redirect("agri_warehousing")
+    return render(request, "agri_warehousing.html", {"warehouses": warehouses, "my_bookings": bookings})
+
+# --- PHASE 3 VIEWS ---
+@login_required
+def agri_skyview(request):
+    from .models import DroneImagery
+    images = DroneImagery.objects.filter(farmer=request.user).order_by('-scan_date')
+    if not images.exists():
+        DroneImagery.objects.create(farmer=request.user, image_url="/static/images/ndvi_sample.jpg", ndvi_score=0.75, issues_detected="Mild drought stress in Sector B")
+        images = DroneImagery.objects.filter(farmer=request.user).order_by('-scan_date')
+    return render(request, "agri_skyview.html", {"images": images})
+
+@login_required
+def agri_invest(request):
+    from .models import InfrastructureProject, Investment
+    projects = InfrastructureProject.objects.all()
+    investments = Investment.objects.filter(investor=request.user)
+    if not projects.exists():
+        InfrastructureProject.objects.create(farmer=request.user, title="Solar Water Pump", description="5kW Solar pump for 10 acres", goal_amount=500000, current_amount=150000, roi_percentage=12.5)
+        projects = InfrastructureProject.objects.all()
+    if request.method == "POST":
+        project = get_object_or_404(InfrastructureProject, id=request.POST.get("project_id"))
+        amount = request.POST.get("amount")
+        Investment.objects.create(investor=request.user, project=project, amount=amount)
+        project.current_amount += float(amount)
+        project.save()
+        messages.success(request, f"Invested Rs {amount} successfully!")
+        return redirect("agri_invest")
+    return render(request, "agri_invest.html", {"projects": projects, "investments": investments})
+
+@login_required
+def agri_freight(request):
+    from .models import FreightListing, FreightBid
+    listings = FreightListing.objects.filter(status="OPEN")
+    my_bids = FreightBid.objects.filter(transporter=request.user)
+    if not listings.exists():
+        FreightListing.objects.create(farmer=request.user, cargo_description="Wheat (500 Tons)", weight_tons=500, pickup_location="Pune", drop_location="Mumbai")
+        listings = FreightListing.objects.filter(status="OPEN")
+    if request.method == "POST":
+        listing = get_object_or_404(FreightListing, id=request.POST.get("listing_id"))
+        amount = request.POST.get("bid_amount")
+        days = request.POST.get("estimated_days")
+        FreightBid.objects.create(transporter=request.user, listing=listing, bid_amount=amount, estimated_days=days)
+        messages.success(request, "Bid submitted!")
+        return redirect("agri_freight")
+    return render(request, "agri_freight.html", {"listings": listings, "my_bids": my_bids})
+
+@login_required
+def agri_soil(request):
+    from .models import SoilTest
+    tests = SoilTest.objects.filter(farmer=request.user)
+    if request.method == "POST":
+        n = request.POST.get("nitrogen")
+        p = request.POST.get("phosphorus")
+        k = request.POST.get("potassium")
+        ph = request.POST.get("ph")
+        SoilTest.objects.create(farmer=request.user, npk_nitrogen=n, npk_phosphorus=p, npk_potassium=k, ph_level=ph, ai_recommendation="Apply 20kg Urea and 10kg DAP next week.")
+        messages.success(request, "Soil test logged! AI Schedule generated.")
+        return redirect("agri_soil")
+    return render(request, "agri_soil.html", {"tests": tests})
+
+@login_required
+def agri_comms(request):
+    from .models import SMSAlert
+    alerts = SMSAlert.objects.filter(farmer=request.user).order_by('-timestamp')
+    if request.method == "POST":
+        alert_type = request.POST.get("alert_type")
+        msg = request.POST.get("message")
+        SMSAlert.objects.create(farmer=request.user, alert_type=alert_type, message=msg, is_sent=True)
+        messages.success(request, "Alert generated.")
+        return redirect("agri_comms")
+    return render(request, "agri_comms.html", {"alerts": alerts})
+
+
+# ----------------- PHASE 4: ORGANIZATION ENTERPRISE FEATURES -----------------
+@login_required
+@_organization_required
+def org_fleet_routing(request):
+    from .models import FleetRoute
+    import json, random
+    routes = FleetRoute.objects.filter(organization=request.organization).order_by('-created_at')
+    
+    if not routes.exists():
+        # Mock some routes
+        FleetRoute.objects.create(
+            organization=request.organization,
+            driver_name="Ramesh Singh",
+            vehicle_plate="MH-12-AB-1234",
+            optimized_path_json=json.dumps([{"lat":18.5204, "lng":73.8567, "name":"Pickup 1"}, {"lat":18.524, "lng":73.850, "name":"Dropoff 1"}]),
+            total_distance_km=14.5,
+            status="IN_PROGRESS"
+        )
+        routes = FleetRoute.objects.filter(organization=request.organization).order_by('-created_at')
+        
+    return render(request, "org_fleet_routing.html", {"routes": routes})
+
+@login_required
+@_organization_required
+def org_grants(request):
+    from .models import GrantOpportunity
+    grants = GrantOpportunity.objects.filter(organization=request.organization)
+    if not grants.exists():
+        GrantOpportunity.objects.create(organization=request.organization, title="Tata CSR Rural Development", provider="Tata Trusts", max_amount=5000000, deadline="2026-12-31", status="DISCOVERED")
+        GrantOpportunity.objects.create(organization=request.organization, title="Govt. Food Security Grant", provider="Ministry of Agriculture", max_amount=10000000, deadline="2026-10-15", status="APPLIED")
+        grants = GrantOpportunity.objects.filter(organization=request.organization)
+        
+    if request.method == "POST":
+        action = request.POST.get("action")
+        grant_id = request.POST.get("grant_id")
+        from django.shortcuts import get_object_or_404
+        grant = get_object_or_404(GrantOpportunity, id=grant_id)
+        if action == "move_forward":
+            # Simple state machine
+            states = ['DISCOVERED', 'PREPARING', 'APPLIED', 'WON']
+            idx = states.index(grant.status)
+            if idx < len(states)-1:
+                grant.status = states[idx+1]
+                grant.save()
+        return redirect("org_grants")
+        
+    return render(request, "org_grants.html", {"grants": grants})
+
+@login_required
+@_organization_required
+def org_shift_scheduler(request):
+    from .models import VolunteerShift, ShiftClaim
+    import datetime
+    from django.utils import timezone
+    shifts = VolunteerShift.objects.filter(organization=request.organization, date__gte=timezone.now().date()).order_by('date', 'start_time')
+    
+    if not shifts.exists():
+        d = timezone.now().date() + datetime.timedelta(days=1)
+        s1 = VolunteerShift.objects.create(organization=request.organization, role="Warehouse Sorter", date=d, start_time="09:00:00", end_time="13:00:00", capacity=5, description="Sorting incoming ugly veggies")
+        s2 = VolunteerShift.objects.create(organization=request.organization, role="Delivery Driver", date=d, start_time="14:00:00", end_time="18:00:00", capacity=2, description="Driving the refrigerated van")
+        ShiftClaim.objects.create(shift=s1, volunteer=request.user, status="CONFIRMED")
+        shifts = VolunteerShift.objects.filter(organization=request.organization, date__gte=timezone.now().date()).order_by('date', 'start_time')
+
+    return render(request, "org_shift_scheduler.html", {"shifts": shifts})
+
+@login_required
+@_organization_required
+def org_esg_report(request):
+    from .models import ESGReport
+    reports = ESGReport.objects.filter(organization=request.organization).order_by('-generated_at')
+    
+    if request.method == "POST":
+        ESGReport.objects.create(
+            organization=request.organization,
+            report_month=request.POST.get("month", "October 2026"),
+            total_food_rescued_kg=12500.50,
+            total_meals_provided=25000,
+            carbon_emissions_saved_kg=8400.25
+        )
+        return redirect("org_esg_report")
+        
+    return render(request, "org_esg_report.html", {"reports": reports})
+
+
+# ----------------- PHASE 5: CONSUMER & COMMUNITY ECOSYSTEM -----------------
+@login_required
+def user_ai_recipe(request):
+    recipe = None
+    if request.method == "POST":
+        ingredients = request.POST.get("ingredients", "")
+        # Mocking AI response
+        recipe = {
+            "title": "Zero-Waste Rustic Veggie Hash",
+            "ingredients": ingredients.split(','),
+            "instructions": [
+                "1. Chop all your leftover veggies into small, even cubes.",
+                "2. Sauteé them in olive oil over medium heat until caramelized.",
+                "3. Season with salt, pepper, and paprika.",
+                "4. Serve with a fried egg on top!"
+            ],
+            "waste_saved": "0.5 kg"
+        }
+    return render(request, "user_ai_recipe.html", {"recipe": recipe})
+
+@login_required
+def user_food_swap(request):
+    from .models import P2PFoodSwap
+    swaps = P2PFoodSwap.objects.filter(status='AVAILABLE').order_by('-created_at')
+    
+    if not swaps.exists():
+        P2PFoodSwap.objects.create(user=request.user, item_name="2 Jars Homemade Jam", description="Made too much strawberry jam, looking to trade for fresh herbs.", looking_for="Fresh Basil or Mint")
+        P2PFoodSwap.objects.create(user=request.user, item_name="Excess Zucchini", description="My garden is overflowing! Free to a good home.", looking_for="Nothing, just take it!")
+        swaps = P2PFoodSwap.objects.filter(status='AVAILABLE').order_by('-created_at')
+        
+    return render(request, "user_food_swap.html", {"swaps": swaps})
+
+@login_required
+def user_carbon_tracker(request):
+    from .models import UserGreenScore
+    score, created = UserGreenScore.objects.get_or_create(
+        user=request.user,
+        defaults={"current_score": 1450, "level_name": "Eco Warrior", "total_co2_saved_kg": 45.2, "total_food_waste_prevented_kg": 12.5}
+    )
+    return render(request, "user_carbon_tracker.html", {"score": score})
+
+@login_required
+def user_fridge_locator(request):
+    from .models import CommunityFridge
+    fridges = CommunityFridge.objects.all()
+    if not fridges.exists():
+        CommunityFridge.objects.create(name="Downtown Free Fridge", location_address="123 Main St, near the library", status="LOW")
+        CommunityFridge.objects.create(name="Neighborhood Pantry", location_address="45 Elm St", status="FULL")
+        fridges = CommunityFridge.objects.all()
+        
+    return render(request, "user_fridge_locator.html", {"fridges": fridges})
+
+@login_required
+def user_farm_tour(request):
+    farm_data = None
+    if request.method == "POST":
+        code = request.POST.get("code", "")
+        # Mocked Farm Data
+        farm_data = {
+            "name": "Green Valley Organics",
+            "farmer": "Priya Sharma",
+            "location": "Nashik, Maharashtra",
+            "soil_health": "Excellent (92%)",
+            "harvest_date": "2 Days Ago",
+            "story": "We believe in regenerative agriculture. Your tomatoes were grown without synthetic pesticides, using collected rainwater."
+        }
+    return render(request, "user_farm_tour.html", {"farm_data": farm_data})
+
+# ==============================================================================
+# PHASE 6: GLOBAL & FUTURE-TECH EXPANSION (SYSTEM, AGRI, USER)
+# ==============================================================================
+
+@login_required
+def system_disaster_relief(request):
+    import random
+    if request.method == 'POST':
+        messages.success(request, "Emergency Rerouting Activated! 5,000 surplus meals diverted to Red Zone.")
+        return redirect('system_disaster_relief')
+        
+    context = {
+        'active_zones': [
+            {'name': 'Mumbai Floods', 'urgency': 'CRITICAL', 'meals_needed': 15000, 'fulfilled': 3200},
+            {'name': 'Assam Relief', 'urgency': 'HIGH', 'meals_needed': 8000, 'fulfilled': 6500},
+        ],
+        'available_fleet': random.randint(15, 45)
+    }
+    return render(request, 'system_disaster_relief.html', context)
+
+@login_required
+def agri_greenhouse_controller(request):
+    import random
+    if request.method == 'POST':
+        device_id = request.POST.get('device_id')
+        messages.success(request, f"Device state updated successfully via IoT Gateway.")
+        return redirect('agri_greenhouse_controller')
+        
+    context = {
+        'devices': [
+            {'id': 1, 'name': 'LED Grow Array (Sector A)', 'type': 'LIGHT', 'status': True, 'reading': '18 Hrs / Day'},
+            {'id': 2, 'name': 'Hydroponic Pump 1', 'type': 'IRRIGATION', 'status': False, 'reading': 'Flow: 0 L/m'},
+            {'id': 3, 'name': 'HVAC Climate Control', 'type': 'CLIMATE', 'status': True, 'reading': 'Temp: 22°C'},
+            {'id': 4, 'name': 'Nutrient Doser', 'type': 'IRRIGATION', 'status': True, 'reading': 'pH: 6.5'}
+        ],
+        'system_health': random.randint(85, 99)
+    }
+    return render(request, 'agri_greenhouse_controller.html', context)
+
+@login_required
+def user_agri_tourism(request):
+    if request.method == 'POST':
+        messages.success(request, "Farm stay booked successfully! The farmer has been notified.")
+        return redirect('user_agri_tourism')
+        
+    context = {
+        'listings': [
+            {'id': 1, 'title': 'Weekend Organic Farm Stay', 'farmer': 'Ramesh Kumar', 'price': 2500, 'type': 'Overnight Stay', 'rating': 4.8},
+            {'id': 2, 'title': 'Mango Picking Tour & Lunch', 'farmer': 'Sunita Devi', 'price': 800, 'type': 'Guided Tour', 'rating': 4.9},
+            {'id': 3, 'title': 'Learn Permaculture Basics', 'farmer': 'Green Acres', 'price': 1500, 'type': 'Workshop', 'rating': 4.7}
+        ]
+    }
+    return render(request, 'user_agri_tourism.html', context)
+
+@login_required
+def system_blockchain_explorer(request):
+    import hashlib
+    import time
+    import random
+    
+    # Generate some fake blockchain blocks
+    blocks = []
+    for i in range(5):
+        tx = f"TXN-{random.randint(10000,99999)}"
+        h = hashlib.sha256(f"{tx}{time.time()}".encode()).hexdigest()
+        blocks.append({
+            'hash': h,
+            'short_hash': h[:12] + "...",
+            'type': random.choice(['CROP_SALE', 'GRANT_DISBURSED', 'ESG_REPORT_VERIFIED']),
+            'timestamp': "Just now" if i == 0 else f"{i*15} mins ago"
+        })
+        
+    context = {'blocks': blocks}
+    return render(request, 'system_blockchain_explorer.html', context)
+
+@login_required
+def agri_auto_subsidy(request):
+    import random
+    if request.method == 'POST':
+        messages.success(request, "AI has successfully generated and filed the subsidy application via Govt API!")
+        return redirect('agri_auto_subsidy')
+        
+    context = {
+        'available_grants': [
+            {'name': 'PM-KISAN Installment Update', 'match_score': 98, 'amount': '₹2,000'},
+            {'name': 'Solar Pump Subsidy (KUSUM)', 'match_score': 85, 'amount': 'Up to 60%'},
+            {'name': 'Organic Farming Certification Grant', 'match_score': 72, 'amount': '₹5,000/hectare'}
+        ],
+        'ai_confidence': random.randint(88, 99)
+    }
+    return render(request, 'agri_auto_subsidy.html', context)
+
+
+# Phase 11: Ecosystem Coordination (Control Tower + Alliances)
+@login_required
+def ecosystem_coordination(request):
+    try:
+        org = request.user.organization
+    except:
+        return redirect('home')
+        
+    alliances = org.alliances.all().select_related('alliance')
+    active_alliance = None
+    tasks = []
+    members = []
+    
+    alliance_id = request.GET.get('alliance')
+    if alliance_id:
+        active_alliance = get_object_or_404(EcosystemAlliance, id=alliance_id)
+        if not active_alliance.members.filter(organization=org).exists():
+            return redirect('ecosystem_coordination')
+        tasks = active_alliance.tasks.all().order_by('-created_at')
+        members = active_alliance.members.all().select_related('organization')
+    elif alliances.exists():
+        active_alliance = alliances.first().alliance
+        tasks = active_alliance.tasks.all().order_by('-created_at')
+        members = active_alliance.members.all().select_related('organization')
+        
+    if request.method == 'POST' and active_alliance:
+        action = request.POST.get('action')
+        if action == 'create_task':
+            title = request.POST.get('title')
+            assignee_id = request.POST.get('assignee')
+            assignee = None
+            if assignee_id:
+                assignee = get_object_or_404(Organization, id=assignee_id)
+            SharedTask.objects.create(
+                alliance=active_alliance,
+                title=title,
+                created_by=org,
+                assigned_to=assignee
+            )
+            return redirect(f"{reverse('ecosystem_coordination')}?alliance={active_alliance.id}")
+            
+        elif action == 'update_task_status':
+            task_id = request.POST.get('task_id')
+            new_status = request.POST.get('status')
+            task = get_object_or_404(SharedTask, id=task_id, alliance=active_alliance)
+            task.status = new_status
+            task.save()
+            return redirect(f"{reverse('ecosystem_coordination')}?alliance={active_alliance.id}")
+
+    context = {
+        'org': org,
+        'alliances': alliances,
+        'active_alliance': active_alliance,
+        'tasks': tasks,
+        'members': members,
+        'todo_tasks': tasks.filter(status='TODO') if tasks else [],
+        'inprogress_tasks': tasks.filter(status='IN_PROGRESS') if tasks else [],
+        'completed_tasks': tasks.filter(status='COMPLETED') if tasks else [],
+        
+        # Control Tower Stats
+        'total_surplus': SurplusFood.objects.filter(donor=org, status='AVAILABLE').count(),
+        'total_deliveries': Delivery.objects.filter(logistics_provider=org, status='IN_TRANSIT').count(),
+        'total_warehouses': Warehouse.objects.filter(owner=org).count(),
+    }
+    return render(request, 'ecosystem_coordination.html', context)
+
+@login_required
+def create_alliance(request):
+    try:
+        org = request.user.organization
+    except:
+        return redirect('home')
+        
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        alliance = EcosystemAlliance.objects.create(name=name, description=description)
+        AllianceMember.objects.create(alliance=alliance, organization=org, role='Admin')
+        return redirect(f"{reverse('ecosystem_coordination')}?alliance={alliance.id}")
+        
+    return redirect('ecosystem_coordination')
+
+@login_required
+def join_alliance(request):
+    try:
+        org = request.user.organization
+    except:
+        return redirect('home')
+        
+    if request.method == 'POST':
+        alliance_id = request.POST.get('alliance_id')
+        alliance = get_object_or_404(EcosystemAlliance, id=alliance_id)
+        AllianceMember.objects.get_or_create(alliance=alliance, organization=org)
+        return redirect(f"{reverse('ecosystem_coordination')}?alliance={alliance.id}")
+        
+    return redirect('ecosystem_coordination')

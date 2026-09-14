@@ -17,7 +17,7 @@
     <p style="margin:5px 0;">{% trans "We analyzed your Farm Fields and Inventory to find active crops:" %}</p>
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
         {% for crop in my_crops %}
-        <span class="pill" style="background:var(--primary); color:white; font-size:1rem; padding:5px 15px;">{{ crop|title }}</span>
+        <span class="pill" style="background:var(--primary); color: white; font-size:1rem; padding:5px 15px;">{{ crop|title }}</span>
         {% empty %}
         <span class="pill" style="background:var(--soft);">{% trans "No crops found. Add fields or inventory first." %}</span>
         {% endfor %}

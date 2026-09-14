@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Agri_Soil: AI Nutrition Scheduler{% endblock %}
+{% block content %}
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: #0f172a; color: white; border-radius: 20px; margin-bottom: 40px;">
+    <div class="eyebrow" style="color:#38bdf8; font-weight:bold; letter-spacing:2px;">{% trans "AGRI_SOIL" %}</div>
+    <h1 style="font-size:3rem; margin:10px 0; color: white;">{% trans "AI Soil Nutrition Scheduler" %}</h1>
+    <p style="font-size:1.2rem; color:#94a3b8; max-width:600px; margin:0 auto;">{% trans "Log your NPK values to receive a hyper-precise, day-by-day fertigation schedule." %}</p>
+</section>
+
+<div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
+    
+    <!-- Input Form -->
+    <div style="flex:1; min-width:300px;">
+        <div class="form-card">
+            <h2 style="font-size:1.5rem; margin-top:0;">🧪 {% trans "Log New Soil Test" %}</h2>
+            <p style="color:var(--muted); font-size:0.95rem; margin-bottom:20px;">Enter the values from your latest lab report.</p>
+            
+            <form method="post" style="display:flex; flex-direction:column; gap:15px;">
+                {% csrf_token %}
+                
+                <div style="display:flex; gap:15px;">
+                    <div style="flex:1;">
+                        <label style="font-weight:bold; font-size:0.9rem;">Nitrogen (N)</label>
+                        <input type="number" step="0.01" name="nitrogen" required placeholder="kg/ha" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); margin-top:5px;">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-weight:bold; font-size:0.9rem;">Phosphorus (P)</label>
+                        <input type="number" step="0.01" name="phosphorus" required placeholder="kg/ha" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); margin-top:5px;">
+                    </div>
+                </div>
+                
+                <div style="display:flex; gap:15px;">
+                    <div style="flex:1;">
+                        <label style="font-weight:bold; font-size:0.9rem;">Potassium (K)</label>
+                        <input type="number" step="0.01" name="potassium" required placeholder="kg/ha" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); margin-top:5px;">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-weight:bold; font-size:0.9rem;">pH Level</label>
+                        <input type="number" step="0.01" name="ph" required placeholder="1.0-14.0" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); margin-top:5px;">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn primary full" style="margin-top:10px; padding:12px; font-size:1.1rem;">Generate AI Schedule</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- AI Results -->
+    <div style="flex:1.5; min-width:300px;">
+        <h2 style="font-size:1.5rem; margin-bottom:20px;">📅 {% trans "AI Fertigation Schedule" %}</h2>
+        
+        {% if tests %}
+            {% with latest=tests.first %}
+            <div class="form-card" style="border-left: 4px solid var(--green);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+                    <div>
+                        <h3 style="margin:0 0 5px;">Latest Recommendation</h3>
+                        <p style="color:var(--muted); font-size:0.9rem; margin:0;">Based on test from {{ latest.test_date|date:"M d, Y" }}</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <span style="background:#e0e7ff; color:#4338ca; padding:5px 10px; border-radius:15px; font-weight:bold; font-size:0.8rem;">N: {{ latest.npk_nitrogen }}</span>
+                        <span style="background:#fce7f3; color:#be185d; padding:5px 10px; border-radius:15px; font-weight:bold; font-size:0.8rem;">P: {{ latest.npk_phosphorus }}</span>
+                        <span style="background: var(--surface); color:#b45309; padding:5px 10px; border-radius:15px; font-weight:bold; font-size:0.8rem;">K: {{ latest.npk_potassium }}</span>
+                        <span style="background:#dcfce7; color:#15803d; padding:5px 10px; border-radius:15px; font-weight:bold; font-size:0.8rem;">pH: {{ latest.ph_level }}</span>
+                    </div>
+                </div>
+                
+                <!-- Mocked Calendar View -->
+                <div style="background: var(--soft); padding:20px; border-radius:10px; border:1px solid var(--line);">
+                    <div style="display:flex; flex-direction:column; gap:15px;">
+                        <div style="display:flex; gap:15px; align-items:center; border-bottom: 1px solid var(--line); padding-bottom:10px;">
+                            <div style="width:60px; text-align:center; font-weight:bold; color:var(--primary);">Day 1</div>
+                            <div style="flex:1;">{{ latest.ai_recommendation }}</div>
+                            <input type="checkbox" style="width:20px; height:20px;">
+                        </div>
+                        <div style="display:flex; gap:15px; align-items:center; border-bottom: 1px solid var(--line); padding-bottom:10px;">
+                            <div style="width:60px; text-align:center; font-weight:bold; color:var(--primary);">Day 5</div>
+                            <div style="flex:1;">Apply 5kg Potassium via drip irrigation (pH correction).</div>
+                            <input type="checkbox" style="width:20px; height:20px;">
+                        </div>
+                        <div style="display:flex; gap:15px; align-items:center;">
+                            <div style="width:60px; text-align:center; font-weight:bold; color:var(--primary);">Day 14</div>
+                            <div style="flex:1;">Foliar spray of micronutrients (Zinc/Boron).</div>
+                            <input type="checkbox" style="width:20px; height:20px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+        {% else %}
+            <div class="form-card" style="text-align:center; padding:40px; border:1px dashed var(--line); color:var(--muted);">
+                Log your first soil test to generate an AI schedule.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

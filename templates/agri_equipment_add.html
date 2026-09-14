@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}List Equipment{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <div class="eyebrow">{% trans "SHARING ECONOMY" %}</div>
+        <h1>{% trans "List Your Equipment" %}</h1>
+        <p>{% trans "Make your idle machinery work for you by renting it to nearby farmers." %}</p>
+    </div>
+</section>
+
+<div class="form-page single">
+    <div class="form-card">
+        <form method="post" action="{% url 'agri_equipment_add' %}">
+            {% csrf_token %}
+            <div class="form-grid">
+                <label>
+                    {% trans "Equipment Name" %}
+                    <input type="text" name="name" required placeholder="e.g. John Deere 5050D Tractor">
+                </label>
+                
+                <label>
+                    {% trans "Equipment Type" %}
+                    <select name="equipment_type" required>
+                        <option value="Tractor">Tractor</option>
+                        <option value="Harvester">Harvester</option>
+                        <option value="Drone">Agricultural Drone</option>
+                        <option value="Seeder">Seeder</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </label>
+
+                <label>
+                    {% trans "Hourly Rate (₹)" %}
+                    <input type="number" name="hourly_rate" min="1" required placeholder="e.g. 500">
+                </label>
+
+                <label>
+                    {% trans "Location / Pincode" %}
+                    <input type="text" name="location" required placeholder="e.g. Pune, 411001">
+                </label>
+
+                <label style="grid-column: 1 / -1;">
+                    {% trans "Description (Optional)" %}
+                    <textarea name="description" rows="3" placeholder="Condition, attachments included, etc."></textarea>
+                </label>
+            </div>
+            
+            <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: flex-end;">
+                <a href="{% url 'agri_equipment_hub' %}" class="btn outline">{% trans "Cancel" %}</a>
+                <button type="submit" class="btn primary">{% trans "List Equipment" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Org_Routing: AI Fleet Dispatch{% endblock %}
+{% block content %}
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: #0f172a; color: white; border-radius: 20px; margin-bottom: 40px;">
+    <div class="eyebrow" style="color:#38bdf8; font-weight:bold; letter-spacing:2px;">{% trans "ORG_ROUTING" %}</div>
+    <h1 style="font-size:3rem; margin:10px 0; color: white;">{% trans "AI Fleet Dispatch Engine" %}</h1>
+    <p style="font-size:1.2rem; color:#94a3b8; max-width:600px; margin:0 auto;">{% trans "Simulate the Traveling Salesman Problem to optimize your surplus food pickup and delivery routes." %}</p>
+</section>
+
+<div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
+    
+    <!-- AI Route Map -->
+    <div style="flex:2; min-width:300px;">
+        <div class="form-card" style="padding:0; overflow:hidden;">
+            <div style="padding:20px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0;">🗺️ {% trans "Live AI Routing Map" %}</h3>
+                <span style="font-size:0.9rem; background:var(--soft); padding:5px 10px; border-radius:20px;">Optimization: ACTIVE</span>
+            </div>
+            
+            <div style="position:relative; width:100%; height:500px; background:#1e293b; display:flex; align-items:center; justify-content:center;">
+                <!-- Simulated City Map Background -->
+                <div style="position:absolute; inset:0; background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 20px 20px; opacity:0.3;"></div>
+                
+                <!-- Animated Route Path using SVG -->
+                <svg width="100%" height="100%" style="position:absolute; top:0; left:0; z-index:10;">
+                    <path d="M100,100 C150,200 300,150 400,300 C500,450 700,350 800,400" fill="transparent" stroke="#38bdf8" stroke-width="4" stroke-dasharray="10,10">
+                        <animate attributeName="stroke-dashoffset" from="100" to="0" dur="2s" repeatCount="indefinite" linear />
+                    </path>
+                    
+                    <!-- Nodes -->
+                    <circle cx="100" cy="100" r="10" fill="#22c55e" />
+                    <text x="120" y="105" fill="white" font-size="12">HQ (Start)</text>
+                    
+                    <circle cx="400" cy="300" r="8" fill="#eab308" />
+                    <text x="415" y="305" fill="white" font-size="12">Pickup: Farm A</text>
+                    
+                    <circle cx="800" cy="400" r="10" fill="#ef4444" />
+                    <text x="750" y="420" fill="white" font-size="12">Dropoff: Orphanage</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Fleet Routes -->
+    <div style="flex:1; min-width:300px;">
+        <h2 style="font-size:1.5rem; margin-bottom:20px;">🚚 {% trans "Active Dispatch Routes" %}</h2>
+        <div class="form-card">
+            <button class="btn primary full" style="margin-bottom:20px;">+ Run AI Optimizer on Backlog</button>
+            
+            {% for route in routes %}
+            <div style="padding:15px; border:1px solid var(--line); border-radius:10px; margin-bottom:15px; background: var(--surface); position:relative;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div style="font-weight:bold; font-size:1.1rem;">{{ route.driver_name }}</div>
+                    <span style="font-size:0.75rem; padding:3px 8px; border-radius:12px; background:var(--soft); color:var(--primary); font-weight:bold;">{{ route.status }}</span>
+                </div>
+                <div style="font-size:0.9rem; color:var(--muted); margin-bottom:10px;">
+                    Vehicle: {{ route.vehicle_plate }} • Total: {{ route.total_distance_km }}km
+                </div>
+                
+                <div style="background: var(--soft); padding:10px; border-radius:5px; font-family:monospace; font-size:0.8rem; border-left:3px solid #38bdf8;">
+                    Sequence: <br>
+                    1. Farm Hub (Pickup) <br>
+                    2. City Shelter (Dropoff)
+                </div>
+            </div>
+            {% empty %}
+            <p style="color:var(--muted); text-align:center;">No active fleet routes.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

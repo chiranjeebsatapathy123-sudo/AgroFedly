@@ -9,7 +9,7 @@
             <h1>{% trans "Equipment Hub" %}</h1>
             <p>{% trans "Rent tractors, drones, and harvesters from nearby farmers, or list your own." %}</p>
         </div>
-        <button class="btn primary" onclick="alert('In a real app, this would open a listing form.')">{% trans "+ List Equipment" %}</button>
+        <a href="{% url 'agri_equipment_add' %}" class="btn primary">{% trans "+ List Equipment" %}</a>
     </div>
 </section>
 

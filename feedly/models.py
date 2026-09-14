@@ -523,3 +523,534 @@ class FoodLedger(models.Model):
             data_string = f"{self.surplus_food.id}{self.action_type}{self.details}{self.previous_hash}".encode('utf-8')
             self.block_hash = hashlib.sha256(data_string).hexdigest()
         super().save(*args, **kwargs)
+
+# ----------------- PHASE 2: NEXT-GEN FEATURES -----------------
+
+class MarketPricePrediction(models.Model):
+    crop_name = models.CharField(max_length=100)
+    current_price_per_kg = models.DecimalField(max_digits=10, decimal_places=2)
+    predicted_price_next_week = models.DecimalField(max_digits=10, decimal_places=2)
+    predicted_price_month = models.DecimalField(max_digits=10, decimal_places=2)
+    confidence_score = models.IntegerField(help_text="0-100")
+    recommendation = models.CharField(max_length=50, choices=(
+        ('SELL_NOW', 'Sell Now'),
+        ('HOLD', 'Hold for Better Price'),
+        ('SELL_PARTIAL', 'Sell Partial')
+    ))
+    updated_at = models.DateTimeField(auto_now=True)
+
+class MicroLoan(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="loans")
+    lender = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    interest_rate = models.DecimalField(max_digits=5, decimal_places=2, help_text="Annual percentage rate")
+    purpose = models.TextField()
+    status = models.CharField(max_length=50, choices=(
+        ('PENDING', 'Pending Approval'),
+        ('APPROVED', 'Approved & Disbursed'),
+        ('REPAID', 'Fully Repaid'),
+        ('DEFAULTED', 'Defaulted')
+    ), default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class CropInsurance(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="insurance_policies")
+    crop_name = models.CharField(max_length=100)
+    acres = models.DecimalField(max_digits=10, decimal_places=2)
+    premium_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    payout_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    trigger_condition = models.CharField(max_length=200, help_text="e.g. 'Drought (< 10mm rain) or Flood'")
+    status = models.CharField(max_length=50, choices=(
+        ('ACTIVE', 'Active'),
+        ('CLAIM_PENDING', 'Claim Pending'),
+        ('PAID_OUT', 'Paid Out'),
+        ('EXPIRED', 'Expired')
+    ), default='ACTIVE')
+
+class CSABox(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="csa_boxes")
+    name = models.CharField(max_length=200, help_text="e.g. 'Ugly Veggies Weekly Box'")
+    description = models.TextField()
+    price_per_box = models.DecimalField(max_digits=10, decimal_places=2)
+    available_subscriptions = models.IntegerField(default=50)
+    is_active = models.BooleanField(default=True)
+
+class CSASubscription(models.Model):
+    consumer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_csa_subs")
+    box = models.ForeignKey(CSABox, on_delete=models.CASCADE)
+    start_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=50, choices=(
+        ('ACTIVE', 'Active'),
+        ('PAUSED', 'Paused'),
+        ('CANCELLED', 'Cancelled')
+    ), default='ACTIVE')
+
+class Warehouse(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="warehouses")
+    name = models.CharField(max_length=200)
+    location = models.CharField(max_length=255)
+    total_palettes = models.IntegerField()
+    available_palettes = models.IntegerField()
+    price_per_palette_day = models.DecimalField(max_digits=10, decimal_places=2)
+    current_temp_celsius = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+class WarehouseBooking(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="warehouse_bookings")
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+    palettes = models.IntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    status = models.CharField(max_length=50, choices=(
+        ('PENDING', 'Pending'),
+        ('ACTIVE', 'Active / Stored'),
+        ('COMPLETED', 'Completed')
+    ), default='PENDING')
+
+# ----------------- PHASE 3: SUPER APP FEATURES -----------------
+
+class DroneImagery(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="drone_maps")
+    scan_date = models.DateTimeField(auto_now_add=True)
+    image_url = models.URLField(max_length=500, blank=True)
+    ndvi_score = models.DecimalField(max_digits=5, decimal_places=2, help_text="-1.0 to 1.0")
+    issues_detected = models.TextField(blank=True, help_text="AI output string")
+    status = models.CharField(max_length=50, default="ANALYZED")
+
+class InfrastructureProject(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects")
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    goal_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    current_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    roi_percentage = models.DecimalField(max_digits=5, decimal_places=2, help_text="e.g. 15.0 for 15%")
+    status = models.CharField(max_length=50, choices=(
+        ('FUNDING', 'Funding Active'),
+        ('FUNDED', 'Fully Funded'),
+        ('COMPLETED', 'Project Completed')
+    ), default='FUNDING')
+
+class Investment(models.Model):
+    investor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="investments")
+    project = models.ForeignKey(InfrastructureProject, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    token_hash = models.CharField(max_length=64, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.token_hash:
+            import hashlib
+            data = f"{self.investor.id}{self.project.id}{self.amount}{self.timestamp}".encode('utf-8')
+            self.token_hash = hashlib.sha256(data).hexdigest()
+        super().save(*args, **kwargs)
+
+class FreightListing(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="freight_listings")
+    cargo_description = models.CharField(max_length=200)
+    weight_tons = models.DecimalField(max_digits=10, decimal_places=2)
+    pickup_location = models.CharField(max_length=200)
+    drop_location = models.CharField(max_length=200)
+    status = models.CharField(max_length=50, choices=(
+        ('OPEN', 'Open for Bids'),
+        ('ASSIGNED', 'Assigned'),
+        ('IN_TRANSIT', 'In Transit'),
+        ('DELIVERED', 'Delivered')
+    ), default='OPEN')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class FreightBid(models.Model):
+    transporter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="freight_bids")
+    listing = models.ForeignKey(FreightListing, on_delete=models.CASCADE, related_name="bids")
+    bid_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    estimated_days = models.IntegerField()
+    status = models.CharField(max_length=50, choices=(
+        ('PENDING', 'Pending'),
+        ('ACCEPTED', 'Accepted'),
+        ('REJECTED', 'Rejected')
+    ), default='PENDING')
+
+class SoilTest(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="soil_tests")
+    test_date = models.DateField(auto_now_add=True)
+    npk_nitrogen = models.DecimalField(max_digits=5, decimal_places=2)
+    npk_phosphorus = models.DecimalField(max_digits=5, decimal_places=2)
+    npk_potassium = models.DecimalField(max_digits=5, decimal_places=2)
+    ph_level = models.DecimalField(max_digits=4, decimal_places=2)
+    """Tokenization engine for sustainable agricultural practices."""
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='carbon_credits')
+    practice_type = models.CharField(max_length=100, help_text="e.g. Cover Crops, No-Till Farming, Methane Reduction")
+    acres_applied = models.DecimalField(max_digits=8, decimal_places=2)
+    co2_sequestered_tons = models.DecimalField(max_digits=8, decimal_places=2, help_text="Calculated CO2 offset")
+    status = models.CharField(
+        max_length=20, 
+        choices=[('PENDING', 'Pending Verification'), ('MINTED', 'Minted/Verified'), ('SOLD', 'Sold')],
+        default='PENDING'
+    )
+    verification_hash = models.CharField(max_length=64, blank=True, help_text="Cryptographic hash proving ledger entry")
+    logged_at = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.co2_sequestered_tons:
+            # Simple heuristic: 1 acre of cover crops ~ 0.5 tons of CO2 sequestered per year
+            self.co2_sequestered_tons = float(self.acres_applied) * 0.5
+        if self.status == 'MINTED' and not self.verification_hash:
+            import hashlib
+            data = f"{self.organization.id}{self.practice_type}{self.co2_sequestered_tons}".encode('utf-8')
+            self.verification_hash = hashlib.sha256(data).hexdigest()
+        super().save(*args, **kwargs)
+
+class FoodLedger(models.Model):
+    """Immutable blockchain-style ledger for tracing food chain of custody"""
+    surplus_food = models.ForeignKey('SurplusFood', on_delete=models.CASCADE, related_name='ledger_entries')
+    action_type = models.CharField(max_length=50, help_text="e.g. LOGGED, DISPATCHED, DELIVERED, TEMPERATURE_CHECK")
+    performed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    previous_hash = models.CharField(max_length=64, blank=True)
+    block_hash = models.CharField(max_length=64, blank=True)
+    details = models.TextField(blank=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.block_hash:
+            import hashlib
+            last_entry = FoodLedger.objects.filter(surplus_food=self.surplus_food).order_by('-timestamp').first()
+            self.previous_hash = last_entry.block_hash if last_entry else "0" * 64
+            
+            data_string = f"{self.surplus_food.id}{self.action_type}{self.details}{self.previous_hash}".encode('utf-8')
+            self.block_hash = hashlib.sha256(data_string).hexdigest()
+        super().save(*args, **kwargs)
+
+# ----------------- PHASE 2: NEXT-GEN FEATURES -----------------
+
+class MarketPricePrediction(models.Model):
+    crop_name = models.CharField(max_length=100)
+    current_price_per_kg = models.DecimalField(max_digits=10, decimal_places=2)
+    predicted_price_next_week = models.DecimalField(max_digits=10, decimal_places=2)
+    predicted_price_month = models.DecimalField(max_digits=10, decimal_places=2)
+    confidence_score = models.IntegerField(help_text="0-100")
+    recommendation = models.CharField(max_length=50, choices=(
+        ('SELL_NOW', 'Sell Now'),
+        ('HOLD', 'Hold for Better Price'),
+        ('SELL_PARTIAL', 'Sell Partial')
+    ))
+    updated_at = models.DateTimeField(auto_now=True)
+
+class MicroLoan(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="loans")
+    lender = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    interest_rate = models.DecimalField(max_digits=5, decimal_places=2, help_text="Annual percentage rate")
+    purpose = models.TextField()
+    status = models.CharField(max_length=50, choices=(
+        ('PENDING', 'Pending Approval'),
+        ('APPROVED', 'Approved & Disbursed'),
+        ('REPAID', 'Fully Repaid'),
+        ('DEFAULTED', 'Defaulted')
+    ), default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class CropInsurance(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="insurance_policies")
+    crop_name = models.CharField(max_length=100)
+    acres = models.DecimalField(max_digits=10, decimal_places=2)
+    premium_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    payout_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    trigger_condition = models.CharField(max_length=200, help_text="e.g. 'Drought (< 10mm rain) or Flood'")
+    status = models.CharField(max_length=50, choices=(
+        ('ACTIVE', 'Active'),
+        ('CLAIM_PENDING', 'Claim Pending'),
+        ('PAID_OUT', 'Paid Out'),
+        ('EXPIRED', 'Expired')
+    ), default='ACTIVE')
+
+class CSABox(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="csa_boxes")
+    name = models.CharField(max_length=200, help_text="e.g. 'Ugly Veggies Weekly Box'")
+    description = models.TextField()
+    price_per_box = models.DecimalField(max_digits=10, decimal_places=2)
+    available_subscriptions = models.IntegerField(default=50)
+    is_active = models.BooleanField(default=True)
+
+class CSASubscription(models.Model):
+    consumer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_csa_subs")
+    box = models.ForeignKey(CSABox, on_delete=models.CASCADE)
+    start_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=50, choices=(
+        ('ACTIVE', 'Active'),
+        ('PAUSED', 'Paused'),
+        ('CANCELLED', 'Cancelled')
+    ), default='ACTIVE')
+
+class Warehouse(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="warehouses")
+    name = models.CharField(max_length=200)
+    location = models.CharField(max_length=255)
+    total_palettes = models.IntegerField()
+    available_palettes = models.IntegerField()
+    price_per_palette_day = models.DecimalField(max_digits=10, decimal_places=2)
+    current_temp_celsius = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+class WarehouseBooking(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="warehouse_bookings")
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+    palettes = models.IntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    status = models.CharField(max_length=50, choices=(
+        ('PENDING', 'Pending'),
+        ('ACTIVE', 'Active / Stored'),
+        ('COMPLETED', 'Completed')
+    ), default='PENDING')
+
+# ----------------- PHASE 3: SUPER APP FEATURES -----------------
+
+class DroneImagery(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="drone_maps")
+    scan_date = models.DateTimeField(auto_now_add=True)
+    image_url = models.URLField(max_length=500, blank=True)
+    ndvi_score = models.DecimalField(max_digits=5, decimal_places=2, help_text="-1.0 to 1.0")
+    issues_detected = models.TextField(blank=True, help_text="AI output string")
+    status = models.CharField(max_length=50, default="ANALYZED")
+
+class InfrastructureProject(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects")
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    goal_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    current_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    roi_percentage = models.DecimalField(max_digits=5, decimal_places=2, help_text="e.g. 15.0 for 15%")
+    status = models.CharField(max_length=50, choices=(
+        ('FUNDING', 'Funding Active'),
+        ('FUNDED', 'Fully Funded'),
+        ('COMPLETED', 'Project Completed')
+    ), default='FUNDING')
+
+class Investment(models.Model):
+    investor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="investments")
+    project = models.ForeignKey(InfrastructureProject, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    token_hash = models.CharField(max_length=64, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.token_hash:
+            import hashlib
+            data = f"{self.investor.id}{self.project.id}{self.amount}{self.timestamp}".encode('utf-8')
+            self.token_hash = hashlib.sha256(data).hexdigest()
+        super().save(*args, **kwargs)
+
+class FreightListing(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="freight_listings")
+    cargo_description = models.CharField(max_length=200)
+    weight_tons = models.DecimalField(max_digits=10, decimal_places=2)
+    pickup_location = models.CharField(max_length=200)
+    drop_location = models.CharField(max_length=200)
+    status = models.CharField(max_length=50, choices=(
+        ('OPEN', 'Open for Bids'),
+        ('ASSIGNED', 'Assigned'),
+        ('IN_TRANSIT', 'In Transit'),
+        ('DELIVERED', 'Delivered')
+    ), default='OPEN')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class FreightBid(models.Model):
+    transporter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="freight_bids")
+    listing = models.ForeignKey(FreightListing, on_delete=models.CASCADE, related_name="bids")
+    bid_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    estimated_days = models.IntegerField()
+    status = models.CharField(max_length=50, choices=(
+        ('PENDING', 'Pending'),
+        ('ACCEPTED', 'Accepted'),
+        ('REJECTED', 'Rejected')
+    ), default='PENDING')
+
+class SoilTest(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="soil_tests")
+    test_date = models.DateField(auto_now_add=True)
+    npk_nitrogen = models.DecimalField(max_digits=5, decimal_places=2)
+    npk_phosphorus = models.DecimalField(max_digits=5, decimal_places=2)
+    npk_potassium = models.DecimalField(max_digits=5, decimal_places=2)
+    ph_level = models.DecimalField(max_digits=4, decimal_places=2)
+    ai_recommendation = models.TextField(blank=True)
+
+class SMSAlert(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sms_alerts")
+    alert_type = models.CharField(max_length=100)
+    message = models.TextField()
+    is_sent = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+# ----------------- PHASE 4: ORGANIZATION ENTERPRISE FEATURES -----------------
+
+class FleetRoute(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="fleet_routes")
+    driver_name = models.CharField(max_length=150)
+    vehicle_plate = models.CharField(max_length=50)
+    optimized_path_json = models.TextField(help_text="JSON array of stops in optimized order")
+    total_distance_km = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    status = models.CharField(max_length=50, choices=(
+        ('PENDING', 'Pending Dispatch'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed')
+    ), default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class GrantOpportunity(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="tracked_grants")
+    title = models.CharField(max_length=200)
+    provider = models.CharField(max_length=200, help_text="e.g. CSR Fund or Govt Body")
+    max_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    deadline = models.DateField()
+    status = models.CharField(max_length=50, choices=(
+        ('DISCOVERED', 'Discovered'),
+        ('PREPARING', 'Preparing Application'),
+        ('APPLIED', 'Applied'),
+        ('WON', 'Won'),
+        ('LOST', 'Lost')
+    ), default='DISCOVERED')
+
+class VolunteerShift(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="shifts")
+    role = models.CharField(max_length=150, help_text="e.g. Warehouse Sorter, Driver")
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    capacity = models.IntegerField(default=1)
+    description = models.TextField(blank=True)
+
+class ShiftClaim(models.Model):
+    shift = models.ForeignKey(VolunteerShift, on_delete=models.CASCADE, related_name="claims")
+    volunteer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_shifts")
+    status = models.CharField(max_length=50, choices=(
+        ('CONFIRMED', 'Confirmed'),
+        ('COMPLETED', 'Completed'),
+        ('NO_SHOW', 'No Show')
+    ), default='CONFIRMED')
+
+class ESGReport(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="esg_reports")
+    report_month = models.CharField(max_length=50, help_text="e.g. October 2026")
+    total_food_rescued_kg = models.DecimalField(max_digits=10, decimal_places=2)
+    total_meals_provided = models.IntegerField()
+    carbon_emissions_saved_kg = models.DecimalField(max_digits=10, decimal_places=2)
+    generated_at = models.DateTimeField(auto_now_add=True)
+
+# ----------------- PHASE 5: CONSUMER & COMMUNITY ECOSYSTEM -----------------
+
+class P2PFoodSwap(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="food_swaps")
+    item_name = models.CharField(max_length=200)
+    description = models.TextField()
+    looking_for = models.CharField(max_length=200, blank=True, help_text="What they want in return")
+    status = models.CharField(max_length=50, choices=(
+        ('AVAILABLE', 'Available'),
+        ('RESERVED', 'Reserved'),
+        ('SWAPPED', 'Successfully Swapped')
+    ), default='AVAILABLE')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class UserGreenScore(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="green_score")
+    current_score = models.IntegerField(default=0)
+    level_name = models.CharField(max_length=100, default="Seedling")
+    total_co2_saved_kg = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_food_waste_prevented_kg = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+class CommunityFridge(models.Model):
+    name = models.CharField(max_length=200)
+    location_address = models.TextField()
+    lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    status = models.CharField(max_length=50, choices=(
+        ('FULL', 'Well Stocked'),
+        ('LOW', 'Running Low'),
+        ('EMPTY', 'Needs Restock'),
+        ('MAINTENANCE', 'Needs Cleaning/Repair')
+    ), default='LOW')
+    last_updated = models.DateTimeField(auto_now=True)
+
+# ----------------- PHASE 6: GLOBAL & FUTURE-TECH EXPANSION -----------------
+
+class DisasterZone(models.Model):
+    name = models.CharField(max_length=200, help_text="e.g. Kerala Floods 2026")
+    urgency_level = models.CharField(max_length=50, choices=(
+        ('CRITICAL', 'Level 1: Critical'),
+        ('HIGH', 'Level 2: High'),
+        ('STABILIZING', 'Level 3: Stabilizing')
+    ), default='HIGH')
+    lat = models.DecimalField(max_digits=9, decimal_places=6)
+    lng = models.DecimalField(max_digits=9, decimal_places=6)
+    required_meals = models.IntegerField(default=10000)
+    meals_fulfilled = models.IntegerField(default=0)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class GreenhouseDevice(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="greenhouse_devices")
+    name = models.CharField(max_length=100, help_text="e.g. LED Grow Light Array 1")
+    device_type = models.CharField(max_length=50, choices=(
+        ('LIGHT', 'Grow Light'),
+        ('IRRIGATION', 'Irrigation Pump'),
+        ('CLIMATE', 'Climate Control (HVAC)')
+    ))
+    status = models.BooleanField(default=False, help_text="True = ON, False = OFF")
+    reading = models.CharField(max_length=50, blank=True, help_text="e.g. 75% Humidity or 18 Hours/day")
+
+class AgriTourismListing(models.Model):
+    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="tourism_listings")
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
+    max_guests = models.IntegerField(default=2)
+    activity_type = models.CharField(max_length=100, choices=(
+        ('FARM_STAY', 'Overnight Farm Stay'),
+        ('TOUR', 'Guided Farm Tour'),
+        ('WORKSHOP', 'Farming Workshop')
+    ), default='FARM_STAY')
+    image_url = models.CharField(max_length=300, blank=True)
+
+class BlockchainLedger(models.Model):
+    transaction_id = models.CharField(max_length=100, unique=True)
+    transaction_type = models.CharField(max_length=100)
+    sender = models.CharField(max_length=100)
+    receiver = models.CharField(max_length=100)
+    amount_or_value = models.CharField(max_length=100)
+    cryptographic_hash = models.CharField(max_length=256)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+
+# Phase 11: Ecosystem Coordination (Multi-Org Alliances & Control Tower)
+class EcosystemAlliance(models.Model):
+    name = models.CharField(max_length=150)
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.name
+
+class AllianceMember(models.Model):
+    alliance = models.ForeignKey(EcosystemAlliance, on_delete=models.CASCADE, related_name='members')
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='alliances')
+    joined_at = models.DateTimeField(auto_now_add=True)
+    role = models.CharField(max_length=50, default="Member") # Admin, Member
+    
+    class Meta:
+        unique_together = ('alliance', 'organization')
+
+class SharedTask(models.Model):
+    STATUS_CHOICES = (
+        ('TODO', 'To Do'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+    )
+    alliance = models.ForeignKey(EcosystemAlliance, on_delete=models.CASCADE, related_name='tasks')
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='created_shared_tasks')
+    assigned_to = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_shared_tasks')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='TODO')
+    due_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.title} ({self.get_status_display()})"

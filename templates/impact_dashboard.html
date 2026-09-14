@@ -7,25 +7,25 @@
   <p>{% trans "Track the real-world impact of your food redistribution efforts." %}</p>
   
   {% if active_org %}
-    <div class="impact-card" style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bbf7d0;">
+    <div class="impact-card" style="background: var(--soft); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--line);">
       <h3>My Organization: {{ active_org.name }}</h3>
       <div style="display: flex; gap: 20px; margin-top: 15px;">
-        <div style="flex: 1; text-align: center; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="flex: 1; text-align: center; padding: 15px; background: var(--surface); border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <div style="font-size: 24px; font-weight: bold; color: #166534;">{{ my_impact.total_meals_saved|default:0 }}</div>
           <div style="font-size: 14px; color: #4b5563;">{% trans "Meals Saved" %}</div>
         </div>
-        <div style="flex: 1; text-align: center; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="flex: 1; text-align: center; padding: 15px; background: var(--surface); border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <div style="font-size: 24px; font-weight: bold; color: #166534;">{{ my_impact.total_co2_reduced_kg|default:0|floatformat:1 }} kg</div>
           <div style="font-size: 14px; color: #4b5563;">{% trans "CO₂ Reduced" %}</div>
         </div>
-        <div style="flex: 1; text-align: center; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="flex: 1; text-align: center; padding: 15px; background: var(--surface); border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <div style="font-size: 24px; font-weight: bold; color: #166534;">🏆 {{ my_impact.impact_points|default:0 }}</div>
           <div style="font-size: 14px; color: #4b5563;">{% trans "Impact Points" %}</div>
         </div>
       </div>
     </div>
     
-    <div class="impact-chart" style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <div class="impact-chart" style="background: var(--surface); padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
       <h3>{% trans "Recent Redistribution Trends" %}</h3>
       <canvas id="impactChart" height="100"></canvas>
     </div>
@@ -67,7 +67,7 @@
   {% if all_impacts %}
     <table class="data-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
       <thead>
-        <tr style="background: #f3f4f6; text-align: left;">
+        <tr style="background: var(--soft); text-align: left;">
           <th style="padding: 10px;">{% trans "Rank" %}</th>
           <th style="padding: 10px;">{% trans "Organization" %}</th>
           <th style="padding: 10px;">{% trans "Meals Saved" %}</th>
@@ -77,7 +77,7 @@
       </thead>
       <tbody>
         {% for impact in all_impacts %}
-        <tr style="border-bottom: 1px solid #e5e7eb;">
+        <tr style="border-bottom: 1px solid var(--line);">
           <td style="padding: 10px;">#{{ forloop.counter }}</td>
           <td style="padding: 10px;"><strong>{{ impact.organization.name }}</strong></td>
           <td style="padding: 10px;">{{ impact.total_meals_saved }}</td>

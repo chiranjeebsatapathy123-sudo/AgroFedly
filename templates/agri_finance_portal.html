@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Agri-Finance & Smart Contracts{% endblock %}
+{% block content %}
+<section class="page-head" style="text-align:center; padding: 40px 20px;">
+    <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px;">{% trans "DECENTRALIZED AGRI-FINANCE" %}</div>
+    <h1 style="font-size:3rem; margin:10px 0;">{% trans "Smart Contracts Portal" %}</h1>
+    <p style="font-size:1.2rem; color:var(--muted); max-width:600px; margin:0 auto;">{% trans "Instant micro-loans and parametric crop insurance powered by transparent smart contracts." %}</p>
+</section>
+
+<div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
+    <!-- Active Policies -->
+    <div class="form-card" style="flex:1; min-width:300px;">
+        <h2 style="font-size:1.5rem; margin-bottom:20px; display:flex; align-items:center; gap:10px;">🛡️ {% trans "My Insurance Policies" %}</h2>
+        {% if policies %}
+            {% for policy in policies %}
+            <div style="border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin-bottom:15px; position:relative; overflow:hidden;">
+                <div style="position:absolute; top:0; left:0; width:5px; height:100%; background:var(--primary);"></div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h3 style="margin:0 0 5px;">{{ policy.crop_name }} Insurance</h3>
+                        <p style="margin:0; font-size:0.9rem; color:var(--muted);">{{ policy.acres }} Acres Covered</p>
+                    </div>
+                    <span class="pill" style="background:#e7f7ec; color:#08713b; font-weight:bold;">{{ policy.get_status_display }}</span>
+                </div>
+                
+                <div style="margin-top:15px; background:var(--soft); padding:10px; border-radius:8px;">
+                    <div style="font-size:0.8rem; color:var(--muted); text-transform:uppercase;">{% trans "Smart Contract Trigger" %}</div>
+                    <div style="font-family:monospace; font-weight:bold; color:var(--ink);">{{ policy.trigger_condition }}</div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-top:15px; border-top:1px dashed var(--line); padding-top:10px;">
+                    <div>
+                        <div style="font-size:0.8rem; color:var(--muted);">Premium Paid</div>
+                        <div style="font-weight:bold;">₹{{ policy.premium_paid }}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:0.8rem; color:var(--muted);">Max Payout</div>
+                        <div style="font-weight:bold; color:var(--primary);">₹{{ policy.payout_amount }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--muted);">{% trans "No active insurance policies." %}</p>
+        {% endif %}
+
+        <h3 style="margin-top:30px; font-size:1.2rem;">{% trans "Buy Parametric Insurance" %}</h3>
+        <form method="post" style="display:flex; flex-direction:column; gap:15px; background:var(--soft); padding:20px; border-radius:10px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="buy_insurance">
+            <input type="text" name="crop_name" placeholder="Crop Name (e.g. Wheat)" required style="padding:10px; border-radius:5px; border:1px solid var(--line);">
+            <input type="number" name="acres" placeholder="Acres to Cover" required style="padding:10px; border-radius:5px; border:1px solid var(--line);">
+            <button type="submit" class="btn primary">{% trans "Activate Smart Contract" %}</button>
+        </form>
+    </div>
+
+    <!-- Micro-Loans -->
+    <div class="form-card" style="flex:1; min-width:300px;">
+        <h2 style="font-size:1.5rem; margin-bottom:20px; display:flex; align-items:center; gap:10px;">💸 {% trans "Micro-Loans" %}</h2>
+        {% if loans %}
+            {% for loan in loans %}
+            <div style="border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h3 style="margin:0 0 5px;">₹{{ loan.amount }}</h3>
+                        <p style="margin:0; font-size:0.9rem; color:var(--muted);">@ {{ loan.interest_rate }}% interest</p>
+                    </div>
+                    <span class="pill" style="background:{% if loan.status == 'APPROVED' %}#e7f7ec; color:#08713b{% else %}#fdf5e6; color:#f39c12{% endif %}; font-weight:bold;">{{ loan.get_status_display }}</span>
+                </div>
+                <p style="margin:10px 0 0; font-size:0.9rem; font-style:italic;">"{{ loan.purpose }}"</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--muted);">{% trans "No active loans." %}</p>
+        {% endif %}
+
+        <h3 style="margin-top:30px; font-size:1.2rem;">{% trans "Apply for a Micro-Loan" %}</h3>
+        <form method="post" style="display:flex; flex-direction:column; gap:15px; background:var(--soft); padding:20px; border-radius:10px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="apply_loan">
+            <input type="number" name="amount" placeholder="Amount (₹)" required style="padding:10px; border-radius:5px; border:1px solid var(--line);">
+            <textarea name="purpose" placeholder="Purpose (e.g. Buying Seeds for Rabi Season)" rows="2" required style="padding:10px; border-radius:5px; border:1px solid var(--line);"></textarea>
+            <button type="submit" class="btn primary" style="background:#10b981; border-color:#10b981;">{% trans "Submit Application" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

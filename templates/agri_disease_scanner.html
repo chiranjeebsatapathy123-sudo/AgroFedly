@@ -66,7 +66,7 @@
         <!-- Scanning Animation Overlay -->
         <div id="scanningOverlay" style="display:none; text-align:center; padding:60px 20px;">
             <div class="orbit" style="transform:scale(0.8); margin-bottom:20px;">
-                <div class="orbit-core" style="background:var(--primary); color:white;">🔍</div>
+                <div class="orbit-core" style="background:var(--primary); color: white;">🔍</div>
                 <div class="orb o1">{% trans "Analyzing..." %}</div>
             </div>
             <h2>{% trans "Running Neural Network..." %}</h2>
@@ -95,6 +95,25 @@
                 }, 1500);
             });
         </script>
+    {% endif %}
+
+    {% if history %}
+    <div style="margin-top:40px;">
+        <h3 style="margin-bottom:15px; display:flex; align-items:center; gap:10px;">🕰️ {% trans "Recent Scans" %}</h3>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            {% for item in history %}
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:15px; background:var(--surface); border:1px solid var(--line); border-radius:10px;">
+                <div>
+                    <h4 style="margin:0 0 5px; color:var(--ink);">{{ item.detected_disease }}</h4>
+                    <p style="margin:0; font-size:0.9rem; color:var(--muted);">{{ item.crop_name }} &bull; {{ item.scanned_at|date:"M d, H:i" }}</p>
+                </div>
+                <div style="text-align:right;">
+                    <span style="font-weight:bold; color:var(--primary);">{{ item.confidence }}%</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Agriculture: AI Auto-Subsidy{% endblock %}
+{% block content %}
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; border-radius: 20px; margin-bottom: 40px;">
+    <div class="eyebrow" style="color:#c7d2fe; font-weight:bold; letter-spacing:2px;">{% trans "AGRICULTURE" %}</div>
+    <h1 style="font-size:3rem; margin:10px 0; color: white;">🤖 {% trans "AI Subsidy Filer" %}</h1>
+    <p style="font-size:1.2rem; color:#e0e7ff; max-width:600px; margin:0 auto;">{% trans "Our AI scans your farm profile and auto-fills complex government grant and subsidy applications for you." %}</p>
+</section>
+
+<div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
+    
+    <!-- Left Column: Scanner -->
+    <div style="flex:1; min-width:300px;">
+        <div class="form-card" style="text-align:center; padding:40px;">
+            <div style="width:100px; height:100px; background:#eff6ff; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:3rem;">
+                📄
+            </div>
+            <h2 style="margin:0 0 10px 0;">Profile Scanner</h2>
+            <p style="color:var(--muted); font-size:0.9rem; margin-bottom:20px;">AI confidence in profile matching: <strong style="color:#10b981;">{{ ai_confidence }}%</strong></p>
+            
+            <div style="text-align:left; background: var(--soft); padding:20px; border-radius:10px; margin-bottom:20px;">
+                <div style="font-size:0.8rem; color:var(--muted); margin-bottom:5px;">✅ Verified Land Records attached</div>
+                <div style="font-size:0.8rem; color:var(--muted); margin-bottom:5px;">✅ Soil Health Cards attached</div>
+                <div style="font-size:0.8rem; color:var(--muted); margin-bottom:5px;">✅ Aadhaar / KYC linked</div>
+            </div>
+            
+            <button class="btn outline full" style="border-radius:10px;">Update Farm Profile</button>
+        </div>
+    </div>
+    
+    <!-- Right Column: Grants -->
+    <div style="flex:2; min-width:300px;">
+        <h2 style="font-size:1.5rem; margin-top:0;">🎯 Matched Government Subsidies</h2>
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            {% for grant in available_grants %}
+            <div class="form-card" style="padding:20px; display:flex; align-items:center; gap:20px;">
+                
+                <!-- Match Ring -->
+                <div style="width:60px; height:60px; border-radius:50%; border:4px solid {% if grant.match_score > 90 %}#10b981{% elif grant.match_score > 80 %}#f59e0b{% else %}#ef4444{% endif %}; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.1rem; color: var(--ink);">
+                    {{ grant.match_score }}%
+                </div>
+                
+                <div style="flex:1;">
+                    <h3 style="margin:0 0 5px 0; font-size:1.2rem;">{{ grant.name }}</h3>
+                    <div style="font-size:0.85rem; color:var(--primary); font-weight:bold;">Estimated Value: {{ grant.amount }}</div>
+                </div>
+                
+                <div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="grant_name" value="{{ grant.name }}">
+                        <button type="submit" class="btn primary mini" style="background:#4f46e5; border-color: var(--ink);">Auto-File ⚡</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

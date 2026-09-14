@@ -49,7 +49,7 @@
                             {% csrf_token %}
                             <input type="hidden" name="action" value="find_matches">
                             <input type="hidden" name="demand_id" value="{{ d.id }}">
-                            <button type="submit" class="btn" style="padding:4px 8px; font-size:0.8rem; background:var(--primary); color:white;">{% trans "Find Matches" %}</button>
+                            <button type="submit" class="btn" style="padding:4px 8px; font-size:0.8rem; background:var(--primary); color: white;">{% trans "Find Matches" %}</button>
                         </form>
                     </td>
                 </tr>
@@ -61,54 +61,52 @@
     </div>
 </div>
 
-<div class="form-card" style="max-width:100%;">
-    <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "Recommended Supply Matches (Pending)" %}</h2>
+<div style="margin-top: 40px;">
+    <h2 style="font-size:1.5rem; margin-bottom:20px; display:flex; align-items:center; gap:10px;">✨ {% trans "Recommended Supply Matches" %}</h2>
     {% if matches %}
-        <table style="width:100%; text-align:left;">
-            <tr>
-                <th style="padding-bottom:10px;">{% trans "Demand" %}</th>
-                <th style="padding-bottom:10px;">{% trans "Matched Produce" %}</th>
-                <th style="padding-bottom:10px;">{% trans "Matched Qty" %}</th>
-                <th style="padding-bottom:10px;">{% trans "Match Score" %}</th>
-                <th style="padding-bottom:10px;">{% trans "Explanation" %}</th>
-                <th style="padding-bottom:10px;">{% trans "Action" %}</th>
-            </tr>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
             {% for match in matches %}
-            <tr>
-                <td style="padding:12px 0; border-top:1px solid #eee; vertical-align:top;">
-                    <strong>{{ match.demand.produce_name }}</strong><br>
-                    Req: {{ match.demand.required_quantity }} {{ match.demand.unit }}
-                </td>
-                <td style="padding:12px 0; border-top:1px solid #eee; vertical-align:top;">
-                    <strong>{{ match.produce.name }}</strong> ({{ match.produce.supplier.name }})<br>
-                    Avail: {{ match.produce.available_quantity }} {{ match.produce.unit }}
-                </td>
-                <td style="padding:12px 0; border-top:1px solid #eee; vertical-align:top; font-weight:bold; color:var(--primary);">
-                    {{ match.matched_quantity }} {{ match.demand.unit }}
-                </td>
-                <td style="padding:12px 0; border-top:1px solid #eee; vertical-align:top;">
-                    <div style="background:#eee; border-radius:10px; width:100%; height:10px; overflow:hidden;">
-                        <div style="background:{% if match.match_score >= 80 %}green{% elif match.match_score >= 50 %}orange{% else %}red{% endif %}; width:{{ match.match_score }}%; height:100%;"></div>
+            <div class="form-card" style="position:relative; overflow:hidden; border: 1px solid var(--line); border-top: 4px solid {% if match.match_score >= 80 %}#08713b{% elif match.match_score >= 50 %}#f39c12{% else %}#c7353d{% endif %}; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                
+                <!-- Match Score Badge -->
+                <div style="position:absolute; top: 15px; right: 15px; background: {% if match.match_score >= 80 %}#e7f7ec; color: #08713b{% elif match.match_score >= 50 %}#fdf5e6; color: #f39c12{% else %}#fff0f1; color: #c7353d{% endif %}; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">
+                    {{ match.match_score }}% Match
+                </div>
+
+                <h3 style="margin: 0 0 15px; font-size: 1.3rem; padding-right: 80px;">{{ match.produce.name }}</h3>
+                
+                <div style="display:flex; justify-content:space-between; margin-bottom: 15px;">
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--muted); text-transform: uppercase;">{% trans "You Requested" %}</div>
+                        <div style="font-weight: bold; font-size: 1.1rem;">{{ match.demand.required_quantity }} {{ match.demand.unit }}</div>
                     </div>
-                    <small>{{ match.match_score }}% Match</small>
-                </td>
-                <td style="padding:12px 0; border-top:1px solid #eee; vertical-align:top;">
-                    <pre style="font-family:inherit; font-size:0.8rem; margin:0; white-space:pre-wrap;">{{ match.explanation }}</pre>
-                </td>
-                <td style="padding:12px 0; border-top:1px solid #eee; vertical-align:top;">
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="accept_match">
-                        <input type="hidden" name="match_id" value="{{ match.id }}">
-                        <button type="submit" class="btn" style="padding:6px 12px; font-size:0.9rem; background:var(--success); color:white; width:100%;">{% trans "Accept Match" %}</button>
-                    </form>
-                </td>
-            </tr>
+                    <div style="text-align:right;">
+                        <div style="font-size: 0.8rem; color: var(--muted); text-transform: uppercase;">{% trans "They Have" %}</div>
+                        <div style="font-weight: bold; font-size: 1.1rem;">{{ match.produce.available_quantity }} {{ match.produce.unit }}</div>
+                    </div>
+                </div>
+
+                <div style="background: var(--soft); padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="font-size: 0.8rem; color: var(--muted); margin-bottom: 5px;">{% trans "Match Details:" %}</div>
+                    <pre style="font-family: inherit; font-size: 0.85rem; margin: 0; white-space: pre-wrap; color: var(--ink);">{{ match.explanation }}</pre>
+                </div>
+                
+                <form method="post" style="margin-top: auto;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="accept_match">
+                    <input type="hidden" name="match_id" value="{{ match.id }}">
+                    <button type="submit" class="btn full" style="background: {% if match.match_score >= 80 %}var(--success){% else %}var(--primary){% endif %}; color: white; font-size: 1rem; padding: 12px; border-radius: 8px;">
+                        {% trans "Accept Match" %}
+                    </button>
+                </form>
+            </div>
             {% endfor %}
-        </table>
+        </div>
     {% else %}
-        <div style="text-align:center; padding:30px;">
-            <p>{% trans "No matches calculated yet. Click \"Find Matches\" on an active demand." %}</p>
+        <div class="form-card" style="text-align:center; padding: 50px 20px;">
+            <div style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;">🔍</div>
+            <h3 style="margin: 0 0 10px;">{% trans "No Matches Yet" %}</h3>
+            <p style="color:var(--muted); max-width: 400px; margin: 0 auto;">{% trans "Click 'Find Matches' on any of your active demands above to scan the marketplace." %}</p>
         </div>
     {% endif %}
 </div>

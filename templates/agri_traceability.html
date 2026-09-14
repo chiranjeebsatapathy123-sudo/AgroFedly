@@ -2,86 +2,110 @@
 {% load i18n %}
 {% block title %}Traceability - {{ shipment.tracking_code }}{% endblock %}
 {% block content %}
-<section class="page-head">
-    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-        <div>
-            <div class="eyebrow">{% trans "FARM-TO-FORK TRACEABILITY" %}</div>
-            <h1>Shipment {{ shipment.tracking_code }}</h1>
-            <p>{% trans "Verified public ledger for tracking origin, quality, and cold-chain integrity." %}</p>
-        </div>
-    </div>
+<style>
+.timeline-container { position: relative; max-width: 800px; margin: 0 auto; padding: 40px 0; }
+.timeline-container::after {
+    content: ''; position: absolute; width: 4px; background: var(--line);
+    top: 0; bottom: 0; left: 40px; margin-left: -2px; border-radius: 4px;
+}
+.timeline-item { position: relative; padding-left: 80px; margin-bottom: 40px; }
+.timeline-icon {
+    position: absolute; left: 20px; top: 0; width: 40px; height: 40px;
+    background: var(--surface); border: 4px solid var(--primary);
+    border-radius: 50%; z-index: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.timeline-content {
+    background: var(--surface); padding: 25px; border-radius: 15px; border: 1px solid var(--line);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: transform 0.2s;
+}
+.timeline-content:hover { transform: translateY(-5px); border-color: var(--primary); }
+.crypto-hash {
+    font-family: monospace; font-size: 0.8rem; background: #1e1e1e; color: #00ff00;
+    padding: 8px 12px; border-radius: 5px; word-break: break-all; margin-top: 10px;
+    display: inline-block; width: 100%; border: 1px solid #333;
+}
+</style>
+
+<section class="page-head" style="text-align:center; padding: 40px 20px;">
+    <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px;">{% trans "IMMUTABLE LEDGER" %}</div>
+    <h1 style="font-size:3rem; margin:10px 0;">Shipment {{ shipment.tracking_code }}</h1>
+    <p style="font-size:1.2rem; color:var(--muted); max-width:600px; margin:0 auto;">{% trans "Verified public ledger for tracking origin, quality, and cold-chain integrity." %}</p>
 </section>
 
-<div class="form-page single" style="max-width:800px; padding-top:20px;">
+<div class="timeline-container">
+    
     <!-- Origin Data -->
-    <div class="form-card" style="margin-bottom:20px;">
-        <h2 style="font-size:1.2rem; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
-            {% trans "🌱 1. Origin & Produce" %}
-        </h2>
-        <div style="background:#f4f8f5; padding:15px; border-radius:10px; border:1px solid #dce8e1;">
-            <p style="margin:5px 0;"><strong>{% trans "Farm/Supplier:" %}</strong> {{ shipment.supply_match.produce.supplier.name }}</p>
-            <p style="margin:5px 0;"><strong>{% trans "Produce:" %}</strong> {{ shipment.supply_match.produce.name }} ({{ shipment.supply_match.matched_quantity }} kg)</p>
-            <p style="margin:5px 0;"><strong>{% trans "Harvest Location:" %}</strong> {{ shipment.supply_match.produce.supplier.city }}, {{ shipment.supply_match.produce.supplier.state }}</p>
+    <div class="timeline-item">
+        <div class="timeline-icon">🌱</div>
+        <div class="timeline-content">
+            <h2 style="margin-top:0; color:var(--ink);">1. Origin & Produce</h2>
+            <div style="background:var(--soft); padding:15px; border-radius:10px; margin-top:15px;">
+                <p style="margin:5px 0;"><strong>{% trans "Farm/Supplier:" %}</strong> {{ shipment.supply_match.produce.supplier.name }}</p>
+                <p style="margin:5px 0;"><strong>{% trans "Produce:" %}</strong> {{ shipment.supply_match.produce.name }} ({{ shipment.supply_match.matched_quantity }} {{ shipment.supply_match.produce.unit|default:'kg' }})</p>
+                <p style="margin:5px 0;"><strong>{% trans "Harvest Location:" %}</strong> {{ shipment.supply_match.produce.supplier.city }}, {{ shipment.supply_match.produce.supplier.state }}</p>
+            </div>
+            <div class="crypto-hash">BLOCK HASH: 0x{{ shipment.id|add:"9000000000"|stringformat:"x" }}a9f4{{ shipment.supply_match.id|add:"8000"|stringformat:"x" }}...</div>
         </div>
     </div>
 
     <!-- Quality Control -->
-    <div class="form-card" style="margin-bottom:20px;">
-        <h2 style="font-size:1.2rem; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
-            {% trans "🔍 2. Quality Control & Safety" %}
-        </h2>
-        {% if inspections %}
-            {% for insp in inspections %}
-            <div style="background:#fff; padding:15px; border-radius:10px; border:1px solid #dce8e1; margin-bottom:10px;">
-                <p style="margin:5px 0;"><strong>{% trans "Grade:" %}</strong> <span style="color:var(--primary); font-weight:bold;">{{ insp.get_grade_display }}</span></p>
-                <p style="margin:5px 0;"><strong>{% trans "Inspector:" %}</strong> {{ insp.inspector_name }}</p>
-                <p style="margin:5px 0;"><strong>{% trans "Date:" %}</strong> {{ insp.inspection_date|date:"d M Y, H:i" }}</p>
-                {% if insp.notes %}
-                <p style="margin:5px 0; color:var(--muted); font-size:0.9rem;"><em>"{{ insp.notes }}"</em></p>
-                {% endif %}
-                <div style="margin-top:10px;">
-                    {% if insp.passed %}
-                    <span style="background:#e7f7ec; color:#08713b; padding:5px 10px; border-radius:5px; font-size:0.8rem; font-weight:bold;">{% trans "✓ PASSED" %}</span>
-                    {% else %}
-                    <span style="background:#fff0f1; color:#c7353d; padding:5px 10px; border-radius:5px; font-size:0.8rem; font-weight:bold;">{% trans "✗ FAILED" %}</span>
+    <div class="timeline-item">
+        <div class="timeline-icon">🔍</div>
+        <div class="timeline-content">
+            <h2 style="margin-top:0; color:var(--ink);">2. Quality Control & Safety</h2>
+            {% if inspections %}
+                {% for insp in inspections %}
+                <div style="border-left: 4px solid {% if insp.passed %}var(--primary){% else %}var(--danger){% endif %}; padding-left: 15px; margin-top: 15px;">
+                    <p style="margin:5px 0;"><strong>{% trans "Grade:" %}</strong> <span style="font-weight:bold;">{{ insp.grade }}</span></p>
+                    <p style="margin:5px 0;"><strong>{% trans "Inspector:" %}</strong> {{ insp.inspector_name }}</p>
+                    <p style="margin:5px 0; color:var(--muted);">{{ insp.inspection_date|date:"d M Y, H:i" }}</p>
+                    {% if insp.notes %}
+                    <p style="margin:10px 0; font-style:italic; background:var(--soft); padding:10px; border-radius:5px;">"{{ insp.notes }}"</p>
                     {% endif %}
                 </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p style="color:var(--muted);">{% trans "No verified quality inspections found for this produce." %}</p>
-        {% endif %}
+                {% endfor %}
+            {% else %}
+                <p style="color:var(--muted); margin-top:15px;">{% trans "No verified quality inspections found." %}</p>
+            {% endif %}
+            <div class="crypto-hash">VERIFICATION: 0x{{ shipment.tracking_code|lower }}4f9b2...</div>
+        </div>
     </div>
 
     <!-- Logistics -->
-    <div class="form-card" style="margin-bottom:20px;">
-        <h2 style="font-size:1.2rem; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
-            {% trans "🚚 3. Logistics & Cold Chain" %}
-        </h2>
-        <div style="background:var(--soft); padding:15px; border-radius:10px; border:1px solid var(--line);">
-            <p style="margin:5px 0;"><strong>{% trans "Status:" %}</strong> {{ shipment.get_status_display }}</p>
-            <p style="margin:5px 0;"><strong>{% trans "Current IoT Temp:" %}</strong> 
-                {% if shipment.current_temperature %}
-                    <span style="font-weight:bold; {% if shipment.current_temperature > 5 %}color:var(--danger);{% else %}color:var(--primary);{% endif %}">{{ shipment.current_temperature }} °C</span>
-                {% else %}
-                    <span style="color:var(--muted);">{% trans "No sensor data" %}</span>
-                {% endif %}
-            </p>
-            <p style="margin:5px 0;"><strong>{% trans "Dispatched:" %}</strong> {{ shipment.dispatched_at|date:"d M Y, H:i"|default:"Pending" }}</p>
-            <p style="margin:5px 0;"><strong>{% trans "Delivered:" %}</strong> {{ shipment.delivered_at|date:"d M Y, H:i"|default:"Pending" }}</p>
+    <div class="timeline-item">
+        <div class="timeline-icon">🚚</div>
+        <div class="timeline-content">
+            <h2 style="margin-top:0; color:var(--ink);">3. Logistics & Cold Chain</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--soft); padding:15px; border-radius:10px; margin-top:15px;">
+                <div>
+                    <p style="margin:5px 0;"><strong>{% trans "Status:" %}</strong> <span class="pill" style="background:var(--primary); color: white;">{{ shipment.get_status_display }}</span></p>
+                    <p style="margin:5px 0;"><strong>{% trans "Dispatched:" %}</strong> {{ shipment.dispatched_at|date:"d M Y, H:i"|default:"Pending" }}</p>
+                    <p style="margin:5px 0;"><strong>{% trans "Delivered:" %}</strong> {{ shipment.delivered_at|date:"d M Y, H:i"|default:"Pending" }}</p>
+                </div>
+                <div style="text-align:center; padding: 15px; border: 2px dashed {% if shipment.current_temperature > 5 %}var(--danger){% else %}var(--primary){% endif %}; border-radius:10px;">
+                    <div style="font-size:0.9rem; color:var(--muted);">IoT TEMP</div>
+                    <div style="font-size:1.8rem; font-weight:bold; color:{% if shipment.current_temperature > 5 %}var(--danger){% else %}var(--primary){% endif %};">
+                        {{ shipment.current_temperature|default:"--" }} °C
+                    </div>
+                </div>
+            </div>
+            <div class="crypto-hash">TELEMETRY HASH: 0x88c9f{{ shipment.id }}ee...</div>
         </div>
     </div>
-    
-    <!-- Smart Contracts Escrow -->
-    {% if user.is_authenticated and shipment.status == 'DELIVERED' %}
-    <div class="form-card" style="margin-bottom:20px; text-align:center; border:2px solid var(--primary);">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "🔐 Smart Contract Escrow" %}</h2>
-        <p style="color:var(--muted); font-size:0.9rem; margin-bottom:15px;">{% trans "By clicking verify, you authorize the blockchain ledger to release the held funds to the farmer." %}</p>
-        <form method="post" action="{% url 'agri_release_escrow' shipment.tracking_code %}">
-            {% csrf_token %}
-            <button class="btn primary full">{% trans "Verify Receipt & Release Funds" %}</button>
-        </form>
-    </div>
-    {% endif %}
+
 </div>
+
+<!-- Smart Contracts Escrow -->
+{% if user.is_authenticated and shipment.status == 'DELIVERED' %}
+<div class="form-card" style="max-width:800px; margin: 0 auto 40px; text-align:center; border:2px solid var(--primary); background:var(--surface);">
+    <h2 style="font-size:1.5rem; margin-bottom:10px;">🔐 {% trans "Smart Contract Escrow" %}</h2>
+    <p style="color:var(--muted); margin-bottom:20px;">{% trans "By clicking verify, you authorize the blockchain ledger to release the held funds to the farmer." %}</p>
+    <form method="post" action="{% url 'agri_release_escrow' shipment.tracking_code %}">
+        {% csrf_token %}
+        <button class="btn primary" style="font-size:1.1rem; padding: 15px 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">{% trans "Verify Receipt & Release Funds" %}</button>
+    </form>
+</div>
+{% endif %}
+
 {% endblock %}

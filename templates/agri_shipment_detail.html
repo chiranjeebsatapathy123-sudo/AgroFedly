@@ -62,7 +62,7 @@
 
 <!-- QR Modal -->
 <div id="qr-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; padding:40px;">
-    <div style="background:#fff; max-width:400px; margin:auto; border-radius:15px; padding:30px; text-align:center; position:relative;">
+    <div style="background: var(--surface); max-width:400px; margin:auto; border-radius:15px; padding:30px; text-align:center; position:relative;">
         <button onclick="document.getElementById('qr-modal').style.display='none'" style="position:absolute; right:15px; top:15px; border:0; background:none; font-size:1.5rem; cursor:pointer;">{% trans "&times;" %}</button>
         <h2>{% trans "Shipment QR" %}</h2>
         <p style="color:var(--muted); font-size:0.9rem;">{% trans "Scan to view farm-to-fork traceability." %}</p>

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}AI Price Advisor{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px;">{% trans "AI HARVEST OPTIMIZER" %}</div>
+            <h1 style="font-size: 2.5rem; margin-top: 10px;">{% trans "Smart Price Predictor" %}</h1>
+            <p style="color:var(--muted);">{% trans "Machine Learning models analyzing market trends, weather, and historical data to tell you exactly when to sell." %}</p>
+        </div>
+    </div>
+</section>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:25px; margin-top:20px;">
+    {% for pred in predictions %}
+    <div class="form-card" style="border-top: 4px solid {% if pred.recommendation == 'SELL_NOW' %}#10b981{% elif pred.recommendation == 'HOLD' %}#f39c12{% else %}#3b82f6{% endif %}; position:relative; overflow:hidden;">
+        
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px;">
+            <h2 style="margin:0; font-size:1.8rem;">{{ pred.crop_name }}</h2>
+            <div style="background:var(--soft); padding:5px 10px; border-radius:20px; font-size:0.8rem; font-weight:bold; color:var(--muted);">
+                AI CONFIDENCE: {{ pred.confidence_score }}%
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 25px;">
+            <div>
+                <div style="font-size:0.9rem; color:var(--muted); text-transform:uppercase;">Current Price</div>
+                <div style="font-size:1.8rem; font-weight:bold;">₹{{ pred.current_price_per_kg }}<span style="font-size:1rem; color:var(--muted); font-weight:normal;">/kg</span></div>
+            </div>
+            
+            <div style="text-align:right;">
+                <div style="font-size:0.9rem; color:var(--muted); text-transform:uppercase;">Next Week (Est)</div>
+                <div style="font-size:1.5rem; font-weight:bold; color:{% if pred.predicted_price_next_week > pred.current_price_per_kg %}#10b981{% else %}#c7353d{% endif %};">
+                    ₹{{ pred.predicted_price_next_week }}
+                    {% if pred.predicted_price_next_week > pred.current_price_per_kg %}
+                    <span style="font-size:1rem;">↑</span>
+                    {% else %}
+                    <span style="font-size:1rem;">↓</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div style="background:var(--soft); border-radius:10px; padding:15px; text-align:center;">
+            <div style="font-size:0.8rem; color:var(--muted); text-transform:uppercase; margin-bottom:5px;">AI Recommendation</div>
+            {% if pred.recommendation == 'SELL_NOW' %}
+                <div style="font-size:1.5rem; font-weight:bold; color: white; background:#10b981; padding:10px; border-radius:8px; animation: pulse 2s infinite;">SELL NOW</div>
+                <p style="margin:10px 0 0; font-size:0.9rem;">Prices are peaking. Lock in your profits immediately.</p>
+            {% elif pred.recommendation == 'HOLD' %}
+                <div style="font-size:1.5rem; font-weight:bold; color: white; background:#f39c12; padding:10px; border-radius:8px;">HOLD</div>
+                <p style="margin:10px 0 0; font-size:0.9rem;">Wait. AI predicts prices will rise to ₹{{ pred.predicted_price_month }} by next month.</p>
+            {% else %}
+                <div style="font-size:1.5rem; font-weight:bold; color: white; background:#3b82f6; padding:10px; border-radius:8px;">SELL PARTIAL</div>
+                <p style="margin:10px 0 0; font-size:0.9rem;">Sell 30% now to cover costs, hold the rest for higher margins.</p>
+            {% endif %}
+        </div>
+        
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+</style>
+{% endblock %}

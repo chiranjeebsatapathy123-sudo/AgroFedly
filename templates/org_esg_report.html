@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Org_ESG: Corporate Reporting{% endblock %}
+{% block content %}
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: #0f172a; color: white; border-radius: 20px; margin-bottom: 40px;">
+    <div class="eyebrow" style="color:#38bdf8; font-weight:bold; letter-spacing:2px;">{% trans "ORG_ESG" %}</div>
+    <h1 style="font-size:3rem; margin:10px 0; color: white;">{% trans "Automated ESG Reporting" %}</h1>
+    <p style="font-size:1.2rem; color:#94a3b8; max-width:600px; margin:0 auto;">{% trans "Generate compliance-ready Environmental, Social, and Governance reports to secure funding." %}</p>
+</section>
+
+<div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
+    
+    <!-- Report Generator -->
+    <div style="flex:1; min-width:300px;">
+        <div class="form-card">
+            <h2 style="font-size:1.5rem; margin-top:0;">📊 {% trans "Generate New Report" %}</h2>
+            <p style="color:var(--muted); font-size:0.95rem; margin-bottom:20px;">The AI will aggregate all your food rescues, deliveries, and carbon offsets for the selected month.</p>
+            
+            <form method="post" style="display:flex; flex-direction:column; gap:15px;">
+                {% csrf_token %}
+                <div>
+                    <label style="font-weight:bold; font-size:0.9rem;">Reporting Period</label>
+                    <select name="month" required style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); margin-top:5px;">
+                        <option value="November 2026">November 2026</option>
+                        <option value="October 2026">October 2026</option>
+                        <option value="September 2026">September 2026</option>
+                    </select>
+                </div>
+                
+                <div style="background: var(--surface); padding:15px; border-radius:8px; font-size:0.85rem; color:var(--muted);">
+                    <strong>Included Metrics:</strong>
+                    <ul style="margin-top:5px; padding-left:20px;">
+                        <li>Total Scope 3 Carbon Emissions Mitigated</li>
+                        <li>Total Kg of Food Diverted from Landfill</li>
+                        <li>Total Nutritious Meals Provided to Community</li>
+                    </ul>
+                </div>
+                
+                <button type="submit" class="btn primary full" style="padding:12px; font-size:1.1rem; margin-top:10px;">Generate PDF Report</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Report Archive -->
+    <div style="flex:2; min-width:300px;">
+        <h2 style="font-size:1.5rem; margin-bottom:20px;">📁 {% trans "Compliance Archive" %}</h2>
+        
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:20px;">
+            {% for report in reports %}
+            <div class="form-card" style="padding:20px; border-top:5px solid #10b981; box-shadow:0 10px 25px rgba(0,0,0,0.05); display:flex; flex-direction:column;">
+                
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
+                    <div>
+                        <div style="font-size:0.8rem; color:var(--muted); text-transform:uppercase;">Period</div>
+                        <h3 style="margin:0; font-size:1.2rem;">{{ report.report_month }}</h3>
+                    </div>
+                    <div style="font-size:2rem;">📄</div>
+                </div>
+                
+                <div style="background: var(--soft); padding:10px; border-radius:8px; margin-bottom:20px; flex:1;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="font-size:0.8rem; color:var(--muted);">Food Rescued:</span>
+                        <strong style="font-size:0.9rem;">{{ report.total_food_rescued_kg }} kg</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="font-size:0.8rem; color:var(--muted);">Meals Provided:</span>
+                        <strong style="font-size:0.9rem;">{{ report.total_meals_provided }}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; border-top:1px solid #e2e8f0; padding-top:5px; margin-top:5px;">
+                        <span style="font-size:0.8rem; color: white; font-weight:bold;">CO2 Saved:</span>
+                        <strong style="font-size:0.9rem; color: white;">{{ report.carbon_emissions_saved_kg }} kg</strong>
+                    </div>
+                </div>
+                
+                <button class="btn outline mini full">Download PDF</button>
+            </div>
+            {% empty %}
+            <div style="grid-column: 1 / -1; text-align:center; padding:40px; background: var(--surface); border-radius:15px; border:1px dashed var(--line);">
+                <p style="color:var(--muted); font-size:1.1rem;">No ESG reports generated yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

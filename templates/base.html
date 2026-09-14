@@ -3,6 +3,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#159653">
+<link rel="manifest" href="{% static 'manifest.json' %}">
 <title>{% block title %}AgroFedly{% endblock %} · Smart Food Operations</title>
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
 <link rel="stylesheet" href="{% static 'css/copilot.css' %}">
@@ -18,16 +21,30 @@
   #drawer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4) !important; border-radius: 10px !important; }
   #drawer::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.6) !important; }
 </style>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('[Service Worker] Registered with scope:', registration.scope);
+        })
+        .catch(err => {
+          console.error('[Service Worker] Registration failed:', err);
+        });
+    });
+  }
+</script>
 </head>
 <body>
 <header class="topbar">
   <button class="menu-btn" id="menuBtn" aria-label="Open navigation">⋯</button>
   <a class="brand" href="{% url 'home' %}"><span class="brand-mark">A</span><span>AgroFedly</span><small>{% trans "Smart Food Operations" %}</small></a>
   <div class="top-actions">
+    <button id="themeBtn" class="theme-btn" title="Toggle Theme" style="margin-right:10px;">💻</button>
     <form action="{% url 'set_language' %}" method="post" style="display:inline-block; margin-right:10px;">
       {% csrf_token %}
       <input name="next" type="hidden" value="{{ request.path }}">
-      <select name="language" onchange="this.form.submit()" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc;">
+      <select name="language" onchange="this.form.submit()" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc; background: rgba(255,255,255,0.8); color: var(--ink);">
         {% get_current_language as LANGUAGE_CODE %}
         {% get_available_languages as LANGUAGES %}
         {% get_language_info_list for LANGUAGES as languages %}
@@ -54,10 +71,30 @@
     <a href="{% url 'dashboard' %}">▦ <span>{% trans "Operations Dashboard" %}</span></a>
     <a href="{% url 'predict_demand' %}">✦ <span>AI Prediction</span></a>
     <a href="{% url 'forecast_7_days' %}">◷ <span>7-Day Forecast</span></a>
+    <!-- PHASE 11 SYSTEM FEATURES -->
+    <a href="{% url 'ecosystem_coordination' %}">🌐 <span>Ecosystem Coordination</span></a>
+    <!-- PHASE 6 GLOBAL SYSTEM FEATURES -->
+    <a href="{% url 'system_disaster_relief' %}">🚨 <span>Disaster Relief Command</span></a>
+    <a href="{% url 'system_blockchain_explorer' %}">🔗 <span>Blockchain Explorer</span></a>
+    
     <a href="{% url 'intelligence_center' %}">⌁ <span>Operations Intelligence</span></a>
     <a href="{% url 'food_safety' %}">♢ <span>Food Safety</span></a>
     <a href="{% url 'surplus_list' %}">▣ <span>Surplus Food</span></a>
     <a href="{% url 'recipient_list' %}">◎ <span>Recipients</span></a>
+    <div class="drawer-label">Volunteer / Consumer</div>
+    <a href="{% url 'volunteer_dashboard' %}">🤝 <span>My Impact</span></a>
+    
+    <!-- PHASE 6 CONSUMER FEATURES -->
+    <a href="{% url 'user_agri_tourism' %}">🏡 <span>Agri-Tourism</span></a>
+    
+    <!-- PHASE 5 CONSUMER & COMMUNITY FEATURES -->
+    <a href="{% url 'user_ai_recipe' %}">🍳 <span>AI Zero-Waste Chef</span></a>
+    <a href="{% url 'user_food_swap' %}">♻️ <span>Local Food Swap</span></a>
+    <a href="{% url 'user_carbon_tracker' %}">🌱 <span>My Green Score</span></a>
+    <a href="{% url 'user_fridge_locator' %}">❄️ <span>Community Fridges</span></a>
+    <a href="{% url 'user_farm_tour' %}">🚜 <span>Virtual Farm Tour</span></a>
+    
+    <a href="{% url 'agri_csa_marketplace' %}">🥬 <span>CSA Subscriptions</span></a>
     <div class="drawer-label">Agriculture</div>
     <a href="{% url 'agri_dashboard' %}">🌾 <span>Agriculture Dashboard</span></a>
     <a href="{% url 'agri_produce_list' %}">📦 <span>Produce Inventory</span></a>
@@ -71,11 +108,29 @@
     <a href="{% url 'agri_iot_dashboard' %}">📡 <span>IoT Sensor Fleet</span></a>
     <a href="{% url 'agri_carbon_dashboard' %}">💰 <span>Carbon Credit Exchange</span></a>
     
+    <!-- PHASE 6 AGRICULTURE FEATURES -->
+    <a href="{% url 'agri_greenhouse_controller' %}">💡 <span>IoT Greenhouse</span></a>
+    <a href="{% url 'agri_auto_subsidy' %}">🤖 <span>Auto-Subsidy Filer</span></a>
+    
+    <!-- PHASE 3 SUPER APP FEATURES -->
+    <a href="{% url 'agri_skyview' %}">🛰️ <span>Drone & Satellite Imagery</span></a>
+    <a href="{% url 'agri_invest' %}">🌱 <span>Farm Crowdfunding</span></a>
+    <a href="{% url 'agri_freight' %}">🚚 <span>Freight Bidding Board</span></a>
+    <a href="{% url 'agri_soil' %}">🧪 <span>AI Soil Nutrition</span></a>
+    <a href="{% url 'agri_comms' %}">📱 <span>SMS Alert Engine</span></a>
+    
     <div class="drawer-label">Organization</div>
     {% if user.organization_memberships.all %}
       <a href="{% url 'organization_dashboard' %}">▤ <span>Organization</span></a>
-      <a href="{% url 'logistics_map' %}">🗺️ <span>Fleet Map</span></a>
-      <a href="{% url 'delivery_list' %}">➜ <span>Delivery System</span></a>
+      <a href="{% url 'impact_dashboard' %}">🌟 <span>Impact Dashboard</span></a>
+      <a href="{% url 'leaderboard' %}">🏆 <span>Leaderboard</span></a>
+      <a href="{% url 'delivery_list' %}">📦 <span>Deliveries</span></a>
+      
+      <!-- PHASE 4 ORGANIZATION ENTERPRISE FEATURES -->
+      <a href="{% url 'org_fleet_routing' %}">🗺️ <span>AI Fleet Routing</span></a>
+      <a href="{% url 'org_grants' %}">💰 <span>CSR Grant Tracker</span></a>
+      <a href="{% url 'org_shift_scheduler' %}">🗓️ <span>Shift Scheduler</span></a>
+      <a href="{% url 'org_esg_report' %}">📊 <span>ESG Reporting</span></a>
     {% endif %}
   {% else %}
     <a class="drawer-cta" href="{% url 'organization_register' %}">＋ <span>Register Organization</span></a>
@@ -113,6 +168,86 @@
 <footer>AgroFedly · AI-assisted food planning · Safety · Redistribution · Delivery</footer>
 <script src="{% static 'js/app.js' %}"></script>
 <script src="{% static 'js/copilot.js' %}"></script>
+<script>
+  // Dynamic Scroll Animations Engine (Motion UI)
+  document.addEventListener("DOMContentLoaded", function() {
+      // 1. Add 'reveal' class to all cards and major sections automatically
+      const elementsToAnimate = document.querySelectorAll('.feature-card, .form-card, .stat-card, .delivery-card, .panel, .live-card, .orbit, .page-head h1');
+      elementsToAnimate.forEach((el, index) => {
+          el.classList.add('reveal');
+          // Add staggered delay based on position in DOM to create a cascade effect
+          el.style.transitionDelay = `${(index % 10) * 0.05}s`;
+      });
+
+      // 2. Setup Intersection Observer
+      const observerOptions = {
+          root: null,
+          rootMargin: '0px',
+          threshold: 0.1
+      };
+
+      const observer = new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                  entry.target.classList.add('active');
+                  observer.unobserve(entry.target); // only animate once
+              }
+          });
+      }, observerOptions);
+
+      // 3. Observe elements
+      document.querySelectorAll('.reveal').forEach(el => {
+          observer.observe(el);
+      });
+      
+      // 4. Advanced Theme Engine (Light/Dark/System)
+      const themeBtn = document.getElementById('themeBtn');
+      const body = document.body;
+      const themeIcons = { light: '☀️', dark: '🌙', system: '💻' };
+      const modes = ['system', 'light', 'dark'];
+      let currentModeIndex = 0;
+
+      // Load saved theme
+      const savedTheme = localStorage.getItem('agrofedly-theme') || 'system';
+      currentModeIndex = modes.indexOf(savedTheme);
+      applyTheme(savedTheme);
+
+      if(themeBtn) {
+          themeBtn.addEventListener('click', () => {
+              currentModeIndex = (currentModeIndex + 1) % modes.length;
+              const newMode = modes[currentModeIndex];
+              localStorage.setItem('agrofedly-theme', newMode);
+              applyTheme(newMode);
+          });
+      }
+
+      function applyTheme(mode) {
+          if(themeBtn) themeBtn.innerText = themeIcons[mode];
+          if(mode === 'dark') {
+              body.classList.add('dark-theme');
+          } else if(mode === 'light') {
+              body.classList.remove('dark-theme');
+          } else {
+              // System preference
+              if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                  body.classList.add('dark-theme');
+              } else {
+                  body.classList.remove('dark-theme');
+              }
+          }
+      }
+      
+      // Listen for system theme changes
+      if(window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+              if(localStorage.getItem('agrofedly-theme') === 'system') {
+                  applyTheme('system');
+              }
+          });
+      }
+  });
+</script>
+
 {% if user.is_authenticated %}
 <script>
   const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";

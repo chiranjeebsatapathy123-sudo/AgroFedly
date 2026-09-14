@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}IoT Smart Warehousing{% endblock %}
+{% block content %}
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: #0f172a; color: white; border-radius: 20px; margin-bottom: 40px;">
+    <div class="eyebrow" style="color:#38bdf8; font-weight:bold; letter-spacing:2px;">{% trans "SMART WAREHOUSING CAPACITY ENGINE" %}</div>
+    <h1 style="font-size:3rem; margin:10px 0; color: white;">{% trans "Real-Time Cold Storage" %}</h1>
+    <p style="font-size:1.2rem; color:#94a3b8; max-width:600px; margin:0 auto;">{% trans "Dynamically book palette space in IoT-monitored facilities to prevent crop spoilage." %}</p>
+</section>
+
+<div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
+    
+    <!-- Available Warehouses -->
+    <div style="flex:2; min-width:300px;">
+        <h2 style="font-size:1.5rem; margin-bottom:20px; display:flex; align-items:center; gap:10px;">🏭 {% trans "Available Facilities" %}</h2>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:20px;">
+            {% for wh in warehouses %}
+            <div class="form-card" style="position:relative; overflow:hidden;">
+                <!-- IoT Live Status Indicator -->
+                <div style="position:absolute; top:20px; right:20px; display:flex; align-items:center; gap:5px; background:var(--soft); padding:5px 10px; border-radius:20px; font-size:0.8rem; font-weight:bold;">
+                    <div style="width:8px; height:8px; border-radius:50%; background:#10b981; animation: pulse 2s infinite;"></div>
+                    IoT LIVE
+                </div>
+
+                <h3 style="margin:0 0 5px; padding-right:80px; font-size:1.4rem;">{{ wh.name }}</h3>
+                <p style="color:var(--muted); font-size:0.9rem; margin:0 0 20px;">📍 {{ wh.location }}</p>
+
+                <div style="display:flex; gap:15px; margin-bottom:20px;">
+                    <div style="flex:1; background:var(--soft); padding:15px; border-radius:10px; text-align:center;">
+                        <div style="font-size:0.8rem; color:var(--muted); text-transform:uppercase;">Temperature</div>
+                        <div style="font-size:1.5rem; font-weight:bold; color:{% if wh.current_temp_celsius > 5 %}#f39c12{% else %}#38bdf8{% endif %};">
+                            {{ wh.current_temp_celsius }}°C
+                        </div>
+                    </div>
+                    <div style="flex:1; background:var(--soft); padding:15px; border-radius:10px; text-align:center;">
+                        <div style="font-size:0.8rem; color:var(--muted); text-transform:uppercase;">Price / Day</div>
+                        <div style="font-size:1.5rem; font-weight:bold;">₹{{ wh.price_per_palette_day }}</div>
+                    </div>
+                </div>
+
+                <!-- Capacity Bar -->
+                <div style="margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;">
+                        <span>Capacity: {{ wh.available_palettes }} / {{ wh.total_palettes }} palettes</span>
+                        <span style="color:var(--primary); font-weight:bold;">Available</span>
+                    </div>
+                    <div style="width:100%; height:8px; background:var(--line); border-radius:4px; overflow:hidden;">
+                        <!-- Calculate percentage used -->
+                        <div style="height:100%; background:var(--primary); width:{% widthratio wh.total_palettes|add:"-"|add:wh.available_palettes wh.total_palettes 100 %}%;"></div>
+                    </div>
+                </div>
+
+                {% if wh.available_palettes > 0 %}
+                <form method="post" style="display:flex; gap:10px; margin-top:20px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="book">
+                    <input type="hidden" name="warehouse_id" value="{{ wh.id }}">
+                    <input type="number" name="palettes" min="1" max="{{ wh.available_palettes }}" value="1" style="width:80px; padding:10px; border-radius:8px; border:1px solid var(--line);">
+                    <input type="number" name="days" placeholder="Days" min="1" value="7" style="width:80px; padding:10px; border-radius:8px; border:1px solid var(--line);">
+                    <button type="submit" class="btn primary" style="flex:1;">{% trans "Book Space" %}</button>
+                </form>
+                {% else %}
+                <button disabled class="btn outline full" style="opacity:0.5;">{% trans "Fully Booked" %}</button>
+                {% endif %}
+
+            </div>
+            {% empty %}
+            <div style="grid-column: 1 / -1; text-align:center; padding:40px; border:1px dashed var(--line); border-radius:15px; color:var(--muted);">
+                {% trans "No warehouses available." %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Right Column: My Bookings -->
+    <div style="flex:1; min-width:300px;">
+        <h2 style="font-size:1.5rem; margin-bottom:20px;">📦 {% trans "My Active Bookings" %}</h2>
+        <div class="form-card">
+            {% if my_bookings %}
+                <div style="display:flex; flex-direction:column; gap:15px;">
+                    {% for booking in my_bookings %}
+                    <div style="background:var(--soft); padding:15px; border-radius:10px; border-left:4px solid var(--primary);">
+                        <h4 style="margin:0 0 5px; font-size:1.1rem;">{{ booking.warehouse.name }}</h4>
+                        <div style="font-size:0.9rem; color:var(--muted);">
+                            <strong>{{ booking.palettes }} Palettes</strong> | Until {{ booking.end_date|date:"M d" }}
+                        </div>
+                        <div style="margin-top:10px; font-size:0.8rem; background: var(--surface); padding:5px; border-radius:5px; display:inline-block;">
+                            🌡️ Live Temp: {{ booking.warehouse.current_temp_celsius }}°C
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color:var(--muted); font-size:0.9rem;">{% trans "You have no active warehouse bookings." %}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+</style>
+{% endblock %}

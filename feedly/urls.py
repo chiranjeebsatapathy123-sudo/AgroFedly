@@ -5,6 +5,11 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("health/", views.health_check, name="health"),
     path("login/", views.login_view, name="login"),
+    path("login/buyer/", views.login_view, kwargs={"persona": "buyer"}, name="login_buyer"),
+    path("login/supplier/", views.login_view, kwargs={"persona": "supplier"}, name="login_supplier"),
+    path("login/organization/", views.login_view, kwargs={"persona": "organization"}, name="login_organization"),
+    path("login/farmer/", views.login_view, kwargs={"persona": "farmer"}, name="login_farmer"),
+    path("login/user/", views.login_view, kwargs={"persona": "user"}, name="login_user"),
     path("logout/", views.logout_view, name="logout"),
 
     path("dashboard/", views.dashboard, name="dashboard"),
@@ -35,9 +40,14 @@ urlpatterns = [
     path("agriculture/iot/", views.agri_iot_dashboard, name="agri_iot_dashboard"),
     path("agriculture/map/", views.agri_field_map, name="agri_field_map"),
     path("agriculture/equipment/", views.agri_equipment_hub, name="agri_equipment_hub"),
+    path("agriculture/equipment/add/", views.agri_equipment_add, name="agri_equipment_add"),
     path("agriculture/equipment/<int:equipment_id>/rent/", views.agri_rent_equipment, name="agri_rent_equipment"),
     path("agriculture/forum/", views.agri_forum, name="agri_forum"),
     path("agriculture/forum/<int:post_id>/", views.agri_forum_detail, name="agri_forum_detail"),
+    path("agriculture/advisor/", views.agri_ai_advisor, name="agri_ai_advisor"),
+    path("agriculture/finance/", views.agri_finance_portal, name="agri_finance_portal"),
+    path("agriculture/csa/", views.agri_csa_marketplace, name="agri_csa_marketplace"),
+    path("agriculture/warehousing/", views.agri_warehousing, name="agri_warehousing"),
     path("agriculture/subsidies/", views.agri_subsidy_finder, name="agri_subsidy_finder"),
     path("agriculture/carbon/", views.agri_carbon_dashboard, name="agri_carbon_dashboard"),
     path("agriculture/carbon/log/", views.agri_carbon_log, name="agri_carbon_log"),
@@ -83,4 +93,36 @@ urlpatterns = [
     path("organization/leaderboard/", views.leaderboard, name="leaderboard"),
     path("deliveries/<int:delivery_id>/receipt/", views.generate_donation_receipt, name="generate_donation_receipt"),
     path("api/copilot/", views.copilot_chat, name="copilot_chat"),
+    
+    # PHASE 3 ROUTES
+    # PHASE 3 ROUTES
+    path("agriculture/skyview/", views.agri_skyview, name="agri_skyview"),
+    path("agriculture/invest/", views.agri_invest, name="agri_invest"),
+    path("agriculture/freight/", views.agri_freight, name="agri_freight"),
+    path("agriculture/soil/", views.agri_soil, name="agri_soil"),
+    path("agriculture/comms/", views.agri_comms, name="agri_comms"),
+
+    # PHASE 4 ROUTES (ORGANIZATION)
+    path("organization/routing/", views.org_fleet_routing, name="org_fleet_routing"),
+    path("organization/grants/", views.org_grants, name="org_grants"),
+    path("organization/shifts/", views.org_shift_scheduler, name="org_shift_scheduler"),
+    path("organization/esg/", views.org_esg_report, name="org_esg_report"),
+
+    # PHASE 5 ROUTES (CONSUMER & COMMUNITY)
+    path("user/recipe/", views.user_ai_recipe, name="user_ai_recipe"),
+    path("user/swap/", views.user_food_swap, name="user_food_swap"),
+    path("user/carbon/", views.user_carbon_tracker, name="user_carbon_tracker"),
+    path("user/fridges/", views.user_fridge_locator, name="user_fridge_locator"),
+    path("user/farm-tour/", views.user_farm_tour, name="user_farm_tour"),
+    # PHASE 6 ROUTES (GLOBAL & FUTURE-TECH)
+    path("system/disaster/", views.system_disaster_relief, name="system_disaster_relief"),
+    path("agriculture/greenhouse/", views.agri_greenhouse_controller, name="agri_greenhouse_controller"),
+    path("user/agritourism/", views.user_agri_tourism, name="user_agri_tourism"),
+    path("system/blockchain/", views.system_blockchain_explorer, name="system_blockchain_explorer"),
+    path("agriculture/subsidy/", views.agri_auto_subsidy, name="agri_auto_subsidy"),
+
+    # Phase 11: Ecosystem Coordination
+    path('org/ecosystem/', views.ecosystem_coordination, name='ecosystem_coordination'),
+    path('org/ecosystem/create/', views.create_alliance, name='create_alliance'),
+    path('org/ecosystem/join/', views.join_alliance, name='join_alliance'),
 ]
