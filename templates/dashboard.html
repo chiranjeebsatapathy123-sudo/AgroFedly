@@ -2,9 +2,117 @@
 {% load i18n %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<section class="page-head"><div><div class="eyebrow">{% trans "OPERATIONS & AI" %}</div><h1>{% trans "Command dashboard" %}</h1><p>{% trans "Demand planning, surplus prevention, redistribution and delivery — in one view." %}</p></div><div class="live-card"><span>{% trans "● Operational" %}</span><small>Model: {{ model_name }}</small><small>AI confidence: {{ avg_confidence }}%</small></div></section>
-<div class="stats-grid"><div class="stat-card accent"><span>{% trans "Predicted meals" %}</span><b>{{ total_predicted }}</b><small>{{ total_predictions }} saved forecasts</small></div><div class="stat-card"><span>{% trans "Surplus quantity" %}</span><b>{{ total_surplus }}</b><small>{% trans "Recorded food" %}</small></div><div class="stat-card"><span>{% trans "Food redistributed" %}</span><b>{{ redistributed }}</b><small>{% trans "Meals moved" %}</small></div><div class="stat-card"><span>{% trans "Recipients" %}</span><b>{{ verified_recipients }}</b><small>Verified of {{ recipients }}</small></div></div>
-<div class="quick-grid"><a href="{% url 'predict_demand' %}" class="quick"><span>✦</span><b>{% trans "Run AI prediction" %}</b><small>{% trans "Estimate today's demand" %}</small></a><a href="{% url 'add_surplus' %}" class="quick"><span>🍱</span><b>{% trans "Record surplus" %}</b><small>{% trans "Check safety automatically" %}</small></a><a href="{% url 'delivery_create' %}" class="quick"><span>➜</span><b>{% trans "Create delivery" %}</b><small>{% trans "Move food to another organization" %}</small></a><a href="{% url 'intelligence_center' %}" class="quick"><span>⌁</span><b>{% trans "Operations intelligence" %}</b><small>{% trans "Analytics, routes, alerts & integrations" %}</small></a></div>
-<div class="two-panels"><section class="panel"><div class="panel-title"><h2>{% trans "Recent forecasts" %}</h2><a href="{% url 'forecast_7_days' %}">{% trans "7-day view" %}</a></div>{% for p in recent_predictions %}<div class="list-row"><div><b>{{ p.date }}</b><small>{{ p.model_name }} · {{ p.confidence }}% confidence</small></div><strong>{{ p.predicted_demand }}</strong></div>{% empty %}<div class="empty">{% trans "No forecasts yet." %}</div>{% endfor %}</section>
-<section class="panel intelligence-preview"><div class="panel-title"><h2>{% trans "Operations intelligence" %}</h2><a href="{% url 'intelligence_center' %}">{% trans "Open all" %}</a></div><div class="feature-mini-grid"><a href="{% url 'intelligence_center' %}#preparation">{% trans "Preparation recommendation" %}</a><a href="{% url 'intelligence_center' %}#consumption">{% trans "Consumption tracking" %}</a><a href="{% url 'intelligence_center' %}#analytics">{% trans "Waste analytics" %}</a><a href="{% url 'intelligence_center' %}#routes">{% trans "Route optimization" %}</a><a href="{% url 'intelligence_center' %}#alerts">{% trans "Predictive waste alerts" %}</a><a href="{% url 'intelligence_center' %}#integrations">{% trans "ERP / IoT integrations" %}</a></div></section></div>
+<div class="breadcrumb" style="max-width:1240px; margin: 20px auto 0; padding: 0 28px;">
+    <a href="{% url 'home' %}">AgroFedly</a> <span>/</span> <span>Dashboard</span>
+</div>
+<section class="page-head" style="padding-top:10px;">
+    <div>
+        <h1>Good {% now "A"|lower %}, {{ user.username|title }}</h1>
+        <p>{% trans "Here's what's happening with your operations today." %}</p>
+    </div>
+    <div class="live-card">
+        <span>{% trans "● Operational" %}</span>
+        <small>Model: {{ model_name }}</small>
+        <small>AI confidence: {{ avg_confidence }}%</small>
+    </div>
+</section>
+
+{% if user.is_authenticated %}
+<div style="max-width:1240px; margin: 0 auto; padding: 0 28px;">
+    <a href="{% url 'system_disaster_relief' %}" style="display:block; text-decoration:none;">
+        <div class="error-box" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-left: 4px solid var(--danger);">
+            <div>
+                <b style="font-size:14px; display:block;">🚨 DISASTER RELIEF & EMERGENCY RESPONSE</b>
+                <span style="font-size:12px;">Active emergency zones require immediate food redirection. Click to view live disaster map.</span>
+            </div>
+            <span class="btn outline" style="font-size:10px;">View Map</span>
+        </div>
+    </a>
+</div>
+{% endif %}
+
+<div class="stats-grid">
+    <div class="stat-card accent">
+        <span>{% trans "Food Surplus" %}</span>
+        <b>{{ total_surplus }}</b>
+        <small>↑ 4.2% vs previous week</small>
+    </div>
+    <div class="stat-card">
+        <span>{% trans "Redistributed" %}</span>
+        <b>{{ redistributed }}</b>
+        <small>Meals successfully moved</small>
+    </div>
+    <div class="stat-card">
+        <span>{% trans "Food Waste Prevented" %}</span>
+        <b>{{ total_predicted }}</b>
+        <small>Est. meals saved</small>
+    </div>
+    <div class="stat-card">
+        <span>{% trans "Active Recipients" %}</span>
+        <b>{{ verified_recipients }}</b>
+        <small>Verified organizations</small>
+    </div>
+</div>
+
+<div class="quick-grid">
+    <a href="{% url 'predict_demand' %}" class="quick">
+        <span>✦</span><b>{% trans "Run AI prediction" %}</b><small>{% trans "Estimate today's demand" %}</small>
+    </a>
+    <a href="{% url 'add_surplus' %}" class="quick">
+        <span>🍱</span><b>{% trans "Record surplus" %}</b><small>{% trans "Check safety automatically" %}</small>
+    </a>
+    <a href="{% url 'delivery_create' %}" class="quick">
+        <span>➜</span><b>{% trans "Create delivery" %}</b><small>{% trans "Move food to another organization" %}</small>
+    </a>
+    <a href="{% url 'intelligence_center' %}" class="quick">
+        <span>⌁</span><b>{% trans "Operations intelligence" %}</b><small>{% trans "Analytics, routes, alerts & integrations" %}</small>
+    </a>
+</div>
+
+<div class="two-panels">
+    <section class="panel">
+        <div class="panel-title">
+            <h2>{% trans "Recent Surplus Food" %}</h2>
+            <a href="{% url 'surplus_list' %}">{% trans "View all" %}</a>
+        </div>
+        {% for s in recent_surplus %}
+        <div class="list-row">
+            <div>
+                <b>{{ s.food_type }}</b>
+                <small>{{ s.quantity }} units · Expires: {{ s.expiration_date|date:"M d" }}</small>
+            </div>
+            <span class="pill {% if s.status == 'SAFE' %}safe{% elif s.status == 'UNSAFE' %}unsafe{% else %}requested{% endif %}">
+                {{ s.get_status_display }}
+            </span>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🍱</div>
+            <p>{% trans "No surplus food recorded yet. Once your organization records prepared food, surplus data will appear here." %}</p>
+        </div>
+        {% endfor %}
+    </section>
+
+    <section class="panel">
+        <div class="panel-title">
+            <h2>{% trans "Recent Activity / Deliveries" %}</h2>
+            <a href="{% url 'delivery_list' %}">{% trans "View all" %}</a>
+        </div>
+        {% for d in recent_deliveries %}
+        <div class="list-row">
+            <div>
+                <b>To: {{ d.receiver.name }}</b>
+                <small>{{ d.get_status_display }} · Driver: {{ d.driver_name|default:"Unassigned" }}</small>
+            </div>
+            <a href="{% url 'delivery_detail' d.id %}" class="btn soft" style="padding: 5px 10px; font-size:10px;">Track</a>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🚚</div>
+            <p>{% trans "No active deliveries. Deliveries created during redistribution will be tracked here." %}</p>
+        </div>
+        {% endfor %}
+    </section>
+</div>
+
 {% endblock %}

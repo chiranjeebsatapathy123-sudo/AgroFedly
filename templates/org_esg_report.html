@@ -2,10 +2,10 @@
 {% load i18n %}
 {% block title %}Org_ESG: Corporate Reporting{% endblock %}
 {% block content %}
-<section class="page-head" style="text-align:center; padding: 40px 20px; background: #0f172a; color: white; border-radius: 20px; margin-bottom: 40px;">
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: var(--color-text-primary); color: white; border-radius: 20px; margin-bottom: 40px;">
     <div class="eyebrow" style="color:#38bdf8; font-weight:bold; letter-spacing:2px;">{% trans "ORG_ESG" %}</div>
     <h1 style="font-size:3rem; margin:10px 0; color: white;">{% trans "Automated ESG Reporting" %}</h1>
-    <p style="font-size:1.2rem; color:#94a3b8; max-width:600px; margin:0 auto;">{% trans "Generate compliance-ready Environmental, Social, and Governance reports to secure funding." %}</p>
+    <p style="font-size:1.2rem; color:var(--color-text-secondary); max-width:600px; margin:0 auto;">{% trans "Generate compliance-ready Environmental, Social, and Governance reports to secure funding." %}</p>
 </section>
 
 <div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
@@ -47,7 +47,7 @@
         
         <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:20px;">
             {% for report in reports %}
-            <div class="form-card" style="padding:20px; border-top:5px solid #10b981; box-shadow:0 10px 25px rgba(0,0,0,0.05); display:flex; flex-direction:column;">
+            <div class="form-card" style="padding:20px; border-top:5px solid var(--color-primary); box-shadow:0 10px 25px rgba(0,0,0,0.05); display:flex; flex-direction:column;">
                 
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
                     <div>

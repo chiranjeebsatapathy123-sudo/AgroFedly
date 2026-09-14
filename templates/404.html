@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Page Not Found{% endblock %}
+{% block content %}
+<section class="form-page single">
+  <div class="form-card" style="text-align: center;">
+    <div class="eyebrow">Error 404</div>
+    <h1>{% trans "Page Not Found" %}</h1>
+    <p>{% trans "Sorry, the page you are looking for does not exist or has been moved." %}</p>
+    <a href="{% url 'dashboard' %}" class="btn primary">{% trans "Return to Dashboard" %}</a>
+  </div>
+</section>
+{% endblock %}

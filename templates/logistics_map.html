@@ -44,8 +44,8 @@
         border-radius: 50%;
     }
     
-    .pip-indicator.active { background: #10b981; box-shadow: 0 0 10px #10b981; }
-    .pip-indicator.pending { background: #f59e0b; }
+    .pip-indicator.active { background: var(--color-primary); box-shadow: 0 0 10px var(--color-primary); }
+    .pip-indicator.pending { background: var(--color-warning); }
     
     #fleetMap {
         height: 600px;
@@ -59,6 +59,7 @@
 {% endblock %}
 
 {% block content %}
+{% include 'demo_banner.html' %}
 <div class="map-container">
     <div class="map-header">
         <div>
@@ -101,13 +102,13 @@ document.addEventListener("DOMContentLoaded", function() {
     // Custom Icons
     const truckIconActive = L.divIcon({
         className: 'custom-icon',
-        html: '<div style="background:#10b981; width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow: 0 0 15px #10b981;"></div>',
+        html: '<div style="background:var(--color-primary); width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow: 0 0 15px var(--color-primary);"></div>',
         iconSize: [16, 16]
     });
     
     const truckIconPending = L.divIcon({
         className: 'custom-icon',
-        html: '<div style="background:#f59e0b; width:12px; height:12px; border-radius:50%; border:2px solid white;"></div>',
+        html: '<div style="background:var(--color-warning); width:12px; height:12px; border-radius:50%; border:2px solid white;"></div>',
         iconSize: [12, 12]
     });
 

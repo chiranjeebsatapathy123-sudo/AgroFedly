@@ -2,10 +2,10 @@
 {% load i18n %}
 {% block title %}Agri_Freight: Bidding Engine{% endblock %}
 {% block content %}
-<section class="page-head" style="text-align:center; padding: 40px 20px; background: #0f172a; color: white; border-radius: 20px; margin-bottom: 40px;">
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: var(--color-text-primary); color: white; border-radius: 20px; margin-bottom: 40px;">
     <div class="eyebrow" style="color:#38bdf8; font-weight:bold; letter-spacing:2px;">{% trans "AGRI_FREIGHT" %}</div>
     <h1 style="font-size:3rem; margin:10px 0; color: white;">{% trans "Reverse-Auction Logistics" %}</h1>
-    <p style="font-size:1.2rem; color:#94a3b8; max-width:600px; margin:0 auto;">{% trans "Farmers post their shipments. Truckers bid to take the load. Lowest price wins." %}</p>
+    <p style="font-size:1.2rem; color:var(--color-text-secondary); max-width:600px; margin:0 auto;">{% trans "Farmers post their shipments. Truckers bid to take the load. Lowest price wins." %}</p>
 </section>
 
 <div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
@@ -24,7 +24,7 @@
                     <div style="font-size:0.8rem; color:var(--muted); text-transform:uppercase;">Current Lowest Bid</div>
                     {% with lowest_bid=listing.bids.all|dictsort:"bid_amount"|first %}
                         {% if lowest_bid %}
-                            <div style="font-size:1.8rem; font-weight:bold; color:#10b981;">₹{{ lowest_bid.bid_amount }}</div>
+                            <div style="font-size:1.8rem; font-weight:bold; color:var(--color-primary);">₹{{ lowest_bid.bid_amount }}</div>
                         {% else %}
                             <div style="font-size:1.2rem; font-weight:bold; color:var(--muted); margin-top:5px;">No bids yet</div>
                         {% endif %}
@@ -82,7 +82,7 @@
                     <div style="padding:15px; border:1px solid var(--line); border-radius:10px; {% if bid.status == 'ACCEPTED' %}border-left: 4px solid var(--green); background: var(--surface);{% endif %}">
                         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                             <h4 style="margin:0; font-size:1rem;">{{ bid.listing.pickup_location }} to {{ bid.listing.drop_location }}</h4>
-                            <span style="font-weight:bold; font-size:0.8rem; padding:3px 8px; border-radius:12px; {% if bid.status == 'ACCEPTED' %}background:#10b981; color: white;{% else %}background:var(--soft);{% endif %}">{{ bid.status }}</span>
+                            <span style="font-weight:bold; font-size:0.8rem; padding:3px 8px; border-radius:12px; {% if bid.status == 'ACCEPTED' %}background:var(--color-primary); color: white;{% else %}background:var(--soft);{% endif %}">{{ bid.status }}</span>
                         </div>
                         <div style="font-size:1.1rem; font-weight:bold;">₹{{ bid.bid_amount }}</div>
                         <div style="font-size:0.8rem; color:var(--muted);">For {{ bid.listing.cargo_description }} ({{ bid.estimated_days }} days)</div>

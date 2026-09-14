@@ -9,3 +9,6 @@ urlpatterns = [
     path("sw.js", TemplateView.as_view(template_name="sw.js", content_type="application/javascript"), name="service_worker"),
     path("favicon.ico", RedirectView.as_view(url="/static/img/favicon.svg", permanent=False)),
 ]
+
+handler404 = 'feedly.views.errors.custom_404'
+handler500 = 'feedly.views.errors.custom_500'

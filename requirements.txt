@@ -27,3 +27,4 @@ qrcode[pil]>=7.0
 
 # OpenAI
 openai>=1.0,<2.0
+channels-redis>=4.0

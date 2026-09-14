@@ -91,25 +91,34 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/polyline/1.0.2/polyline.min.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function() {
-        const start = [{{ start_coords.lat }}, {{ start_coords.lng }}];
-        const end = [{{ end_coords.lat }}, {{ end_coords.lng }}];
-        
-        const map = L.map('routeMap').setView(start, 13);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-        }).addTo(map);
-        
-        L.marker(start).addTo(map).bindPopup("Origin");
-        L.marker(end).addTo(map).bindPopup("Destination");
-        
-        // Decode polyline geometry string from OSRM
-        const geomStr = "{{ route_data.geometry }}";
-        if(geomStr) {
-          try {
-            const coordinates = polyline.decode(geomStr);
-            const routeLine = L.polyline(coordinates, {color: '#4ade80', weight: 5}).addTo(map);
-            map.fitBounds(routeLine.getBounds(), {padding: [20, 20]});
-          } catch(e) { console.error("Error decoding polyline", e); }
+        try {
+          if (typeof L === 'undefined') throw new Error("Leaflet library failed to load (timeout or network error).");
+
+          const start = [{{ start_coords.lat }}, {{ start_coords.lng }}];
+          const end = [{{ end_coords.lat }}, {{ end_coords.lng }}];
+          
+          const map = L.map('routeMap').setView(start, 13);
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+          }).addTo(map);
+          
+          L.marker(start).addTo(map).bindPopup("Origin");
+          L.marker(end).addTo(map).bindPopup("Destination");
+          
+          // Decode polyline geometry string from OSRM
+          const geomStr = "{{ route_data.geometry }}";
+          if(geomStr) {
+            try {
+              const coordinates = polyline.decode(geomStr);
+              const routeLine = L.polyline(coordinates, {color: '#4ade80', weight: 5}).addTo(map);
+              map.fitBounds(routeLine.getBounds(), {padding: [20, 20]});
+            } catch(e) { console.error("Error decoding polyline", e); }
+          }
+        } catch (e) {
+            console.error("Map initialization failed:", e);
+            document.getElementById('routeMap').innerHTML = `<div style="display:flex; justify-content:center; align-items:center; height:100%; background:#f8f9fa; color:#dc3545; text-align:center; padding:20px;">
+                <b>Map Unavailable</b><br>Could not load mapping service. Delivery details are still available above.
+            </div>`;
         }
       });
     </script>

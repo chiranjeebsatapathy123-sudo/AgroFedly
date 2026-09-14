@@ -5,7 +5,7 @@ import uuid
 
 
 class MealRecord(models.Model):
-    date = models.DateField()
+    date = models.DateField(db_index=True)
     attendance = models.PositiveIntegerField(default=0)
     meals_prepared = models.PositiveIntegerField(default=0)
     meals_consumed = models.PositiveIntegerField(default=0)
@@ -154,7 +154,7 @@ class SurplusFood(models.Model):
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     storage_temperature = models.FloatField(default=4.0)
     storage_time_hours = models.FloatField(default=0.0, validators=[MinValueValidator(0)])
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING", db_index=True)
     
     # AI Quality Control fields
     quality_image = models.ImageField(upload_to="surplus_quality/", null=True, blank=True)
@@ -163,28 +163,11 @@ class SurplusFood(models.Model):
     
     is_safe = models.BooleanField(default=False)
     safety_alert = models.CharField(max_length=255, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
-    def check_safety(self):
-        if self.storage_temperature <= 5 and self.storage_time_hours <= 24:
-            self.is_safe = True
-            self.status = "SAFE"
-            self.safety_alert = "Safe for redistribution."
-        elif self.storage_temperature <= 8 and self.storage_time_hours <= 36:
-            self.is_safe = False
-            self.status = "WARNING"
-            self.safety_alert = "Marginal conditions. Rapid redistribution or manual check required."
-        else:
-            self.is_safe = False
-            self.status = "UNSAFE"
-            reasons = []
-            if self.storage_temperature > 8:
-                reasons.append("temperature too high")
-            if self.storage_time_hours > 36:
-                reasons.append("storage time exceeded")
-            self.safety_alert = "Unsafe: " + " and ".join(reasons) + "."
-            
-        self.save(update_fields=["is_safe", "status", "safety_alert"])
+    def check_safety(self, user=None):
+        from feedly.services.food_safety import evaluate_food_safety
+        evaluate_food_safety(self, user=user)
 
     def __str__(self):
         return self.food_name
@@ -244,11 +227,11 @@ class Delivery(models.Model):
     recipient_signature = models.TextField(blank=True, help_text="Base64 encoded signature image data")
     scheduled_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="REQUESTED")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="REQUESTED", db_index=True)
     tracking_code = models.CharField(max_length=20, unique=True, editable=False)
     notes = models.TextField(blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -1054,3 +1037,14 @@ class SharedTask(models.Model):
     
     def __str__(self):
         return f"{self.title} ({self.get_status_display()})"
+
+class Notification(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    notification_type = models.CharField(max_length=50)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Notification: {self.message[:20]}"

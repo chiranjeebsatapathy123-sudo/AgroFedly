@@ -2,10 +2,10 @@
 {% load i18n %}
 {% block title %}Org_Shifts: Volunteer Scheduler{% endblock %}
 {% block content %}
-<section class="page-head" style="text-align:center; padding: 40px 20px; background: #0f172a; color: white; border-radius: 20px; margin-bottom: 40px;">
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: var(--color-text-primary); color: white; border-radius: 20px; margin-bottom: 40px;">
     <div class="eyebrow" style="color:#38bdf8; font-weight:bold; letter-spacing:2px;">{% trans "ORG_SHIFTS" %}</div>
     <h1 style="font-size:3rem; margin:10px 0; color: white;">{% trans "Volunteer Shift Roster" %}</h1>
-    <p style="font-size:1.2rem; color:#94a3b8; max-width:600px; margin:0 auto;">{% trans "Post available shifts for drivers and warehouse sorters, and let volunteers claim them." %}</p>
+    <p style="font-size:1.2rem; color:var(--color-text-secondary); max-width:600px; margin:0 auto;">{% trans "Post available shifts for drivers and warehouse sorters, and let volunteers claim them." %}</p>
 </section>
 
 <div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
@@ -68,7 +68,7 @@
                 <div style="min-width:120px; text-align:right;">
                     <div style="font-size:0.85rem; font-weight:bold; margin-bottom:5px;">{{ shift.claims.count }} / {{ shift.capacity }} Filled</div>
                     <div style="width:100%; height:8px; background:var(--line); border-radius:4px; overflow:hidden;">
-                        <div style="height:100%; background:linear-gradient(90deg, #f59e0b, #10b981); width:{% widthratio shift.claims.count shift.capacity 100 %}%;"></div>
+                        <div style="height:100%; background:linear-gradient(90deg, var(--color-warning), var(--color-primary)); width:{% widthratio shift.claims.count shift.capacity 100 %}%;"></div>
                     </div>
                 </div>
                 

@@ -23,7 +23,7 @@
     <p style="margin-bottom: 30px; color: #9ca3af;">By confirming, you verify that {{ delivery.quantity }} meals were safely delivered to {{ delivery.receiver.name }}.</p>
     <form method="post">
       {% csrf_token %}
-      <button class="btn primary" style="width: 100%; padding: 15px; font-size: 1.2rem; background: #16a34a;">{% trans "Confirm Delivered (Recipient)" %}</button>
+      <button class="btn primary" style="width: 100%; padding: 15px; font-size: 1.2rem; background: var(--color-primary);">{% trans "Confirm Delivered (Recipient)" %}</button>
     </form>
   {% else %}
     <h2>This delivery is already {{ delivery.status|lower }}.</h2>

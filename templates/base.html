@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#159653">
+<meta name="theme-color" content="var(--color-primary)">
 <link rel="manifest" href="{% static 'manifest.json' %}">
 <title>{% block title %}AgroFedly{% endblock %} · Smart Food Operations</title>
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
@@ -22,6 +22,14 @@
   #drawer::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.6) !important; }
 </style>
 <script>
+  // FOUC prevention: Apply theme before body renders
+  (function() {
+    const savedTheme = localStorage.getItem('agrofedly-theme') || 'system';
+    if (savedTheme === 'dark' || (savedTheme === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark-theme');
+    }
+  })();
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
@@ -40,7 +48,13 @@
   <button class="menu-btn" id="menuBtn" aria-label="Open navigation">⋯</button>
   <a class="brand" href="{% url 'home' %}"><span class="brand-mark">A</span><span>AgroFedly</span><small>{% trans "Smart Food Operations" %}</small></a>
   <div class="top-actions">
-    <button id="themeBtn" class="theme-btn" title="Toggle Theme" style="margin-right:10px;">💻</button>
+    <div style="position: relative; display: inline-block; margin-right:10px;">
+      <select id="themeSelector" style="padding: 4px; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-primary); cursor:pointer;">
+        <option value="light">☀️ Light</option>
+        <option value="dark">🌙 Dark</option>
+        <option value="system">💻 System</option>
+      </select>
+    </div>
     <form action="{% url 'set_language' %}" method="post" style="display:inline-block; margin-right:10px;">
       {% csrf_token %}
       <input name="next" type="hidden" value="{{ request.path }}">
@@ -66,67 +80,62 @@
 
 <aside class="drawer" id="drawer">
   <div class="drawer-head"><strong>{% trans "Navigate" %}</strong><button id="closeMenu">×</button></div>
+  <div class="drawer-category">Overview</div>
   <a href="{% url 'home' %}">⌂ <span>{% trans "Home" %}</span></a>
   {% if user.is_authenticated %}
     <a href="{% url 'dashboard' %}">▦ <span>{% trans "Operations Dashboard" %}</span></a>
-    <a href="{% url 'predict_demand' %}">✦ <span>AI Prediction</span></a>
-    <a href="{% url 'forecast_7_days' %}">◷ <span>7-Day Forecast</span></a>
-    <!-- PHASE 11 SYSTEM FEATURES -->
-    <a href="{% url 'ecosystem_coordination' %}">🌐 <span>Ecosystem Coordination</span></a>
-    <!-- PHASE 6 GLOBAL SYSTEM FEATURES -->
-    <a href="{% url 'system_disaster_relief' %}">🚨 <span>Disaster Relief Command</span></a>
-    <a href="{% url 'system_blockchain_explorer' %}">🔗 <span>Blockchain Explorer</span></a>
     
-    <a href="{% url 'intelligence_center' %}">⌁ <span>Operations Intelligence</span></a>
-    <a href="{% url 'food_safety' %}">♢ <span>Food Safety</span></a>
+    <div class="drawer-category">Food Management</div>
     <a href="{% url 'surplus_list' %}">▣ <span>Surplus Food</span></a>
+    <a href="{% url 'delivery_list' %}">📦 <span>Deliveries</span></a>
     <a href="{% url 'recipient_list' %}">◎ <span>Recipients</span></a>
-    <div class="drawer-label">Volunteer / Consumer</div>
-    <a href="{% url 'volunteer_dashboard' %}">🤝 <span>My Impact</span></a>
     
-    <!-- PHASE 6 CONSUMER FEATURES -->
-    <a href="{% url 'user_agri_tourism' %}">🏡 <span>Agri-Tourism</span></a>
-    
-    <!-- PHASE 5 CONSUMER & COMMUNITY FEATURES -->
+    <!-- Phase 5 / 6 specialized consumer features -->
     <a href="{% url 'user_ai_recipe' %}">🍳 <span>AI Zero-Waste Chef</span></a>
     <a href="{% url 'user_food_swap' %}">♻️ <span>Local Food Swap</span></a>
-    <a href="{% url 'user_carbon_tracker' %}">🌱 <span>My Green Score</span></a>
     <a href="{% url 'user_fridge_locator' %}">❄️ <span>Community Fridges</span></a>
-    <a href="{% url 'user_farm_tour' %}">🚜 <span>Virtual Farm Tour</span></a>
     
-    <a href="{% url 'agri_csa_marketplace' %}">🥬 <span>CSA Subscriptions</span></a>
-    <div class="drawer-label">Agriculture</div>
+    <div class="drawer-category">Insights</div>
+    <a href="{% url 'intelligence_center' %}">⌁ <span>Operations Intelligence</span></a>
+    <a href="{% url 'predict_demand' %}">✦ <span>AI Prediction</span></a>
+    <a href="{% url 'forecast_7_days' %}">◷ <span>7-Day Forecast</span></a>
+    <a href="{% url 'agri_market_trends' %}">📊 <span>Market Trends (AI)</span></a>
+    <a href="{% url 'user_carbon_tracker' %}">🌱 <span>My Green Score</span></a>
+
+    <div class="drawer-category">Agriculture</div>
     <a href="{% url 'agri_dashboard' %}">🌾 <span>Agriculture Dashboard</span></a>
     <a href="{% url 'agri_produce_list' %}">📦 <span>Produce Inventory</span></a>
     <a href="{% url 'agri_processing_list' %}">⚙️ <span>Produce Processing</span></a>
-    <a href="{% url 'agri_supply_matching' %}">🤝 <span>Supply Matching</span></a>
-    <a href="{% url 'agri_supply_requests_list' %}">📥 <span>Supply Requests</span></a>
-    <a href="{% url 'agri_market_trends' %}">📊 <span>Market Trends (AI)</span></a>
-    <a href="{% url 'agri_ledger' %}">🛡️ <span>Payments Ledger</span></a>
+    <a href="{% url 'agri_iot_dashboard' %}">📡 <span>IoT Sensor Fleet</span></a>
+    <a href="{% url 'agri_greenhouse_controller' %}">💡 <span>IoT Greenhouse</span></a>
     <a href="{% url 'agri_disease_scanner' %}">🔬 <span>AI Disease Scanner</span></a>
     <a href="{% url 'agri_yield_predictor' %}">📈 <span>Yield Predictor</span></a>
-    <a href="{% url 'agri_iot_dashboard' %}">📡 <span>IoT Sensor Fleet</span></a>
-    <a href="{% url 'agri_carbon_dashboard' %}">💰 <span>Carbon Credit Exchange</span></a>
-    
-    <!-- PHASE 6 AGRICULTURE FEATURES -->
-    <a href="{% url 'agri_greenhouse_controller' %}">💡 <span>IoT Greenhouse</span></a>
-    <a href="{% url 'agri_auto_subsidy' %}">🤖 <span>Auto-Subsidy Filer</span></a>
-    
-    <!-- PHASE 3 SUPER APP FEATURES -->
-    <a href="{% url 'agri_skyview' %}">🛰️ <span>Drone & Satellite Imagery</span></a>
-    <a href="{% url 'agri_invest' %}">🌱 <span>Farm Crowdfunding</span></a>
-    <a href="{% url 'agri_freight' %}">🚚 <span>Freight Bidding Board</span></a>
     <a href="{% url 'agri_soil' %}">🧪 <span>AI Soil Nutrition</span></a>
-    <a href="{% url 'agri_comms' %}">📱 <span>SMS Alert Engine</span></a>
+    <a href="{% url 'agri_csa_marketplace' %}">🥬 <span>CSA Subscriptions</span></a>
     
-    <div class="drawer-label">Organization</div>
+    <div class="drawer-category">Community & Ecosystem</div>
+    <a href="{% url 'ecosystem_coordination' %}">🌐 <span>Ecosystem Coordination</span></a>
+    <a href="{% url 'system_disaster_relief' %}">🚨 <span>Disaster Relief Command</span></a>
+    <a href="{% url 'volunteer_dashboard' %}">🤝 <span>Volunteer Impact</span></a>
+    <a href="{% url 'user_farm_tour' %}">🚜 <span>Virtual Farm Tour</span></a>
+    <a href="{% url 'user_agri_tourism' %}">🏡 <span>Agri-Tourism</span></a>
+    <a href="{% url 'agri_invest' %}">🌱 <span>Farm Crowdfunding</span></a>
+
+    <div class="drawer-category">Administration</div>
+    <a href="{% url 'agri_supply_matching' %}">🤝 <span>Supply Matching</span></a>
+    <a href="{% url 'agri_supply_requests_list' %}">📥 <span>Supply Requests</span></a>
+    <a href="{% url 'agri_ledger' %}">🛡️ <span>Payments Ledger</span></a>
+    <a href="{% url 'agri_carbon_dashboard' %}">💰 <span>Carbon Credit Exchange</span></a>
+    <a href="{% url 'agri_auto_subsidy' %}">🤖 <span>Auto-Subsidy Filer</span></a>
+    <a href="{% url 'agri_skyview' %}">🛰️ <span>Drone & Satellite Imagery</span></a>
+    <a href="{% url 'agri_freight' %}">🚚 <span>Freight Bidding Board</span></a>
+    <a href="{% url 'agri_comms' %}">📱 <span>SMS Alert Engine</span></a>
+
     {% if user.organization_memberships.all %}
+      <div class="drawer-category">Organization</div>
       <a href="{% url 'organization_dashboard' %}">▤ <span>Organization</span></a>
       <a href="{% url 'impact_dashboard' %}">🌟 <span>Impact Dashboard</span></a>
       <a href="{% url 'leaderboard' %}">🏆 <span>Leaderboard</span></a>
-      <a href="{% url 'delivery_list' %}">📦 <span>Deliveries</span></a>
-      
-      <!-- PHASE 4 ORGANIZATION ENTERPRISE FEATURES -->
       <a href="{% url 'org_fleet_routing' %}">🗺️ <span>AI Fleet Routing</span></a>
       <a href="{% url 'org_grants' %}">💰 <span>CSR Grant Tracker</span></a>
       <a href="{% url 'org_shift_scheduler' %}">🗓️ <span>Shift Scheduler</span></a>
@@ -201,39 +210,31 @@
       });
       
       // 4. Advanced Theme Engine (Light/Dark/System)
-      const themeBtn = document.getElementById('themeBtn');
-      const body = document.body;
-      const themeIcons = { light: '☀️', dark: '🌙', system: '💻' };
-      const modes = ['system', 'light', 'dark'];
-      let currentModeIndex = 0;
-
-      // Load saved theme
+      const themeSelector = document.getElementById('themeSelector');
+      const root = document.documentElement;
       const savedTheme = localStorage.getItem('agrofedly-theme') || 'system';
-      currentModeIndex = modes.indexOf(savedTheme);
-      applyTheme(savedTheme);
-
-      if(themeBtn) {
-          themeBtn.addEventListener('click', () => {
-              currentModeIndex = (currentModeIndex + 1) % modes.length;
-              const newMode = modes[currentModeIndex];
+      
+      if(themeSelector) {
+          themeSelector.value = savedTheme;
+          themeSelector.addEventListener('change', (e) => {
+              const newMode = e.target.value;
               localStorage.setItem('agrofedly-theme', newMode);
               applyTheme(newMode);
           });
       }
 
       function applyTheme(mode) {
-          if(themeBtn) themeBtn.innerText = themeIcons[mode];
+          let isDark = false;
           if(mode === 'dark') {
-              body.classList.add('dark-theme');
-          } else if(mode === 'light') {
-              body.classList.remove('dark-theme');
+              isDark = true;
+          } else if(mode === 'system') {
+              isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
+          
+          if (isDark) {
+              root.classList.add('dark-theme');
           } else {
-              // System preference
-              if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                  body.classList.add('dark-theme');
-              } else {
-                  body.classList.remove('dark-theme');
-              }
+              root.classList.remove('dark-theme');
           }
       }
       

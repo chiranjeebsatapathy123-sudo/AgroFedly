@@ -2,5 +2,5 @@
 {% load i18n %}
 {% block title %}Add Member{% endblock %}
 {% block content %}
-<section class="form-page single"><div class="form-card"><div class="eyebrow">{% trans "TEAM MANAGEMENT" %}</div><h1>{% trans "Add organization member" %}</h1><p>{% trans "The user must already have an Fedly login." %}</p><form method="post" class="form-grid">{% csrf_token %}{{ form.as_p }}<button class="btn primary">{% trans "Add / Update Member" %}</button></form></div></section>
+<section class="form-page single"><div class="form-card"><div class="eyebrow">{% trans "TEAM MANAGEMENT" %}</div><h1>{% trans "Add organization member" %}</h1><p>{% trans "The user must already have an Fedly login." %}</p><form method="post" class="form-grid">{% csrf_token %}{% for field in form %}<label class="form-group">{{ field.label }}{{ field }}{% if field.errors %}<small class="field-error is-invalid" style="color:var(--danger);">{{ field.errors|striptags }}</small>{% endif %}</label>{% endfor %}<button class="btn primary">{% trans "Add / Update Member" %}</button></form></div></section>
 {% endblock %}

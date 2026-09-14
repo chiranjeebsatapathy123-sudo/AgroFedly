@@ -26,15 +26,17 @@
   </div>
 </section>
 <script>
-{% trans "document.addEventListener('DOMContentLoaded', () =" %}> {
+document.addEventListener('DOMContentLoaded', () => {
     fetch('{% url "recipient_recommendations" food.id %}')
-        .then(res => {% trans "res.json()) .then(data =" %}> {
+        .then(res => res.json())
+        .then(data => {
             if (data.recommendations && data.recommendations.length > 0) {
                 const container = document.createElement('div');
                 container.className = 'form-card';
                 container.style.marginTop = '16px';
                 
-                let html = '<div class="eyebrow">{% trans "SMART MATCHING" %}</div><h3>{% trans "Top Recommended Recipients" %}</h3><ul style="list-style:none; padding:0; margin:0;">{% trans "'; data.recommendations.forEach(r =" %}> {
+                let html = '<div class="eyebrow">{% trans "SMART MATCHING" %}</div><h3>{% trans "Top Recommended Recipients" %}</h3><ul style="list-style:none; padding:0; margin:0;">';
+                data.recommendations.forEach(r => {
                     html += `<li style="padding:12px; border-bottom:1px solid var(--border); border-radius:6px; background:var(--background-secondary); margin-bottom:8px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <strong>${r.name}</strong>
@@ -47,7 +49,11 @@
                 container.innerHTML = html;
                 document.querySelector('.form-page').appendChild(container);
             }
-        }).catch(err => console.error("Error fetching recommendations:", err));
+        })
+        .catch(err => {
+            console.error("Error fetching recommendations:", err);
+            // Optionally show a user-friendly error in the UI
+        });
 });
 </script>
 {% endblock %}

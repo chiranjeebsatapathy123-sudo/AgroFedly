@@ -1,6 +1,5 @@
-const CACHE_NAME = 'agrofedly-pwa-v1';
+const CACHE_NAME = 'agrofedly-pwa-v2';
 const STATIC_ASSETS = [
-    '/',
     '/static/css/app.css',
     '/static/css/copilot.css',
     '/static/js/app.js',
@@ -42,6 +41,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     // Only intercept GET requests
     if (event.request.method !== 'GET') return;
+    
+    const url = new URL(event.request.url);
+    // Do not cache API, WebSockets, or Admin routes
+    if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/ws/') || url.pathname.startsWith('/admin/')) {
+        return;
+    }
 
     event.respondWith(
         fetch(event.request)
@@ -62,8 +67,6 @@ self.addEventListener('fetch', (event) => {
                     if (cachedResponse) {
                         return cachedResponse;
                     }
-                    // If not in cache and it's a navigation request, we could return an offline.html
-                    // But for now, we just let it fail gracefully
                 });
             })
     );

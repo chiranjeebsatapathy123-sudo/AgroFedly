@@ -51,9 +51,9 @@
                 </td>
                 <td style="padding:12px 0; border-top:1px solid #eee;">
                     {% if t.escrow_status == 'HELD' %}
-                        <span class="pill" style="background:#fff6dd; color:#8b6400;">{% trans "🔒 Escrow" %}</span>
+                        <span class="pill" style="background:#fff6dd; color:var(--color-warning);">{% trans "🔒 Escrow" %}</span>
                     {% elif t.escrow_status == 'RELEASED' %}
-                        <span class="pill" style="background:#e7f7ec; color:#08713b;">{% trans "🔓 Released" %}</span>
+                        <span class="pill" style="background:var(--color-success-bg); color:var(--color-primary);">{% trans "🔓 Released" %}</span>
                     {% else %}
                         <span class="pill">{% trans "Direct" %}</span>
                     {% endif %}

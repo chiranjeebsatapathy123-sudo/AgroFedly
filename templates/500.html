@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Server Error{% endblock %}
+{% block content %}
+<section class="form-page single">
+  <div class="form-card" style="text-align: center;">
+    <div class="eyebrow">Error 500</div>
+    <h1>{% trans "Server Error" %}</h1>
+    <p>{% trans "Sorry, something went wrong on our end. Please try again later." %}</p>
+    <a href="{% url 'dashboard' %}" class="btn primary">{% trans "Return to Dashboard" %}</a>
+  </div>
+</section>
+{% endblock %}

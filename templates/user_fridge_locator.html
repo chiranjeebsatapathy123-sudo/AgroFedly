@@ -3,8 +3,8 @@
 {% block title %}User: Community Fridges{% endblock %}
 {% block content %}
 <section class="page-head" style="text-align:center; padding: 40px 20px; background: var(--soft); color: var(--ink); border-radius: 20px; margin-bottom: 40px; border: 1px solid var(--line);">
-    <div class="eyebrow" style="color:#16a34a; font-weight:bold; letter-spacing:2px;">{% trans "COMMUNITY ECOSYSTEM" %}</div>
-    <h1 style="font-size:3rem; margin:10px 0; color:#14532d;">{% trans "Free Community Fridges" %}</h1>
+    <div class="eyebrow" style="color:var(--color-primary); font-weight:bold; letter-spacing:2px;">{% trans "COMMUNITY ECOSYSTEM" %}</div>
+    <h1 style="font-size:3rem; margin:10px 0; color:var(--color-primary-hover);">{% trans "Free Community Fridges" %}</h1>
     <p style="font-size:1.2rem; color:#166534; max-width:600px; margin:0 auto;">{% trans "Find public refrigerators in your neighborhood to drop off surplus groceries, or take what you need for free. No questions asked." %}</p>
 </section>
 
@@ -20,19 +20,19 @@
             
             <div style="width:100%; height:500px; background: var(--line); position:relative; display:flex; align-items:center; justify-content:center;">
                 <!-- Simulated Map Background -->
-                <div style="position:absolute; inset:0; background-image: radial-gradient(#94a3b8 1px, transparent 1px); background-size: 20px 20px; opacity:0.3;"></div>
+                <div style="position:absolute; inset:0; background-image: radial-gradient(var(--color-text-secondary) 1px, transparent 1px); background-size: 20px 20px; opacity:0.3;"></div>
                 
                 <p style="color:var(--muted); z-index:10; background: var(--surface); padding:10px 20px; border-radius:20px; box-shadow:0 2px 10px rgba(0,0,0,0.1);">Map Engine Initialized: 2 Active Fridges Found</p>
                 
                 <!-- Simulated Pins -->
                 <div style="position:absolute; top:30%; left:40%; z-index:20; text-align:center;">
                     <div style="font-size:2rem; animation: bounce 2s infinite;">📍</div>
-                    <div style="background: var(--surface); padding:5px 10px; font-size:0.75rem; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.2); margin-top:5px; font-weight:bold; color:#ef4444;">Needs Restock</div>
+                    <div style="background: var(--surface); padding:5px 10px; font-size:0.75rem; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.2); margin-top:5px; font-weight:bold; color:var(--color-danger);">Needs Restock</div>
                 </div>
                 
                 <div style="position:absolute; top:60%; left:65%; z-index:20; text-align:center;">
                     <div style="font-size:2rem; animation: bounce 2s infinite; animation-delay: 1s;">📍</div>
-                    <div style="background: var(--surface); padding:5px 10px; font-size:0.75rem; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.2); margin-top:5px; font-weight:bold; color:#10b981;">Well Stocked</div>
+                    <div style="background: var(--surface); padding:5px 10px; font-size:0.75rem; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.2); margin-top:5px; font-weight:bold; color:var(--color-primary);">Well Stocked</div>
                 </div>
                 
                 <style>
@@ -51,7 +51,7 @@
         <h2 style="font-size:1.5rem; margin-bottom:20px;">📋 Fridge Directory</h2>
         <div style="display:flex; flex-direction:column; gap:15px;">
             {% for fridge in fridges %}
-            <div class="form-card" style="padding:20px; border-left:4px solid {% if fridge.status == 'FULL' %}#10b981{% elif fridge.status == 'LOW' %}#f59e0b{% elif fridge.status == 'EMPTY' %}#ef4444{% else %}#94a3b8{% endif %};">
+            <div class="form-card" style="padding:20px; border-left:4px solid {% if fridge.status == 'FULL' %}var(--color-primary){% elif fridge.status == 'LOW' %}var(--color-warning){% elif fridge.status == 'EMPTY' %}var(--color-danger){% else %}var(--color-text-secondary){% endif %};">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
                     <h3 style="margin:0; font-size:1.2rem;">{{ fridge.name }}</h3>
                     <span style="font-size:0.75rem; padding:3px 8px; border-radius:12px; background:var(--soft); font-weight:bold; color:var(--primary);">

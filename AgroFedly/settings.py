@@ -15,10 +15,19 @@ _raw_secret = (
     or os.getenv("SECRET_KEY")
     or ""
 ).strip().strip('\'\"')
-SECRET_KEY = _raw_secret or "django-insecure-feedora-super-secret-key-production-fallback-123456789"
 
 DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*"]
+
+if not DEBUG and not _raw_secret:
+    raise ValueError("DJANGO_SECRET_KEY environment variable must be set in production.")
+
+SECRET_KEY = _raw_secret or "django-insecure-feedora-super-secret-key-development-fallback"
+
+ALLOWED_HOSTS_ENV = os.getenv("DJANGO_ALLOWED_HOSTS", "")
+if ALLOWED_HOSTS_ENV:
+    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(",") if host.strip()]
+else:
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"] if DEBUG else []
 CSRF_TRUSTED_ORIGINS = [
     "https://*.vercel.app",
     "https://*.now.sh",
@@ -68,11 +77,22 @@ TEMPLATES = [
 WSGI_APPLICATION = "AgroFedly.wsgi.application"
 ASGI_APPLICATION = "AgroFedly.asgi.application"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+REDIS_URL = os.getenv("REDIS_URL")
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [REDIS_URL],
+            },
+        },
     }
-}
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
 
 DATABASE_URL = (
     os.getenv("DATABASE_URL")
@@ -92,6 +112,9 @@ if DATABASE_URL:
         )
     }
 else:
+    if not DEBUG:
+        raise ValueError("DATABASE_URL must be set in production.")
+
     db_path = BASE_DIR / "db.sqlite3"
     backup_db = BASE_DIR / "db.sqlite3.backup"
     if os.getenv("VERCEL"):
@@ -144,6 +167,9 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard"
@@ -151,3 +177,10 @@ LOGOUT_REDIRECT_URL = "login"
 
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+API_KEY = os.getenv("API_KEY", "default-insecure-api-key-for-dev")
+
+# Celery Configuration
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'

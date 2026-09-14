@@ -1,52 +1,71 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load i18n %}
 {% block title %}Volunteer Dashboard{% endblock %}
 {% block content %}
-<div class="panel">
-  <h2>Welcome, {{ profile.user.get_full_name|default:profile.user.username }}</h2>
-  <p>Your Vehicle: {{ profile.vehicle_type }} ({{ profile.vehicle_number }})</p>
-  <p>Total Deliveries Completed: {{ profile.total_deliveries }}</p>
-</div>
+<section class="page-head">
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+        <div>
+            <div class="eyebrow">{% trans "VOLUNTEER PORTAL" %}</div>
+            <h1>{% trans "Welcome, " %}{{ profile.user.get_full_name|default:profile.user.username }}</h1>
+            <p>{% trans "Your Vehicle:" %} {{ profile.vehicle_type }} ({{ profile.vehicle_number }}) &bull; {% trans "Total Deliveries:" %} {{ profile.total_deliveries }}</p>
+        </div>
+    </div>
+</section>
 
-<div class="grid-2">
-  <div class="panel">
-    <h3>{% trans "Available Deliveries" %}</h3>
-    {% if available_deliveries %}
-      <ul class="surplus-list">
-      {% for delivery in available_deliveries %}
-        <li>
-          <strong>{{ delivery.food_name }} ({{ delivery.quantity }})</strong>
-          <p>From: {{ delivery.pickup_address }}</p>
-          <p>To: {{ delivery.delivery_address }}</p>
-          <form method="post" style="margin-top: 10px;">
-            {% csrf_token %}
-            <input type="hidden" name="delivery_id" value="{{ delivery.id }}">
-            <input type="hidden" name="action" value="accept">
-            <button type="submit" class="btn btn-primary btn-sm">{% trans "Accept Delivery" %}</button>
-          </form>
-        </li>
-      {% endfor %}
-      </ul>
-    {% else %}
-      <p class="empty-state">{% trans "No pending deliveries right now." %}</p>
-    {% endif %}
-  </div>
-  
-  <div class="panel">
-    <h3>{% trans "My Assigned Deliveries" %}</h3>
-    {% if my_deliveries %}
-      <ul class="surplus-list">
-      {% for delivery in my_deliveries %}
-        <li>
-          <strong>{{ delivery.tracking_code }} - {{ delivery.food_name }}</strong>
-          <p>{% trans "Status:" %} <span class="badge badge-{{ delivery.status|lower }}">{{ delivery.get_status_display }}</span></p>
-          <a href="{% url 'delivery_detail' delivery.id %}" class="btn btn-secondary btn-sm">{% trans "View Details" %}</a>
-        </li>
-      {% endfor %}
-      </ul>
-    {% else %}
-      <p class="empty-state">{% trans "You haven't been assigned any deliveries yet." %}</p>
-    {% endif %}
-  </div>
+<div class="form-grid">
+    <!-- Available Deliveries -->
+    <div class="form-card" style="align-self: start;">
+        <h2 style="font-size:1.3rem; margin-bottom:20px;">📦 {% trans "Available Deliveries" %}</h2>
+        {% if available_deliveries %}
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                {% for delivery in available_deliveries %}
+                <div style="background:var(--soft); padding:15px; border-radius:10px; border:1px solid var(--line);">
+                    <h3 style="margin:0 0 5px 0;">{{ delivery.food_name }} ({{ delivery.quantity }})</h3>
+                    <div style="font-size:0.9rem; color:var(--muted); margin-bottom:5px;"><strong>From:</strong> {{ delivery.pickup_address }}</div>
+                    <div style="font-size:0.9rem; color:var(--muted); margin-bottom:15px;"><strong>To:</strong> {{ delivery.delivery_address }}</div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="delivery_id" value="{{ delivery.id }}">
+                        <input type="hidden" name="action" value="accept">
+                        <button type="submit" class="btn primary full" style="border-radius:6px; font-size:0.9rem; padding:8px;">{% trans "Accept Delivery" %}</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align:center; padding:30px; border:1px dashed var(--line); border-radius:10px; color:var(--muted);">
+                {% trans "No pending deliveries right now." %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- My Assigned Deliveries -->
+    <div class="form-card" style="align-self: start;">
+        <h2 style="font-size:1.3rem; margin-bottom:20px;">🚚 {% trans "My Assigned Deliveries" %}</h2>
+        {% if my_deliveries %}
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                {% for delivery in my_deliveries %}
+                <div style="background:var(--surface); padding:15px; border-radius:10px; border:1px solid var(--line); border-left:4px solid {% if delivery.status == 'COMPLETED' %}var(--color-primary){% elif delivery.status == 'IN_TRANSIT' %}var(--color-info){% else %}var(--color-warning){% endif %};">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                        <h3 style="margin:0;">{{ delivery.food_name }}</h3>
+                        <span style="font-size:0.75rem; padding:3px 8px; border-radius:12px; background:var(--soft); font-weight:bold; color:var(--primary);">
+                            {{ delivery.get_status_display }}
+                        </span>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--muted); font-family:monospace; margin-bottom:15px; background:var(--soft); padding:4px 8px; border-radius:5px; display:inline-block;">
+                        ID: {{ delivery.tracking_code }}
+                    </div>
+                    
+                    <a href="{% url 'delivery_detail' delivery.id %}" class="btn outline full" style="border-radius:6px; font-size:0.9rem; padding:8px; text-align:center;">{% trans "View Details" %}</a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align:center; padding:30px; border:1px dashed var(--line); border-radius:10px; color:var(--muted);">
+                {% trans "You haven't been assigned any deliveries yet." %}
+            </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

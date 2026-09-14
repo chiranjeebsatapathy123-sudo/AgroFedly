@@ -2,6 +2,7 @@
 {% load i18n %}
 {% block title %}Agriculture: Greenhouse Controller{% endblock %}
 {% block content %}
+{% include 'demo_banner.html' %}
 <section class="page-head" style="text-align:center; padding: 40px 20px; background: #064e3b; color: white; border-radius: 20px; margin-bottom: 40px;">
     <div class="eyebrow" style="color:#6ee7b7; font-weight:bold; letter-spacing:2px;">{% trans "FUTURE FARMING" %}</div>
     <h1 style="font-size:3rem; margin:10px 0; color: white;">💡 {% trans "IoT Greenhouse Controller" %}</h1>
@@ -11,11 +12,11 @@
 <!-- System Status Banner -->
 <div style="background: var(--soft); border: 1px solid var(--line); padding:20px; border-radius:15px; display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
     <div style="display:flex; align-items:center; gap:15px;">
-        <div style="width:50px; height:50px; background:#10b981; border-radius:50%; display:flex; align-items:center; justify-content:center; color: white; font-size:1.5rem; font-weight:bold;">
+        <div style="width:50px; height:50px; background:var(--color-primary); border-radius:50%; display:flex; align-items:center; justify-content:center; color: white; font-size:1.5rem; font-weight:bold;">
             {{ system_health }}%
         </div>
         <div>
-            <h3 style="margin:0; color:#14532d;">System Health Optimal</h3>
+            <h3 style="margin:0; color:var(--color-primary-hover);">System Health Optimal</h3>
             <div style="font-size:0.85rem; color:#166534;">All 12 sensors reporting normal telemetry.</div>
         </div>
     </div>
@@ -28,7 +29,7 @@
 <!-- Device Grid -->
 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:25px;">
     {% for device in devices %}
-    <div class="form-card" style="padding:25px; transition:all 0.3s ease; border-top:5px solid {% if device.status %}#10b981{% else %}#94a3b8{% endif %}; background:{% if device.status %}white{% else %}#f8fafc{% endif %};">
+    <div class="form-card" style="padding:25px; transition:all 0.3s ease; border-top:5px solid {% if device.status %}var(--color-primary){% else %}var(--color-text-secondary){% endif %}; background:{% if device.status %}white{% else %}#f8fafc{% endif %};">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
             <div style="font-size:2rem;">
                 {% if device.type == 'LIGHT' %}💡
@@ -43,11 +44,11 @@
                 <input type="hidden" name="device_id" value="{{ device.id }}">
                 <button type="submit" style="background:transparent; border:none; cursor:pointer; padding:0;">
                     {% if device.status %}
-                        <div style="width:50px; height:26px; background:#10b981; border-radius:13px; position:relative;">
+                        <div style="width:50px; height:26px; background:var(--color-primary); border-radius:13px; position:relative;">
                             <div style="width:20px; height:20px; background: var(--surface); border-radius:50%; position:absolute; top:3px; right:3px; box-shadow:0 2px 5px rgba(0,0,0,0.2);"></div>
                         </div>
                     {% else %}
-                        <div style="width:50px; height:26px; background:#cbd5e1; border-radius:13px; position:relative;">
+                        <div style="width:50px; height:26px; background:var(--color-text-secondary); border-radius:13px; position:relative;">
                             <div style="width:20px; height:20px; background: var(--surface); border-radius:50%; position:absolute; top:3px; left:3px; box-shadow:0 2px 5px rgba(0,0,0,0.2);"></div>
                         </div>
                     {% endif %}

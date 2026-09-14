@@ -18,14 +18,14 @@
     <div class="form-card" style="flex: 1; min-width: 300px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 40px 20px; background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: white; border:none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
         <h3 style="margin: 0 0 20px; font-weight: normal; letter-spacing: 2px; color: #a8d5e2;">YOUR LIFETIME IMPACT</h3>
         <div style="position:relative; width: 200px; height: 200px; border-radius: 50%; display:flex; align-items:center; justify-content:center; border: 8px solid rgba(16, 185, 129, 0.3);">
-            <div style="position:absolute; width: 100%; height: 100%; border-radius: 50%; border: 8px solid #10b981; border-top-color: transparent; border-right-color: transparent; transform: rotate(45deg);"></div>
+            <div style="position:absolute; width: 100%; height: 100%; border-radius: 50%; border: 8px solid var(--color-primary); border-top-color: transparent; border-right-color: transparent; transform: rotate(45deg);"></div>
             <div style="text-align:center;">
                 <div style="font-size: 3.5rem; font-weight: bold; line-height: 1;">{{ total_co2 }}</div>
                 <div style="font-size: 1rem; color: #a8d5e2;">TONS CO₂</div>
             </div>
         </div>
         <div style="margin-top: 20px; font-size: 1.2rem; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px;">
-            Estimated Value: <strong style="color: #10b981;">${{ estimated_value|floatformat:2 }}</strong>
+            Estimated Value: <strong style="color: var(--color-primary);">${{ estimated_value|floatformat:2 }}</strong>
         </div>
     </div>
 
@@ -57,7 +57,7 @@
             <div style="background: var(--surface); border: 1px solid var(--line); border-radius: 15px; padding: 20px; display:flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: transform 0.2s;">
                 
                 <div style="display:flex; align-items:center; gap: 20px;">
-                    <div style="background: #e7f7ec; color: #08713b; width: 60px; height: 60px; border-radius: 12px; display:flex; align-items:center; justify-content:center; font-size: 24px; font-weight:bold;">
+                    <div style="background: var(--color-success-bg); color: var(--color-primary); width: 60px; height: 60px; border-radius: 12px; display:flex; align-items:center; justify-content:center; font-size: 24px; font-weight:bold;">
                         {{ c.co2_sequestered_tons }}t
                     </div>
                     <div>
@@ -69,9 +69,9 @@
                 <div style="text-align: right;">
                     <div style="margin-bottom: 8px;">
                         {% if c.status == 'MINTED' %}
-                            <span style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid var(--line); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight:bold; letter-spacing: 1px; box-shadow: 0 0 10px rgba(16,185,129,0.2);">{{ c.get_status_display }}</span>
+                            <span style="background: rgba(16, 185, 129, 0.1); color: var(--color-primary); border: 1px solid var(--line); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight:bold; letter-spacing: 1px; box-shadow: 0 0 10px rgba(16,185,129,0.2);">{{ c.get_status_display }}</span>
                         {% elif c.status == 'PENDING' %}
-                            <span style="background: rgba(243, 156, 18, 0.1); color: #f39c12; border: 1px solid var(--line); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight:bold; letter-spacing: 1px;">{{ c.get_status_display }}</span>
+                            <span style="background: rgba(243, 156, 18, 0.1); color: var(--color-warning); border: 1px solid var(--line); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight:bold; letter-spacing: 1px;">{{ c.get_status_display }}</span>
                         {% else %}
                             <span class="pill">{{ c.get_status_display }}</span>
                         {% endif %}

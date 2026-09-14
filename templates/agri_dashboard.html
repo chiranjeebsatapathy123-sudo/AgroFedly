@@ -2,6 +2,7 @@
 {% load i18n %}
 {% block title %}Agriculture Dashboard{% endblock %}
 {% block content %}
+{% include 'demo_banner.html' %}
 <section class="page-head">
     <div>
         <div class="eyebrow">{% trans "AGRICULTURE MODULE" %}</div>
@@ -166,7 +167,7 @@
                     {
                         label: 'Processed Output (kg)',
                         data: trends.processed,
-                        borderColor: '#3b82f6',
+                        borderColor: 'var(--color-info)',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         borderWidth: 2,
                         borderDash: [5, 5],
@@ -192,7 +193,7 @@
                 labels: dist.labels,
                 datasets: [{
                     data: dist.data,
-                    backgroundColor: ['#f59e0b', '#ef4444', '#eab308', '#8b5cf6', '#cbd5e1'],
+                    backgroundColor: ['var(--color-warning)', 'var(--color-danger)', '#eab308', '#8b5cf6', 'var(--color-text-secondary)'],
                     borderWidth: 0
                 }]
             },
@@ -211,7 +212,7 @@
                 datasets: [{
                     label: '% of Inventory',
                     data: risk.data,
-                    backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
+                    backgroundColor: ['#22c55e', 'var(--color-warning)', 'var(--color-danger)'],
                     borderRadius: 4
                 }]
             },

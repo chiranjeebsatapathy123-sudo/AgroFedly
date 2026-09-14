@@ -2,10 +2,10 @@
 {% load i18n %}
 {% block title %}Org_Routing: AI Fleet Dispatch{% endblock %}
 {% block content %}
-<section class="page-head" style="text-align:center; padding: 40px 20px; background: #0f172a; color: white; border-radius: 20px; margin-bottom: 40px;">
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: var(--color-text-primary); color: white; border-radius: 20px; margin-bottom: 40px;">
     <div class="eyebrow" style="color:#38bdf8; font-weight:bold; letter-spacing:2px;">{% trans "ORG_ROUTING" %}</div>
     <h1 style="font-size:3rem; margin:10px 0; color: white;">{% trans "AI Fleet Dispatch Engine" %}</h1>
-    <p style="font-size:1.2rem; color:#94a3b8; max-width:600px; margin:0 auto;">{% trans "Simulate the Traveling Salesman Problem to optimize your surplus food pickup and delivery routes." %}</p>
+    <p style="font-size:1.2rem; color:var(--color-text-secondary); max-width:600px; margin:0 auto;">{% trans "Simulate the Traveling Salesman Problem to optimize your surplus food pickup and delivery routes." %}</p>
 </section>
 
 <div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
@@ -18,9 +18,9 @@
                 <span style="font-size:0.9rem; background:var(--soft); padding:5px 10px; border-radius:20px;">Optimization: ACTIVE</span>
             </div>
             
-            <div style="position:relative; width:100%; height:500px; background:#1e293b; display:flex; align-items:center; justify-content:center;">
+            <div style="position:relative; width:100%; height:500px; background:var(--color-surface-elevated); display:flex; align-items:center; justify-content:center;">
                 <!-- Simulated City Map Background -->
-                <div style="position:absolute; inset:0; background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 20px 20px; opacity:0.3;"></div>
+                <div style="position:absolute; inset:0; background-image: radial-gradient(var(--color-text-primary) 1px, transparent 1px); background-size: 20px 20px; opacity:0.3;"></div>
                 
                 <!-- Animated Route Path using SVG -->
                 <svg width="100%" height="100%" style="position:absolute; top:0; left:0; z-index:10;">
@@ -35,7 +35,7 @@
                     <circle cx="400" cy="300" r="8" fill="#eab308" />
                     <text x="415" y="305" fill="white" font-size="12">Pickup: Farm A</text>
                     
-                    <circle cx="800" cy="400" r="10" fill="#ef4444" />
+                    <circle cx="800" cy="400" r="10" fill="var(--color-danger)" />
                     <text x="750" y="420" fill="white" font-size="12">Dropoff: Orphanage</text>
                 </svg>
             </div>

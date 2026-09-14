@@ -2,10 +2,10 @@
 {% load i18n %}
 {% block title %}Agri_Invest: Tokenized Crowdfunding{% endblock %}
 {% block content %}
-<section class="page-head" style="text-align:center; padding: 40px 20px; background: #0f172a; color: white; border-radius: 20px; margin-bottom: 40px;">
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: var(--color-text-primary); color: white; border-radius: 20px; margin-bottom: 40px;">
     <div class="eyebrow" style="color:#38bdf8; font-weight:bold; letter-spacing:2px;">{% trans "AGRI_INVEST" %}</div>
     <h1 style="font-size:3rem; margin:10px 0; color: white;">{% trans "Tokenized Farm Crowdfunding" %}</h1>
-    <p style="font-size:1.2rem; color:#94a3b8; max-width:600px; margin:0 auto;">{% trans "Invest capital into farm infrastructure projects and earn a tokenized percentage of future crop yields." %}</p>
+    <p style="font-size:1.2rem; color:var(--color-text-secondary); max-width:600px; margin:0 auto;">{% trans "Invest capital into farm infrastructure projects and earn a tokenized percentage of future crop yields." %}</p>
 </section>
 
 <div style="display:flex; flex-wrap:wrap; gap:30px; margin-bottom:40px;">
@@ -25,7 +25,7 @@
                     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                         <div>
                             <h3 style="margin:0 0 5px; font-size:1.4rem;">{{ proj.title }}</h3>
-                            <p style="color:var(--muted); font-size:0.9rem; margin:0 0 10px;">By Farmer ID #{{ proj.farmer.id }} • ROI: <span style="color:#10b981; font-weight:bold;">{{ proj.roi_percentage }}% APY</span></p>
+                            <p style="color:var(--muted); font-size:0.9rem; margin:0 0 10px;">By Farmer ID #{{ proj.farmer.id }} • ROI: <span style="color:var(--color-primary); font-weight:bold;">{{ proj.roi_percentage }}% APY</span></p>
                         </div>
                         <span style="background:var(--soft); color:var(--primary); padding:5px 10px; border-radius:15px; font-size:0.8rem; font-weight:bold;">{{ proj.get_status_display }}</span>
                     </div>
@@ -39,7 +39,7 @@
                             <span>Goal: ₹{{ proj.goal_amount }}</span>
                         </div>
                         <div style="width:100%; height:10px; background:var(--line); border-radius:5px; overflow:hidden;">
-                            <div style="height:100%; background:linear-gradient(90deg, var(--primary), #10b981); width:{% widthratio proj.current_amount proj.goal_amount 100 %}%;"></div>
+                            <div style="height:100%; background:linear-gradient(90deg, var(--primary), var(--color-primary)); width:{% widthratio proj.current_amount proj.goal_amount 100 %}%;"></div>
                         </div>
                     </div>
                     

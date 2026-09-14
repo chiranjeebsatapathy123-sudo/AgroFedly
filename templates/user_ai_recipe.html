@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block title %}User: AI Recipe Generator{% endblock %}
 {% block content %}
-<section class="page-head" style="text-align:center; padding: 40px 20px; background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 20px; margin-bottom: 40px;">
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: white; border-radius: 20px; margin-bottom: 40px;">
     <div class="eyebrow" style="color:#a7f3d0; font-weight:bold; letter-spacing:2px;">{% trans "COMMUNITY ECOSYSTEM" %}</div>
     <h1 style="font-size:3rem; margin:10px 0; color: white;">{% trans "AI Zero-Waste Chef" %}</h1>
     <p style="font-size:1.2rem; color:#ecfdf5; max-width:600px; margin:0 auto;">{% trans "Don't throw away those leftovers! Tell the AI what's in your fridge, and get a gourmet, zero-waste recipe instantly." %}</p>
@@ -22,7 +22,7 @@
                     <textarea name="ingredients" required placeholder="e.g. Half an onion, some old rice, a sad looking tomato, cheddar cheese..." rows="4" style="width:100%; padding:15px; border-radius:12px; border:2px solid var(--line); font-family:inherit; resize:vertical;"></textarea>
                 </div>
                 
-                <button type="submit" class="btn primary full" style="padding:15px; font-size:1.1rem; border-radius:12px; background:#10b981;">Generate Recipe 🪄</button>
+                <button type="submit" class="btn primary full" style="padding:15px; font-size:1.1rem; border-radius:12px; background:var(--color-primary);">Generate Recipe 🪄</button>
             </form>
         </div>
     </div>
@@ -30,7 +30,7 @@
     <!-- Recipe Output -->
     <div style="flex:1.5; min-width:300px;">
         {% if recipe %}
-        <div class="form-card" style="border: 2px solid #10b981; position:relative; overflow:hidden;">
+        <div class="form-card" style="border: 2px solid var(--color-primary); position:relative; overflow:hidden;">
             <div style="position:absolute; top:-20px; right:-20px; font-size:10rem; opacity:0.05;">🍽️</div>
             
             <div style="display:inline-block; padding:5px 15px; background: var(--green); color: white; color: white; font-weight:bold; border-radius:20px; font-size:0.8rem; margin-bottom:15px;">
@@ -42,7 +42,7 @@
             <h4 style="margin-bottom:10px; color:var(--primary);">You'll use:</h4>
             <ul style="margin-top:0; margin-bottom:25px; padding-left:20px; color:var(--muted);">
                 {% for ing in recipe.ingredients %}
-                <li>{{ ing|trim }}</li>
+                <li>{{ ing }}</li>
                 {% endfor %}
             </ul>
             
@@ -59,8 +59,8 @@
         </div>
         {% else %}
         <div class="form-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height:400px; border:2px dashed var(--line); background: var(--soft);">
-            <div style="font-size:4rem; margin-bottom:15px; color:#cbd5e1;">🤖🍳</div>
-            <h3 style="margin:0 0 10px; color:#94a3b8;">Waiting for ingredients...</h3>
+            <div style="font-size:4rem; margin-bottom:15px; color:var(--color-text-secondary);">🤖🍳</div>
+            <h3 style="margin:0 0 10px; color:var(--color-text-secondary);">Waiting for ingredients...</h3>
             <p style="color:var(--muted); font-size:0.9rem; max-width:250px;">The AI chef is ready to transform your leftovers into something delicious.</p>
         </div>
         {% endif %}

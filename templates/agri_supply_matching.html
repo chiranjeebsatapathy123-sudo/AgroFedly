@@ -66,10 +66,10 @@
     {% if matches %}
         <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
             {% for match in matches %}
-            <div class="form-card" style="position:relative; overflow:hidden; border: 1px solid var(--line); border-top: 4px solid {% if match.match_score >= 80 %}#08713b{% elif match.match_score >= 50 %}#f39c12{% else %}#c7353d{% endif %}; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <div class="form-card" style="position:relative; overflow:hidden; border: 1px solid var(--line); border-top: 4px solid {% if match.match_score >= 80 %}var(--color-primary){% elif match.match_score >= 50 %}var(--color-warning){% else %}var(--color-danger){% endif %}; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                 
                 <!-- Match Score Badge -->
-                <div style="position:absolute; top: 15px; right: 15px; background: {% if match.match_score >= 80 %}#e7f7ec; color: #08713b{% elif match.match_score >= 50 %}#fdf5e6; color: #f39c12{% else %}#fff0f1; color: #c7353d{% endif %}; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">
+                <div style="position:absolute; top: 15px; right: 15px; background: {% if match.match_score >= 80 %}var(--color-success-bg); color: var(--color-primary){% elif match.match_score >= 50 %}var(--color-warning-bg); color: var(--color-warning){% else %}var(--color-danger-bg); color: var(--color-danger){% endif %}; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">
                     {{ match.match_score }}% Match
                 </div>
 

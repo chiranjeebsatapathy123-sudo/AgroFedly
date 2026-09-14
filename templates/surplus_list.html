@@ -1,7 +1,85 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Surplus{% endblock %}
+{% block title %}Food Surplus Inventory{% endblock %}
 {% block content %}
-<section class="page-head"><div><div class="eyebrow">{% trans "SURPLUS CONTROL" %}</div><h1>{% trans "Surplus food" %}</h1><p>{% trans "Only SAFE quantities can move into redistribution." %}</p></div><a class="btn primary" href="{% url 'add_surplus' %}">{% trans "＋ Add surplus" %}</a></section>
-<div class="table-card"><table><thead><tr><th>{% trans "Food" %}</th><th>{% trans "Qty" %}</th><th>{% trans "Temperature" %}</th><th>{% trans "Time" %}</th><th>{% trans "AI Quality" %}</th><th>{% trans "Status" %}</th><th>{% trans "Action" %}</th></tr></thead><tbody>{% for f in surplus_foods %}<tr><td><b>{{ f.food_name }}</b></td><td>{{ f.quantity }}</td><td>{{ f.storage_temperature }}°C</td><td>{{ f.storage_time_hours }}h</td><td>{% if f.ai_freshness_score %}<span style="color:var(--primary);font-weight:bold;">{{ f.ai_freshness_score }}%</span><br><small class="text-muted">{{ f.ai_quality_notes|truncatechars:30 }}</small>{% else %}<span class="text-muted">N/A</span>{% endif %}</td><td><span class="pill {{ f.status|lower }}">{{ f.get_status_display }}</span></td><td>{% if f.status == "SAFE" and f.quantity %}<a class="table-btn" href="{% url 'redistribute_food' f.id %}">{% trans "Redistribute" %}</a>{% endif %} <a class="table-btn outline" href="{% url 'food_traceability' f.id %}">⛓️ {% trans "Trace" %}</a></td></tr>{% empty %}<tr><td colspan="7" class="empty">{% trans "No surplus records." %}</td></tr>{% endfor %}</tbody></table></div>
+<div class="breadcrumb" style="max-width:1240px; margin: 20px auto 0; padding: 0 28px;">
+    <a href="{% url 'home' %}">AgroFedly</a> <span>/</span> <a href="{% url 'dashboard' %}">Dashboard</a> <span>/</span> <span>Surplus Food</span>
+</div>
+<section class="page-head" style="padding-top:10px;">
+    <div>
+        <div class="eyebrow">{% trans "FOOD INVENTORY" %}</div>
+        <h1>{% trans "Surplus food" %}</h1>
+        <p>{% trans "Track prepared food, consumption and eligible surplus. Only SAFE quantities can move into redistribution." %}</p>
+    </div>
+    <a class="btn primary" href="{% url 'add_surplus' %}">{% trans "＋ Add Surplus" %}</a>
+</section>
+
+<div class="table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>{% trans "Food" %}</th>
+                <th>{% trans "Eligible Qty" %}</th>
+                <th>{% trans "Storage Data" %}</th>
+                <th>{% trans "AI Assessment" %}</th>
+                <th>{% trans "Safety Status" %}</th>
+                <th>{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in surplus_foods %}
+            <tr>
+                <td>
+                    <b style="font-size:13px; color:var(--forest);">{{ f.food_name }}</b>
+                    <br><small style="color:var(--muted); font-size:10px;">ID: #{{ f.id }} · {{ f.created_at|date:"M d, H:i" }}</small>
+                </td>
+                <td>
+                    <b style="font-size:16px;">{{ f.quantity }}</b> <small>units</small>
+                </td>
+                <td>
+                    <span style="display:block; font-size:11px;">Temp: <b>{{ f.storage_temperature }}°C</b></span>
+                    <span style="display:block; font-size:11px;">Time: <b>{{ f.storage_time_hours }}h</b></span>
+                </td>
+                <td style="min-width: 200px;">
+                    {% if f.ai_freshness_score %}
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:10px; font-weight:700;">
+                            <span>Freshness Score</span>
+                            <span style="color:var(--primary);">{{ f.ai_freshness_score }}%</span>
+                        </div>
+                        <div style="height:6px; background:#e7eee9; border-radius:4px; overflow:hidden; margin-bottom:4px;">
+                            <div style="height:100%; width:{{ f.ai_freshness_score }}%; background:linear-gradient(90deg, var(--color-primary), #79be4a);"></div>
+                        </div>
+                        <small style="color:var(--muted); font-size:9px;">{{ f.ai_quality_notes|truncatechars:40 }}</small>
+                    {% else %}
+                        <span style="color:var(--muted); font-size:11px; font-style:italic;">{% trans "No AI data available" %}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="pill {% if f.status == 'SAFE' %}safe{% elif f.status == 'UNSAFE' %}unsafe{% else %}requested{% endif %}">
+                        {{ f.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <div style="display:flex; gap:8px;">
+                        {% if f.status == "SAFE" and f.quantity > 0 %}
+                            <a class="table-btn" href="{% url 'redistribute_food' f.id %}">{% trans "Redistribute" %}</a>
+                        {% endif %}
+                        <a class="table-btn outline" style="background:var(--color-background); color:var(--muted);" href="{% url 'food_traceability' f.id %}">{% trans "Trace" %}</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🍽️</div>
+                        <p>{% trans "No surplus records yet. Once your organization records prepared food, surplus data will appear here." %}</p>
+                        <a class="btn primary" href="{% url 'add_surplus' %}">{% trans "＋ Add Surplus" %}</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

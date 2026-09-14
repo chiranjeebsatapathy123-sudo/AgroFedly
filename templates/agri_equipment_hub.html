@@ -21,7 +21,7 @@
         <div class="form-card" style="border:2px solid var(--primary);">
             <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                 <h3 style="margin:0;">{{ rental.equipment.name }}</h3>
-                <span class="pill" style="background:#e7f7ec; color:var(--primary);">{{ rental.status }}</span>
+                <span class="pill" style="background:var(--color-success-bg); color:var(--primary);">{{ rental.status }}</span>
             </div>
             <p style="margin:5px 0;"><strong>{% trans "Cost:" %}</strong> ₹{{ rental.total_cost }}</p>
             <p style="margin:5px 0; color:var(--muted); font-size:0.9rem;">From {{ rental.start_time|date:"M d" }} to {{ rental.end_time|date:"M d" }}</p>

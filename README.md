@@ -14,7 +14,11 @@ A Django-based food-demand forecasting, surplus management, organization registr
 - Live OpenWeather endpoint
 - Delivery creation, tracking code, status workflow and delivery detail
 - Responsive UI with left three-dot navigation drawer
-- SQLite database for local development
+- Production-ready PostgreSQL and Redis configuration via environment variables
+- Concurrent transaction handling (atomic, select_for_update)
+- Service Worker offline caching fixed (ignores /api/ and /ws/)
+- API Security and validation for ERP/IoT integrations
+- Comprehensive error pages and health check endpoints
 
 ## Architecture Flow: User to Delivery
 

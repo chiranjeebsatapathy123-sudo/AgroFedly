@@ -2,13 +2,24 @@
 {% load i18n %}
 {% block title %}Volunteer Registration{% endblock %}
 {% block content %}
-<div class="panel">
-  <h2>{% trans "Volunteer Driver Registration" %}</h2>
-  <p>{% trans "Sign up to deliver surplus food and reduce waste." %}</p>
-  <form method="post" class="standard-form">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">{% trans "Register / Update Profile" %}</button>
-  </form>
-</div>
+<section class="form-page single">
+  <div class="form-intro">
+      <div class="eyebrow">{% trans "COMMUNITY IMPACT" %}</div>
+      <h1>{% trans "Volunteer Driver Registration" %}</h1>
+      <p>{% trans "Sign up to deliver surplus food and reduce waste." %}</p>
+  </div>
+  <div class="form-card">
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+      {% for field in form %}
+        <label class="form-group">
+            {{ field.label }}
+            {{ field }}
+            {% if field.errors %}<small class="field-error is-invalid" style="color:var(--danger);">{{ field.errors|striptags }}</small>{% endif %}
+        </label>
+      {% endfor %}
+      <button type="submit" class="btn primary full">{% trans "Register / Update Profile" %}</button>
+    </form>
+  </div>
+</section>
 {% endblock %}

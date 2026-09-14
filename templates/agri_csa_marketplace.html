@@ -59,7 +59,7 @@
                     <div style="background:var(--soft); padding:15px; border-radius:10px; border:1px solid var(--line);">
                         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                             <strong style="color:var(--ink);">{{ sub.box.name }}</strong>
-                            <span class="pill" style="background:#e7f7ec; color:#08713b; font-size:0.7rem;">{{ sub.get_status_display }}</span>
+                            <span class="pill" style="background:var(--color-success-bg); color:var(--color-primary); font-size:0.7rem;">{{ sub.get_status_display }}</span>
                         </div>
                         <div style="font-size:0.8rem; color:var(--muted);">
                             Started: {{ sub.start_date|date:"M d, Y" }}

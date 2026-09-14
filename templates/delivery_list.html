@@ -2,7 +2,10 @@
 {% load i18n %}
 {% block title %}Delivery System{% endblock %}
 {% block content %}
-<section class="page-head">
+<div class="breadcrumb" style="max-width:1240px; margin: 20px auto 0; padding: 0 28px;">
+    <a href="{% url 'home' %}">AgroFedly</a> <span>/</span> <a href="{% url 'dashboard' %}">Dashboard</a> <span>/</span> <span>Deliveries</span>
+</div>
+<section class="page-head" style="padding-top:10px;">
   <div>
     <div class="eyebrow">{% trans "LAST-MILE LOGISTICS" %}</div>
     <h1>{% trans "Delivery system" %}</h1>
@@ -43,9 +46,9 @@
     <span class="pill {{ d.status|lower }}">{{ d.get_status_display }}</span>
     <div class="delivery-actions" style="display: flex; gap: 6px; align-items: center;">
       <a href="{% url 'delivery_detail' d.id %}" class="table-btn">{% trans "View" %}</a>
-      <a href="{% url 'delivery_live_tracking' d.id %}" class="table-btn" style="background:#e8f4fb; color:#1d6f93;">{% trans "Track" %}</a>
+      <a href="{% url 'delivery_live_tracking' d.id %}" class="table-btn" style="background:var(--color-info-bg); color:var(--color-info);">{% trans "Track" %}</a>
       {% if d.status != "DELIVERED" and request.user.is_superuser %}
-          <a href="{% url 'delivery_proof' d.id %}" class="table-btn" style="background:#fff6dd; color:#8b6400;">{% trans "PoD" %}</a>
+          <a href="{% url 'delivery_proof' d.id %}" class="table-btn" style="background:#fff6dd; color:var(--color-warning);">{% trans "PoD" %}</a>
       {% endif %}
     </div>
   </div>

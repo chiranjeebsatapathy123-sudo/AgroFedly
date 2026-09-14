@@ -2,6 +2,7 @@
 {% load i18n %}
 {% block title %}IoT Sensor Fleet{% endblock %}
 {% block content %}
+{% include 'demo_banner.html' %}
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
         <div>
@@ -21,20 +22,20 @@
     <!-- Soil Moisture Gauge -->
     <div class="form-card" style="text-align:center; position:relative; overflow:hidden;">
         <h3 style="font-size:1.1rem; color:var(--text-light); margin-bottom:15px;">{% trans "Avg Soil Moisture" %}</h3>
-        <div style="font-size:3rem; font-weight:900; color:#3b82f6;" id="val-moisture">42%</div>
+        <div style="font-size:3rem; font-weight:900; color:var(--color-info);" id="val-moisture">42%</div>
         <div style="font-size:0.9rem; color:var(--text-light); margin-top:10px;">Target: 40% - 60%</div>
         <div style="height:4px; width:100%; background: var(--line); border-radius:2px; margin-top:15px; overflow:hidden;">
-            <div id="bar-moisture" style="height:100%; width:42%; background:#3b82f6; transition: width 1s ease-in-out;"></div>
+            <div id="bar-moisture" style="height:100%; width:42%; background:var(--color-info); transition: width 1s ease-in-out;"></div>
         </div>
     </div>
 
     <!-- Temperature Gauge -->
     <div class="form-card" style="text-align:center; position:relative; overflow:hidden;">
         <h3 style="font-size:1.1rem; color:var(--text-light); margin-bottom:15px;">{% trans "Ambient Temp" %}</h3>
-        <div style="font-size:3rem; font-weight:900; color:#ef4444;" id="val-temp">24.5°C</div>
+        <div style="font-size:3rem; font-weight:900; color:var(--color-danger);" id="val-temp">24.5°C</div>
         <div style="font-size:0.9rem; color:var(--text-light); margin-top:10px;">Optimal: 20°C - 28°C</div>
         <div style="height:4px; width:100%; background: var(--line); border-radius:2px; margin-top:15px; overflow:hidden;">
-            <div id="bar-temp" style="height:100%; width:50%; background:#ef4444; transition: width 1s ease-in-out;"></div>
+            <div id="bar-temp" style="height:100%; width:50%; background:var(--color-danger); transition: width 1s ease-in-out;"></div>
         </div>
     </div>
 
@@ -78,13 +79,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 {
                     label: 'Moisture (%)',
                     data: [41, 42, 42, 43, 42, 41, 42],
-                    borderColor: '#3b82f6',
+                    borderColor: 'var(--color-info)',
                     tension: 0.4
                 },
                 {
                     label: 'Temp (°C)',
                     data: [24.1, 24.3, 24.5, 24.4, 24.6, 24.5, 24.5],
-                    borderColor: '#ef4444',
+                    borderColor: 'var(--color-danger)',
                     tension: 0.4
                 }
             ]

@@ -82,7 +82,7 @@
         fieldsData.forEach(field => {
             if (field.geojson) {
                 const layer = L.geoJSON(field.geojson, {
-                    style: { color: '#159653', weight: 3, fillOpacity: 0.3 }
+                    style: { color: 'var(--color-primary)', weight: 3, fillOpacity: 0.3 }
                 });
                 layer.bindPopup(`<b>${field.name}</b><br>${field.crop}<br>${field.area} acres`);
                 layer.addTo(drawnItems);
@@ -99,7 +99,7 @@
         },
         draw: {
             polygon: {
-                shapeOptions: { color: '#159653' }
+                shapeOptions: { color: 'var(--color-primary)' }
             },
             polyline: false,
             rectangle: false,
@@ -156,7 +156,7 @@
                 health = 'Moderate Stress (NDVI: 0.45)';
             } else {
                 // Low Health (Red)
-                color = '#ef4444';
+                color = 'var(--color-danger)';
                 health = 'Low Health Zone Detected (NDVI: 0.15) - Requires immediate nitrogen/water';
             }
             

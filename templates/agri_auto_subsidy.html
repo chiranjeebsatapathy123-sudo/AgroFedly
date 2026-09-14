@@ -2,7 +2,8 @@
 {% load i18n %}
 {% block title %}Agriculture: AI Auto-Subsidy{% endblock %}
 {% block content %}
-<section class="page-head" style="text-align:center; padding: 40px 20px; background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; border-radius: 20px; margin-bottom: 40px;">
+{% include 'demo_banner.html' %}
+<section class="page-head" style="text-align:center; padding: 40px 20px; background: linear-gradient(135deg, #4f46e5, var(--color-info)); color: white; border-radius: 20px; margin-bottom: 40px;">
     <div class="eyebrow" style="color:#c7d2fe; font-weight:bold; letter-spacing:2px;">{% trans "AGRICULTURE" %}</div>
     <h1 style="font-size:3rem; margin:10px 0; color: white;">🤖 {% trans "AI Subsidy Filer" %}</h1>
     <p style="font-size:1.2rem; color:#e0e7ff; max-width:600px; margin:0 auto;">{% trans "Our AI scans your farm profile and auto-fills complex government grant and subsidy applications for you." %}</p>
@@ -17,7 +18,7 @@
                 📄
             </div>
             <h2 style="margin:0 0 10px 0;">Profile Scanner</h2>
-            <p style="color:var(--muted); font-size:0.9rem; margin-bottom:20px;">AI confidence in profile matching: <strong style="color:#10b981;">{{ ai_confidence }}%</strong></p>
+            <p style="color:var(--muted); font-size:0.9rem; margin-bottom:20px;">AI confidence in profile matching: <strong style="color:var(--color-primary);">{{ ai_confidence }}%</strong></p>
             
             <div style="text-align:left; background: var(--soft); padding:20px; border-radius:10px; margin-bottom:20px;">
                 <div style="font-size:0.8rem; color:var(--muted); margin-bottom:5px;">✅ Verified Land Records attached</div>
@@ -37,7 +38,7 @@
             <div class="form-card" style="padding:20px; display:flex; align-items:center; gap:20px;">
                 
                 <!-- Match Ring -->
-                <div style="width:60px; height:60px; border-radius:50%; border:4px solid {% if grant.match_score > 90 %}#10b981{% elif grant.match_score > 80 %}#f59e0b{% else %}#ef4444{% endif %}; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.1rem; color: var(--ink);">
+                <div style="width:60px; height:60px; border-radius:50%; border:4px solid {% if grant.match_score > 90 %}var(--color-primary){% elif grant.match_score > 80 %}var(--color-warning){% else %}var(--color-danger){% endif %}; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.1rem; color: var(--ink);">
                     {{ grant.match_score }}%
                 </div>
                 
