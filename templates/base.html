@@ -8,6 +8,7 @@
 <link rel="manifest" href="{% static 'manifest.json' %}">
 <title>{% block title %}AgroFedly{% endblock %} · Smart Food Operations</title>
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
+<link rel="stylesheet" href="{% static 'css/motion.css' %}">
 <link rel="stylesheet" href="{% static 'css/copilot.css' %}">
 <style>
   #drawer { 
@@ -21,6 +22,14 @@
   #drawer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4) !important; border-radius: 10px !important; }
   #drawer::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.6) !important; }
 </style>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+</script>
 <script>
   // FOUC prevention: Apply theme before body renders
   (function() {
@@ -79,7 +88,7 @@
 </header>
 
 <aside class="drawer" id="drawer">
-  <div class="drawer-head"><strong>{% trans "Navigate" %}</strong><button id="closeMenu">×</button></div>
+  <div class="drawer-head"><strong>{% trans "Navigate" %}</strong><button id="closeMenu" onclick="document.getElementById('drawer').classList.remove('open'); document.getElementById('backdrop').classList.remove('show');">×</button></div>
   <div class="drawer-category">Overview</div>
   <a href="{% url 'home' %}">⌂ <span>{% trans "Home" %}</span></a>
   {% if user.is_authenticated %}
@@ -148,9 +157,28 @@
 </aside>
 <div class="backdrop" id="backdrop"></div>
 
+<!-- Global Search Modal -->
+<div id="global-search-modal" class="search-modal">
+  <div class="search-modal-content">
+    <div class="search-header">
+      <input type="text" id="global-search-input" placeholder="Search surplus, delivery, analytics... (or press '/' to focus)">
+      <button onclick="document.getElementById('global-search-modal').classList.remove('active')" class="close-search">×</button>
+    </div>
+    <div class="search-results">
+      <div class="search-category">Quick Links</div>
+      <a href="{% url 'surplus_list' %}">▣ Food Surplus</a>
+      <a href="{% url 'delivery_list' %}">📦 Deliveries</a>
+      <a href="{% url 'intelligence_center' %}">⌁ Operations Intelligence</a>
+    </div>
+  </div>
+</div>
+
 {% if messages %}
 <div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>
 {% endif %}
+
+<!-- Global 3D Engine Canvas -->
+<canvas id="agrofedly-3d-canvas"></canvas>
 
 <main>{% block content %}{% endblock %}</main>
 
@@ -175,8 +203,20 @@
 {% endif %}
 
 <footer>AgroFedly · AI-assisted food planning · Safety · Redistribution · Delivery</footer>
-<script src="{% static 'js/app.js' %}"></script>
+<script src="{% static 'js/ui_core.js' %}?v=1.0"></script>
+<script src="{% static 'js/app.js' %}?v=1.2"></script>
 <script src="{% static 'js/copilot.js' %}"></script>
+<script type="module">
+  import { AgroFedly3D } from "{% static 'js/3d_engine.js' %}";
+  import { VoiceAssistant } from "{% static 'js/voice_assistant.js' %}";
+  import { ExperienceManager } from "{% static 'js/experience_manager.js' %}";
+  
+  document.addEventListener('DOMContentLoaded', () => {
+      window.experienceManager = new ExperienceManager();
+      window.agrofedly3D = new AgroFedly3D('agrofedly-3d-canvas');
+      window.voiceAssistant = new VoiceAssistant();
+  });
+</script>
 <script>
   // Dynamic Scroll Animations Engine (Motion UI)
   document.addEventListener("DOMContentLoaded", function() {

@@ -12,6 +12,6 @@
 </section>
 
 <section class="panel"><div class="panel-title"><h2>{% trans "Team" %}</h2>{% if membership.role == "OWNER" or membership.role == "ADMIN" %}<a href="{% url 'organization_add_member' %}">{% trans "Add member" %}</a>{% endif %}</div>
-{% for m in members %}<div class="member-row"><div class="avatar">{{ m.user.username|first|upper }}</div><div><b>{{ m.user.username }}</b><small>{{ m.get_role_display }}</small></div>{% if m.role != "OWNER" and membership.role == "OWNER" %}<form method="post" action="{% url 'organization_remove_member' m.id %}">{% csrf_token %}<button class="icon-btn">×</button></form>{% endif %}</div>{% empty %}<div class="empty">{% trans "No team members." %}</div>{% endfor %}</section>
+{% for m in members %}<div class="member-row"><div class="avatar">{{ m.user.username|first|upper }}</div><div><b>{{ m.user.username }}</b><small>{{ m.get_role_display }}</small></div>{% if m.role != "OWNER" and membership.role == "OWNER" %}<form method="post" action="{% url 'organization_remove_member' m.id %}" onsubmit="event.preventDefault(); window.ui && window.ui.showConfirm('Remove Member', 'Are you sure you want to remove this member from the organization?', () => this.submit());">{% csrf_token %}<button class="icon-btn" type="submit">×</button></form>{% endif %}</div>{% empty %}<div class="empty">{% trans "No team members." %}</div>{% endfor %}</section>
 </div>
 {% endblock %}

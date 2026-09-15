@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 {% block title %}{% trans "Home" %}{% endblock %}
 {% block content %}
-<section class="hero">
-  <div class="hero-copy">
+<section class="hero scene-3d-container">
+  <div class="hero-copy card-3d">
     <div class="eyebrow">{% trans "SMART FOOD OPERATIONS PLATFORM" %}</div>
     <h1>{% trans "Plan better meals." %}<br><span>{% trans "Move surplus smarter." %}</span></h1>
     <p>{% trans "Fedly connects AI demand planning, food safety, organizations and last-mile delivery in one operational workspace." %}</p>
@@ -17,7 +17,7 @@
       {% endif %}
     </div>
   </div>
-  <div class="hero-panel">
+  <div class="hero-panel card-3d">
     <div class="panel-top"><span>{% trans "LIVE OPERATIONS" %}</span><b>● {% trans "Operational" %}</b></div>
     <div class="orbit"><div class="orbit-core">🍲</div><span class="orb o1">{% trans "AI" %}</span><span class="orb o2">{% trans "SAFE" %}</span><span class="orb o3">{% trans "MOVE" %}</span></div>
     <div class="mini-grid"><div><b>7D</b><span>{% trans "Forecast" %}</span></div><div><b>24/7</b><span>{% trans "Tracking" %}</span></div><div><b>1</b><span>{% trans "Workspace" %}</span></div></div>
@@ -40,4 +40,14 @@
   <div><div class="eyebrow">{% trans "GET STARTED" %}</div><h2>{% trans "Your organization can join Fedly today." %}</h2><p>{% trans "Registration creates the organization and its owner account together, so the form actually leads directly into the workspace." %}</p></div>
   <a class="btn light" href="{% url 'organization_register' %}">{% trans "Register Organization →" %}</a>
 </section>
+
+<script type="module">
+  import { HeroScene } from "{% static 'js/3d_scenes/hero_scene.js' %}";
+  
+  document.addEventListener('DOMContentLoaded', () => {
+      if (window.agrofedly3D) {
+          window.agrofedly3D.loadScene(HeroScene);
+      }
+  });
+</script>
 {% endblock %}

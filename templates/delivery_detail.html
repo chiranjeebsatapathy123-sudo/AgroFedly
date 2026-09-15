@@ -2,17 +2,17 @@
 {% load i18n %}
 {% block title %}{{ delivery.tracking_code }}{% endblock %}
 {% block content %}
-<section class="page-head">
+<section class="page-head anim-fade-in">
   <div>
     <div class="eyebrow">{% trans "SHIPMENT TRACKING" %}</div>
     <h1>{{ delivery.tracking_code }}</h1>
     <p>{{ delivery.food_name }} · {{ delivery.quantity }} meals · {{ delivery.sender.name }} → {{ delivery.receiver.name }}</p>
   </div>
-  <span class="pill {{ delivery.status|lower }} large-pill">{{ delivery.get_status_display }}</span>
+  <span class="pill {{ delivery.status|lower }} large-pill anim-scale-in stagger-1">{{ delivery.get_status_display }}</span>
 </section>
 
 <div class="two-panels">
-<section class="panel">
+<section class="panel reveal anim-slide-in stagger-2">
   <div class="panel-title"><h2>{% trans "Live delivery timeline" %}</h2><span class="track">{{ delivery.tracking_code }}</span></div>
   <div class="timeline">
     <div class="timeline-step done"><span>✓</span><div><b>{% trans "Requested" %}</b><small>Shipment created {{ delivery.created_at|date:"d M Y, H:i" }}</small></div></div>
@@ -25,7 +25,7 @@
 
 <section class="panel">
   <div class="panel-title"><h2>{% trans "Update shipment" %}</h2></div>
-  <form method="post" action="{% url 'delivery_update_status' delivery.id %}" class="form-grid">
+  <form method="post" action="{% url 'delivery_update_status' delivery.id %}" class="form-grid" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">
     {% csrf_token %}
     <label>{% trans "Next status" %}
       <select name="status">
@@ -47,7 +47,7 @@
 </div>
 
 <div class="two-panels">
-<section class="panel">
+<section class="panel reveal anim-slide-in stagger-3">
   <div class="panel-title"><h2>{% trans "Sender information" %}</h2><span class="track">{% trans "ORIGIN" %}</span></div>
   <div class="detail-list">
     <div><span>{% trans "Organization" %}</span><b>{{ delivery.sender.name }}</b></div>
@@ -58,7 +58,7 @@
     <div><span>{% trans "Created by" %}</span><b>{{ delivery.created_by.get_full_name|default:delivery.created_by.username|default:"System" }}</b></div>
   </div>
 </section>
-<section class="panel">
+<section class="panel reveal anim-slide-in stagger-4">
   <div class="panel-title"><h2>{% trans "Receiver information" %}</h2><span class="track">{% trans "DESTINATION" %}</span></div>
   <div class="detail-list">
     <div><span>{% trans "Organization" %}</span><b>{{ delivery.receiver.name }}</b></div>
@@ -72,7 +72,7 @@
 </div>
 
 <div class="two-panels">
-<section class="panel">
+<section class="panel reveal anim-slide-in stagger-5">
   <div class="panel-title"><h2>{% trans "Route & contacts" %}</h2></div>
   <div class="route-detail">
     <div class="route-stop"><span>{% trans "ORIGIN" %}</span><b>{{ delivery.sender.name }}</b><p>{{ delivery.pickup_address }}</p></div>
@@ -125,7 +125,7 @@
   </div>
   {% endif %}
 </section>
-<section class="panel">
+<section class="panel reveal anim-slide-in stagger-6">
   <div class="panel-title"><h2>{% trans "Shipment information" %}</h2></div>
   <div class="detail-list">
     <div><span>{% trans "Food" %}</span><b>{{ delivery.food_name }}</b></div>
@@ -134,7 +134,7 @@
     <div><span>{% trans "Notes" %}</span><b>{{ delivery.notes|default:"No special instructions" }}</b></div>
   </div>
 </section>
-<section class="panel">
+<section class="panel reveal anim-slide-in stagger-7">
   <div class="panel-title"><h2>{% trans "Shipment QR Code" %}</h2></div>
   <div style="text-align: center; padding: 20px;">
     {% if delivery.status != 'DELIVERED' and delivery.status != 'CANCELLED' %}
@@ -147,16 +147,16 @@
 </section>
 </div>
 
-<div class="delivery-actions">
+<div class="delivery-actions anim-fade-up stagger-8">
   <a class="btn soft" href="{% url 'delivery_list' %}">{% trans "← Back to deliveries" %}</a>
   {% if delivery.status == "REQUESTED" %}
-    <form method="post" action="{% url 'delivery_update_status' delivery.id %}">{% csrf_token %}<input type="hidden" name="status" value="ASSIGNED"><button class="btn primary">{% trans "Assign driver" %}</button></form>
+    <form method="post" action="{% url 'delivery_update_status' delivery.id %}" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">{% csrf_token %}<input type="hidden" name="status" value="ASSIGNED"><button class="btn primary">{% trans "Assign driver" %}</button></form>
   {% elif delivery.status == "ASSIGNED" %}
-    <form method="post" action="{% url 'delivery_update_status' delivery.id %}">{% csrf_token %}<input type="hidden" name="status" value="PICKED_UP"><button class="btn primary">{% trans "Mark picked up" %}</button></form>
+    <form method="post" action="{% url 'delivery_update_status' delivery.id %}" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">{% csrf_token %}<input type="hidden" name="status" value="PICKED_UP"><button class="btn primary">{% trans "Mark picked up" %}</button></form>
   {% elif delivery.status == "PICKED_UP" %}
-    <form method="post" action="{% url 'delivery_update_status' delivery.id %}">{% csrf_token %}<input type="hidden" name="status" value="IN_TRANSIT"><button class="btn primary">{% trans "Start transit" %}</button></form>
+    <form method="post" action="{% url 'delivery_update_status' delivery.id %}" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">{% csrf_token %}<input type="hidden" name="status" value="IN_TRANSIT"><button class="btn primary">{% trans "Start transit" %}</button></form>
   {% elif delivery.status == "IN_TRANSIT" %}
-    <form method="post" action="{% url 'delivery_update_status' delivery.id %}">{% csrf_token %}<input type="hidden" name="status" value="DELIVERED"><button class="btn primary">{% trans "✓ Confirm delivered" %}</button></form>
+    <form method="post" action="{% url 'delivery_update_status' delivery.id %}" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">{% csrf_token %}<input type="hidden" name="status" value="DELIVERED"><button class="btn primary">{% trans "✓ Confirm delivered" %}</button></form>
   {% elif delivery.status == "DELIVERED" %}
     <a class="btn primary" href="{% url 'generate_donation_receipt' delivery.id %}">{% trans "📄 Download Receipt" %}</a>
   {% endif %}

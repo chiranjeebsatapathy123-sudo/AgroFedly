@@ -5,16 +5,16 @@
 <div class="breadcrumb" style="max-width:1240px; margin: 20px auto 0; padding: 0 28px;">
     <a href="{% url 'home' %}">AgroFedly</a> <span>/</span> <a href="{% url 'dashboard' %}">Dashboard</a> <span>/</span> <span>Deliveries</span>
 </div>
-<section class="page-head" style="padding-top:10px;">
+<section class="page-head anim-fade-in" style="padding-top:10px;">
   <div>
     <div class="eyebrow">{% trans "LAST-MILE LOGISTICS" %}</div>
     <h1>{% trans "Delivery system" %}</h1>
     <p>{{ organization.name }} · Track every food shipment from request to confirmed delivery.</p>
   </div>
-  <a class="btn primary" href="{% url 'delivery_create' %}">{% trans "＋ Create delivery" %}</a>
+  <a class="btn primary anim-scale-in stagger-1" href="{% url 'delivery_create' %}">{% trans "＋ Create delivery" %}</a>
 </section>
 
-<div class="stats-grid delivery-stats">
+<div class="stats-grid delivery-stats anim-fade-up stagger-2">
   <div class="stat-card"><span>{% trans "Total shipments" %}</span><b>{{ total_deliveries }}</b><small>{% trans "All incoming and outgoing" %}</small></div>
   <div class="stat-card accent"><span>{% trans "Active" %}</span><b>{{ active_deliveries }}</b><small>{% trans "Currently moving or assigned" %}</small></div>
   <div class="stat-card"><span>{% trans "Delivered" %}</span><b>{{ delivered_deliveries }}</b><small>{% trans "Completed shipments" %}</small></div>
@@ -40,7 +40,7 @@
 
 <div class="delivery-board">
 {% for d in deliveries %}
-<div class="delivery-card">
+<div class="delivery-card reveal anim-fade-up stagger-{{ forloop.counter }}">
   <div class="delivery-top">
     <span class="track">{{ d.tracking_code }}</span>
     <span class="pill {{ d.status|lower }}">{{ d.get_status_display }}</span>
@@ -48,7 +48,7 @@
       <a href="{% url 'delivery_detail' d.id %}" class="table-btn">{% trans "View" %}</a>
       <a href="{% url 'delivery_live_tracking' d.id %}" class="table-btn" style="background:var(--color-info-bg); color:var(--color-info);">{% trans "Track" %}</a>
       {% if d.status != "DELIVERED" and request.user.is_superuser %}
-          <a href="{% url 'delivery_proof' d.id %}" class="table-btn" style="background:#fff6dd; color:var(--color-warning);">{% trans "PoD" %}</a>
+          <a href="{% url 'delivery_proof' d.id %}" class="table-btn" style="background:var(--surface-warning); color:var(--status-requested);">{% trans "PoD" %}</a>
       {% endif %}
     </div>
   </div>
@@ -56,6 +56,6 @@
   <div class="route"><div><b>{{ d.sender.name }}</b><span>{{ d.sender.phone|default:d.sender.email|default:"Sender contact not provided" }}</span><span>{{ d.pickup_address|truncatechars:55 }}</span></div><i>→</i><div><b>{{ d.receiver.name }}</b><span>{{ d.receiver.phone|default:d.receiver.email|default:"Receiver contact not provided" }}</span><span>{{ d.delivery_address|truncatechars:55 }}</span></div></div>
   <div class="delivery-meta"><span>Sender: {{ d.sender.city|default:"—" }}</span><span>Receiver: {{ d.receiver.city|default:"—" }}</span><span>Driver: {{ d.driver_name|default:"Unassigned" }}</span><span>{{ d.scheduled_at|date:"d M Y, H:i"|default:"Schedule pending" }}</span></div>
 </div>
-{% empty %}<div class="empty large">{% trans "No deliveries match your search. Create a shipment or clear the filters." %}</div>{% endfor %}
+{% empty %}<div class="empty large anim-fade-in stagger-3">{% trans "No deliveries match your search. Create a shipment or clear the filters." %}</div>{% endfor %}
 </div>
 {% endblock %}

@@ -62,6 +62,7 @@ urlpatterns = [
     path("surplus/", views.surplus_list, name="surplus_list"),
     path("surplus/add/", views.add_surplus_food, name="add_surplus"),
     path("surplus/<int:food_id>/redistribute/", views.redistribute_food, name="redistribute_food"),
+    path("surplus/<int:food_id>/delete/", views.delete_surplus, name="delete_surplus"),
     path("surplus/<int:food_id>/trace/", views.food_chain_of_custody, name="food_traceability"),
     path("surplus/<int:food_id>/recommendations/", views.recipient_recommendations, name="recipient_recommendations"),
 

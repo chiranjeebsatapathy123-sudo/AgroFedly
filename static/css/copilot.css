@@ -74,13 +74,14 @@
 
 .ai-msg {
   background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
   align-self: flex-start;
   border-bottom-left-radius: 4px;
 }
 
 .user-msg {
-  background: var(--primary);
-  color: white;
+  background: var(--color-primary);
+  color: #ffffff;
   align-self: flex-end;
   border-bottom-right-radius: 4px;
 }
@@ -97,7 +98,7 @@
   flex-grow: 1;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  color: #ffffff;
   border-radius: 20px;
   padding: 8px 16px;
   outline: none;
@@ -112,7 +113,7 @@
 .copilot-btn-icon {
   background: transparent;
   border: none;
-  color: white;
+  color: #ffffff;
   font-size: 1.2rem;
   cursor: pointer;
   padding: 6px;

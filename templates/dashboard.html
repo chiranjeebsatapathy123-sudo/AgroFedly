@@ -1,16 +1,16 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="breadcrumb" style="max-width:1240px; margin: 20px auto 0; padding: 0 28px;">
     <a href="{% url 'home' %}">AgroFedly</a> <span>/</span> <span>Dashboard</span>
 </div>
-<section class="page-head" style="padding-top:10px;">
+<section class="page-head anim-fade-in" style="padding-top:10px;">
     <div>
         <h1>Good {% now "A"|lower %}, {{ user.username|title }}</h1>
         <p>{% trans "Here's what's happening with your operations today." %}</p>
     </div>
-    <div class="live-card">
+    <div class="live-card anim-scale-in stagger-1">
         <span>{% trans "● Operational" %}</span>
         <small>Model: {{ model_name }}</small>
         <small>AI confidence: {{ avg_confidence }}%</small>
@@ -31,52 +31,52 @@
 </div>
 {% endif %}
 
-<div class="stats-grid">
-    <div class="stat-card accent">
+<div class="stats-grid scene-3d-container">
+    <div class="stat-card accent card-3d reveal anim-fade-up stagger-1">
         <span>{% trans "Food Surplus" %}</span>
         <b>{{ total_surplus }}</b>
         <small>↑ 4.2% vs previous week</small>
     </div>
-    <div class="stat-card">
+    <div class="stat-card card-3d reveal anim-fade-up stagger-2">
         <span>{% trans "Redistributed" %}</span>
         <b>{{ redistributed }}</b>
         <small>Meals successfully moved</small>
     </div>
-    <div class="stat-card">
+    <div class="stat-card card-3d reveal anim-fade-up stagger-3">
         <span>{% trans "Food Waste Prevented" %}</span>
         <b>{{ total_predicted }}</b>
         <small>Est. meals saved</small>
     </div>
-    <div class="stat-card">
+    <div class="stat-card card-3d reveal anim-fade-up stagger-4">
         <span>{% trans "Active Recipients" %}</span>
         <b>{{ verified_recipients }}</b>
         <small>Verified organizations</small>
     </div>
 </div>
 
-<div class="quick-grid">
-    <a href="{% url 'predict_demand' %}" class="quick">
+<div class="quick-grid scene-3d-container">
+    <a href="{% url 'predict_demand' %}" class="quick card-3d reveal anim-scale-in stagger-1">
         <span>✦</span><b>{% trans "Run AI prediction" %}</b><small>{% trans "Estimate today's demand" %}</small>
     </a>
-    <a href="{% url 'add_surplus' %}" class="quick">
+    <a href="{% url 'add_surplus' %}" class="quick card-3d reveal anim-scale-in stagger-2">
         <span>🍱</span><b>{% trans "Record surplus" %}</b><small>{% trans "Check safety automatically" %}</small>
     </a>
-    <a href="{% url 'delivery_create' %}" class="quick">
+    <a href="{% url 'delivery_create' %}" class="quick card-3d reveal anim-scale-in stagger-3">
         <span>➜</span><b>{% trans "Create delivery" %}</b><small>{% trans "Move food to another organization" %}</small>
     </a>
-    <a href="{% url 'intelligence_center' %}" class="quick">
+    <a href="{% url 'intelligence_center' %}" class="quick card-3d reveal anim-scale-in stagger-4">
         <span>⌁</span><b>{% trans "Operations intelligence" %}</b><small>{% trans "Analytics, routes, alerts & integrations" %}</small>
     </a>
 </div>
 
-<div class="two-panels">
-    <section class="panel">
+<div class="two-panels scene-3d-container">
+    <section class="panel card-3d reveal anim-slide-in stagger-2">
         <div class="panel-title">
             <h2>{% trans "Recent Surplus Food" %}</h2>
             <a href="{% url 'surplus_list' %}">{% trans "View all" %}</a>
         </div>
         {% for s in recent_surplus %}
-        <div class="list-row">
+        <div class="list-row reveal anim-fade-up stagger-{{ forloop.counter }}">
             <div>
                 <b>{{ s.food_type }}</b>
                 <small>{{ s.quantity }} units · Expires: {{ s.expiration_date|date:"M d" }}</small>
@@ -86,20 +86,20 @@
             </span>
         </div>
         {% empty %}
-        <div class="empty-state">
+        <div class="empty-state anim-fade-in stagger-3">
             <div class="empty-state-icon">🍱</div>
             <p>{% trans "No surplus food recorded yet. Once your organization records prepared food, surplus data will appear here." %}</p>
         </div>
         {% endfor %}
     </section>
 
-    <section class="panel">
+    <section class="panel card-3d reveal anim-slide-in stagger-3">
         <div class="panel-title">
             <h2>{% trans "Recent Activity / Deliveries" %}</h2>
             <a href="{% url 'delivery_list' %}">{% trans "View all" %}</a>
         </div>
         {% for d in recent_deliveries %}
-        <div class="list-row">
+        <div class="list-row reveal anim-fade-up stagger-{{ forloop.counter }}">
             <div>
                 <b>To: {{ d.receiver.name }}</b>
                 <small>{{ d.get_status_display }} · Driver: {{ d.driver_name|default:"Unassigned" }}</small>
@@ -107,7 +107,7 @@
             <a href="{% url 'delivery_detail' d.id %}" class="btn soft" style="padding: 5px 10px; font-size:10px;">Track</a>
         </div>
         {% empty %}
-        <div class="empty-state">
+        <div class="empty-state anim-fade-in stagger-4">
             <div class="empty-state-icon">🚚</div>
             <p>{% trans "No active deliveries. Deliveries created during redistribution will be tracked here." %}</p>
         </div>
@@ -115,4 +115,13 @@
     </section>
 </div>
 
+<script type="module">
+  import { DashboardScene } from "{% static 'js/3d_scenes/dashboard_scene.js' %}";
+  
+  document.addEventListener('DOMContentLoaded', () => {
+      if (window.agrofedly3D) {
+          window.agrofedly3D.loadScene(DashboardScene);
+      }
+  });
+</script>
 {% endblock %}

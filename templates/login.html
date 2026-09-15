@@ -1,16 +1,36 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 {% block title %}{% if persona %}{{ persona|title }} {% endif %}Login{% endblock %}
 {% block content %}
-<section class="auth-wrap"><div class="auth-card">
-  <div class="eyebrow">{% if persona %}{% trans "SECURE ACCESS FOR" %} {{ persona|upper }}{% else %}{% trans "SECURE ACCESS" %}{% endif %}</div>
-  <h1>{% if persona %}{% trans "Login as" %} {{ persona|title }}{% else %}{% trans "Welcome back" %}{% endif %}</h1>
-  <p>{% trans "Sign in to your Fedly workspace." %}</p>
-  <form method="post" class="form-grid">{% csrf_token %}
+<section class="auth-wrap scene-3d-container"><div class="auth-card card-3d anim-fade-up">
+  <div class="eyebrow anim-fade-in stagger-1">{% if persona %}{% trans "SECURE ACCESS FOR" %} {{ persona|upper }}{% else %}{% trans "SECURE ACCESS" %}{% endif %}</div>
+  <h1 class="anim-fade-up stagger-2">{% if persona %}{% trans "Login as" %} {{ persona|title }}{% else %}{% trans "Welcome back" %}{% endif %}</h1>
+  <p class="anim-fade-in stagger-3">{% trans "Sign in to your Fedly workspace." %}</p>
+  <form method="post" class="form-grid anim-scale-in stagger-4" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button[type=submit]'), true)">{% csrf_token %}
     <label>{% trans "Username" %}<input name="username" required autocomplete="username"></label>
     <label>{% trans "Password" %}<input name="password" type="password" required autocomplete="current-password"></label>
-    <button class="btn primary full">{% trans "Sign in" %}</button>
+    <button type="submit" class="btn primary full">{% trans "Sign in" %}</button>
   </form>
-  <div class="auth-foot">{% trans "New organization?" %} <a href="{% url 'organization_register' %}">{% trans "Register here" %}</a></div>
+  <div class="auth-foot anim-fade-in stagger-5">{% trans "New organization?" %} <a href="{% url 'organization_register' %}">{% trans "Register here" %}</a></div>
 </div></section>
+
+<script type="module">
+  import { LoginScene } from "{% static 'js/3d_scenes/login_scene.js' %}";
+  
+  document.addEventListener('DOMContentLoaded', () => {
+      if (window.agrofedly3D) {
+          window.agrofedly3D.loadScene(LoginScene);
+      }
+      
+      // Dynamic 3D tilt effect on the card
+      const card = document.querySelector('.auth-card');
+      if (card && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.addEventListener('mousemove', (e) => {
+              const x = (window.innerWidth / 2 - e.clientX) / 50;
+              const y = (window.innerHeight / 2 - e.clientY) / 50;
+              card.style.transform = `translateY(-8px) translateZ(30px) rotateY(${x}deg) rotateX(${y}deg)`;
+          });
+      }
+  });
+</script>
 {% endblock %}

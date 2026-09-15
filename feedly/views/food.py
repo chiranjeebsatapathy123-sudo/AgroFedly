@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionForm, SurplusFoodForm
-from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact
+from ..models import FoodLedger, DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact
 User = get_user_model()
 try:
     import joblib
@@ -134,3 +134,11 @@ def food_chain_of_custody(request, food_id):
     food = get_object_or_404(SurplusFood, id=food_id)
     ledger_entries = FoodLedger.objects.filter(surplus_food=food).order_by('timestamp')
     return render(request, 'food_traceability.html', {'food': food, 'ledger_entries': ledger_entries})
+
+@_organization_required
+def delete_surplus(request, food_id):
+    if request.method == 'POST':
+        food = get_object_or_404(SurplusFood, id=food_id, organization=request.organization)
+        food.delete()
+        return JsonResponse({'status': 'success', 'message': 'Surplus record deleted successfully.'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)

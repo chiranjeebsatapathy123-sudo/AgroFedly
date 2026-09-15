@@ -2,12 +2,12 @@
 {% load i18n %}
 {% block title %}Operations Intelligence{% endblock %}
 {% block content %}
-<section class="page-head">
+<section class="page-head anim-fade-in">
   <div><div class="eyebrow">{% trans "SMART FOOD OPERATIONS" %}</div><h1>{% trans "Operations intelligence" %}</h1><p>{% trans "One workspace for preparation, consumption, waste prevention, impact, routing and live operational signals." %}</p></div>
-  <div class="live-card"><span>{% trans "● Intelligence online" %}</span><small>Updated {{ today }}</small><small>{% trans "All calculations use your stored operational data" %}</small></div>
+  <div class="live-card anim-scale-in stagger-1"><span>{% trans "● Intelligence online" %}</span><small>Updated {{ today }}</small><small>{% trans "All calculations use your stored operational data" %}</small></div>
 </section>
 
-<section class="stats-grid">
+<section class="stats-grid anim-fade-up stagger-2">
   <div class="stat-card accent"><span>{% trans "Waste risk score" %}</span><b>{{ waste_risk_score }}/100</b><small>{% trans "Lower is better" %}</small></div>
   <div class="stat-card"><span>{% trans "Cost savings" %}</span><b>₹{{ cost_savings|floatformat:0 }}</b><small>{% trans "Estimated avoided meal cost" %}</small></div>
   <div class="stat-card"><span>{% trans "Carbon savings" %}</span><b>{{ carbon_savings|floatformat:1 }} kg</b><small>{% trans "Estimated avoided emissions" %}</small></div>
@@ -17,12 +17,12 @@
 <section class="feature-section" id="preparation">
   <div class="panel-title"><div><div class="eyebrow">{% trans "PLANNING" %}</div><h2>{% trans "Preparation & consumption" %}</h2></div></div>
   <div class="feature-grid">
-    <article class="feature-card"><span class="feature-icon">✦</span><h3>{% trans "Preparation recommendation" %}</h3><p>{% trans "Generate a recommended preparation quantity from attendance and the existing demand model." %}</p>
-      <form method="post" class="inline-form">{% csrf_token %}<input type="hidden" name="action" value="preparation"><input name="attendance" type="number" min="0" placeholder="Expected attendance" required><button class="btn primary">{% trans "Recommend" %}</button></form>
+    <article class="feature-card reveal anim-fade-up stagger-1"><span class="feature-icon">✦</span><h3>{% trans "Preparation recommendation" %}</h3><p>{% trans "Generate a recommended preparation quantity from attendance and the existing demand model." %}</p>
+      <form method="post" class="inline-form" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">{% csrf_token %}<input type="hidden" name="action" value="preparation"><input name="attendance" type="number" min="0" placeholder="Expected attendance" required><button class="btn primary">{% trans "Recommend" %}</button></form>
       {% if latest_forecast %}<small>Latest: {{ latest_forecast.recommended_preparation }} meals · {{ latest_forecast.waste_risk }} risk</small>{% endif %}
     </article>
-    <article class="feature-card" id="consumption"><span class="feature-icon">◷</span><h3>{% trans "Consumption tracking" %}</h3><p>{% trans "Record prepared and consumed meals to continuously measure actual waste." %}</p>
-      <form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="track_consumption"><div class="form-grid"><input name="date" type="date" value="{{ today|date:'Y-m-d' }}"><input name="attendance" type="number" min="0" placeholder="Attendance" required><input name="prepared" type="number" min="0" placeholder="Prepared" required><input name="consumed" type="number" min="0" placeholder="Consumed" required></div><button class="btn primary">{% trans "Record consumption" %}</button></form>
+    <article class="feature-card reveal anim-fade-up stagger-2" id="consumption"><span class="feature-icon">◷</span><h3>{% trans "Consumption tracking" %}</h3><p>{% trans "Record prepared and consumed meals to continuously measure actual waste." %}</p>
+      <form method="post" class="stack-form" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">{% csrf_token %}<input type="hidden" name="action" value="track_consumption"><div class="form-grid"><input name="date" type="date" value="{{ today|date:'Y-m-d' }}"><input name="attendance" type="number" min="0" placeholder="Attendance" required><input name="prepared" type="number" min="0" placeholder="Prepared" required><input name="consumed" type="number" min="0" placeholder="Consumed" required></div><button class="btn primary">{% trans "Record consumption" %}</button></form>
     </article>
   </div>
 </section>
@@ -30,9 +30,9 @@
 <section class="feature-section" id="analytics">
   <div class="panel-title"><div><div class="eyebrow">{% trans "IMPACT" %}</div><h2>{% trans "Waste analytics & impact calculation" %}</h2></div></div>
   <div class="feature-grid">
-    <article class="feature-card"><span class="feature-icon">◌</span><h3>{% trans "Waste analytics" %}</h3><div class="metric-line"><span>{% trans "Prepared" %}</span><b>{{ tracked_prepared }}</b></div><div class="metric-line"><span>{% trans "Consumed" %}</span><b>{{ tracked_consumed }}</b></div><div class="metric-line"><span>{% trans "Tracked waste" %}</span><b>{{ tracked_waste }}</b></div><div class="metric-line"><span>{% trans "Waste rate" %}</span><b>{{ waste_rate }}%</b></div></article>
-    <article class="feature-card"><span class="feature-icon">◎</span><h3>{% trans "Impact calculation" %}</h3><p>{% trans "Redistributed food is converted into operational impact estimates." %}</p><div class="impact-row"><b>₹{{ cost_savings|floatformat:0 }}</b><span>{% trans "cost savings" %}</span></div><div class="impact-row"><b>{{ carbon_savings|floatformat:1 }} kg</b><span>{% trans "carbon savings" %}</span></div><small>{% trans "Assumptions: ₹35/meal and 0.65 kg CO₂e/meal." %}</small></article>
-    <article class="feature-card"><span class="feature-icon">⚠</span><h3>{% trans "Waste risk score" %}</h3><div class="risk-meter"><span style="width:{{ waste_risk_score }}%"></span></div><b>{{ waste_risk_score }}/100</b><p>{% trans "Combines tracked waste, forecast surplus and current surplus volume." %}</p></article>
+    <article class="feature-card reveal anim-fade-up stagger-1"><span class="feature-icon">◌</span><h3>{% trans "Waste analytics" %}</h3><div class="metric-line"><span>{% trans "Prepared" %}</span><b>{{ tracked_prepared }}</b></div><div class="metric-line"><span>{% trans "Consumed" %}</span><b>{{ tracked_consumed }}</b></div><div class="metric-line"><span>{% trans "Tracked waste" %}</span><b>{{ tracked_waste }}</b></div><div class="metric-line"><span>{% trans "Waste rate" %}</span><b>{{ waste_rate }}%</b></div></article>
+    <article class="feature-card reveal anim-fade-up stagger-2"><span class="feature-icon">◎</span><h3>{% trans "Impact calculation" %}</h3><p>{% trans "Redistributed food is converted into operational impact estimates." %}</p><div class="impact-row"><b>₹{{ cost_savings|floatformat:0 }}</b><span>{% trans "cost savings" %}</span></div><div class="impact-row"><b>{{ carbon_savings|floatformat:1 }} kg</b><span>{% trans "carbon savings" %}</span></div><small>{% trans "Assumptions: ₹35/meal and 0.65 kg CO₂e/meal." %}</small></article>
+    <article class="feature-card reveal anim-fade-up stagger-3"><span class="feature-icon">⚠</span><h3>{% trans "Waste risk score" %}</h3><div class="risk-meter"><span style="width:{{ waste_risk_score }}%"></span></div><b>{{ waste_risk_score }}/100</b><p>{% trans "Combines tracked waste, forecast surplus and current surplus volume." %}</p></article>
   </div>
   {% if accuracy_data %}
   <div class="feature-grid" style="margin-top: 24px;">
@@ -55,8 +55,8 @@
 <section class="feature-section" id="routes">
   <div class="panel-title"><div><div class="eyebrow">{% trans "REDISTRIBUTION" %}</div><h2>{% trans "Route optimization & live surplus map" %}</h2></div></div>
   <div class="feature-grid">
-    <article class="feature-card route-card"><span class="feature-icon">➜</span><h3>{% trans "Route optimization" %}</h3><p>{% trans "Verified recipients are ranked by capacity fit, distance and urgency." %}</p>{% for r in routes %}<div class="list-row"><div><b>{{ r.name }}</b><small>{{ r.distance }} km · capacity {{ r.capacity }} · urgency {{ r.urgency }}</small></div><strong>{{ r.score }}%</strong></div>{% empty %}<div class="empty">{% trans "Add verified recipients to generate routes." %}</div>{% endfor %}</article>
-    <article class="feature-card"><span class="feature-icon">⌖</span><h3>{% trans "Live surplus map" %}</h3><p>{% trans "Current safe/pending surplus locations are exposed as live operational points." %}</p><div class="map-placeholder">{% for p in surplus_points %}<div class="map-point"><b>{{ p.food_name }}</b><span>{{ p.quantity }} units · {{ p.storage_temperature }}°C · {{ p.status }}</span></div>{% empty %}<div class="empty">{% trans "No active surplus points." %}</div>{% endfor %}</div></article>
+    <article class="feature-card route-card reveal anim-fade-up stagger-1"><span class="feature-icon">➜</span><h3>{% trans "Route optimization" %}</h3><p>{% trans "Verified recipients are ranked by capacity fit, distance and urgency." %}</p>{% for r in routes %}<div class="list-row reveal anim-fade-in stagger-{{ forloop.counter }}"><div><b>{{ r.name }}</b><small>{{ r.distance }} km · capacity {{ r.capacity }} · urgency {{ r.urgency }}</small></div><strong>{{ r.score }}%</strong></div>{% empty %}<div class="empty">{% trans "Add verified recipients to generate routes." %}</div>{% endfor %}</article>
+    <article class="feature-card reveal anim-fade-up stagger-2"><span class="feature-icon">⌖</span><h3>{% trans "Live surplus map" %}</h3><p>{% trans "Current safe/pending surplus locations are exposed as live operational points." %}</p><div class="map-placeholder">{% for p in surplus_points %}<div class="map-point reveal anim-scale-in stagger-{{ forloop.counter }}"><b>{{ p.food_name }}</b><span>{{ p.quantity }} units · {{ p.storage_temperature }}°C · {{ p.status }}</span></div>{% empty %}<div class="empty">{% trans "No active surplus points." %}</div>{% endfor %}</div></article>
   </div>
 </section>
 
@@ -103,8 +103,8 @@
   </div>
 
   <div class="feature-grid">
-    <article class="feature-card"><span class="feature-icon">⚠️</span><h3>{% trans "Emergency surplus detection" %}</h3>{% for item in emergency_items %}<div class="alert-row"><div><b>{{ item.food }}</b><small>{{ item.quantity }} units • {{ item.age_hours }}h</small></div><span>{{ item.reason }}</span></div>{% empty %}<div class="empty">{% trans "No emergency surplus detected." %}</div>{% endfor %}</article>
-    <article class="feature-card"><span class="feature-icon">📈</span><h3>{% trans "Predictive waste alerts" %}</h3>{% for f in forecast_alerts %}<div class="alert-row"><div><b>{{ f.date }}</b><small>Expected surplus {{ f.expected_surplus }}</small></div><span>{{ f.waste_risk }}</span></div>{% empty %}<div class="empty">{% trans "No medium/high predictive waste alerts." %}</div>{% endfor %}</article>
+    <article class="feature-card reveal anim-fade-up stagger-1"><span class="feature-icon">⚠️</span><h3>{% trans "Emergency surplus detection" %}</h3>{% for item in emergency_items %}<div class="alert-row"><div><b>{{ item.food }}</b><small>{{ item.quantity }} units • {{ item.age_hours }}h</small></div><span>{{ item.reason }}</span></div>{% empty %}<div class="empty">{% trans "No emergency surplus detected." %}</div>{% endfor %}</article>
+    <article class="feature-card reveal anim-fade-up stagger-2"><span class="feature-icon">📈</span><h3>{% trans "Predictive waste alerts" %}</h3>{% for f in forecast_alerts %}<div class="alert-row"><div><b>{{ f.date }}</b><small>Expected surplus {{ f.expected_surplus }}</small></div><span>{{ f.waste_risk }}</span></div>{% empty %}<div class="empty">{% trans "No medium/high predictive waste alerts." %}</div>{% endfor %}</article>
   </div>
 </section>
 
