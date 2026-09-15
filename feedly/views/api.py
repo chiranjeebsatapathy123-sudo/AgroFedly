@@ -69,8 +69,6 @@ import json
 from ..copilot import generate_copilot_response
 import qrcode
 from django.http import HttpResponse
-from ..models import CarbonCredit
-from ..forms import CarbonCreditForm
 
 from django.db import connection
 def health_check(request):

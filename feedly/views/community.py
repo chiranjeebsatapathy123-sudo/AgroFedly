@@ -69,8 +69,6 @@ import json
 from ..copilot import generate_copilot_response
 import qrcode
 from django.http import HttpResponse
-from ..models import CarbonCredit
-from ..forms import CarbonCreditForm
 
 @login_required
 def volunteer_register(request):
@@ -120,69 +118,7 @@ def user_ai_recipe(request):
         recipe = {'title': 'Zero-Waste Rustic Veggie Hash', 'ingredients': ingredients.split(','), 'instructions': ['1. Chop all your leftover veggies into small, even cubes.', '2. Sauteé them in olive oil over medium heat until caramelized.', '3. Season with salt, pepper, and paprika.', '4. Serve with a fried egg on top!'], 'waste_saved': '0.5 kg'}
     return render(request, 'user_ai_recipe.html', {'recipe': recipe})
 
-@login_required
-def user_food_swap(request):
-    from feedly.models import P2PFoodSwap
-    swaps = P2PFoodSwap.objects.filter(status='AVAILABLE').order_by('-created_at')
-    if not swaps.exists():
-        P2PFoodSwap.objects.create(user=request.user, item_name='2 Jars Homemade Jam', description='Made too much strawberry jam, looking to trade for fresh herbs.', looking_for='Fresh Basil or Mint')
-        P2PFoodSwap.objects.create(user=request.user, item_name='Excess Zucchini', description='My garden is overflowing! Free to a good home.', looking_for='Nothing, just take it!')
-        swaps = P2PFoodSwap.objects.filter(status='AVAILABLE').order_by('-created_at')
-    return render(request, 'user_food_swap.html', {'swaps': swaps})
 
-@login_required
-def user_carbon_tracker(request):
-    from feedly.models import UserGreenScore
-    score, created = UserGreenScore.objects.get_or_create(user=request.user, defaults={'current_score': 1450, 'level_name': 'Eco Warrior', 'total_co2_saved_kg': 45.2, 'total_food_waste_prevented_kg': 12.5})
-    return render(request, 'user_carbon_tracker.html', {'score': score})
-
-@login_required
-def user_fridge_locator(request):
-    from feedly.models import CommunityFridge
-    fridges = CommunityFridge.objects.all()
-    if not fridges.exists():
-        CommunityFridge.objects.create(name='Downtown Free Fridge', location_address='123 Main St, near the library', status='LOW')
-        CommunityFridge.objects.create(name='Neighborhood Pantry', location_address='45 Elm St', status='FULL')
-        fridges = CommunityFridge.objects.all()
-    return render(request, 'user_fridge_locator.html', {'fridges': fridges})
-
-@login_required
-def user_farm_tour(request):
-    farm_data = None
-    if request.method == 'POST':
-        code = request.POST.get('code', '')
-        farm_data = {'name': 'Green Valley Organics', 'farmer': 'Priya Sharma', 'location': 'Nashik, Maharashtra', 'soil_health': 'Excellent (92%)', 'harvest_date': '2 Days Ago', 'story': 'We believe in regenerative agriculture. Your tomatoes were grown without synthetic pesticides, using collected rainwater.'}
-    return render(request, 'user_farm_tour.html', {'farm_data': farm_data})
-
-@login_required
-def system_disaster_relief(request):
-    import random
-    if request.method == 'POST':
-        messages.success(request, 'Emergency Rerouting Activated! 5,000 surplus meals diverted to Red Zone.')
-        return redirect('system_disaster_relief')
-    context = {'active_zones': [{'name': 'Mumbai Floods', 'urgency': 'CRITICAL', 'meals_needed': 15000, 'fulfilled': 3200}, {'name': 'Assam Relief', 'urgency': 'HIGH', 'meals_needed': 8000, 'fulfilled': 6500}], 'available_fleet': random.randint(15, 45)}
-    return render(request, 'system_disaster_relief.html', context)
-
-@login_required
-def user_agri_tourism(request):
-    if request.method == 'POST':
-        messages.success(request, 'Farm stay booked successfully! The farmer has been notified.')
-        return redirect('user_agri_tourism')
-    context = {'listings': [{'id': 1, 'title': 'Weekend Organic Farm Stay', 'farmer': 'Ramesh Kumar', 'price': 2500, 'type': 'Overnight Stay', 'rating': 4.8}, {'id': 2, 'title': 'Mango Picking Tour & Lunch', 'farmer': 'Sunita Devi', 'price': 800, 'type': 'Guided Tour', 'rating': 4.9}, {'id': 3, 'title': 'Learn Permaculture Basics', 'farmer': 'Green Acres', 'price': 1500, 'type': 'Workshop', 'rating': 4.7}]}
-    return render(request, 'user_agri_tourism.html', context)
-
-@login_required
-def system_blockchain_explorer(request):
-    import hashlib
-    import time
-    import random
-    blocks = []
-    for i in range(5):
-        tx = f'TXN-{random.randint(10000, 99999)}'
-        h = hashlib.sha256(f'{tx}{time.time()}'.encode()).hexdigest()
-        blocks.append({'hash': h, 'short_hash': h[:12] + '...', 'type': random.choice(['CROP_SALE', 'GRANT_DISBURSED', 'ESG_REPORT_VERIFIED']), 'timestamp': 'Just now' if i == 0 else f'{i * 15} mins ago'})
-    context = {'blocks': blocks}
-    return render(request, 'system_blockchain_explorer.html', context)
 
 @login_required
 def ecosystem_coordination(request):

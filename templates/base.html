@@ -101,44 +101,30 @@
     
     <!-- Phase 5 / 6 specialized consumer features -->
     <a href="{% url 'user_ai_recipe' %}">🍳 <span>AI Zero-Waste Chef</span></a>
-    <a href="{% url 'user_food_swap' %}">♻️ <span>Local Food Swap</span></a>
-    <a href="{% url 'user_fridge_locator' %}">❄️ <span>Community Fridges</span></a>
     
     <div class="drawer-category">Insights</div>
     <a href="{% url 'intelligence_center' %}">⌁ <span>Operations Intelligence</span></a>
     <a href="{% url 'predict_demand' %}">✦ <span>AI Prediction</span></a>
     <a href="{% url 'forecast_7_days' %}">◷ <span>7-Day Forecast</span></a>
     <a href="{% url 'agri_market_trends' %}">📊 <span>Market Trends (AI)</span></a>
-    <a href="{% url 'user_carbon_tracker' %}">🌱 <span>My Green Score</span></a>
 
     <div class="drawer-category">Agriculture</div>
     <a href="{% url 'agri_dashboard' %}">🌾 <span>Agriculture Dashboard</span></a>
     <a href="{% url 'agri_produce_list' %}">📦 <span>Produce Inventory</span></a>
     <a href="{% url 'agri_processing_list' %}">⚙️ <span>Produce Processing</span></a>
     <a href="{% url 'agri_iot_dashboard' %}">📡 <span>IoT Sensor Fleet</span></a>
-    <a href="{% url 'agri_greenhouse_controller' %}">💡 <span>IoT Greenhouse</span></a>
     <a href="{% url 'agri_disease_scanner' %}">🔬 <span>AI Disease Scanner</span></a>
     <a href="{% url 'agri_yield_predictor' %}">📈 <span>Yield Predictor</span></a>
     <a href="{% url 'agri_soil' %}">🧪 <span>AI Soil Nutrition</span></a>
-    <a href="{% url 'agri_csa_marketplace' %}">🥬 <span>CSA Subscriptions</span></a>
     
     <div class="drawer-category">Community & Ecosystem</div>
     <a href="{% url 'ecosystem_coordination' %}">🌐 <span>Ecosystem Coordination</span></a>
-    <a href="{% url 'system_disaster_relief' %}">🚨 <span>Disaster Relief Command</span></a>
     <a href="{% url 'volunteer_dashboard' %}">🤝 <span>Volunteer Impact</span></a>
-    <a href="{% url 'user_farm_tour' %}">🚜 <span>Virtual Farm Tour</span></a>
-    <a href="{% url 'user_agri_tourism' %}">🏡 <span>Agri-Tourism</span></a>
-    <a href="{% url 'agri_invest' %}">🌱 <span>Farm Crowdfunding</span></a>
 
     <div class="drawer-category">Administration</div>
     <a href="{% url 'agri_supply_matching' %}">🤝 <span>Supply Matching</span></a>
     <a href="{% url 'agri_supply_requests_list' %}">📥 <span>Supply Requests</span></a>
-    <a href="{% url 'agri_ledger' %}">🛡️ <span>Payments Ledger</span></a>
-    <a href="{% url 'agri_carbon_dashboard' %}">💰 <span>Carbon Credit Exchange</span></a>
-    <a href="{% url 'agri_auto_subsidy' %}">🤖 <span>Auto-Subsidy Filer</span></a>
     <a href="{% url 'agri_skyview' %}">🛰️ <span>Drone & Satellite Imagery</span></a>
-    <a href="{% url 'agri_freight' %}">🚚 <span>Freight Bidding Board</span></a>
-    <a href="{% url 'agri_comms' %}">📱 <span>SMS Alert Engine</span></a>
 
     {% if user.organization_memberships.all %}
       <div class="drawer-category">Organization</div>
@@ -146,9 +132,6 @@
       <a href="{% url 'impact_dashboard' %}">🌟 <span>Impact Dashboard</span></a>
       <a href="{% url 'leaderboard' %}">🏆 <span>Leaderboard</span></a>
       <a href="{% url 'org_fleet_routing' %}">🗺️ <span>AI Fleet Routing</span></a>
-      <a href="{% url 'org_grants' %}">💰 <span>CSR Grant Tracker</span></a>
-      <a href="{% url 'org_shift_scheduler' %}">🗓️ <span>Shift Scheduler</span></a>
-      <a href="{% url 'org_esg_report' %}">📊 <span>ESG Reporting</span></a>
     {% endif %}
   {% else %}
     <a class="drawer-cta" href="{% url 'organization_register' %}">＋ <span>Register Organization</span></a>

@@ -69,8 +69,6 @@ import json
 from ..copilot import generate_copilot_response
 import qrcode
 from django.http import HttpResponse
-from ..models import CarbonCredit
-from ..forms import CarbonCreditForm
 
 @_organization_required
 def organization_dashboard(request):
@@ -237,50 +235,3 @@ def org_fleet_routing(request):
         routes = FleetRoute.objects.filter(organization=request.organization).order_by('-created_at')
     return render(request, 'org_fleet_routing.html', {'routes': routes})
 
-@login_required
-@_organization_required
-def org_grants(request):
-    from feedly.models import GrantOpportunity
-    grants = GrantOpportunity.objects.filter(organization=request.organization)
-    if not grants.exists():
-        GrantOpportunity.objects.create(organization=request.organization, title='Tata CSR Rural Development', provider='Tata Trusts', max_amount=5000000, deadline='2026-12-31', status='DISCOVERED')
-        GrantOpportunity.objects.create(organization=request.organization, title='Govt. Food Security Grant', provider='Ministry of Agriculture', max_amount=10000000, deadline='2026-10-15', status='APPLIED')
-        grants = GrantOpportunity.objects.filter(organization=request.organization)
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        grant_id = request.POST.get('grant_id')
-        from django.shortcuts import get_object_or_404
-        grant = get_object_or_404(GrantOpportunity, id=grant_id)
-        if action == 'move_forward':
-            states = ['DISCOVERED', 'PREPARING', 'APPLIED', 'WON']
-            idx = states.index(grant.status)
-            if idx < len(states) - 1:
-                grant.status = states[idx + 1]
-                grant.save()
-        return redirect('org_grants')
-    return render(request, 'org_grants.html', {'grants': grants})
-
-@login_required
-@_organization_required
-def org_shift_scheduler(request):
-    from feedly.models import VolunteerShift, ShiftClaim
-    import datetime
-    from django.utils import timezone
-    shifts = VolunteerShift.objects.filter(organization=request.organization, date__gte=timezone.now().date()).order_by('date', 'start_time')
-    if not shifts.exists():
-        d = timezone.now().date() + datetime.timedelta(days=1)
-        s1 = VolunteerShift.objects.create(organization=request.organization, role='Warehouse Sorter', date=d, start_time='09:00:00', end_time='13:00:00', capacity=5, description='Sorting incoming ugly veggies')
-        s2 = VolunteerShift.objects.create(organization=request.organization, role='Delivery Driver', date=d, start_time='14:00:00', end_time='18:00:00', capacity=2, description='Driving the refrigerated van')
-        ShiftClaim.objects.create(shift=s1, volunteer=request.user, status='CONFIRMED')
-        shifts = VolunteerShift.objects.filter(organization=request.organization, date__gte=timezone.now().date()).order_by('date', 'start_time')
-    return render(request, 'org_shift_scheduler.html', {'shifts': shifts})
-
-@login_required
-@_organization_required
-def org_esg_report(request):
-    from feedly.models import ESGReport
-    reports = ESGReport.objects.filter(organization=request.organization).order_by('-generated_at')
-    if request.method == 'POST':
-        ESGReport.objects.create(organization=request.organization, report_month=request.POST.get('month', 'October 2026'), total_food_rescued_kg=12500.5, total_meals_provided=25000, carbon_emissions_saved_kg=8400.25)
-        return redirect('org_esg_report')
-    return render(request, 'org_esg_report.html', {'reports': reports})

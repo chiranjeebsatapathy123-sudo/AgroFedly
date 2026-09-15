@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionForm, SurplusFoodForm
-from ..models import FoodLedger, DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact
+from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact
 User = get_user_model()
 try:
     import joblib
@@ -69,8 +69,6 @@ import json
 from ..copilot import generate_copilot_response
 import qrcode
 from django.http import HttpResponse
-from ..models import CarbonCredit
-from ..forms import CarbonCreditForm
 
 @_organization_required
 def surplus_list(request):
@@ -95,7 +93,6 @@ def add_surplus_food(request):
                 food.ai_quality_notes = 'AI Vision Analysis: Visual quality is borderline. Ensure temperature is strictly maintained.'
         food.save()
         food.check_safety(user=request.user)
-        FoodLedger.objects.create(surplus_food=food, action_type='LOGGED', performed_by=request.user, details=f'Surplus food logged. Qty: {food.quantity}. Temp: {food.storage_temperature}Â°C.')
         messages.success(request, 'Surplus recorded and AI safety status calculated.')
         return redirect('surplus_list')
     return render(request, 'add_surplus.html', {'form': form})
@@ -130,9 +127,11 @@ def post_meal_logging(request):
         form = PostMealRecordForm(initial=initial)
     return render(request, 'post_meal_log.html', {'form': form})
 
+@login_required
 def food_chain_of_custody(request, food_id):
     food = get_object_or_404(SurplusFood, id=food_id)
-    ledger_entries = FoodLedger.objects.filter(surplus_food=food).order_by('timestamp')
+    from ..models import ProduceTraceabilityLedger
+    ledger_entries = ProduceTraceabilityLedger.objects.filter(surplus=food).order_by('timestamp')
     return render(request, 'food_traceability.html', {'food': food, 'ledger_entries': ledger_entries})
 
 @_organization_required

@@ -161,9 +161,9 @@ class AgriculturalProduceForm(forms.ModelForm):
     class Meta:
         model = AgriculturalProduce
         fields = [
-            "name", "category", "crop_type", "quantity", "unit",
+            "farm", "batch_number", "name", "category", "crop_type", "quantity", "unit",
             "available_quantity", "harvest_date", "location", "expected_shelf_life_days",
-            "storage_condition", "quality_status"
+            "storage_condition", "quality_status", "processing_status"
         ]
         widgets = {
             "harvest_date": forms.DateInput(attrs={"type": "date"}),
@@ -237,13 +237,4 @@ class VolunteerProfileForm(forms.ModelForm):
             "vehicle_number": forms.TextInput(attrs={"placeholder": "Vehicle registration number"}),
         }
 
-from .models import CarbonCredit
 
-class CarbonCreditForm(forms.ModelForm):
-    class Meta:
-        model = CarbonCredit
-        fields = ["practice_type", "acres_applied"]
-        widgets = {
-            "practice_type": forms.TextInput(attrs={"placeholder": "e.g. Cover Crops, No-Till Farming"}),
-            "acres_applied": forms.NumberInput(attrs={"step": "0.1", "placeholder": "100.5"}),
-        }

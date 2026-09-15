@@ -7,7 +7,7 @@
         <div>
             <div class="eyebrow">{% trans "INVENTORY" %}</div>
             <h1>{% trans "Agricultural Produce" %}</h1>
-            <p>{% trans "Track raw agricultural harvest, shelf life, and estimated post-harvest loss risks." %}</p>
+            <p>{% trans "Track raw agricultural harvest, shelf life, and processing status." %}</p>
         </div>
         <a href="{% url 'agri_produce_add' %}" class="btn primary">{% trans "＋ Add Produce" %}</a>
     </div>
@@ -17,32 +17,26 @@
     {% if produce_list %}
         <table style="width:100%; text-align:left;">
             <tr>
-                <th style="padding-bottom:10px;">{% trans "Produce Name" %}</th>
-                <th style="padding-bottom:10px;">{% trans "Supplier" %}</th>
-                <th style="padding-bottom:10px;">{% trans "Category" %}</th>
-                <th style="padding-bottom:10px;">{% trans "Location" %}</th>
-                <th style="padding-bottom:10px;">{% trans "Available" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Farm" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Produce" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Batch No." %}</th>
+                <th style="padding-bottom:10px;">{% trans "Available Quantity" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Quality / Processing" %}</th>
                 <th style="padding-bottom:10px;">{% trans "Harvest Date" %}</th>
-                <th style="padding-bottom:10px;">{% trans "Loss Risk" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Location" %}</th>
             </tr>
-            {% for p in produce_list %}
+            {% for item in produce_list %}
             <tr>
-                <td style="padding:12px 0; border-top:1px solid #eee;"><strong>{{ p.name }}</strong><br><small>{{ p.crop_type }}</small></td>
-                <td style="padding:12px 0; border-top:1px solid #eee;">{{ p.supplier.name }}</td>
-                <td style="padding:12px 0; border-top:1px solid #eee;">{{ p.category }}</td>
-                <td style="padding:12px 0; border-top:1px solid #eee;">{{ p.location|default:"-" }}</td>
-                <td style="padding:12px 0; border-top:1px solid #eee;"><strong>{{ p.available_quantity }} {{ p.unit }}</strong></td>
-                <td style="padding:12px 0; border-top:1px solid #eee;">{{ p.harvest_date|date:"d M Y" }}<br><small>Shelf life: {{ p.expected_shelf_life_days }} days</small></td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ item.farm.name|default:"-" }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;"><strong>{{ item.name }}</strong><br><small>{{ item.crop_type }}</small></td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ item.batch_number|default:"-" }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;"><strong>{{ item.available_quantity }} {{ item.unit }}</strong></td>
                 <td style="padding:12px 0; border-top:1px solid #eee;">
-                    {% if p.risk_level == 'High' %}
-                    <span style="color:red; font-weight:bold;">{% trans "High Risk" %}</span>
-                    <br><small>{% trans "Process or supply soon!" %}</small>
-                    {% elif p.risk_level == 'Medium' %}
-                    <span style="color:orange; font-weight:bold;">{% trans "Medium Risk" %}</span>
-                    {% else %}
-                    <span style="color:green; font-weight:bold;">{% trans "Low Risk" %}</span>
-                    {% endif %}
+                    <span class="status-badge {{ item.quality_status|lower }}">{{ item.quality_status }}</span>
+                    <br><small>{{ item.processing_status }}</small>
                 </td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ item.harvest_date }}</td>
+                <td style="padding:12px 0; border-top:1px solid #eee;">{{ item.location }}</td>
             </tr>
             {% endfor %}
         </table>

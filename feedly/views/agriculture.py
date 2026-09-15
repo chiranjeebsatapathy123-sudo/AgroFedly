@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionForm, SurplusFoodForm
-from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact
+from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact, StorageRecord
 User = get_user_model()
 try:
     import joblib
@@ -69,19 +69,39 @@ import json
 from ..copilot import generate_copilot_response
 import qrcode
 from django.http import HttpResponse
-from ..models import CarbonCredit
-from ..forms import CarbonCreditForm
 
 @login_required
 def agri_dashboard(request):
-    produce = AgriculturalProduce.objects.all()
-    processing = ProcessingRecord.objects.all()
+    org_member = request.user.organization_memberships.first()
+    org = org_member.organization if org_member else None
+    
+    if not org:
+        messages.error(request, 'You must belong to an organization to view the Agriculture Command Center.')
+        return redirect('home')
+        
+    farms = FarmField.objects.filter(organization=org)
+    produce = AgriculturalProduce.objects.filter(farm__organization=org)
+    processing = ProcessingRecord.objects.filter(input_produce__farm__organization=org)
+    storage = StorageRecord.objects.filter(organization=org)
+    
+    total_farms = farms.count()
     total_produce = produce.aggregate(total=Sum('available_quantity'))['total'] or 0
-    total_processed = processing.aggregate(total=Sum('input_quantity'))['total'] or 0
-    loss_avoided = total_processed
-    generate_weather_advisory('Bhubaneswar')
+    total_processed = processing.aggregate(total=Sum('output_quantity'))['total'] or 0
+    total_stored = storage.aggregate(total=Sum('quantity'))['total'] or 0
+    
     active_advisories = WeatherAdvisory.objects.filter(expires_at__gt=timezone.now()).order_by('-issued_at')
-    context = {'total_suppliers': Organization.objects.filter(organization_type='SUPPLIER').count(), 'total_produce': total_produce, 'total_processed': total_processed, 'loss_avoided': loss_avoided, 'recent_produce': produce.order_by('-created_at')[:5], 'recent_processing': processing.order_by('-processing_date')[:5], 'advisories': active_advisories}
+    
+    context = {
+        'total_farms': total_farms,
+        'total_produce': total_produce,
+        'total_processed': total_processed,
+        'total_stored': total_stored,
+        'recent_produce': produce.order_by('-created_at')[:5],
+        'recent_processing': processing.order_by('-processing_date')[:5],
+        'recent_storage': storage.order_by('-entry_time')[:5],
+        'advisories': active_advisories,
+        'organization': org
+    }
     return render(request, 'agri_dashboard.html', context)
 
 @login_required
@@ -91,20 +111,24 @@ def agri_produce_list(request):
 
 @login_required
 def agri_produce_add(request):
+    org_member = request.user.organization_memberships.first()
     if request.method == 'POST':
         form = AgriculturalProduceForm(request.POST)
+        if org_member:
+            form.fields['farm'].queryset = form.fields['farm'].queryset.filter(organization=org_member.organization)
         if form.is_valid():
-            org = request.user.organization_memberships.first()
-            if not org:
+            if not org_member:
                 messages.error(request, 'You must belong to an organization to add produce.')
                 return redirect('agri_produce_list')
             produce = form.save(commit=False)
-            produce.supplier = org.organization
+            produce.supplier = org_member.organization
             produce.save()
             messages.success(request, 'Produce added successfully.')
             return redirect('agri_produce_list')
     else:
         form = AgriculturalProduceForm()
+        if org_member:
+            form.fields['farm'].queryset = form.fields['farm'].queryset.filter(organization=org_member.organization)
     return render(request, 'agri_produce_form.html', {'form': form})
 
 @login_required
@@ -508,34 +532,7 @@ def agri_ai_advisor(request):
         predictions = MarketPricePrediction.objects.all().order_by('-updated_at')
     return render(request, 'agri_ai_advisor.html', {'predictions': predictions})
 
-@login_required
-def agri_finance_portal(request):
-    from feedly.models import MicroLoan, CropInsurance
-    loans = MicroLoan.objects.filter(farmer=request.user)
-    policies = CropInsurance.objects.filter(farmer=request.user)
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        if action == 'apply_loan':
-            MicroLoan.objects.create(farmer=request.user, amount=request.POST.get('amount'), purpose=request.POST.get('purpose'), interest_rate=4.5)
-            messages.success(request, 'Loan application submitted!')
-        elif action == 'buy_insurance':
-            CropInsurance.objects.create(farmer=request.user, crop_name=request.POST.get('crop_name'), acres=request.POST.get('acres'), premium_paid=500, payout_amount=10000, trigger_condition='Drought')
-            messages.success(request, 'Insurance active!')
-        return redirect('agri_finance_portal')
-    return render(request, 'agri_finance_portal.html', {'loans': loans, 'policies': policies})
 
-@login_required
-def agri_csa_marketplace(request):
-    from feedly.models import CSABox, CSASubscription
-    boxes = CSABox.objects.filter(is_active=True)
-    subs = CSASubscription.objects.filter(consumer=request.user)
-    if request.method == 'POST':
-        if request.POST.get('action') == 'subscribe':
-            box = get_object_or_404(CSABox, id=request.POST.get('box_id'))
-            CSASubscription.objects.create(consumer=request.user, box=box)
-            messages.success(request, f'Subscribed to {box.name}!')
-        return redirect('agri_csa_marketplace')
-    return render(request, 'agri_csa_marketplace.html', {'boxes': boxes, 'my_subscriptions': subs})
 
 @login_required
 def agri_warehousing(request):
@@ -567,40 +564,7 @@ def agri_skyview(request):
         images = DroneImagery.objects.filter(farmer=request.user).order_by('-scan_date')
     return render(request, 'agri_skyview.html', {'images': images})
 
-@login_required
-def agri_invest(request):
-    from feedly.models import InfrastructureProject, Investment
-    projects = InfrastructureProject.objects.all()
-    investments = Investment.objects.filter(investor=request.user)
-    if not projects.exists():
-        InfrastructureProject.objects.create(farmer=request.user, title='Solar Water Pump', description='5kW Solar pump for 10 acres', goal_amount=500000, current_amount=150000, roi_percentage=12.5)
-        projects = InfrastructureProject.objects.all()
-    if request.method == 'POST':
-        project = get_object_or_404(InfrastructureProject, id=request.POST.get('project_id'))
-        amount = request.POST.get('amount')
-        Investment.objects.create(investor=request.user, project=project, amount=amount)
-        project.current_amount += float(amount)
-        project.save()
-        messages.success(request, f'Invested Rs {amount} successfully!')
-        return redirect('agri_invest')
-    return render(request, 'agri_invest.html', {'projects': projects, 'investments': investments})
 
-@login_required
-def agri_freight(request):
-    from feedly.models import FreightListing, FreightBid
-    listings = FreightListing.objects.filter(status='OPEN')
-    my_bids = FreightBid.objects.filter(transporter=request.user)
-    if not listings.exists():
-        FreightListing.objects.create(farmer=request.user, cargo_description='Wheat (500 Tons)', weight_tons=500, pickup_location='Pune', drop_location='Mumbai')
-        listings = FreightListing.objects.filter(status='OPEN')
-    if request.method == 'POST':
-        listing = get_object_or_404(FreightListing, id=request.POST.get('listing_id'))
-        amount = request.POST.get('bid_amount')
-        days = request.POST.get('estimated_days')
-        FreightBid.objects.create(transporter=request.user, listing=listing, bid_amount=amount, estimated_days=days)
-        messages.success(request, 'Bid submitted!')
-        return redirect('agri_freight')
-    return render(request, 'agri_freight.html', {'listings': listings, 'my_bids': my_bids})
 
 @login_required
 def agri_soil(request):

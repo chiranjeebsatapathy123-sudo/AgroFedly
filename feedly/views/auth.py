@@ -69,8 +69,6 @@ import json
 from ..copilot import generate_copilot_response
 import qrcode
 from django.http import HttpResponse
-from ..models import CarbonCredit
-from ..forms import CarbonCreditForm
 
 def login_view(request, persona=None):
     if request.user.is_authenticated:

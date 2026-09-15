@@ -1,115 +1,110 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Agriculture Dashboard{% endblock %}
+{% block title %}Agriculture Command Center{% endblock %}
 {% block content %}
 {% include 'demo_banner.html' %}
 <section class="page-head">
     <div>
-        <div class="eyebrow">{% trans "AGRICULTURE MODULE" %}</div>
-        <h1>{% trans "Agriculture Dashboard" %}</h1>
-        <p>{% trans "From Farm to Plate: Track produce, processing yields, and manage agricultural supply chain." %}</p>
+        <div class="eyebrow">{% trans "PHASE 10" %}</div>
+        <h1>{% trans "Agriculture Command Center" %}</h1>
+        <p>{% trans "Organization-wide overview of Farms, Produce, Storage, and Processing." %}</p>
     </div>
 </section>
 
 <div class="result-cards" style="margin-bottom:20px;">
     <div>
-        <span>{% trans "Total Registered Suppliers" %}</span>
-        <b>{{ total_suppliers }}</b>
+        <span>{% trans "Total Active Farms" %}</span>
+        <b>{{ total_farms }}</b>
     </div>
     <div>
-        <span>{% trans "Total Produce Available" %}</span>
+        <span>{% trans "Produce Inventory" %}</span>
         <b>{{ total_produce }} kg</b>
     </div>
     <div>
-        <span>{% trans "Total Produce Processed" %}</span>
+        <span>{% trans "Processed Output" %}</span>
         <b>{{ total_processed }} kg</b>
     </div>
     <div>
-        <span>{% trans "Estimated Loss Avoided" %}</span>
-        <b style="color:var(--success);">{{ loss_avoided }} kg</b>
+        <span>{% trans "Total in Storage" %}</span>
+        <b style="color:var(--info);">{{ total_stored }} kg</b>
     </div>
 </div>
 
 <div style="display:flex; gap:20px; flex-wrap:wrap;">
-    <!-- Recent Produce Inventory -->
+    <!-- Produce Inventory -->
     <div class="form-card" style="flex:1; min-width:300px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "Recent Harvest & Inventory" %}</h2>
-        {% if recent_produce %}
-            <table style="width:100%; text-align:left;">
-                <tr><th style="padding-bottom:10px;">{% trans "Produce" %}</th><th style="padding-bottom:10px;">{% trans "Available" %}</th><th style="padding-bottom:10px;">{% trans "Risk Level" %}</th></tr>
-                {% for p in recent_produce %}
-                <tr>
-                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ p.name }}</td>
-                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ p.available_quantity }} {{ p.unit }}</td>
-                    <td style="padding:8px 0; border-top:1px solid #eee;">
-                        {% if p.risk_level == 'High' %}
-                        <span style="color:red; font-weight:bold;">{% trans "High" %}</span>
-                        {% elif p.risk_level == 'Medium' %}
-                        <span style="color:orange; font-weight:bold;">{% trans "Medium" %}</span>
-                        {% else %}
-                        <span style="color:green; font-weight:bold;">{% trans "Low" %}</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-        {% else %}
-            <p>{% trans "No agricultural produce recorded yet." %}</p>
-        {% endif %}
-        <a href="{% url 'agri_produce_list' %}" class="btn full" style="margin-top:15px; text-align:center;">{% trans "View Full Inventory" %}</a>
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">🌾 {% trans "Recent Harvests" %}</h2>
+        <table style="width:100%; text-align:left;">
+            <tr><th style="padding-bottom:10px;">{% trans "Produce (Batch)" %}</th><th style="padding-bottom:10px;">{% trans "Available" %}</th></tr>
+            {% for p in recent_produce %}
+            <tr>
+                <td style="padding:8px 0; border-top:1px solid #eee;">{{ p.name }} <br><small class="text-muted">{{ p.batch_number|default:"No Batch" }}</small></td>
+                <td style="padding:8px 0; border-top:1px solid #eee;">{{ p.available_quantity }} {{ p.unit }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" style="padding:15px; text-align:center; color:var(--text-light);">
+                    {% trans "Awaiting operational data for produce." %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <a href="{% url 'agri_produce_add' %}" class="btn full" style="margin-top:15px; text-align:center;">{% trans "+ Add Produce" %}</a>
     </div>
     
-    <!-- Recent Processing -->
+    <!-- Processing -->
     <div class="form-card" style="flex:1; min-width:300px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "Recent Processing Activities" %}</h2>
-        {% if recent_processing %}
-            <table style="width:100%; text-align:left;">
-                <tr>
-                    <th style="padding-bottom:10px;">{% trans "Input" %}</th>
-                    <th style="padding-bottom:10px;">{% trans "Output" %}</th>
-                    <th style="padding-bottom:10px;">{% trans "Yield" %}</th>
-                </tr>
-                {% for r in recent_processing %}
-                <tr>
-                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ r.input_quantity }} {{ r.input_produce.unit }} {{ r.input_produce.name }}</td>
-                    <td style="padding:8px 0; border-top:1px solid #eee;">{{ r.output_quantity }} {{ r.input_produce.unit }} {{ r.output_product }}</td>
-                    <td style="padding:8px 0; border-top:1px solid #eee; color:var(--success);">{{ r.processing_yield_percent }}%</td>
-                </tr>
-                {% endfor %}
-            </table>
-        {% else %}
-            <p>{% trans "No processing records yet." %}</p>
-        {% endif %}
-        <a href="{% url 'agri_processing_list' %}" class="btn full" style="margin-top:15px; text-align:center;">{% trans "View Processing Log" %}</a>
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">🏭 {% trans "Processing Plant" %}</h2>
+        <table style="width:100%; text-align:left;">
+            <tr>
+                <th style="padding-bottom:10px;">{% trans "Input" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Output" %}</th>
+            </tr>
+            {% for r in recent_processing %}
+            <tr>
+                <td style="padding:8px 0; border-top:1px solid #eee;">{{ r.input_quantity }} {{ r.input_produce.unit }} {{ r.input_produce.name }}</td>
+                <td style="padding:8px 0; border-top:1px solid #eee; color:var(--success);">{{ r.output_quantity }} {{ r.input_produce.unit }} {{ r.output_product }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" style="padding:15px; text-align:center; color:var(--text-light);">
+                    {% trans "Awaiting operational data for processing." %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <a href="{% url 'agri_processing_add' %}" class="btn full" style="margin-top:15px; text-align:center;">{% trans "+ Record Processing" %}</a>
     </div>
-    
-    <!-- Quality & Logistics -->
-    <div class="form-card" style="flex:1; min-width:300px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">{% trans "Quality & Logistics" %}</h2>
-        <p style="margin-bottom:15px; color:var(--text-light);">{% trans "Track quality inspections and cold-chain shipments." %}</p>
-        
-        <div style="display:flex; flex-direction:column; gap:10px;">
-            <a href="{% url 'agri_inspection_add' %}" class="btn" style="text-align:center;">{% trans "Record QC Inspection" %}</a>
-            <a href="{% url 'agri_shipment_list' %}" class="btn" style="text-align:center;">{% trans "Shipment Tracking" %}</a>
-        </div>
-    </div>
-</div>
 
-<!-- Charts Section -->
-<div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:20px;">
-    <div class="form-card" style="flex:2; min-width:500px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">📈 {% trans "6-Month Harvest & Yield Trends" %}</h2>
-        <canvas id="trendsChart" height="100"></canvas>
-    </div>
-    
+    <!-- Storage -->
     <div class="form-card" style="flex:1; min-width:300px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">🍩 {% trans "Crop Distribution" %}</h2>
-        <canvas id="distributionChart" height="200"></canvas>
-    </div>
-    
-    <div class="form-card" style="flex:1; min-width:300px;">
-        <h2 style="font-size:1.2rem; margin-bottom:10px;">📊 {% trans "Inventory Risk Assessment" %}</h2>
-        <canvas id="riskChart" height="200"></canvas>
+        <h2 style="font-size:1.2rem; margin-bottom:10px;">❄️ {% trans "Storage & Cold Chain" %}</h2>
+        <table style="width:100%; text-align:left;">
+            <tr>
+                <th style="padding-bottom:10px;">{% trans "Batch Location" %}</th>
+                <th style="padding-bottom:10px;">{% trans "Status" %}</th>
+            </tr>
+            {% for s in recent_storage %}
+            <tr>
+                <td style="padding:8px 0; border-top:1px solid #eee;">{{ s.location }}<br><small class="text-muted">{{ s.batch_number }} | {{ s.quantity }} {{ s.unit }}</small></td>
+                <td style="padding:8px 0; border-top:1px solid #eee;">
+                    {% if s.status == 'SAFE' %}
+                    <span style="color:var(--success); font-weight:bold;">{{ s.status }}</span>
+                    {% elif s.status == 'MONITOR' %}
+                    <span style="color:var(--warning); font-weight:bold;">{{ s.status }}</span>
+                    {% else %}
+                    <span style="color:var(--danger); font-weight:bold;">{{ s.status }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" style="padding:15px; text-align:center; color:var(--text-light);">
+                    {% trans "Awaiting operational data for storage facilities." %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
     </div>
 </div>
 
@@ -131,100 +126,4 @@
 </div>
 {% endif %}
 
-<!-- Inject JSON data -->
-{{ chart_trends_data|json_script:"trends-data" }}
-{{ chart_distribution_data|json_script:"dist-data" }}
-{{ chart_risk_data|json_script:"risk-data" }}
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Parse data
-        const trends = JSON.parse(document.getElementById('trends-data').textContent);
-        const dist = JSON.parse(document.getElementById('dist-data').textContent);
-        const risk = JSON.parse(document.getElementById('risk-data').textContent);
-        
-        // Setup shared options
-        Chart.defaults.font.family = "'Inter', sans-serif";
-        Chart.defaults.color = "#64748b";
-
-        // 1. Trends Line Chart
-        new Chart(document.getElementById('trendsChart'), {
-            type: 'line',
-            data: {
-                labels: trends.labels,
-                datasets: [
-                    {
-                        label: 'Harvested (kg)',
-                        data: trends.harvest,
-                        borderColor: '#22c55e',
-                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true
-                    },
-                    {
-                        label: 'Processed Output (kg)',
-                        data: trends.processed,
-                        borderColor: 'var(--color-info)',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        tension: 0.4,
-                        fill: true
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { position: 'top' } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
-
-        // 2. Crop Distribution Doughnut
-        new Chart(document.getElementById('distributionChart'), {
-            type: 'doughnut',
-            data: {
-                labels: dist.labels,
-                datasets: [{
-                    data: dist.data,
-                    backgroundColor: ['var(--color-warning)', 'var(--color-danger)', '#eab308', '#8b5cf6', 'var(--color-text-secondary)'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                cutout: '70%',
-                plugins: { legend: { position: 'bottom' } }
-            }
-        });
-
-        // 3. Risk Assessment Bar
-        new Chart(document.getElementById('riskChart'), {
-            type: 'bar',
-            data: {
-                labels: risk.labels,
-                datasets: [{
-                    label: '% of Inventory',
-                    data: risk.data,
-                    backgroundColor: ['#22c55e', 'var(--color-warning)', 'var(--color-danger)'],
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, max: 100, grid: { display: false } },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
-    });
-</script>
 {% endblock %}

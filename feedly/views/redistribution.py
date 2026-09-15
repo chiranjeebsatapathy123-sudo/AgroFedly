@@ -69,8 +69,6 @@ import json
 from ..copilot import generate_copilot_response
 import qrcode
 from django.http import HttpResponse
-from ..models import CarbonCredit
-from ..forms import CarbonCreditForm
 
 @_organization_required
 def redistribute_food(request, food_id):
@@ -95,7 +93,33 @@ def redistribute_food(request, food_id):
                     if food.quantity == 0:
                         food.status = 'REDISTRIBUTED'
                     food.save()
-                    messages.success(request, 'Surplus redistributed.')
+                    
+                    # Create Traceability Ledger entry
+                    from ..models import ProduceTraceabilityLedger
+                    import uuid
+                    ProduceTraceabilityLedger.objects.create(
+                        transaction_id=str(uuid.uuid4()),
+                        transaction_type='ALLOCATED',
+                        surplus=food,
+                        quantity=item.quantity,
+                        actor=request.user,
+                        organization=food.organization,
+                        details=f"Allocated {item.quantity} to {item.recipient.name}"
+                    )
+                    
+                    # Create Delivery record
+                    Delivery.objects.create(
+                        surplus=food,
+                        sender=food.organization,
+                        receiver=food.organization, # Self-managed delivery
+                        status='REQUESTED',
+                        food_name=food.food_name,
+                        quantity=item.quantity,
+                        pickup_address=food.organization.address if food.organization else "",
+                        delivery_address="Recipient: " + item.recipient.name
+                    )
+                    
+                    messages.success(request, 'Surplus redistributed and delivery requested.')
                     return redirect('surplus_list')
             return render(request, 'redistribute.html', {'form': form, 'food': food, 'verified_recipient_count': Recipient.objects.filter(verified=True, capacity__gt=0).count()})
     else:

@@ -1,5 +1,5 @@
 from django.conf import settings
-from ..models import FoodLedger
+from ..models import ProduceTraceabilityLedger
 
 # Configurable safety thresholds
 # These could potentially be loaded from DB settings in the future.
@@ -45,12 +45,15 @@ def evaluate_food_safety(food_instance, user=None):
     food_instance.save(update_fields=["is_safe", "status", "safety_alert"])
     
     # Create audit trail
-    FoodLedger.objects.create(
-        surplus_food=food_instance,
-        action_type='QUALITY_CHECK' if is_safe else 'SPOILED',
+    import uuid
+    ProduceTraceabilityLedger.objects.create(
+        transaction_id=str(uuid.uuid4()),
+        transaction_type='QUALITY_CHECK' if is_safe else 'SPOILED',
+        surplus=food_instance,
         quantity=food_instance.quantity,
-        performed_by=user,
-        notes=f"Safety evaluation run. Status: {status}. {alert}"
+        actor=user,
+        organization=food_instance.organization,
+        details=f"Safety evaluation run. Status: {status}. {alert}"
     )
     
     return is_safe, status, alert

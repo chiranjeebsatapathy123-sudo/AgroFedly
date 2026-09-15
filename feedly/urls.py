@@ -34,7 +34,6 @@ urlpatterns = [
     path("agriculture/shipments/", views.agri_shipment_list, name="agri_shipment_list"),
     path("agriculture/shipments/<int:shipment_id>/", views.agri_shipment_detail, name="agri_shipment_detail"),
     path("agriculture/inspection/add/", views.agri_inspection_add, name="agri_inspection_add"),
-    path("agriculture/ledger/", views.agri_ledger, name="agri_ledger"),
     path("agriculture/scanner/", views.agri_disease_scanner, name="agri_disease_scanner"),
     path("agriculture/yield/", views.agri_yield_predictor, name="agri_yield_predictor"),
     path("agriculture/iot/", views.agri_iot_dashboard, name="agri_iot_dashboard"),
@@ -42,15 +41,9 @@ urlpatterns = [
     path("agriculture/equipment/", views.agri_equipment_hub, name="agri_equipment_hub"),
     path("agriculture/equipment/add/", views.agri_equipment_add, name="agri_equipment_add"),
     path("agriculture/equipment/<int:equipment_id>/rent/", views.agri_rent_equipment, name="agri_rent_equipment"),
-    path("agriculture/forum/", views.agri_forum, name="agri_forum"),
-    path("agriculture/forum/<int:post_id>/", views.agri_forum_detail, name="agri_forum_detail"),
     path("agriculture/advisor/", views.agri_ai_advisor, name="agri_ai_advisor"),
-    path("agriculture/finance/", views.agri_finance_portal, name="agri_finance_portal"),
-    path("agriculture/csa/", views.agri_csa_marketplace, name="agri_csa_marketplace"),
     path("agriculture/warehousing/", views.agri_warehousing, name="agri_warehousing"),
     path("agriculture/subsidies/", views.agri_subsidy_finder, name="agri_subsidy_finder"),
-    path("agriculture/carbon/", views.agri_carbon_dashboard, name="agri_carbon_dashboard"),
-    path("agriculture/carbon/log/", views.agri_carbon_log, name="agri_carbon_log"),
     path("api/iot/live/", views.api_iot_live_stream, name="api_iot_live_stream"),
     path("trace/<str:tracking_code>/", views.agri_traceability, name="agri_traceability"),
     path("trace/<str:tracking_code>/release/", views.agri_release_escrow, name="agri_release_escrow"),
@@ -98,29 +91,16 @@ urlpatterns = [
     # PHASE 3 ROUTES
     # PHASE 3 ROUTES
     path("agriculture/skyview/", views.agri_skyview, name="agri_skyview"),
-    path("agriculture/invest/", views.agri_invest, name="agri_invest"),
-    path("agriculture/freight/", views.agri_freight, name="agri_freight"),
     path("agriculture/soil/", views.agri_soil, name="agri_soil"),
     path("agriculture/comms/", views.agri_comms, name="agri_comms"),
 
     # PHASE 4 ROUTES (ORGANIZATION)
     path("organization/routing/", views.org_fleet_routing, name="org_fleet_routing"),
-    path("organization/grants/", views.org_grants, name="org_grants"),
-    path("organization/shifts/", views.org_shift_scheduler, name="org_shift_scheduler"),
-    path("organization/esg/", views.org_esg_report, name="org_esg_report"),
+
 
     # PHASE 5 ROUTES (CONSUMER & COMMUNITY)
     path("user/recipe/", views.user_ai_recipe, name="user_ai_recipe"),
-    path("user/swap/", views.user_food_swap, name="user_food_swap"),
-    path("user/carbon/", views.user_carbon_tracker, name="user_carbon_tracker"),
-    path("user/fridges/", views.user_fridge_locator, name="user_fridge_locator"),
-    path("user/farm-tour/", views.user_farm_tour, name="user_farm_tour"),
     # PHASE 6 ROUTES (GLOBAL & FUTURE-TECH)
-    path("system/disaster/", views.system_disaster_relief, name="system_disaster_relief"),
-    path("agriculture/greenhouse/", views.agri_greenhouse_controller, name="agri_greenhouse_controller"),
-    path("user/agritourism/", views.user_agri_tourism, name="user_agri_tourism"),
-    path("system/blockchain/", views.system_blockchain_explorer, name="system_blockchain_explorer"),
-    path("agriculture/subsidy/", views.agri_auto_subsidy, name="agri_auto_subsidy"),
 
     # Phase 11: Ecosystem Coordination
     path('org/ecosystem/', views.ecosystem_coordination, name='ecosystem_coordination'),
