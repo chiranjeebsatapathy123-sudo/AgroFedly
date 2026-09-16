@@ -197,7 +197,7 @@ export class VoiceAssistant {
             this.requireConfirmation(
                 "This is a sensitive action. Would you like me to proceed?", 
                 "Action completed.", 
-                () => { console.log('Action performed safely'); }
+                () => { /* Action performed safely */ }
             );
             return;
         }

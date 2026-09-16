@@ -17,18 +17,7 @@
 <link rel="stylesheet" href="{% static 'css/motion.css' %}">
 <link rel="stylesheet" href="{% static 'css/copilot.css' %}">
 <link rel="stylesheet" href="{% static 'css/premium.css' %}">
-<style>
-  #drawer { 
-      overflow-y: scroll !important; 
-      max-height: 100vh !important;
-      scrollbar-width: thin; 
-      scrollbar-color: rgba(255,255,255,0.4) rgba(0,0,0,0.1); 
-  }
-  #drawer::-webkit-scrollbar { width: 8px !important; display: block !important; }
-  #drawer::-webkit-scrollbar-track { background: rgba(0,0,0,0.1) !important; }
-  #drawer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4) !important; border-radius: 10px !important; }
-  #drawer::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.6) !important; }
-</style>
+
 <script type="importmap">
   {
     "imports": {
@@ -67,48 +56,48 @@
       </a>
 
   {% if user.is_authenticated %}
-  <nav class="top-nav" style="display:flex; align-items:center; gap:20px; flex:1; justify-content:center;">
+  <nav class="top-nav">
     <div class="nav-item">
-      <a href="{% url 'dashboard' %}" style="text-decoration:none; color:var(--text); font-weight:500; font-size:0.95rem;">Operations</a>
+      <a href="{% url 'dashboard' %}" class="nav-link">Operations</a>
       <div class="nav-dropdown">
-        <a href="{% url 'surplus_list' %}">▣ Surplus Food</a>
-        <a href="{% url 'delivery_list' %}">📦 Deliveries</a>
-        <a href="{% url 'recipient_list' %}">◎ Recipients</a>
-        <a href="{% url 'intelligence_center' %}">⌁ Intelligence</a>
-        <a href="{% url 'predict_demand' %}">✦ AI Prediction</a>
-        <a href="{% url 'forecast_7_days' %}">◷ 7-Day Forecast</a>
-        <a href="{% url 'agri_market_trends' %}">📊 Market Trends</a>
+        <a href="{% url 'surplus_list' %}"><i class="fas fa-box"></i> Surplus Food</a>
+        <a href="{% url 'delivery_list' %}"><i class="fas fa-truck"></i> Deliveries</a>
+        <a href="{% url 'recipient_list' %}"><i class="fas fa-users"></i> Recipients</a>
+        <a href="{% url 'intelligence_center' %}"><i class="fas fa-brain"></i> Intelligence</a>
+        <a href="{% url 'predict_demand' %}"><i class="fas fa-chart-line"></i> AI Prediction</a>
+        <a href="{% url 'forecast_7_days' %}"><i class="fas fa-calendar-alt"></i> 7-Day Forecast</a>
+        <a href="{% url 'agri_market_trends' %}"><i class="fas fa-chart-bar"></i> Market Trends</a>
       </div>
     </div>
     <div class="nav-item">
-      <a href="{% url 'agri_dashboard' %}" style="text-decoration:none; color:var(--text); font-weight:500; font-size:0.95rem;">Agriculture</a>
+      <a href="{% url 'agri_dashboard' %}" class="nav-link">Agriculture</a>
       <div class="nav-dropdown">
-        <a href="{% url 'agri_produce_list' %}">📦 Produce Inventory</a>
-        <a href="{% url 'agri_processing_list' %}">⚙️ Produce Processing</a>
-        <a href="{% url 'agri_iot_dashboard' %}">📡 IoT Sensor</a>
-        <a href="{% url 'agri_disease_scanner' %}">🔬 AI Disease</a>
-        <a href="{% url 'agri_yield_predictor' %}">📈 Yield Predict</a>
-        <a href="{% url 'agri_soil' %}">🧪 Soil</a>
+        <a href="{% url 'agri_produce_list' %}"><i class="fas fa-seedling"></i> Produce Inventory</a>
+        <a href="{% url 'agri_processing_list' %}"><i class="fas fa-cogs"></i> Produce Processing</a>
+        <a href="{% url 'agri_iot_dashboard' %}"><i class="fas fa-satellite-dish"></i> IoT Sensor</a>
+        <a href="{% url 'agri_disease_scanner' %}"><i class="fas fa-microscope"></i> AI Disease</a>
+        <a href="{% url 'agri_yield_predictor' %}"><i class="fas fa-chart-pie"></i> Yield Predict</a>
+        <a href="{% url 'agri_soil' %}"><i class="fas fa-flask"></i> Soil</a>
       </div>
     </div>
     <div class="nav-item">
-      <a href="{% url 'ecosystem_coordination' %}" style="text-decoration:none; color:var(--text); font-weight:500; font-size:0.95rem;">Ecosystem</a>
+      <a href="{% url 'ecosystem_coordination' %}" class="nav-link">Ecosystem</a>
       <div class="nav-dropdown">
-        <a href="{% url 'ecosystem_coordination' %}">🌐 Network</a>
-        <a href="{% url 'volunteer_dashboard' %}">🤝 Volunteer</a>
-        <a href="{% url 'agri_supply_matching' %}">🤝 Supply Matching</a>
-        <a href="{% url 'agri_supply_requests_list' %}">📥 Requests</a>
-        <a href="{% url 'agri_skyview' %}">🛰️ Skyview</a>
+        <a href="{% url 'ecosystem_coordination' %}"><i class="fas fa-network-wired"></i> Network</a>
+        <a href="{% url 'volunteer_dashboard' %}"><i class="fas fa-hands-helping"></i> Volunteer</a>
+        <a href="{% url 'agri_supply_matching' %}"><i class="fas fa-handshake"></i> Supply Matching</a>
+        <a href="{% url 'agri_supply_requests_list' %}"><i class="fas fa-inbox"></i> Requests</a>
+        <a href="{% url 'agri_skyview' %}"><i class="fas fa-satellite"></i> Skyview</a>
       </div>
     </div>
     {% if user.organization_memberships.all %}
     <div class="nav-item">
-      <a href="{% url 'organization_dashboard' %}" style="text-decoration:none; color:var(--text); font-weight:500; font-size:0.95rem;">Organization</a>
+      <a href="{% url 'organization_dashboard' %}" class="nav-link">Organization</a>
       <div class="nav-dropdown">
-        <a href="{% url 'organization_dashboard' %}">▤ Dashboard</a>
-        <a href="{% url 'impact_dashboard' %}">🌟 Impact</a>
-        <a href="{% url 'leaderboard' %}">🏆 Leaderboard</a>
-        <a href="{% url 'org_fleet_routing' %}">🗺️ Fleet Routing</a>
+        <a href="{% url 'organization_dashboard' %}"><i class="fas fa-columns"></i> Dashboard</a>
+        <a href="{% url 'impact_dashboard' %}"><i class="fas fa-star"></i> Impact</a>
+        <a href="{% url 'leaderboard' %}"><i class="fas fa-trophy"></i> Leaderboard</a>
+        <a href="{% url 'org_fleet_routing' %}"><i class="fas fa-route"></i> Fleet Routing</a>
       </div>
     </div>
     {% endif %}

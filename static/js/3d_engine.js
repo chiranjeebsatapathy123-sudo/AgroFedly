@@ -164,7 +164,7 @@ export class AgroFedly3D {
             if (this.aiCore) this.aiCore.setState(e.detail.state);
         });
 
-        console.log('[AgroFedly3D] Persistent Engine initialized.');
+        // Persistent Engine initialized.
     }
 
     checkWebGL() {

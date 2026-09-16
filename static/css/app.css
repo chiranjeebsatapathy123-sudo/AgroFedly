@@ -835,3 +835,32 @@ html {
   color: var(--color-primary);
 }
 
+
+/* Drawer Styles */
+#drawer { 
+    overflow-y: scroll !important; 
+    max-height: 100vh !important;
+    scrollbar-width: thin; 
+    scrollbar-color: rgba(255,255,255,0.4) rgba(0,0,0,0.1); 
+}
+#drawer::-webkit-scrollbar { width: 8px !important; display: block !important; }
+#drawer::-webkit-scrollbar-track { background: rgba(0,0,0,0.1) !important; }
+#drawer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4) !important; border-radius: 10px !important; }
+#drawer::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.6) !important; }
+
+/* Navigation Links */
+.top-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    justify-content: center;
+}
+
+.top-nav .nav-link {
+    text-decoration: none;
+    color: var(--color-text-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+

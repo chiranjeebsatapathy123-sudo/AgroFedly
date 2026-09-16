@@ -40,7 +40,7 @@ export class ExperienceManager {
             document.dispatchEvent(new CustomEvent('agrofedly:motion:change', { detail: { reducedMotion: e.matches } }));
         });
 
-        console.log('[ExperienceManager] Initialized.');
+        // Engine initialized
     }
 
     setupNavigationInterceptor() {
@@ -341,7 +341,7 @@ export class ExperienceManager {
         };
 
         this.ws.onclose = (e) => {
-            console.log('Socket closed, retrying in 5s');
+            // Socket closed, retrying in 5s
             setTimeout(() => this.initWebSocket(), 5000);
         };
     }

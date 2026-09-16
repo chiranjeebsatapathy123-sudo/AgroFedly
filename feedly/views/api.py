@@ -447,7 +447,6 @@ def api_global_search(request):
 
     return JsonResponse({'results': results})
 
-@csrf_exempt
 @login_required
 def api_ai_scenario(request):
     """What-If Simulator 2.0 Backend"""
@@ -478,7 +477,6 @@ def api_ai_scenario(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
-@csrf_exempt
 @login_required
 def api_ai_action_preview(request):
     """Preview consequences before applying action"""
