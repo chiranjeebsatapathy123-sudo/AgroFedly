@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}AgroFedly AI{% endblock %}
+
+{% block content %}
+<section style="padding: 60px 20px; max-width: 1000px; margin: 0 auto;">
+    <h1 style="font-size: 3rem; margin-bottom: 30px;">AgroFedly AI</h1>
+    <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 40px;">
+        Data-driven recommendations to help you make better operational decisions.
+    </p>
+
+    <div class="card" style="padding: 40px; margin-bottom: 30px; background: var(--surface);">
+        <h2>Demand Forecasting</h2>
+        <p>Our machine learning models analyze historical data, weather patterns, and market trends to predict upcoming demand, helping you optimize production planning.</p>
+    </div>
+
+    <div class="card" style="padding: 40px; margin-bottom: 30px; background: var(--surface);">
+        <h2>Surplus Intelligence</h2>
+        <p>AgroFedly AI automatically detects anomalies in inventory and consumption rates, proactively suggesting redistribution workflows for potential surplus.</p>
+    </div>
+
+    <div class="card" style="padding: 40px; margin-bottom: 30px; background: var(--surface);">
+        <h2>AI Copilot</h2>
+        <p>A natural language interface for your operations. Ask questions, navigate complex data, and execute workflows using conversational commands.</p>
+    </div>
+    
+    <div class="alert info">
+        <strong>Note:</strong> AgroFedly AI provides predictions and recommendations. It is designed to assist human operators and does not replace professional operational decisions.
+    </div>
+</section>
+{% endblock %}

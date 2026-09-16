@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}The Platform — AgroFedly{% endblock %}
+
+{% block content %}
+<section style="padding: 60px 20px; max-width: 1000px; margin: 0 auto;">
+    <h1 style="font-size: 3rem; margin-bottom: 30px;">The AgroFedly Platform</h1>
+    <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 40px;">
+        AgroFedly is a comprehensive operational suite designed to modernize the journey of food from farm to table.
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 40px;">
+        <div class="card" style="padding: 30px;">
+            <h2>Agriculture Management</h2>
+            <p>Manage farms, harvests, and produce seamlessly. Gain visibility into every stage of your agricultural operations.</p>
+        </div>
+        <div class="card" style="padding: 30px;">
+            <h2>Demand Intelligence</h2>
+            <p>Predict market demand using advanced AI modeling, minimizing overproduction and ensuring optimal resource allocation.</p>
+        </div>
+        <div class="card" style="padding: 30px;">
+            <h2>Redistribution & Surplus</h2>
+            <p>Intelligently identify potential surplus and seamlessly coordinate redistribution to verified recipients, keeping food out of landfills.</p>
+        </div>
+        <div class="card" style="padding: 30px;">
+            <h2>Traceability & Logistics</h2>
+            <p>Track every batch from harvest to final destination, ensuring food safety compliance and end-to-end visibility.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -10,5 +10,7 @@ urlpatterns = [
     path("favicon.ico", RedirectView.as_view(url="/static/img/favicon.svg", permanent=False)),
 ]
 
+handler400 = 'feedly.views.errors.custom_400'
+handler403 = 'feedly.views.errors.custom_403'
 handler404 = 'feedly.views.errors.custom_404'
 handler500 = 'feedly.views.errors.custom_500'

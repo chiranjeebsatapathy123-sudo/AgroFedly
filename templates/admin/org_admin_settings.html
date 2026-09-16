@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Settings - {{ active_org.name }}{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-4xl mx-auto mt-16">
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2">Organization Settings</h1>
+            <p class="text-gray-400">Manage your organization profile, defaults, and API integrations.</p>
+        </div>
+    </div>
+
+    <form method="POST" class="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
+        {% csrf_token %}
+        <h3 class="text-xl font-bold text-white mb-6 border-b border-white/10 pb-4">General Profile</h3>
+        
+        <div class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Organization Name</label>
+                <input type="text" name="name" value="{{ active_org.name }}" required class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 max-w-md">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Organization ID</label>
+                <input type="text" value="{{ active_org.id }}" disabled class="w-full bg-black/40 border border-white/5 rounded-lg px-4 py-3 text-gray-500 max-w-md cursor-not-allowed font-mono text-sm">
+                <p class="text-xs text-gray-500 mt-2">Unique identifier for API and support requests.</p>
+            </div>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-white/10 flex justify-end">
+            <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg shadow transition-colors">
+                Save Changes
+            </button>
+        </div>
+    </form>
+    
+    <div class="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
+        <h3 class="text-xl font-bold text-red-500 mb-4">Danger Zone</h3>
+        <p class="text-gray-400 mb-6">Deleting an organization is permanent and cannot be undone. All data will be lost.</p>
+        <button type="button" class="px-6 py-2.5 bg-red-600/20 hover:bg-red-600/40 text-red-500 border border-red-500/30 font-medium rounded-lg transition-colors">
+            Delete Organization
+        </button>
+    </div>
+</div>
+{% endblock %}

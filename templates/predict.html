@@ -13,8 +13,45 @@
         {% endif %}
     {% endif %}
 </div>
-</div><div class="form-card"><form method="post" class="form-grid">{% csrf_token %}<label>Expected attendance{% if default_attendance %}<span class="badge" style="font-size:0.7em; margin-left:8px; background:var(--primary); color: white; padding:2px 6px; border-radius:4px;">{% trans "ERP Synced" %}</span>{% endif %}<input name="attendance" type="number" min="0" required placeholder="e.g. 1500" value="{% if default_attendance %}{{ default_attendance }}{% endif %}"></label><label>{% trans "City for live weather" %}<input name="city" placeholder="e.g. Bhubaneswar"></label><label>{% trans "Holiday" %}<select name="holiday"><option value="0">{% trans "No" %}</option><option value="1">{% trans "Yes" %}</option></select></label><label>{% trans "Exam Day" %}<select name="exam_day"><option value="0">{% trans "No" %}</option><option value="1">{% trans "Yes" %}</option></select></label><label>{% trans "Event Flag" %}<select name="event_flag"><option value="0">{% trans "No" %}</option><option value="1">{% trans "Yes" %}</option></select></label><button class="btn primary full">{% trans "Run AI Prediction" %}</button></form>{% if error %}<div class="error-box">{{ error }}</div>{% endif %}</div></section>
+{% if model_metrics %}
+<div class="model-metrics" style="margin-top: 10px; display:flex; gap: 10px; font-size: 0.85em;">
+    <div style="padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px;">
+        <span style="color: var(--text-muted);">MAE:</span> <strong>{{ model_metrics.mae }}</strong>
+    </div>
+    <div style="padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px;">
+        <span style="color: var(--text-muted);">RMSE:</span> <strong>{{ model_metrics.rmse }}</strong>
+    </div>
+    <div style="padding: 8px; background: var(--surface); border: 1px solid {% if model_metrics.drift_warning %}var(--danger){% else %}var(--success){% endif %}; border-radius: 4px; color: {% if model_metrics.drift_warning %}var(--danger){% else %}var(--success){% endif %};">
+        <strong>{% if model_metrics.drift_warning %}⚠️ Model Drift Detected{% else %}✓ Model Stable{% endif %}</strong>
+    </div>
+</div>
+{% endif %}
+</div><div class="form-card"><form method="post" class="form-grid">{% csrf_token %}<label>Expected attendance{% if default_attendance %}<span class="badge" style="font-size:0.7em; margin-left:8px; background:var(--primary); color: white; padding:2px 6px; border-radius:4px;">{% trans "ERP Synced" %}</span>{% endif %}<input name="attendance" type="number" min="0" required placeholder="e.g. 1500" value="{% if default_attendance %}{{ default_attendance }}{% endif %}"></label><label>{% trans "City for live weather" %}<input name="city" placeholder="e.g. Bhubaneswar"></label><label>{% trans "Holiday" %}<select name="holiday"><option value="0">{% trans "No" %}</option><option value="1">{% trans "Yes" %}</option></select></label><label>{% trans "Exam Day" %}<select name="event_flag"><option value="0">{% trans "No" %}</option><option value="1">{% trans "Yes" %}</option></select></label><button class="btn primary full">{% trans "Run AI Prediction" %}</button></form>{% if error %}<div class="error-box">{{ error }}</div>{% endif %}</div></section>
 {% if result %}<section class="result-section"><div class="result-main"><div class="eyebrow">{% trans "FORECAST RESULT" %}</div><h2>{{ result.prediction }} meals</h2><p>{% trans "Recommended preparation:" %} <b>{{ result.recommended }}</b></p><div class="range"><span>{{ result.lower }}</span><div><i style="width:{{ result.confidence }}%"></i></div><span>{{ result.upper }}</span></div></div><div class="result-cards"><div><span>{% trans "Confidence" %}</span><b>{{ result.confidence }}%</b></div><div><span>{% trans "Expected surplus" %}</span><b>{{ result.expected_surplus }}</b></div><div><span>{% trans "Waste risk" %}</span><b>{{ result.risk }}</b></div></div>
+{% if result.features %}
+<div class="result-main" style="margin-top:20px;">
+  <div class="eyebrow">{% trans "FORECAST EXPLANATION" %}</div>
+  <p style="margin-bottom: 10px; font-size: 0.9em; color: var(--text-muted);">Key factors influencing this prediction:</p>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+      <div style="background: var(--surface); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
+          <span style="font-size: 0.8em; color: var(--text-muted); display: block;">Base Attendance</span>
+          <strong>{{ result.features.attendance }}</strong>
+      </div>
+      <div style="background: var(--surface); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
+          <span style="font-size: 0.8em; color: var(--text-muted); display: block;">Recent Avg Demand</span>
+          <strong>{{ result.features.recent_avg_demand|floatformat:1 }}</strong>
+      </div>
+      <div style="background: var(--surface); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
+          <span style="font-size: 0.8em; color: var(--text-muted); display: block;">Temperature</span>
+          <strong>{{ result.features.temperature }}°C</strong>
+      </div>
+      <div style="background: var(--surface); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
+          <span style="font-size: 0.8em; color: var(--text-muted); display: block;">Holiday / Event</span>
+          <strong>{% if result.features.holiday %}Yes{% elif result.features.event_flag %}Event{% else %}No{% endif %}</strong>
+      </div>
+  </div>
+</div>
+{% endif %}
 {% if produce_requirements %}
 <div class="result-main" style="margin-top:20px;">
   <div class="eyebrow">{% trans "RAW PRODUCE REQUIREMENT" %}</div>

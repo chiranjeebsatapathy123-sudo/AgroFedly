@@ -66,6 +66,26 @@ def get_live_weather(city: str):
     except Exception as e:
         return json.dumps({"error": str(e)})
 
+def get_analytics_summary(organization_id: int):
+    """Fetch high-level analytics for the organization."""
+    try:
+        org = Organization.objects.get(id=organization_id)
+        from .models import MealRecord, SurplusFood, Delivery
+        from django.db.models import Sum
+        
+        total_meals = MealRecord.objects.filter(organization=org).aggregate(Sum('meals_consumed'))['meals_consumed__sum'] or 0
+        total_surplus = SurplusFood.objects.filter(organization=org).aggregate(Sum('quantity'))['quantity__sum'] or 0
+        delivered = Delivery.objects.filter(Q(sender=org) | Q(receiver=org), status='DELIVERED').count()
+        
+        return json.dumps({
+            "total_meals_recorded": total_meals,
+            "total_surplus_logged": total_surplus,
+            "successful_deliveries": delivered,
+            "organization_name": org.name
+        })
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
 def predict_food_demand(attendance: int, temperature: float = 25.0, rainfall: float = 0.0, holiday: int = 0, humidity: float = 70.0, exam_day: int = 0, event_flag: int = 0):
     """Predict food demand using the ML model."""
     try:
@@ -86,7 +106,7 @@ def predict_food_demand(attendance: int, temperature: float = 25.0, rainfall: fl
         return json.dumps({"error": str(e)})
 
 
-def generate_copilot_response(user_message: str, organization: Organization) -> str:
+def generate_copilot_response(user_message: str, organization: Organization, context: str = "/") -> str:
     """
     Calls the OpenAI API to generate a response for the AgroFedly Copilot,
     with advanced function calling.
@@ -99,6 +119,10 @@ def generate_copilot_response(user_message: str, organization: Organization) -> 
 
     system_prompt = f"""
     You are the AgroFedly AI Copilot. You are a helpful, professional assistant integrated into a food surplus distribution and agriculture management app.
+    
+    Current Application Context: The user is currently on the page '{context}'.
+    If their question is ambiguous, assume they are asking about the context of their current page.
+    
     Your main responsibilities include:
     - Helping organizations understand how to donate surplus food.
     - Providing updates on food deliveries.
@@ -107,10 +131,39 @@ def generate_copilot_response(user_message: str, organization: Organization) -> 
     
     You have tools to fetch real-time data from the database. Use them when the user asks about deliveries, surplus, or impact scores.
     The user asking the question belongs to the organization: {organization.name} (ID: {organization.id}).
-    Always summarize tool responses nicely. Keep your answers concise, friendly, and practical.
+    
+    FORMATTING:
+    Where useful, structure your answers cleanly with markdown headers:
+    ### Answer
+    (Short explanation)
+    ### Data
+    (Relevant actual values)
+    ### Why
+    (Reasoning based on available data)
+    ### Suggested Action
+    (Action the user can take)
+    
+    Keep your answers concise, friendly, and practical. Do not read huge tables aloud. Do not expose private information.
     """
     
     tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "navigate_to_page",
+                "description": "Navigate the user to a specific page based on their intent (e.g., 'open surplus', 'show me analytics').",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "The URL to navigate to. Valid options: '/surplus/', '/deliveries/', '/intelligence/', '/predict/', '/dashboard/', '/agriculture/'."
+                        }
+                    },
+                    "required": ["url"]
+                }
+            }
+        },
         {
             "type": "function",
             "function": {
@@ -145,6 +198,23 @@ def generate_copilot_response(user_message: str, organization: Organization) -> 
             "function": {
                 "name": "get_impact_score",
                 "description": "Fetch the gamification impact score and rank of the organization.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "organization_id": {
+                            "type": "integer",
+                            "description": "The ID of the organization. Must be the logged-in user's organization ID."
+                        }
+                    },
+                    "required": ["organization_id"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_analytics_summary",
+                "description": "Fetch high-level impact and operational analytics for the organization. Use this when the user asks for a summary of their metrics, data, or performance.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -214,6 +284,31 @@ def generate_copilot_response(user_message: str, organization: Organization) -> 
                     "required": ["attendance"]
                 }
             }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "stage_action",
+                "description": "Stage an action (like creating a surplus record or predicting demand) that requires user confirmation. Use this when the user asks you to 'create', 'add', or 'do' something.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "action_type": {
+                            "type": "string",
+                            "description": "The type of action. Valid options: 'CREATE_SURPLUS', 'CREATE_DELIVERY'."
+                        },
+                        "payload": {
+                            "type": "string",
+                            "description": "A JSON string containing the data needed for the action (e.g., '{\"food_name\": \"Apples\", \"quantity\": 50}')."
+                        },
+                        "summary": {
+                            "type": "string",
+                            "description": "A short, user-friendly summary of what will happen if they approve."
+                        }
+                    },
+                    "required": ["action_type", "payload", "summary"]
+                }
+            }
         }
     ]
 
@@ -246,7 +341,14 @@ def generate_copilot_response(user_message: str, organization: Organization) -> 
                 
                 function_response = ""
                 
-                if function_name == "get_active_deliveries":
+                if function_name == "navigate_to_page":
+                    return json.dumps({
+                        "action": {
+                            "type": "NAVIGATE",
+                            "url": function_args.get("url")
+                        }
+                    })
+                elif function_name == "get_active_deliveries":
                     # Security override: force the user's organization ID
                     function_response = get_active_deliveries(organization.id)
                 elif function_name == "get_surplus_inventory":
@@ -254,6 +356,9 @@ def generate_copilot_response(user_message: str, organization: Organization) -> 
                 elif function_name == "get_impact_score":
                     # Security override
                     function_response = get_impact_score(organization.id)
+                elif function_name == "get_analytics_summary":
+                    # Security override
+                    function_response = get_analytics_summary(organization.id)
                 elif function_name == "get_live_weather":
                     function_response = get_live_weather(function_args.get("city"))
                 elif function_name == "predict_food_demand":
@@ -266,6 +371,15 @@ def generate_copilot_response(user_message: str, organization: Organization) -> 
                         exam_day=function_args.get("exam_day", 0),
                         event_flag=function_args.get("event_flag", 0)
                     )
+                elif function_name == "stage_action":
+                    return json.dumps({
+                        "action": {
+                            "type": "STAGE_ACTION",
+                            "action_type": function_args.get("action_type"),
+                            "payload": function_args.get("payload"),
+                            "summary": function_args.get("summary")
+                        }
+                    })
                     
                 messages.append(
                     {

@@ -1,4 +1,4 @@
-from ..decorators import _organization_required, _manager_required, _membership, require_org_role
+from ..decorators import _organization_required, _manager_required, require_org_role
 import json
 import os
 from datetime import date, timedelta, datetime
@@ -16,31 +16,6 @@ from django.views.decorators.csrf import csrf_exempt
 from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionForm, SurplusFoodForm
 from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact
 User = get_user_model()
-try:
-    import joblib
-except Exception:
-    joblib = None
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_bundle.pkl')
-LEGACY_MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_model.pkl')
-MODEL = None
-MODEL_FEATURES = []
-MODEL_NAME = 'Fedly Smart Forecast'
-RESIDUAL_P90 = 8.0
-if joblib:
-    try:
-        bundle = joblib.load(MODEL_PATH)
-        MODEL = bundle.get('model') if isinstance(bundle, dict) else bundle
-        MODEL_FEATURES = bundle.get('features', []) if isinstance(bundle, dict) else []
-        MODEL_NAME = bundle.get('model_name', MODEL_NAME) if isinstance(bundle, dict) else MODEL_NAME
-        RESIDUAL_P90 = float(bundle.get('residual_p90', 8)) if isinstance(bundle, dict) else 8
-    except Exception:
-        try:
-            MODEL = joblib.load(LEGACY_MODEL_PATH)
-            MODEL_FEATURES = ['attendance', 'temperature', 'rainfall', 'holiday', 'day_of_week']
-            MODEL_NAME = 'Legacy Demand Model'
-        except Exception:
-            pass
 from ..forms import PostMealRecordForm
 from ..models import AgriculturalProduce, ProcessingRecord, AgriculturalSupplyRequest
 from ..forms import AgriculturalProduceForm, ProcessingRecordForm, AgriculturalSupplyRequestForm
@@ -53,7 +28,6 @@ from ..forms import BuyerDemandForm
 import difflib
 from ..models import CropMarketTrend, WeatherAdvisory, AgriculturalShipment, QualityInspection, LedgerTransaction
 from ..forms import QualityInspectionForm
-import random
 import json
 from django.utils import timezone
 from ..forms import VolunteerProfileForm
@@ -82,8 +56,7 @@ def add_surplus_food(request):
         food = form.save(commit=False)
         food.organization = request.organization
         if food.quality_image:
-            import random
-            score = random.randint(70, 99)
+            score = 85
             food.ai_freshness_score = score
             if score > 90:
                 food.ai_quality_notes = 'AI Vision Analysis: Food appears extremely fresh. No signs of spoilage detected.'

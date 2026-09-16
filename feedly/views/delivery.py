@@ -1,4 +1,4 @@
-from ..decorators import _organization_required, _manager_required, _membership, require_org_role
+from ..decorators import _organization_required, _manager_required, require_org_role
 import json
 import os
 from datetime import date, timedelta, datetime
@@ -16,31 +16,6 @@ from django.views.decorators.csrf import csrf_exempt
 from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionForm, SurplusFoodForm
 from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact
 User = get_user_model()
-try:
-    import joblib
-except Exception:
-    joblib = None
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_bundle.pkl')
-LEGACY_MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_model.pkl')
-MODEL = None
-MODEL_FEATURES = []
-MODEL_NAME = 'Fedly Smart Forecast'
-RESIDUAL_P90 = 8.0
-if joblib:
-    try:
-        bundle = joblib.load(MODEL_PATH)
-        MODEL = bundle.get('model') if isinstance(bundle, dict) else bundle
-        MODEL_FEATURES = bundle.get('features', []) if isinstance(bundle, dict) else []
-        MODEL_NAME = bundle.get('model_name', MODEL_NAME) if isinstance(bundle, dict) else MODEL_NAME
-        RESIDUAL_P90 = float(bundle.get('residual_p90', 8)) if isinstance(bundle, dict) else 8
-    except Exception:
-        try:
-            MODEL = joblib.load(LEGACY_MODEL_PATH)
-            MODEL_FEATURES = ['attendance', 'temperature', 'rainfall', 'holiday', 'day_of_week']
-            MODEL_NAME = 'Legacy Demand Model'
-        except Exception:
-            pass
 from ..forms import PostMealRecordForm
 from ..models import AgriculturalProduce, ProcessingRecord, AgriculturalSupplyRequest
 from ..forms import AgriculturalProduceForm, ProcessingRecordForm, AgriculturalSupplyRequestForm
@@ -84,6 +59,16 @@ def delivery_list(request):
         status = ''
     all_deliveries = Delivery.objects.filter(Q(sender=request.organization) | Q(receiver=request.organization))
     status_counts = {value: all_deliveries.filter(status=value).count() for value, _ in Delivery.STATUS_CHOICES}
+    
+    # Calculate Risk Flags for Deliveries
+    now = timezone.now()
+    for d in deliveries:
+        d.risk_flag = None
+        if d.status == 'REQUESTED':
+            d.risk_flag = 'Delayed pickup' if (now - d.created_at).total_seconds() > 7200 else None
+        elif d.status == 'IN_TRANSIT':
+            d.risk_flag = 'Approaching safe-window limit' if d.surplus and d.surplus.storage_temperature > 5 else None
+
     return render(request, 'delivery_list.html', {'deliveries': deliveries, 'organization': request.organization, 'search': search, 'active_status': status, 'status_counts': status_counts, 'total_deliveries': all_deliveries.count(), 'active_deliveries': all_deliveries.exclude(status__in={'DELIVERED', 'CANCELLED'}).count(), 'delivered_deliveries': all_deliveries.filter(status='DELIVERED').count()})
 
 @_organization_required
@@ -235,7 +220,7 @@ def delivery_proof(request, delivery_id):
 def generate_donation_receipt(request, delivery_id):
     delivery = get_object_or_404(Delivery, id=delivery_id)
     if not request.user.is_superuser:
-        if delivery.sender not in request.user.organization_memberships.values_list('organization', flat=True):
+        if delivery.sender not in request.user.organizations.values_list('organization', flat=True):
             messages.error(request, 'You do not have permission to view this receipt.')
             return redirect('delivery_list')
     if delivery.status != 'DELIVERED':

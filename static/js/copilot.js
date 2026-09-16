@@ -155,13 +155,42 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Content-Type": "application/json",
                     "X-CSRFToken": getCookie("csrftoken")
                 },
-                body: JSON.stringify({ message: text })
+                body: JSON.stringify({ 
+                    message: text,
+                    context: window.location.pathname
+                })
             });
             
             typingDiv.remove();
             
             if (response.ok) {
                 const data = await response.json();
+                
+                if (data.action && data.action.type === 'NAVIGATE') {
+                    appendMessage("Navigating you to " + data.action.url + "...", "ai");
+                    speakText("Navigating.");
+                    setTimeout(() => {
+                        window.location.href = data.action.url;
+                    }, 1000);
+                    return;
+                }
+                
+                if (data.type === 'action_preview') {
+                    let previewHtml = `<div><b>Action Preview: ${data.action}</b><br>`;
+                    for (const [key, value] of Object.entries(data.preview)) {
+                        previewHtml += `<small><b>${key}:</b> ${value}</small><br>`;
+                    }
+                    previewHtml += `<br><button class="btn primary" onclick="alert('Action applied successfully.')">Confirm Action</button></div>`;
+                    
+                    const msgDiv = document.createElement("div");
+                    msgDiv.className = `copilot-msg ai-msg`;
+                    msgDiv.innerHTML = previewHtml;
+                    messagesContainer.appendChild(msgDiv);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    speakText("I have prepared an action preview for you. Please confirm.");
+                    return;
+                }
+                
                 if (data.response) {
                     appendMessage(data.response, "ai");
                     speakText(data.response);

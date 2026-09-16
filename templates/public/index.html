@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}AgroFedly{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section style="min-height: 80vh; display: flex; align-items: center; padding: 40px 20px; position: relative;">
+    <div style="max-width: 600px; z-index: 2;">
+        <h1 style="font-size: 3.5rem; line-height: 1.1; margin-bottom: 20px;">AI-powered intelligence<br>for modern agriculture operations</h1>
+        <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 40px;">
+            Plan production. Understand demand. Manage produce.<br>Reduce avoidable surplus.
+        </p>
+        <div style="display: flex; gap: 15px;">
+            <a href="{% url 'organization_register' %}" class="btn primary" style="font-size: 1.1rem; padding: 12px 24px;">Get Started</a>
+            <a href="{% url 'product' %}" class="btn secondary" style="font-size: 1.1rem; padding: 12px 24px;">Explore Platform</a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Snippet -->
+<section style="padding: 60px 20px; background: var(--surface);">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 2.5rem; margin-bottom: 50px;">Complete Operational Visibility</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; text-align: left;">
+            <div class="card card-hover" style="padding: 30px;">
+                <div style="font-size: 2rem; margin-bottom: 15px;">🌱</div>
+                <h3 style="margin-bottom: 10px;">Agriculture Operations</h3>
+                <p style="color: var(--text-muted);">Manage farms, plan harvests, and track produce seamlessly from the field.</p>
+            </div>
+            
+            <div class="card card-hover" style="padding: 30px;">
+                <div style="font-size: 2rem; margin-bottom: 15px;">📈</div>
+                <h3 style="margin-bottom: 10px;">AI Demand Forecasting</h3>
+                <p style="color: var(--text-muted);">Anticipate market needs with intelligent, real-time demand modeling.</p>
+            </div>
+            
+            <div class="card card-hover" style="padding: 30px;">
+                <div style="font-size: 2rem; margin-bottom: 15px;">🔄</div>
+                <h3 style="margin-bottom: 10px;">Surplus & Redistribution</h3>
+                <p style="color: var(--text-muted);">Identify excess produce and match it with verified recipients efficiently.</p>
+            </div>
+            
+            <div class="card card-hover" style="padding: 30px;">
+                <div style="font-size: 2rem; margin-bottom: 15px;">🚚</div>
+                <h3 style="margin-bottom: 10px;">Logistics & Traceability</h3>
+                <p style="color: var(--text-muted);">Follow every batch through processing, storage, and delivery.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

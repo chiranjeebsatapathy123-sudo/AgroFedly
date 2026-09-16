@@ -1,4 +1,4 @@
-from ..decorators import _organization_required, _manager_required, _membership, require_org_role
+from ..decorators import _organization_required, _manager_required, require_org_role
 import json
 import os
 from datetime import date, timedelta, datetime
@@ -16,31 +16,6 @@ from django.views.decorators.csrf import csrf_exempt
 from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionForm, SurplusFoodForm
 from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact, StorageRecord
 User = get_user_model()
-try:
-    import joblib
-except Exception:
-    joblib = None
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_bundle.pkl')
-LEGACY_MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_model.pkl')
-MODEL = None
-MODEL_FEATURES = []
-MODEL_NAME = 'Fedly Smart Forecast'
-RESIDUAL_P90 = 8.0
-if joblib:
-    try:
-        bundle = joblib.load(MODEL_PATH)
-        MODEL = bundle.get('model') if isinstance(bundle, dict) else bundle
-        MODEL_FEATURES = bundle.get('features', []) if isinstance(bundle, dict) else []
-        MODEL_NAME = bundle.get('model_name', MODEL_NAME) if isinstance(bundle, dict) else MODEL_NAME
-        RESIDUAL_P90 = float(bundle.get('residual_p90', 8)) if isinstance(bundle, dict) else 8
-    except Exception:
-        try:
-            MODEL = joblib.load(LEGACY_MODEL_PATH)
-            MODEL_FEATURES = ['attendance', 'temperature', 'rainfall', 'holiday', 'day_of_week']
-            MODEL_NAME = 'Legacy Demand Model'
-        except Exception:
-            pass
 from ..forms import PostMealRecordForm
 from ..models import AgriculturalProduce, ProcessingRecord, AgriculturalSupplyRequest
 from ..forms import AgriculturalProduceForm, ProcessingRecordForm, AgriculturalSupplyRequestForm
@@ -53,7 +28,6 @@ from ..forms import BuyerDemandForm
 import difflib
 from ..models import CropMarketTrend, WeatherAdvisory, AgriculturalShipment, QualityInspection, LedgerTransaction
 from ..forms import QualityInspectionForm
-import random
 import json
 from django.utils import timezone
 from ..forms import VolunteerProfileForm
@@ -72,7 +46,7 @@ from django.http import HttpResponse
 
 @login_required
 def agri_dashboard(request):
-    org_member = request.user.organization_memberships.first()
+    org_member = request.user.organizations.first()
     org = org_member.organization if org_member else None
     
     if not org:
@@ -106,12 +80,15 @@ def agri_dashboard(request):
 
 @login_required
 def agri_produce_list(request):
-    produce_list = AgriculturalProduce.objects.all().order_by('-harvest_date')
+    org_member = request.user.organizations.first()
+    if not org_member:
+        return redirect('home')
+    produce_list = AgriculturalProduce.objects.filter(supplier=org_member.organization).order_by('-harvest_date')
     return render(request, 'agri_produce_list.html', {'produce_list': produce_list})
 
 @login_required
 def agri_produce_add(request):
-    org_member = request.user.organization_memberships.first()
+    org_member = request.user.organizations.first()
     if request.method == 'POST':
         form = AgriculturalProduceForm(request.POST)
         if org_member:
@@ -133,12 +110,15 @@ def agri_produce_add(request):
 
 @login_required
 def agri_processing_list(request):
-    processing_records = ProcessingRecord.objects.all().order_by('-processing_date')
+    org_member = request.user.organizations.first()
+    if not org_member:
+        return redirect('home')
+    processing_records = ProcessingRecord.objects.filter(input_produce__supplier=org_member.organization).order_by('-processing_date')
     return render(request, 'agri_processing.html', {'records': processing_records})
 
 @login_required
 def agri_processing_add(request):
-    org = request.user.organization_memberships.first()
+    org = request.user.organizations.first()
     if request.method == 'POST':
         form = ProcessingRecordForm(request.POST, supplier=org.organization if org else None)
         if form.is_valid():
@@ -158,7 +138,7 @@ def agri_processing_add(request):
 
 @login_required
 def agri_supply_matching(request):
-    org = request.user.organization_memberships.first()
+    org = request.user.organizations.first()
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'create_demand':
@@ -232,7 +212,7 @@ def agri_supply_matching(request):
 
 @login_required
 def agri_supply_requests_list(request):
-    user_org = request.user.organization_memberships.first()
+    user_org = request.user.organizations.first()
     if user_org:
         org = user_org.organization
         requests = AgriculturalSupplyRequest.objects.filter(models.Q(requester=org) | models.Q(produce__supplier=org)).order_by('-created_at')
@@ -242,7 +222,7 @@ def agri_supply_requests_list(request):
 
 @login_required
 def agri_supply_request_add(request):
-    org = request.user.organization_memberships.first()
+    org = request.user.organizations.first()
     if request.method == 'POST':
         form = AgriculturalSupplyRequestForm(request.POST)
         if form.is_valid():
@@ -259,7 +239,7 @@ def agri_supply_request_add(request):
 def agri_supply_request_accept(request, request_id):
     if request.method == 'POST':
         supply_request = get_object_or_404(AgriculturalSupplyRequest, id=request_id)
-        user_org = request.user.organization_memberships.first()
+        user_org = request.user.organizations.first()
         if not user_org or supply_request.produce.supplier != user_org.organization:
             messages.error(request, 'You are not authorized to accept this request.')
             return redirect('agri_supply_requests_list')
@@ -307,7 +287,7 @@ def agri_market_trends(request):
 
 @login_required
 def agri_shipment_list(request):
-    shipments = AgriculturalShipment.objects.all().order_by('-created_at')
+    shipments = AgriculturalShipment.objects.filter(organization=request.organization).order_by('-created_at')
     return render(request, 'agri_shipments.html', {'shipments': shipments})
 
 @login_required
@@ -329,7 +309,7 @@ def agri_inspection_add(request):
 
 @login_required
 def agri_ledger(request):
-    org = request.user.organization_memberships.first()
+    org = request.user.organizations.first()
     if not org:
         messages.error(request, 'You must belong to an organization to view the ledger.')
         return redirect('agri_dashboard')
@@ -364,7 +344,7 @@ def agri_disease_scanner(request):
         scan_type = request.POST.get('scan_type', 'disease')
         if scan_type == 'grading':
             grades = [('Grade A (Export Quality)', 98.2, 'Optimal size, color, and zero blemishes. Premium pricing recommended.'), ('Grade B (Local Market)', 89.4, 'Minor superficial blemishes. Standard market pricing.'), ('Grade C (Processing/Juicing)', 92.1, 'Substandard shape or color. Recommend selling for processing.')]
-            disease, confidence, treatment = random.choice(grades)
+            disease, confidence, treatment = grades[0]
             msg = f'Grading complete! Result: {disease}'
         else:
             from ..services.agri_apis import analyze_plant_disease
@@ -476,7 +456,7 @@ def agri_forum_detail(request, post_id):
 def agri_subsidy_finder(request):
     fields = FarmField.objects.filter(farmer=request.user)
     my_crop_types = [f.crop_type.lower() for f in fields]
-    produce = AgriculturalProduce.objects.filter(producer=request.user.organization_memberships.first().organization if request.user.organization_memberships.exists() else None)
+    produce = AgriculturalProduce.objects.filter(producer=request.user.organizations.first().organization if request.user.organizations.exists() else None)
     my_crop_types.extend([p.name.lower() for p in produce])
     my_crop_types = set(my_crop_types)
     all_schemes = GovernmentScheme.objects.all()
@@ -605,9 +585,8 @@ def agri_greenhouse_controller(request):
 
 @login_required
 def agri_auto_subsidy(request):
-    import random
     if request.method == 'POST':
         messages.success(request, 'AI has successfully generated and filed the subsidy application via Govt API!')
         return redirect('agri_auto_subsidy')
-    context = {'available_grants': [{'name': 'PM-KISAN Installment Update', 'match_score': 98, 'amount': '₹2,000'}, {'name': 'Solar Pump Subsidy (KUSUM)', 'match_score': 85, 'amount': 'Up to 60%'}, {'name': 'Organic Farming Certification Grant', 'match_score': 72, 'amount': '₹5,000/hectare'}], 'ai_confidence': random.randint(88, 99)}
+    context = {'available_grants': [{'name': 'PM-KISAN Installment Update', 'match_score': 98, 'amount': '₹2,000'}, {'name': 'Solar Pump Subsidy (KUSUM)', 'match_score': 85, 'amount': 'Up to 60%'}, {'name': 'Organic Farming Certification Grant', 'match_score': 72, 'amount': '₹5,000/hectare'}], 'ai_confidence': 92}
     return render(request, 'agri_auto_subsidy.html', context)

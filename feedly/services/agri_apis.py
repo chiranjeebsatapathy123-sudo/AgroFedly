@@ -1,6 +1,5 @@
 import requests
 from django.conf import settings
-import random
 
 def analyze_plant_disease(image_data_or_url):
     """
@@ -39,7 +38,7 @@ def analyze_plant_disease(image_data_or_url):
         ("Nitrogen Deficiency", 78, "Apply NPK fertilizer (40-20-20)"),
         ("Stem Rust", 65, "Isolate crop and apply triadimefon")
     ]
-    disease, confidence, treatment = random.choice(diseases)
+    disease, confidence, treatment = diseases[0]
     return {
         "disease": disease,
         "confidence": confidence,
@@ -74,7 +73,7 @@ def predict_crop_yield(crop_type, area_hectares, lat, lng):
             
     # If API failed or wasn't provided, generate heuristic factor
     if weather_factor == 1.0:
-        weather_factor = random.uniform(0.9, 1.15)
+        weather_factor = 1.05
         
     base_yield = area_hectares * 3.5  # tons per hectare
     expected = base_yield * weather_factor
@@ -95,5 +94,5 @@ def get_iot_status():
             {'id': 2, 'name': 'Hydroponic Pump 1', 'type': 'IRRIGATION', 'status': True, 'reading': 'Flow: 1.2 L/m'},
             {'id': 3, 'name': 'HVAC Climate Control', 'type': 'CLIMATE', 'status': True, 'reading': 'Temp: 22°C'},
         ],
-        'system_health': random.randint(85, 99)
+        'system_health': 95
     }

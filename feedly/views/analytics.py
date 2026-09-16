@@ -1,4 +1,4 @@
-from ..decorators import _organization_required, _manager_required, _membership, require_org_role
+from ..decorators import _organization_required, _manager_required, require_org_role
 import json
 import os
 from datetime import date, timedelta, datetime
@@ -16,31 +16,6 @@ from django.views.decorators.csrf import csrf_exempt
 from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionForm, SurplusFoodForm
 from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact
 User = get_user_model()
-try:
-    import joblib
-except Exception:
-    joblib = None
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_bundle.pkl')
-LEGACY_MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_model.pkl')
-MODEL = None
-MODEL_FEATURES = []
-MODEL_NAME = 'Fedly Smart Forecast'
-RESIDUAL_P90 = 8.0
-if joblib:
-    try:
-        bundle = joblib.load(MODEL_PATH)
-        MODEL = bundle.get('model') if isinstance(bundle, dict) else bundle
-        MODEL_FEATURES = bundle.get('features', []) if isinstance(bundle, dict) else []
-        MODEL_NAME = bundle.get('model_name', MODEL_NAME) if isinstance(bundle, dict) else MODEL_NAME
-        RESIDUAL_P90 = float(bundle.get('residual_p90', 8)) if isinstance(bundle, dict) else 8
-    except Exception:
-        try:
-            MODEL = joblib.load(LEGACY_MODEL_PATH)
-            MODEL_FEATURES = ['attendance', 'temperature', 'rainfall', 'holiday', 'day_of_week']
-            MODEL_NAME = 'Legacy Demand Model'
-        except Exception:
-            pass
 from ..forms import PostMealRecordForm
 from ..models import AgriculturalProduce, ProcessingRecord, AgriculturalSupplyRequest
 from ..forms import AgriculturalProduceForm, ProcessingRecordForm, AgriculturalSupplyRequestForm
@@ -95,3 +70,9 @@ def analytics_dashboard(request):
     chart_records = list(reversed(chart_records))
     context = {'utilization_rate': round(utilization_rate, 1), 'total_produce_waste': round(total_produce_waste_kg, 2), 'monetary_value_waste': round(monetary_value_waste, 2), 'savings_value': round(savings_value, 2), 'top_wasted': top_wasted, 'chart_records': chart_records}
     return render(request, 'analytics.html', context)
+
+@login_required
+def data_story(request):
+    """Data Story Mode (Phase 18E Cinematic Experience)"""
+    return render(request, 'data_story.html', {})
+

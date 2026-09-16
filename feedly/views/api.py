@@ -1,4 +1,4 @@
-from ..decorators import _organization_required, _manager_required, _membership, require_org_role
+from ..decorators import _organization_required, _manager_required, require_org_role
 import json
 import os
 from datetime import date, timedelta, datetime
@@ -53,7 +53,6 @@ from ..forms import BuyerDemandForm
 import difflib
 from ..models import CropMarketTrend, WeatherAdvisory, AgriculturalShipment, QualityInspection, LedgerTransaction
 from ..forms import QualityInspectionForm
-import random
 import json
 from django.utils import timezone
 from ..forms import VolunteerProfileForm
@@ -71,12 +70,44 @@ import qrcode
 from django.http import HttpResponse
 
 from django.db import connection
+from django.conf import settings
+
 def health_check(request):
+    health = {'status': 'ok', 'service': 'AgroFedly'}
+    status_code = 200
+    
+    # Check Database
     try:
         connection.ensure_connection()
-        return JsonResponse({'status': 'ok', 'service': 'Fedly', 'database': 'connected'})
+        health['database'] = 'connected'
     except Exception as e:
-        return JsonResponse({'status': 'error', 'service': 'Fedly', 'database': 'disconnected', 'error': str(e)}, status=503)
+        health['status'] = 'error'
+        health['database'] = 'disconnected'
+        status_code = 503
+
+    # Check Redis
+    if hasattr(settings, 'CHANNEL_LAYERS') and 'default' in settings.CHANNEL_LAYERS:
+        try:
+            redis_url = settings.CHANNEL_LAYERS['default'].get('CONFIG', {}).get('hosts', [None])[0]
+            if redis_url:
+                import redis
+                r = redis.from_url(redis_url)
+                r.ping()
+                health['redis'] = 'connected'
+            else:
+                health['redis'] = 'in-memory (dev)'
+        except Exception as e:
+            health['status'] = 'error'
+            health['redis'] = 'disconnected'
+            status_code = 503
+            
+    # Check ML Model
+    if MODEL:
+        health['ml_model'] = 'loaded'
+    else:
+        health['ml_model'] = 'unavailable (fallback active)'
+
+    return JsonResponse(health, status=status_code)
 
 def _weather(city):
     key = getattr(settings, 'WEATHER_API_KEY', '')
@@ -127,7 +158,7 @@ def _predict(attendance, temperature=25, rainfall=0, holiday=0, humidity=70, exa
     expected_surplus = max(0, recommended - prediction)
     ratio = expected_surplus / max(recommended, 1)
     risk = 'HIGH' if ratio >= 0.12 or expected_surplus >= 80 else 'MEDIUM' if ratio >= 0.05 or expected_surplus >= 30 else 'LOW'
-    return {'prediction': prediction, 'lower': lower, 'upper': upper, 'recommended': recommended, 'confidence': round(confidence, 1), 'expected_surplus': expected_surplus, 'risk': risk, 'model_name': MODEL_NAME, 'status': status, 'fallback': fallback}
+    return {'prediction': prediction, 'lower': lower, 'upper': upper, 'recommended': recommended, 'confidence': round(confidence, 1), 'expected_surplus': expected_surplus, 'risk': risk, 'model_name': MODEL_NAME, 'status': status, 'fallback': fallback, 'features': features}
 
 @login_required
 def predict_demand(request):
@@ -156,12 +187,29 @@ def predict_demand(request):
             messages.success(request, 'AI forecast saved successfully.')
         except (ValueError, TypeError) as exc:
             error = str(exc)
+            
+    # Calculate Model Performance Metrics (MAE, RMSE)
+    import math
+    past_forecasts = DemandForecast.objects.filter(date__lt=date.today()).order_by('-date')[:30]
+    past_meals = {m.date: m.meals_consumed for m in MealRecord.objects.filter(date__in=[f.date for f in past_forecasts]).exclude(data_source='ERP')}
+    
+    errors = []
+    for f in past_forecasts:
+        actual = past_meals.get(f.date)
+        if actual is not None and actual > 0:
+            errors.append(abs(f.predicted_demand - actual))
+            
+    mae = sum(errors) / len(errors) if errors else 0
+    rmse = math.sqrt(sum(e**2 for e in errors) / len(errors)) if errors else 0
+    drift_warning = mae > 20  # Threshold for warning
+    model_metrics = {'mae': round(mae, 1), 'rmse': round(rmse, 1), 'drift_warning': drift_warning, 'samples': len(errors)}
+    
     produce_requirements = []
     if result:
         ingredients = Ingredient.objects.filter(is_active=True)
         for ingredient in ingredients:
             produce_requirements.append({'name': ingredient.name, 'unit': ingredient.unit, 'required': round(result['prediction'] * ingredient.quantity_per_meal, 2), 'recommended': round(result['recommended'] * ingredient.quantity_per_meal, 2), 'buffer': round((result['recommended'] - result['prediction']) * ingredient.quantity_per_meal, 2)})
-    return render(request, 'predict.html', {'result': result, 'weather': weather, 'error': error, 'model_name': MODEL_NAME, 'default_attendance': default_attendance, 'produce_requirements': produce_requirements})
+    return render(request, 'predict.html', {'result': result, 'weather': weather, 'error': error, 'model_name': MODEL_NAME, 'default_attendance': default_attendance, 'produce_requirements': produce_requirements, 'model_metrics': model_metrics})
 
 @login_required
 def forecast_7_days(request):
@@ -172,18 +220,24 @@ def forecast_7_days(request):
             holiday = int(request.POST.get('holiday', 0))
             if attendance <= 0:
                 raise ValueError('Attendance must be greater than zero.')
+            scenario_forecasts = []
             for offset in range(7):
                 target = date.today() + timedelta(days=offset)
-                item = _predict(int(round(attendance * (0.82 if target.weekday() >= 5 else 1))), 25, 0, holiday if offset == 0 else int(target.weekday() >= 5), target)
-                item['date'] = target
-                item['produce_requirements'] = []
-                ingredients = Ingredient.objects.filter(is_active=True)
-                for ingredient in ingredients:
-                    item['produce_requirements'].append({'name': ingredient.name, 'unit': ingredient.unit, 'required': round(item['prediction'] * ingredient.quantity_per_meal, 2), 'recommended': round(item['recommended'] * ingredient.quantity_per_meal, 2), 'buffer': round((item['recommended'] - item['prediction']) * ingredient.quantity_per_meal, 2)})
-                forecasts.append(item)
+                
+                # Base Model (Current AI Suggestion based on historical averages)
+                base_item = _predict(int(round(attendance * (0.82 if target.weekday() >= 5 else 1))), 25, 0, int(target.weekday() >= 5), target)
+                base_item['date'] = target
+                
+                # Custom Scenario (User provided overrides)
+                scenario_item = _predict(int(round(attendance * (0.82 if target.weekday() >= 5 else 1))), 25, 0, holiday if offset == 0 else int(target.weekday() >= 5), target)
+                scenario_item['date'] = target
+                
+                forecasts.append(base_item)
+                scenario_forecasts.append(scenario_item)
+                
         except (ValueError, TypeError) as exc:
             messages.error(request, str(exc))
-    return render(request, 'forecast.html', {'forecasts': forecasts, 'model_name': MODEL_NAME})
+    return render(request, 'forecast.html', {'forecasts': forecasts, 'scenario_forecasts': scenario_forecasts if request.method == 'POST' else None, 'model_name': MODEL_NAME})
 
 @login_required
 def weather_data(request):
@@ -215,7 +269,6 @@ def require_api_key(view_func):
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 
-@csrf_exempt
 @require_api_key
 def api_erp_attendance(request):
     """External API endpoint for ERP to push attendance data."""
@@ -233,7 +286,6 @@ def api_erp_attendance(request):
     except (ValueError, TypeError, json.JSONDecodeError) as e:
         return JsonResponse({'error': str(e)}, status=400)
 
-@csrf_exempt
 @require_api_key
 def api_iot_temperature(request):
     """External API endpoint for ESP32/IoT to push temperature data."""
@@ -258,24 +310,207 @@ def api_iot_live_stream(request):
     data = []
     for shipment in active_shipments:
         current = shipment.current_temperature or 4.0
-        fluctuation = random.uniform(-0.5, 0.5)
+        fluctuation = 0.0
         new_temp = round(current + fluctuation, 1)
         shipment.current_temperature = new_temp
         shipment.save(update_fields=['current_temperature'])
         data.append({'tracking_code': shipment.tracking_code, 'temperature': new_temp, 'status': 'Warning' if new_temp > 6.0 or new_temp < 0.0 else 'Normal'})
     return JsonResponse({'status': 'success', 'data': data})
 
-@csrf_exempt
 @_organization_required
 def copilot_chat(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            user_message = data.get('message', '')
+            user_message = data.get('message', '').strip().lower()
+            context = data.get('context', '/')
             if not user_message:
                 return JsonResponse({'error': 'No message provided'}, status=400)
-            ai_response = generate_copilot_response(user_message, request.organization)
+                
+            # Hardcoded NLP rules for Demo workflows (Phase 19)
+            if "pause surplus alerts" in user_message or "pause alerts" in user_message:
+                return JsonResponse({
+                    'type': 'action_preview',
+                    'action': 'pause_surplus_alerts',
+                    'preview': {
+                        'Automation': 'Surplus Alerts',
+                        'Current': 'Enabled',
+                        'New': 'Paused',
+                        'Impact': 'You may stop receiving surplus alerts.'
+                    }
+                })
+            
+            ai_response = generate_copilot_response(user_message, request.organization, context)
+            
+            # If the response is a JSON string (e.g. for navigation), parse it
+            try:
+                if isinstance(ai_response, str) and ai_response.strip().startswith('{'):
+                    parsed = json.loads(ai_response)
+                    return JsonResponse(parsed)
+            except json.JSONDecodeError:
+                pass
+                
             return JsonResponse({'response': ai_response})
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+@login_required
+def api_global_search(request):
+    """Global search endpoint for Command Palette (Ctrl+K) with NLP support."""
+    q = request.GET.get('q', '').strip()
+    if not q:
+        return JsonResponse({'results': []})
+        
+    results = []
+    org_member = request.user.organizations.first()
+    org = org_member.organization if org_member else None
+    
+    q_lower = q.lower()
+    
+    # NLP Intent Detection
+    intent = "search"
+    if any(verb in q_lower for verb in ["go to", "open", "show me", "navigate to"]):
+        intent = "navigate"
+    elif any(verb in q_lower for verb in ["where is", "track", "find delivery"]):
+        intent = "track"
+        
+    # 1. Search Deliveries
+    deliveries = Delivery.objects.filter(
+        Q(tracking_code__icontains=q) | Q(food_name__icontains=q)
+    )
+    if org:
+        deliveries = deliveries.filter(Q(sender=org) | Q(receiver=org))
+        
+    for d in deliveries[:5]:
+        results.append({
+            'title': f'Delivery #{d.tracking_code}',
+            'subtitle': f'{d.food_name} - {d.get_status_display()}',
+            'url': f'/deliveries/{d.id}/',
+            'type': 'Delivery' if intent != 'track' else 'Tracking Result',
+            'icon': '📦' if intent != 'track' else '📍'
+        })
+        
+    # 2. Search Surplus Food
+    surplus = SurplusFood.objects.filter(food_name__icontains=q)
+    if org:
+        surplus = surplus.filter(organization=org)
+        
+    for s in surplus[:5]:
+        results.append({
+            'title': s.food_name,
+            'subtitle': f'{s.quantity} units - {s.get_status_display()}',
+            'url': f'/surplus/',
+            'type': 'Surplus',
+            'icon': '🍎'
+        })
+        
+    # 3. Search Users / Team (If Admin)
+    if org:
+        members = OrganizationMember.objects.filter(
+            organization=org,
+            user__username__icontains=q
+        )
+        for m in members[:3]:
+            results.append({
+                'title': m.user.username,
+                'subtitle': m.get_role_display(),
+                'url': '/organization/',
+                'type': 'Team',
+                'icon': '👤'
+            })
+            
+    # 4. Pages (Static commands & NLP Navigation)
+    pages = [
+        {'title': 'Dashboard', 'url': '/dashboard/', 'keywords': ['home', 'dashboard', 'start', 'overview'], 'icon': '📊'},
+        {'title': 'Intelligence Center', 'url': '/intelligence/', 'keywords': ['ai', 'intelligence', 'metrics', 'brain'], 'icon': '🧠'},
+        {'title': 'Redistribute Surplus', 'url': '/surplus/', 'keywords': ['redistribute', 'donate', 'give', 'surplus'], 'icon': '🤝'},
+        {'title': 'Live Deliveries', 'url': '/deliveries/', 'keywords': ['delivery', 'logistics', 'map'], 'icon': '🚚'},
+        {'title': 'Agriculture Command', 'url': '/agriculture/skyview/', 'keywords': ['farm', 'agriculture', 'skyview'], 'icon': '🌾'}
+    ]
+    
+    for p in pages:
+        if q_lower in p['title'].lower() or any(k in q_lower for k in p['keywords']):
+            results.append({
+                'title': p['title'],
+                'subtitle': 'AI Page Navigation' if intent == 'navigate' else 'Page Navigation',
+                'url': p['url'],
+                'type': 'Navigation',
+                'icon': p['icon']
+            })
+
+    # Sort results to put NLP intent matches first
+    if intent == 'navigate':
+        results.sort(key=lambda x: 0 if x['type'] == 'Navigation' else 1)
+    elif intent == 'track':
+        results.sort(key=lambda x: 0 if x['type'] == 'Tracking Result' else 1)
+
+    return JsonResponse({'results': results})
+
+@csrf_exempt
+@login_required
+def api_ai_scenario(request):
+    """What-If Simulator 2.0 Backend"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    try:
+        data = json.loads(request.body)
+        attendance = int(data.get('attendance', 0))
+        temperature = float(data.get('temperature', 25.0))
+        rainfall = float(data.get('rainfall', 0.0))
+        production = int(data.get('production', 0))
+        
+        # Calculate base using the _predict function
+        result = _predict(attendance, temperature, rainfall)
+        
+        # Overlay user custom production vs AI recommended
+        simulated_surplus = max(0, production - result['prediction'])
+        ratio = simulated_surplus / max(production, 1)
+        risk = 'HIGH' if ratio >= 0.12 or simulated_surplus >= 80 else 'MEDIUM' if ratio >= 0.05 or simulated_surplus >= 30 else 'LOW'
+        
+        return JsonResponse({
+            'success': True,
+            'prediction': result['prediction'],
+            'simulated_surplus': simulated_surplus,
+            'risk': risk,
+            'confidence': result['confidence']
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@csrf_exempt
+@login_required
+def api_ai_action_preview(request):
+    """Preview consequences before applying action"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    try:
+        data = json.loads(request.body)
+        action_type = data.get('action_type')
+        
+        preview = {
+            'action': action_type,
+            'current': 'Unknown',
+            'suggested': 'Unknown',
+            'difference': 'N/A',
+            'estimated_effect': [],
+            'affected': 'Unknown'
+        }
+        
+        if action_type == 'adjust_production':
+            current = int(data.get('current', 0))
+            suggested = int(data.get('suggested', 0))
+            diff = suggested - current
+            
+            preview['current'] = f"{current} units"
+            preview['suggested'] = f"{suggested} units"
+            preview['difference'] = f"{diff} units"
+            preview['estimated_effect'] = [
+                f"Surplus reduction: {abs(diff)} units",
+                f"Estimated cost change: ₹{abs(diff) * 35}"
+            ]
+            preview['affected'] = "Today's Production Plan"
+            
+        return JsonResponse({'success': True, 'preview': preview})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

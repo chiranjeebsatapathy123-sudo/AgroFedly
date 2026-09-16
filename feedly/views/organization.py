@@ -1,4 +1,4 @@
-from ..decorators import _organization_required, _manager_required, _membership, require_org_role
+from ..decorators import _organization_required, _manager_required, require_role, require_org_role
 import json
 import os
 from datetime import date, timedelta, datetime
@@ -16,31 +16,6 @@ from django.views.decorators.csrf import csrf_exempt
 from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionForm, SurplusFoodForm
 from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact
 User = get_user_model()
-try:
-    import joblib
-except Exception:
-    joblib = None
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_bundle.pkl')
-LEGACY_MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_model.pkl')
-MODEL = None
-MODEL_FEATURES = []
-MODEL_NAME = 'Fedly Smart Forecast'
-RESIDUAL_P90 = 8.0
-if joblib:
-    try:
-        bundle = joblib.load(MODEL_PATH)
-        MODEL = bundle.get('model') if isinstance(bundle, dict) else bundle
-        MODEL_FEATURES = bundle.get('features', []) if isinstance(bundle, dict) else []
-        MODEL_NAME = bundle.get('model_name', MODEL_NAME) if isinstance(bundle, dict) else MODEL_NAME
-        RESIDUAL_P90 = float(bundle.get('residual_p90', 8)) if isinstance(bundle, dict) else 8
-    except Exception:
-        try:
-            MODEL = joblib.load(LEGACY_MODEL_PATH)
-            MODEL_FEATURES = ['attendance', 'temperature', 'rainfall', 'holiday', 'day_of_week']
-            MODEL_NAME = 'Legacy Demand Model'
-        except Exception:
-            pass
 from ..forms import PostMealRecordForm
 from ..models import AgriculturalProduce, ProcessingRecord, AgriculturalSupplyRequest
 from ..forms import AgriculturalProduceForm, ProcessingRecordForm, AgriculturalSupplyRequestForm
@@ -53,7 +28,6 @@ from ..forms import BuyerDemandForm
 import difflib
 from ..models import CropMarketTrend, WeatherAdvisory, AgriculturalShipment, QualityInspection, LedgerTransaction
 from ..forms import QualityInspectionForm
-import random
 import json
 from django.utils import timezone
 from ..forms import VolunteerProfileForm
@@ -77,8 +51,8 @@ def organization_dashboard(request):
     deliveries = Delivery.objects.filter(Q(sender=org) | Q(receiver=org)).select_related('sender', 'receiver')[:8]
     outgoing = Delivery.objects.filter(sender=org).aggregate(v=Sum('quantity'))['v'] or 0
     incoming = Delivery.objects.filter(receiver=org).aggregate(v=Sum('quantity'))['v'] or 0
-    other_memberships = OrganizationMember.objects.select_related('organization').filter(user=request.user, is_active=True, organization__is_active=True).exclude(organization=org).order_by('organization__name')
-    return render(request, 'organization_dashboard.html', {'organization': org, 'membership': request.membership, 'members': members, 'member_count': members.count(), 'deliveries': deliveries, 'outgoing_quantity': outgoing, 'incoming_quantity': incoming, 'other_memberships': other_memberships})
+    others = OrganizationMember.objects.select_related('organization').filter(user=request.user, is_active=True, organization__is_active=True).exclude(organization=org).order_by('organization__name')
+    return render(request, 'organization_dashboard.html', {'organization': org, 'membership': request.membership, 'members': members, 'member_count': members.count(), 'deliveries': deliveries, 'outgoing_quantity': outgoing, 'incoming_quantity': incoming, 'others': others})
 
 def register_organization(request):
     """Register a new organization.
@@ -103,7 +77,7 @@ def register_organization(request):
                     membership.save(update_fields=['role', 'is_active'])
                 request.session['active_organization_id'] = organization.id
                 messages.success(request, f'{organization.name} is registered and is now your active organization.')
-                return redirect('organization_dashboard')
+                return redirect('organization_onboarding')
         elif not username or not password:
             form.add_error(None, 'Login username and password are required.')
         elif password != password2:
@@ -118,7 +92,7 @@ def register_organization(request):
             login(request, user)
             request.session['active_organization_id'] = organization.id
             messages.success(request, f'{organization.name} is registered. Welcome to Fedly.')
-            return redirect('organization_dashboard')
+            return redirect('organization_onboarding')
     else:
         form = OrganizationForm()
     return render(request, 'organization_register.html', {'form': form, 'registering_as_authenticated_user': request.user.is_authenticated})
@@ -189,12 +163,11 @@ def organization_remove_member(request, member_id):
 @login_required
 @_organization_required
 def logistics_map(request):
-    import random
     deliveries = Delivery.objects.filter(sender=request.organization, status__in=['SCHEDULED', 'IN_TRANSIT'])
     delivery_data = []
     for d in deliveries:
-        lat = 18.5204 + random.uniform(-0.05, 0.05)
-        lng = 73.8567 + random.uniform(-0.05, 0.05)
+        lat = 18.5204
+        lng = 73.8567
         delivery_data.append({'id': d.id, 'tracking_code': d.tracking_code, 'status': d.status, 'lat': lat, 'lng': lng})
     return render(request, 'logistics_map.html', {'deliveries_json': json.dumps(delivery_data)})
 
@@ -235,3 +208,140 @@ def org_fleet_routing(request):
         routes = FleetRoute.objects.filter(organization=request.organization).order_by('-created_at')
     return render(request, 'org_fleet_routing.html', {'routes': routes})
 
+
+@login_required
+@_organization_required
+def organization_onboarding(request):
+    organization = request.organization
+    
+    if organization.onboarding_completed:
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        step = int(request.POST.get('step', 1))
+        
+        if step == 1:
+            organization.onboarding_step = 2
+        elif step == 2:
+            organization.onboarding_step = 3
+        elif step == 3:
+            organization.onboarding_step = 4
+        elif step == 4:
+            organization.onboarding_step = 5
+        elif step == 5:
+            organization.onboarding_completed = True
+            organization.save()
+            messages.success(request, 'Onboarding complete! Welcome to AgroFedly.')
+            return redirect('dashboard')
+            
+        organization.save()
+        
+    return render(request, 'onboarding.html', {'organization': organization})
+
+@login_required
+@_organization_required
+def data_quality_center(request):
+    org = request.organization
+    
+    # 1. Missing Harvest Dates
+    missing_harvest = AgriculturalProduce.objects.filter(supplier=org, harvest_date__isnull=True).count()
+    
+    # 2. Unknown Quality Produce
+    unknown_quality = AgriculturalProduce.objects.filter(supplier=org, quality_grade='').count()
+    
+    # 3. Recipients Missing Capacity
+    missing_capacity = Recipient.objects.filter(capacity=0).count()
+    
+    # 4. Old Deliveries still marked IN_TRANSIT
+    from django.utils import timezone
+    from datetime import timedelta
+    stale_deliveries = Delivery.objects.filter(
+        sender=org, 
+        status='IN_TRANSIT', 
+        dispatched_at__lt=timezone.now() - timedelta(days=2)
+    ).count()
+
+    context = {
+        'issues': [
+            {'title': 'Missing Harvest Dates', 'count': missing_harvest, 'severity': 'critical', 'desc': 'Produce records without a harvest date cannot be reliably tracked for spoilage risk.'},
+            {'title': 'Unknown Quality Grades', 'count': unknown_quality, 'severity': 'warning', 'desc': 'Produce lacking a quality grade affects distribution priority and ML models.'},
+            {'title': 'Recipients Missing Capacity', 'count': missing_capacity, 'severity': 'info', 'desc': 'Recipients with zero capacity configured may not receive optimal surplus matches.'},
+            {'title': 'Stale Transit Deliveries', 'count': stale_deliveries, 'severity': 'critical', 'desc': 'Deliveries marked IN_TRANSIT for over 48 hours require manual verification.'}
+        ]
+    }
+    return render(request, 'data_quality.html', context)
+
+@require_role(['OWNER', 'ADMIN'])
+def organization_admin_dashboard(request):
+    members = request.organization.members.all().select_related('user')
+    audit_logs = getattr(request.organization, 'audit_logs', None)
+    logs = audit_logs.all()[:10] if audit_logs else []
+    return render(request, 'admin/org_admin_dashboard.html', {
+        'members': members,
+        'audit_logs': logs,
+    })
+
+@require_role(['OWNER', 'ADMIN'])
+def organization_admin_members(request):
+    members = request.organization.members.all().select_related('user')
+    invitations = getattr(request.organization, 'invitations', None)
+    pending_invites = invitations.filter(status='PENDING') if invitations else []
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'invite':
+            email = request.POST.get('email')
+            role = request.POST.get('role', 'STAFF')
+            
+            # Simple mockup of invite creation
+            from ..models import OrganizationInvitation
+            from django.utils import timezone
+            import datetime
+            
+            OrganizationInvitation.objects.create(
+                organization=request.organization,
+                email=email,
+                role=role,
+                status='PENDING',
+                expires_at=timezone.now() + datetime.timedelta(days=7),
+                invited_by=request.user
+            )
+            
+            # Audit log
+            from ..models import TenantAuditLog
+            TenantAuditLog.objects.create(
+                organization=request.organization,
+                actor=request.user,
+                action='MEMBER_INVITED',
+                entity_name='OrganizationInvitation',
+                metadata={'email': email, 'role': role}
+            )
+            
+            messages.success(request, f'Invitation sent to {email}.')
+            return redirect('organization_admin_members')
+            
+    return render(request, 'admin/org_admin_members.html', {
+        'members': members,
+        'invitations': pending_invites,
+    })
+
+@require_role(['OWNER', 'ADMIN'])
+def organization_admin_audit(request):
+    audit_logs = getattr(request.organization, 'audit_logs', None)
+    logs = audit_logs.all().select_related('actor') if audit_logs else []
+    return render(request, 'admin/org_admin_audit.html', {
+        'audit_logs': logs,
+    })
+
+@require_role(['OWNER', 'ADMIN'])
+def organization_admin_settings(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            request.organization.name = name
+            request.organization.save()
+            messages.success(request, 'Organization settings updated successfully.')
+            return redirect('organization_admin_settings')
+            
+    return render(request, 'admin/org_admin_settings.html')

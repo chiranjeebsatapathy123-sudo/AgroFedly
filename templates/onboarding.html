@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Onboarding - {{ organization.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-8 relative z-10 p-6 glass-panel fade-in">
+    <!-- Progress Indicator -->
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold text-white mb-2">Welcome to AgroFedly, {{ organization.name }}</h2>
+        <p class="text-gray-300">Let's set up your operational environment in a few quick steps.</p>
+        
+        <div class="flex items-center justify-between mt-8 relative">
+            <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-white/10 z-0 rounded-full"></div>
+            <div class="absolute left-0 top-1/2 transform -translate-y-1/2 h-1 bg-gradient-to-r from-emerald-400 to-teal-500 z-0 rounded-full transition-all duration-500" style="width: calc(({{ organization.onboarding_step }} - 1) * 25%);"></div>
+            
+            {% for i in '12345'|make_list %}
+            <div class="relative z-10 flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 {% if forloop.counter <= organization.onboarding_step %}bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]{% else %}bg-white/10 text-gray-400 backdrop-blur-md border border-white/20{% endif %}">
+                    {{ forloop.counter }}
+                </div>
+                <span class="mt-2 text-xs font-medium {% if forloop.counter <= organization.onboarding_step %}text-emerald-400{% else %}text-gray-400{% endif %}">
+                    {% if forloop.counter == 1 %}Organization{% endif %}
+                    {% if forloop.counter == 2 %}Operations{% endif %}
+                    {% if forloop.counter == 3 %}Data Setup{% endif %}
+                    {% if forloop.counter == 4 %}Preferences{% endif %}
+                    {% if forloop.counter == 5 %}Ready{% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Step Content -->
+    <div class="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-8">
+        <form method="POST" action="{% url 'organization_onboarding' %}">
+            {% csrf_token %}
+            <input type="hidden" name="step" value="{{ organization.onboarding_step }}">
+
+            {% if organization.onboarding_step == 1 %}
+            <!-- Step 1: Organization Profile -->
+            <div class="step-content fade-in">
+                <h3 class="text-2xl font-semibold text-white mb-6">Verify Organization Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Organization Name</label>
+                        <input type="text" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" value="{{ organization.name }}" disabled>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Organization Type</label>
+                        <input type="text" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" value="{{ organization.get_organization_type_display }}" disabled>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Registration / VAT Number</label>
+                        <input type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" value="{{ organization.registration_number }}" placeholder="Optional">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Primary Contact Email</label>
+                        <input type="email" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" value="{{ organization.email }}" placeholder="contact@example.com">
+                    </div>
+                </div>
+            </div>
+
+            {% elif organization.onboarding_step == 2 %}
+            <!-- Step 2: Operations Focus -->
+            <div class="step-content fade-in">
+                <h3 class="text-2xl font-semibold text-white mb-6">What are your primary operations?</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <label class="cursor-pointer relative">
+                        <input type="checkbox" class="peer sr-only" name="operations" value="agriculture" checked>
+                        <div class="h-full bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-colors peer-checked:bg-emerald-500/20 peer-checked:border-emerald-500/50">
+                            <i class="fas fa-leaf text-2xl text-emerald-400 mb-3"></i>
+                            <h4 class="text-white font-medium mb-1">Agriculture</h4>
+                            <p class="text-sm text-gray-400">Crop management, harvesting, and yield tracking.</p>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer relative">
+                        <input type="checkbox" class="peer sr-only" name="operations" value="logistics" checked>
+                        <div class="h-full bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-colors peer-checked:bg-emerald-500/20 peer-checked:border-emerald-500/50">
+                            <i class="fas fa-truck text-2xl text-blue-400 mb-3"></i>
+                            <h4 class="text-white font-medium mb-1">Logistics</h4>
+                            <p class="text-sm text-gray-400">Fleet routing, delivery scheduling, and tracking.</p>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer relative">
+                        <input type="checkbox" class="peer sr-only" name="operations" value="redistribution">
+                        <div class="h-full bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-colors peer-checked:bg-emerald-500/20 peer-checked:border-emerald-500/50">
+                            <i class="fas fa-hands-helping text-2xl text-purple-400 mb-3"></i>
+                            <h4 class="text-white font-medium mb-1">Redistribution</h4>
+                            <p class="text-sm text-gray-400">Surplus management, food banks, and donations.</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            {% elif organization.onboarding_step == 3 %}
+            <!-- Step 3: Data Integration -->
+            <div class="step-content fade-in">
+                <h3 class="text-2xl font-semibold text-white mb-6">Data Integration</h3>
+                <p class="text-gray-300 mb-6">AgroFedly requires operational data to power AI forecasts and real-time twin capabilities. How would you like to proceed?</p>
+                
+                <div class="space-y-4">
+                    <div class="flex items-start p-4 bg-white/5 border border-white/10 rounded-xl">
+                        <div class="flex-shrink-0 mt-1">
+                            <i class="fas fa-file-csv text-blue-400 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="text-white font-medium">I have CSV/Excel data to import</h4>
+                            <p class="text-sm text-gray-400 mt-1">Use the Data Import Center after onboarding to map your existing records.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start p-4 bg-white/5 border border-white/10 rounded-xl">
+                        <div class="flex-shrink-0 mt-1">
+                            <i class="fas fa-network-wired text-purple-400 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="text-white font-medium">I will use the API</h4>
+                            <p class="text-sm text-gray-400 mt-1">Connect your ERP or IoT systems directly via the AgroFedly REST API.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start p-4 bg-white/5 border border-white/10 rounded-xl">
+                        <div class="flex-shrink-0 mt-1">
+                            <i class="fas fa-keyboard text-emerald-400 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="text-white font-medium">I will enter data manually</h4>
+                            <p class="text-sm text-gray-400 mt-1">Start fresh and input data through the AgroFedly interface.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% elif organization.onboarding_step == 4 %}
+            <!-- Step 4: AI Preferences -->
+            <div class="step-content fade-in">
+                <h3 class="text-2xl font-semibold text-white mb-6">AI & Automation Preferences</h3>
+                
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-white font-medium">Daily AI Briefings</h4>
+                            <p class="text-sm text-gray-400">Receive an AI-generated summary of operational risks and opportunities on your dashboard.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-white font-medium">Automated Subsidies</h4>
+                            <p class="text-sm text-gray-400">Allow AI to automatically match your profile with government agricultural schemes.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            {% elif organization.onboarding_step == 5 %}
+            <!-- Step 5: Ready -->
+            <div class="step-content fade-in text-center py-8">
+                <div class="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-check text-5xl text-emerald-400"></i>
+                </div>
+                <h3 class="text-3xl font-bold text-white mb-4">You're All Set!</h3>
+                <p class="text-gray-300 max-w-lg mx-auto mb-8">Your organization profile is configured. The Digital Twin is initializing your environment. Let's head to the dashboard.</p>
+            </div>
+            {% endif %}
+
+            <!-- Navigation Buttons -->
+            <div class="mt-10 flex justify-between items-center pt-6 border-t border-white/10">
+                {% if organization.onboarding_step > 1 %}
+                <button type="button" onclick="history.back()" class="px-6 py-2.5 rounded-full bg-white/10 text-white font-medium hover:bg-white/20 transition-colors">
+                    Back
+                </button>
+                {% else %}
+                <div></div>
+                {% endif %}
+                
+                <button type="submit" class="px-8 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:-translate-y-0.5">
+                    {% if organization.onboarding_step == 5 %}Go to Dashboard{% else %}Continue{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

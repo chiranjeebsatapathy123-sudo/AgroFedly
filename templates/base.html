@@ -5,11 +5,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="var(--color-primary)">
+<meta name="description" content="AgroFedly is an AI-powered agriculture operations platform and digital twin ecosystem for optimizing food supply chains, forecasting demand, and eliminating surplus waste.">
+<meta name="keywords" content="AgroFedly, Agriculture AI, Food Supply Chain, Surplus Food, Logistics, Demand Forecasting, AgTech">
+<meta property="og:title" content="AgroFedly | AI-Powered Agriculture Intelligence">
+<meta property="og:description" content="Manage your operations, predict demand, and reduce waste with AgroFedly's digital twin ecosystem.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="{% static 'manifest.json' %}">
-<title>{% block title %}AgroFedly{% endblock %} · Smart Food Operations</title>
+    <title>{% block title %}AgroFedly{% endblock %} — AI-Powered Agriculture & Produce Intelligence</title>
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
 <link rel="stylesheet" href="{% static 'css/motion.css' %}">
 <link rel="stylesheet" href="{% static 'css/copilot.css' %}">
+<link rel="stylesheet" href="{% static 'css/premium.css' %}">
 <style>
   #drawer { 
       overflow-y: scroll !important; 
@@ -54,8 +61,59 @@
 </head>
 <body>
 <header class="topbar">
-  <button class="menu-btn" id="menuBtn" aria-label="Open navigation">⋯</button>
-  <a class="brand" href="{% url 'home' %}"><span class="brand-mark">A</span><span>AgroFedly</span><small>{% trans "Smart Food Operations" %}</small></a>
+  
+      <a class="brand" href="{% url 'index' %}">
+        <span class="brand-mark">A</span><span>AgroFedly</span>
+      </a>
+
+  {% if user.is_authenticated %}
+  <nav class="top-nav" style="display:flex; align-items:center; gap:20px; flex:1; justify-content:center;">
+    <div class="nav-item">
+      <a href="{% url 'dashboard' %}" style="text-decoration:none; color:var(--text); font-weight:500; font-size:0.95rem;">Operations</a>
+      <div class="nav-dropdown">
+        <a href="{% url 'surplus_list' %}">▣ Surplus Food</a>
+        <a href="{% url 'delivery_list' %}">📦 Deliveries</a>
+        <a href="{% url 'recipient_list' %}">◎ Recipients</a>
+        <a href="{% url 'intelligence_center' %}">⌁ Intelligence</a>
+        <a href="{% url 'predict_demand' %}">✦ AI Prediction</a>
+        <a href="{% url 'forecast_7_days' %}">◷ 7-Day Forecast</a>
+        <a href="{% url 'agri_market_trends' %}">📊 Market Trends</a>
+      </div>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'agri_dashboard' %}" style="text-decoration:none; color:var(--text); font-weight:500; font-size:0.95rem;">Agriculture</a>
+      <div class="nav-dropdown">
+        <a href="{% url 'agri_produce_list' %}">📦 Produce Inventory</a>
+        <a href="{% url 'agri_processing_list' %}">⚙️ Produce Processing</a>
+        <a href="{% url 'agri_iot_dashboard' %}">📡 IoT Sensor</a>
+        <a href="{% url 'agri_disease_scanner' %}">🔬 AI Disease</a>
+        <a href="{% url 'agri_yield_predictor' %}">📈 Yield Predict</a>
+        <a href="{% url 'agri_soil' %}">🧪 Soil</a>
+      </div>
+    </div>
+    <div class="nav-item">
+      <a href="{% url 'ecosystem_coordination' %}" style="text-decoration:none; color:var(--text); font-weight:500; font-size:0.95rem;">Ecosystem</a>
+      <div class="nav-dropdown">
+        <a href="{% url 'ecosystem_coordination' %}">🌐 Network</a>
+        <a href="{% url 'volunteer_dashboard' %}">🤝 Volunteer</a>
+        <a href="{% url 'agri_supply_matching' %}">🤝 Supply Matching</a>
+        <a href="{% url 'agri_supply_requests_list' %}">📥 Requests</a>
+        <a href="{% url 'agri_skyview' %}">🛰️ Skyview</a>
+      </div>
+    </div>
+    {% if user.organization_memberships.all %}
+    <div class="nav-item">
+      <a href="{% url 'organization_dashboard' %}" style="text-decoration:none; color:var(--text); font-weight:500; font-size:0.95rem;">Organization</a>
+      <div class="nav-dropdown">
+        <a href="{% url 'organization_dashboard' %}">▤ Dashboard</a>
+        <a href="{% url 'impact_dashboard' %}">🌟 Impact</a>
+        <a href="{% url 'leaderboard' %}">🏆 Leaderboard</a>
+        <a href="{% url 'org_fleet_routing' %}">🗺️ Fleet Routing</a>
+      </div>
+    </div>
+    {% endif %}
+  </nav>
+  {% endif %}
   <div class="top-actions">
     <div style="position: relative; display: inline-block; margin-right:10px;">
       <select id="themeSelector" style="padding: 4px; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-primary); cursor:pointer;">
@@ -64,6 +122,7 @@
         <option value="system">💻 System</option>
       </select>
     </div>
+    <button onclick="document.body.classList.toggle('focus-mode')" title="Toggle Focus Mode" style="margin-right:10px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-primary); cursor:pointer;">🎯</button>
     <form action="{% url 'set_language' %}" method="post" style="display:inline-block; margin-right:10px;">
       {% csrf_token %}
       <input name="next" type="hidden" value="{{ request.path }}">
@@ -79,6 +138,72 @@
       </select>
     </form>
     {% if user.is_authenticated %}
+      <!-- Organization Switcher -->
+      {% if active_org %}
+      <div style="position: relative; display: inline-block; margin-right: 15px;">
+        <button id="orgSwitcherBtn" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; padding: 6px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary);" onclick="document.getElementById('orgDropdown').classList.toggle('show')">
+          <i class="fas fa-building text-emerald-500"></i>
+          <span class="font-medium text-sm">{{ active_org.name }}</span>
+          <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+        </button>
+        <div id="orgDropdown" class="notif-dropdown" style="display: none; position: absolute; right: 0; top: 100%; width: 280px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; margin-top: 5px;">
+          <div style="padding: 12px; border-bottom: 1px solid var(--border); font-weight: bold; font-size: 0.85em; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Your Workspaces</div>
+          <div style="max-height: 300px; overflow-y: auto;">
+            {% for membership in available_memberships %}
+              <a href="{% url 'organization_switch' membership.organization.id %}?next={{ request.path }}" style="display: flex; align-items: center; padding: 12px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--text); transition: background 0.2s;">
+                <div style="width: 32px; height: 32px; border-radius: 6px; background: {% if membership.organization.id == active_org.id %}rgba(16, 185, 129, 0.2){% else %}rgba(255,255,255,0.05){% endif %}; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                  <i class="fas fa-check {% if membership.organization.id == active_org.id %}text-emerald-500{% else %}opacity-0{% endif %}"></i>
+                </div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 500; font-size: 0.95em;">{{ membership.organization.name }}</div>
+                  <div style="font-size: 0.75em; color: var(--text-secondary);">{{ membership.get_role_display }}</div>
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+          <div style="padding: 8px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px;">
+            <a href="{% url 'organization_onboarding' %}" style="padding: 8px; font-size: 0.85em; text-align: center; color: var(--text-secondary); text-decoration: none; border-radius: 6px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><i class="fas fa-plus mr-2"></i> Create New Organization</a>
+            <a href="{% url 'organization_dashboard' %}" style="padding: 8px; font-size: 0.85em; text-align: center; color: var(--text-secondary); text-decoration: none; border-radius: 6px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><i class="fas fa-cog mr-2"></i> Manage Organizations</a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div style="position: relative; display: inline-block; margin-right: 10px;">
+          <button id="notifBtn" style="background: transparent; border: none; font-size: 20px; cursor: pointer; position: relative; padding: 4px;" onclick="document.getElementById('notifDropdown').classList.toggle('show')">
+              🔔
+              <span style="position: absolute; top: 0; right: 0; background: var(--danger); color: white; border-radius: 50%; font-size: 10px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-weight: bold;">3</span>
+          </button>
+          <div id="notifDropdown" class="notif-dropdown" style="display: none; position: absolute; right: 0; top: 100%; width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100;">
+              <div style="padding: 12px; border-bottom: 1px solid var(--border); font-weight: bold; font-size: 0.9em; color: var(--primary);">AI Agent Alerts</div>
+              <div style="max-height: 300px; overflow-y: auto;">
+                  <a href="/intelligence/" style="display: block; padding: 12px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--text);">
+                      <div style="font-size: 0.85em; font-weight: bold; margin-bottom: 4px;">Surplus Agent</div>
+                      <div style="font-size: 0.8em; color: var(--text-muted);">High surplus risk predicted for tomorrow. Click to review.</div>
+                  </a>
+                  <a href="/dashboard/" style="display: block; padding: 12px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--text);">
+                      <div style="font-size: 0.85em; font-weight: bold; margin-bottom: 4px;">Logistics Agent</div>
+                      <div style="font-size: 0.8em; color: var(--text-muted);">2 deliveries require driver assignment immediately.</div>
+                  </a>
+                  <a href="/agriculture/iot/" style="display: block; padding: 12px; text-decoration: none; color: var(--text);">
+                      <div style="font-size: 0.85em; font-weight: bold; margin-bottom: 4px;">Storage Agent</div>
+                      <div style="font-size: 0.8em; color: var(--text-muted);">Temperature anomaly detected in Cold Room B.</div>
+                  </a>
+              </div>
+          </div>
+      </div>
+      <script>
+          document.addEventListener('click', function(event) {
+              var btn = document.getElementById('notifBtn');
+              var dropdown = document.getElementById('notifDropdown');
+              if (btn && dropdown && !btn.contains(event.target) && !dropdown.contains(event.target)) {
+                  dropdown.classList.remove('show');
+                  dropdown.style.display = 'none';
+              } else if (btn && btn.contains(event.target)) {
+                  dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+              }
+          });
+      </script>
       <span class="user-chip">● {{ user.username }}</span>
       <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="logout-mini">{% trans "Logout" %}</button></form>
     {% else %}
@@ -87,74 +212,9 @@
   </div>
 </header>
 
-<aside class="drawer" id="drawer">
-  <div class="drawer-head"><strong>{% trans "Navigate" %}</strong><button id="closeMenu" onclick="document.getElementById('drawer').classList.remove('open'); document.getElementById('backdrop').classList.remove('show');">×</button></div>
-  <div class="drawer-category">Overview</div>
-  <a href="{% url 'home' %}">⌂ <span>{% trans "Home" %}</span></a>
-  {% if user.is_authenticated %}
-    <a href="{% url 'dashboard' %}">▦ <span>{% trans "Operations Dashboard" %}</span></a>
-    
-    <div class="drawer-category">Food Management</div>
-    <a href="{% url 'surplus_list' %}">▣ <span>Surplus Food</span></a>
-    <a href="{% url 'delivery_list' %}">📦 <span>Deliveries</span></a>
-    <a href="{% url 'recipient_list' %}">◎ <span>Recipients</span></a>
-    
-    <!-- Phase 5 / 6 specialized consumer features -->
-    <a href="{% url 'user_ai_recipe' %}">🍳 <span>AI Zero-Waste Chef</span></a>
-    
-    <div class="drawer-category">Insights</div>
-    <a href="{% url 'intelligence_center' %}">⌁ <span>Operations Intelligence</span></a>
-    <a href="{% url 'predict_demand' %}">✦ <span>AI Prediction</span></a>
-    <a href="{% url 'forecast_7_days' %}">◷ <span>7-Day Forecast</span></a>
-    <a href="{% url 'agri_market_trends' %}">📊 <span>Market Trends (AI)</span></a>
 
-    <div class="drawer-category">Agriculture</div>
-    <a href="{% url 'agri_dashboard' %}">🌾 <span>Agriculture Dashboard</span></a>
-    <a href="{% url 'agri_produce_list' %}">📦 <span>Produce Inventory</span></a>
-    <a href="{% url 'agri_processing_list' %}">⚙️ <span>Produce Processing</span></a>
-    <a href="{% url 'agri_iot_dashboard' %}">📡 <span>IoT Sensor Fleet</span></a>
-    <a href="{% url 'agri_disease_scanner' %}">🔬 <span>AI Disease Scanner</span></a>
-    <a href="{% url 'agri_yield_predictor' %}">📈 <span>Yield Predictor</span></a>
-    <a href="{% url 'agri_soil' %}">🧪 <span>AI Soil Nutrition</span></a>
-    
-    <div class="drawer-category">Community & Ecosystem</div>
-    <a href="{% url 'ecosystem_coordination' %}">🌐 <span>Ecosystem Coordination</span></a>
-    <a href="{% url 'volunteer_dashboard' %}">🤝 <span>Volunteer Impact</span></a>
 
-    <div class="drawer-category">Administration</div>
-    <a href="{% url 'agri_supply_matching' %}">🤝 <span>Supply Matching</span></a>
-    <a href="{% url 'agri_supply_requests_list' %}">📥 <span>Supply Requests</span></a>
-    <a href="{% url 'agri_skyview' %}">🛰️ <span>Drone & Satellite Imagery</span></a>
 
-    {% if user.organization_memberships.all %}
-      <div class="drawer-category">Organization</div>
-      <a href="{% url 'organization_dashboard' %}">▤ <span>Organization</span></a>
-      <a href="{% url 'impact_dashboard' %}">🌟 <span>Impact Dashboard</span></a>
-      <a href="{% url 'leaderboard' %}">🏆 <span>Leaderboard</span></a>
-      <a href="{% url 'org_fleet_routing' %}">🗺️ <span>AI Fleet Routing</span></a>
-    {% endif %}
-  {% else %}
-    <a class="drawer-cta" href="{% url 'organization_register' %}">＋ <span>Register Organization</span></a>
-    <a href="{% url 'login' %}">↪ <span>Login</span></a>
-  {% endif %}
-</aside>
-<div class="backdrop" id="backdrop"></div>
-
-<!-- Global Search Modal -->
-<div id="global-search-modal" class="search-modal">
-  <div class="search-modal-content">
-    <div class="search-header">
-      <input type="text" id="global-search-input" placeholder="Search surplus, delivery, analytics... (or press '/' to focus)">
-      <button onclick="document.getElementById('global-search-modal').classList.remove('active')" class="close-search">×</button>
-    </div>
-    <div class="search-results">
-      <div class="search-category">Quick Links</div>
-      <a href="{% url 'surplus_list' %}">▣ Food Surplus</a>
-      <a href="{% url 'delivery_list' %}">📦 Deliveries</a>
-      <a href="{% url 'intelligence_center' %}">⌁ Operations Intelligence</a>
-    </div>
-  </div>
-</div>
 
 {% if messages %}
 <div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>
@@ -162,6 +222,8 @@
 
 <!-- Global 3D Engine Canvas -->
 <canvas id="agrofedly-3d-canvas"></canvas>
+
+
 
 <main>{% block content %}{% endblock %}</main>
 
@@ -182,6 +244,16 @@
       <button id="copilot-send-btn" class="copilot-btn-icon">➤</button>
     </div>
   </div>
+</div>
+
+<!-- Universal Quick Action Button -->
+<div id="universal-quick-action" style="position: fixed; bottom: 30px; right: 30px; z-index: 999; display: flex; flex-direction: column; align-items: flex-end;">
+    <div id="quick-action-menu" style="display: none; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 10px; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); flex-direction: column; gap: 10px; align-items: flex-end;">
+        <a href="{% url 'add_surplus' %}" class="btn outline" style="border-radius: 20px; padding: 8px 16px; white-space: nowrap;">+ Log Surplus</a>
+        <a href="{% url 'delivery_create' %}" class="btn outline" style="border-radius: 20px; padding: 8px 16px; white-space: nowrap;">+ New Delivery</a>
+        <a href="{% url 'agri_produce_add' %}" class="btn outline" style="border-radius: 20px; padding: 8px 16px; white-space: nowrap;">+ Add Produce</a>
+    </div>
+    <button onclick="const menu = document.getElementById('quick-action-menu'); menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';" class="btn primary" style="border-radius: 50%; width: 56px; height: 56px; font-size: 28px; box-shadow: 0 10px 25px rgba(16,185,129,0.4); display: flex; justify-content: center; align-items: center; padding: 0; line-height: 1; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="Quick Actions">+</button>
 </div>
 {% endif %}
 
@@ -305,5 +377,7 @@
   };
 </script>
 {% endif %}
+
+{% include 'command_palette.html' %}
 </body>
 </html>

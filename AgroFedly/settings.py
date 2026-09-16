@@ -28,10 +28,11 @@ if ALLOWED_HOSTS_ENV:
     ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(",") if host.strip()]
 else:
     ALLOWED_HOSTS = ["127.0.0.1", "localhost"] if DEBUG else []
-CSRF_TRUSTED_ORIGINS = [
-    "https://*.vercel.app",
-    "https://*.now.sh",
-]
+CSRF_TRUSTED_ORIGINS_ENV = os.getenv("CSRF_TRUSTED_ORIGINS", "")
+if CSRF_TRUSTED_ORIGINS_ENV:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_ENV.split(",") if origin.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = []
 
 INSTALLED_APPS = [
     "daphne",
@@ -55,6 +56,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "feedly.middleware.OrganizationMiddleware",
 ]
 
 ROOT_URLCONF = "AgroFedly.urls"
@@ -69,6 +71,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "feedly.context_processors.organization_context",
             ],
         },
     },
@@ -113,20 +116,9 @@ if DATABASE_URL:
     }
 else:
     if not DEBUG:
-        raise ValueError("DATABASE_URL must be set in production.")
+        raise ValueError("DATABASE_URL must be set in production. SQLite fallback is strictly prohibited in production.")
 
     db_path = BASE_DIR / "db.sqlite3"
-    backup_db = BASE_DIR / "db.sqlite3.backup"
-    if os.getenv("VERCEL"):
-        tmp_db = Path("/tmp") / "db.sqlite3"
-        if backup_db.exists() and not tmp_db.exists():
-            import shutil
-            shutil.copy2(backup_db, tmp_db)
-        db_path = tmp_db
-    elif not db_path.exists() and backup_db.exists():
-        import shutil
-        shutil.copy2(backup_db, db_path)
-
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -184,3 +176,15 @@ CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+
+# Security settings for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "True") == "True"
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

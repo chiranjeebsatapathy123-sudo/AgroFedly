@@ -4,7 +4,7 @@
 {% block title %}{% trans "Traceability Ledger" %} - {{ food.food_name }}{% endblock %}
 
 {% block content %}
-<section class="page-head">
+<section class="page-head reveal">
     <div>
         <div class="eyebrow">{% trans "IMMUTABLE AUDIT TRAIL" %}</div>
         <h1>{% trans "Chain of Custody" %}: {{ food.food_name }}</h1>
@@ -13,36 +13,135 @@
     <a class="btn" href="{% url 'surplus_list' %}">← {% trans "Back to Surplus" %}</a>
 </section>
 
-<div class="ledger-container" style="max-width: 800px; margin: 0 auto;">
+<style>
+.timeline-container {
+    max-width: 800px;
+    margin: 3rem auto;
+    position: relative;
+    padding-left: 2rem;
+}
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-border);
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+    padding-left: 2rem;
+}
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2.35rem;
+    top: 0;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--color-surface);
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 0 0 4px var(--color-bg);
+}
+.timeline-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.timeline-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.timeline-type {
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.timeline-time {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.timeline-details {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+.hash-block {
+    background: var(--color-bg);
+    padding: 1rem;
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.85rem;
+    overflow-wrap: break-word;
+    border: 1px dashed var(--color-border);
+}
+.hash-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.25rem;
+}
+.hash-value {
+    color: var(--color-primary);
+    word-break: break-all;
+}
+.hash-prev {
+    color: var(--color-text-secondary);
+    word-break: break-all;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+}
+</style>
+
+<div class="timeline-container reveal" style="animation-delay: 0.1s;">
     {% for entry in ledger_entries %}
-    <div class="ledger-block" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; position: relative;">
-        
-        <div style="display:flex; justify-content: space-between; margin-bottom: 1rem;">
-            <div style="font-weight: 700; color: var(--primary); font-size: 1.2rem;">{{ entry.action_type }}</div>
-            <div class="text-muted">{{ entry.timestamp|date:"M d, Y H:i:s" }}</div>
-        </div>
-        
-        <p style="margin-bottom: 1rem;">{{ entry.details }}</p>
-        
-        <div style="background: var(--bg); padding: 1rem; border-radius: 4px; font-family: monospace; font-size: 0.85rem; overflow-wrap: break-word;">
-            <div style="color: var(--text-muted); margin-bottom: 0.5rem;">
-                <strong>Previous Hash:</strong><br>
-                {{ entry.previous_hash }}
+    <div class="timeline-item">
+        <div class="timeline-card">
+            <div class="timeline-header">
+                <div class="timeline-type">{{ entry.transaction_type }}</div>
+                <div class="timeline-time">
+                    ⏱️ {{ entry.timestamp|date:"M d, Y H:i:s" }}
+                </div>
             </div>
-            <div style="color: var(--color-primary);">
-                <strong>Block Hash:</strong><br>
-                {{ entry.block_hash }}
+            
+            <div class="timeline-details">
+                {{ entry.details }}
+            </div>
+            
+            <div class="hash-block">
+                <div class="hash-label">Previous Block Hash</div>
+                <div class="hash-prev">{{ entry.previous_hash }}</div>
+                
+                <div class="hash-label">Current Block Hash ({{ entry.transaction_id|truncatechars:12 }})</div>
+                <div class="hash-value">{{ entry.block_hash }}</div>
             </div>
         </div>
-        
-        {% if not forloop.last %}
-        <div style="position: absolute; bottom: -1.5rem; left: 50%; transform: translateX(-50%); color: var(--border); font-size: 1.5rem;">
-            ↓
-        </div>
-        {% endif %}
     </div>
     {% empty %}
-    <div class="empty">{% trans "No ledger records found for this food item." %}</div>
+    <div class="empty">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+        <h3>No ledger records found</h3>
+        <p class="text-muted">This food item has not generated any traceability events yet.</p>
+    </div>
     {% endfor %}
 </div>
 {% endblock %}

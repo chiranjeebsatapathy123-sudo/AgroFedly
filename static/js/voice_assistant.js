@@ -156,9 +156,28 @@ export class VoiceAssistant {
 
         const path = window.location.pathname;
 
-        // Intent Registry
+        // Backend NLP Routing for complex queries
+        if (command.includes('find') || command.includes('where is') || command.includes('track') || command.includes('search') || command.includes('navigate to') || command.includes('open')) {
+            this.setState('UNDERSTANDING');
+            fetch('/api/search/?q=' + encodeURIComponent(command))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.results && data.results.length > 0) {
+                        const topHit = data.results[0];
+                        this.executeAction(`Found it. Opening ${topHit.title}...`, () => {
+                            window.location.href = topHit.url;
+                        });
+                    } else {
+                        this.executeAction("I couldn't find anything matching that query.", () => {});
+                    }
+                }).catch(e => {
+                    this.executeAction("I had trouble reaching the intelligence module.", () => {});
+                });
+            return;
+        }
+
+        // Intent Registry for quick local actions
         const intents = [
-            { id: 'NAVIGATE', keywords: ['open', 'go to', 'navigate', 'take me to', 'show me'] },
             { id: 'QUERY_SURPLUS', keywords: ['surplus', 'food available', 'excess food'] },
             { id: 'QUERY_ANALYTICS', keywords: ['analytics', 'impact', 'statistics'] },
             { id: 'CHANGE_THEME', keywords: ['dark mode', 'light mode', 'theme'] },

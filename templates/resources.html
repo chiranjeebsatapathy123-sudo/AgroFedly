@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Resources - AgroFedly{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto mt-16 relative z-10 p-6">
+    <h1 class="text-4xl font-bold text-white mb-4">Resource Center</h1>
+    <p class="text-xl text-gray-300 mb-12">Guides, API documentation, and best practices for food supply chain resilience.</p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-panel p-6 text-center hover:bg-white/10 transition-colors cursor-pointer">
+            <i class="fas fa-book text-3xl text-emerald-400 mb-3"></i>
+            <h3 class="text-white font-bold">Documentation</h3>
+        </div>
+        <div class="glass-panel p-6 text-center hover:bg-white/10 transition-colors cursor-pointer">
+            <i class="fas fa-code text-3xl text-indigo-400 mb-3"></i>
+            <h3 class="text-white font-bold">API Reference</h3>
+        </div>
+        <div class="glass-panel p-6 text-center hover:bg-white/10 transition-colors cursor-pointer">
+            <i class="fas fa-hands-helping text-3xl text-purple-400 mb-3"></i>
+            <h3 class="text-white font-bold">Community</h3>
+        </div>
+    </div>
+</div>
+{% endblock %}

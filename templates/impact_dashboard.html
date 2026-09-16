@@ -63,6 +63,17 @@
     });
   </script>
 
+  <div class="impact-methodology" style="background: var(--surface); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed var(--primary);">
+      <h3 style="margin-top: 0; color: var(--primary);">{% trans "Impact Methodology 📊" %}</h3>
+      <p style="font-size: 0.9em; margin-bottom: 10px; color: var(--text-muted);">How we calculate your real-world impact based on actual operational data:</p>
+      <ul style="font-size: 0.9em; margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+          <li><strong>Meals Saved:</strong> <code style="background: var(--background-secondary); padding: 2px 6px; border-radius: 4px;">Total successful Delivery volume (status: DELIVERED)</code></li>
+          <li><strong>CO₂ Reduced:</strong> <code style="background: var(--background-secondary); padding: 2px 6px; border-radius: 4px;">Meals Saved × 0.65 kg CO₂e</code> (Avoided landfill methane emissions per meal)</li>
+          <li><strong>Cost Savings:</strong> <code style="background: var(--background-secondary); padding: 2px 6px; border-radius: 4px;">Meals Saved × ₹35</code> (Estimated average production cost per meal)</li>
+      </ul>
+      <p style="font-size: 0.8em; margin-top: 10px; color: var(--text-light);"><em>Note: Metrics are strictly derived from verified logistics data on the AgroFedly ledger.</em></p>
+  </div>
+
   <h3>{% trans "Top Contributors Leaderboard" %}</h3>
   {% if all_impacts %}
     <table class="data-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">

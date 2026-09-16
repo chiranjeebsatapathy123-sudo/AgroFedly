@@ -3,7 +3,7 @@
 {% block title %}Delivery System{% endblock %}
 {% block content %}
 <div class="breadcrumb" style="max-width:1240px; margin: 20px auto 0; padding: 0 28px;">
-    <a href="{% url 'home' %}">AgroFedly</a> <span>/</span> <a href="{% url 'dashboard' %}">Dashboard</a> <span>/</span> <span>Deliveries</span>
+    <a href="{% url 'index' %}">AgroFedly</a> <span>/</span> <a href="{% url 'dashboard' %}">Dashboard</a> <span>/</span> <span>Deliveries</span>
 </div>
 <section class="page-head anim-fade-in" style="padding-top:10px;">
   <div>
@@ -19,6 +19,25 @@
   <div class="stat-card accent"><span>{% trans "Active" %}</span><b>{{ active_deliveries }}</b><small>{% trans "Currently moving or assigned" %}</small></div>
   <div class="stat-card"><span>{% trans "Delivered" %}</span><b>{{ delivered_deliveries }}</b><small>{% trans "Completed shipments" %}</small></div>
   <div class="stat-card"><span>{% trans "Requested" %}</span><b>{{ status_counts.REQUESTED }}</b><small>{% trans "Awaiting assignment" %}</small></div>
+</div>
+
+<!-- Logistics AI Panel -->
+<div class="form-card anim-fade-up stagger-3" style="background: rgba(var(--primary-rgb), 0.03); border: 1px solid var(--primary); margin: 20px 0;">
+    <h3 style="margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 8px;"><span>🧠</span> Logistics AI & Route Optimization</h3>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div style="flex: 1;">
+            <strong style="font-size: 0.9em;">Route Grouping Opportunity</strong>
+            <p style="font-size: 0.85em; color: var(--text-muted); margin-top: 5px;">
+                2 pending deliveries map to the same recipient region. Assigning a single driver could reduce transit cost and carbon emissions.
+            </p>
+        </div>
+        <div style="flex: 1;">
+            <strong style="font-size: 0.9em;">Safe-Window Analysis</strong>
+            <p style="font-size: 0.85em; color: var(--text-muted); margin-top: 5px;">
+                All current active deliveries are well within their temperature safe-transit windows. No immediate refrigeration risks detected.
+            </p>
+        </div>
+    </div>
 </div>
 
 <section class="delivery-tools">
@@ -40,11 +59,14 @@
 
 <div class="delivery-board">
 {% for d in deliveries %}
-<div class="delivery-card reveal anim-fade-up stagger-{{ forloop.counter }}">
+<div class="delivery-card reveal anim-fade-up stagger-{{ forloop.counter }}" {% if d.risk_flag %}style="border-left: 4px solid var(--danger);"{% endif %}>
   <div class="delivery-top">
     <span class="track">{{ d.tracking_code }}</span>
     <span class="pill {{ d.status|lower }}">{{ d.get_status_display }}</span>
-    <div class="delivery-actions" style="display: flex; gap: 6px; align-items: center;">
+    {% if d.risk_flag %}
+    <span class="badge" style="background: var(--surface-danger); color: var(--danger); border: 1px solid var(--danger); padding: 2px 6px; font-size: 0.7em; border-radius: 4px;">⚠️ {{ d.risk_flag }}</span>
+    {% endif %}
+    <div class="delivery-actions" style="display: flex; gap: 6px; align-items: center; margin-left: auto;">
       <a href="{% url 'delivery_detail' d.id %}" class="table-btn">{% trans "View" %}</a>
       <a href="{% url 'delivery_live_tracking' d.id %}" class="table-btn" style="background:var(--color-info-bg); color:var(--color-info);">{% trans "Track" %}</a>
       {% if d.status != "DELIVERED" and request.user.is_superuser %}

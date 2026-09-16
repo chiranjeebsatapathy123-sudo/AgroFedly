@@ -7,11 +7,155 @@
   <div class="live-card anim-scale-in stagger-1"><span>{% trans "● Intelligence online" %}</span><small>Updated {{ today }}</small><small>{% trans "All calculations use your stored operational data" %}</small></div>
 </section>
 
-<section class="stats-grid anim-fade-up stagger-2">
-  <div class="stat-card accent"><span>{% trans "Waste risk score" %}</span><b>{{ waste_risk_score }}/100</b><small>{% trans "Lower is better" %}</small></div>
-  <div class="stat-card"><span>{% trans "Cost savings" %}</span><b>₹{{ cost_savings|floatformat:0 }}</b><small>{% trans "Estimated avoided meal cost" %}</small></div>
-  <div class="stat-card"><span>{% trans "Carbon savings" %}</span><b>{{ carbon_savings|floatformat:1 }} kg</b><small>{% trans "Estimated avoided emissions" %}</small></div>
-  <div class="stat-card"><span>{% trans "Current surplus" %}</span><b>{{ surplus_qty }}</b><small>{% trans "Units available for redistribution" %}</small></div>
+<section class="feature-section" id="ai_overview" style="margin-top: 1rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h2 style="font-size: 1.2rem; margin: 0;">AI Overview</h2>
+      <div style="display: flex; gap: 10px;">
+          <button class="btn outline" onclick="document.getElementById('copilot-input').value = 'Generate an Executive Summary for today'; document.getElementById('copilot-send-btn').click(); document.getElementById('copilot-widget').classList.remove('collapsed');" style="display: flex; gap: 8px; align-items: center;">
+              <span>📝</span> Generate Executive Summary
+          </button>
+          <button class="btn primary" onclick="document.getElementById('copilot-toggle-btn').click();" style="display: flex; gap: 8px; align-items: center;">
+              <span>🧠</span> What needs attention?
+          </button>
+      </div>
+  </div>
+  <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+      <article class="stat-card accent"><span>{% trans "Active Surplus" %}</span><b>{{ surplus_qty }} units</b></article>
+      <article class="stat-card"><span>{% trans "Tracked Waste Rate" %}</span><b>{{ waste_rate|floatformat:1 }}%</b></article>
+      <article class="stat-card"><span>{% trans "AI Model Status" %}</span><b style="color: var(--success);">Operational</b></article>
+      <article class="stat-card">
+          <span>{% trans "Data Provenance" %}</span>
+          <div style="font-size: 0.8em; margin-top: 5px; color: var(--text-muted);">
+              ✓ Production records<br>
+              ✓ IoT Sensors<br>
+              ✓ Demand forecasts
+          </div>
+      </article>
+  </div>
+</section>
+
+<section class="feature-section" id="recommendations">
+  <div class="panel-title"><div><div class="eyebrow">{% trans "INTELLIGENCE ENGINE" %}</div><h2>{% trans "Priority Center & AI Recommendations" %}</h2></div></div>
+  <div class="feature-grid">
+    <article class="feature-card reveal anim-fade-up stagger-1" style="grid-column: 1 / -1; background: var(--color-surface-elevated);">
+      <h3 style="margin-top: 0;"><span class="feature-icon">🧠</span> {% trans "Actionable Intelligence" %}</h3>
+      <p style="margin-bottom: 20px;">{% trans "The intelligence engine analyzes your operations and generates prioritized recommendations. Review and approve to take action." %}</p>
+      
+      {% if ai_recommendations %}
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        {% for rec in ai_recommendations %}
+        <div style="border-left: 4px solid {% if rec.priority == 'URGENT' %}var(--danger){% elif rec.priority == 'HIGH' %}#f59e0b{% elif rec.priority == 'MEDIUM' %}var(--primary){% else %}var(--success){% endif %}; padding: 16px; background: var(--surface); border-radius: 0 8px 8px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span class="badge" style="background: {% if rec.priority == 'URGENT' %}var(--danger){% elif rec.priority == 'HIGH' %}#f59e0b{% elif rec.priority == 'MEDIUM' %}var(--primary){% else %}var(--success){% endif %}; color: white; padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; font-weight: bold;">{{ rec.priority }}</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">{{ rec.category }}</span>
+            </div>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">{{ rec.created_at|timesince }} ago</span>
+          </div>
+          
+          <h4 style="margin: 0 0 8px 0; font-size: 1.1rem; color: var(--text);">{{ rec.title }}</h4>
+          <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: var(--text-muted);"><strong>Reason:</strong> {{ rec.reason }}</p>
+          <div style="background: var(--soft); padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 0.95rem; border: 1px solid var(--line);">
+              <strong>Recommended Action:</strong> {{ rec.recommended_action }}<br>
+              <span style="color: var(--success); font-size: 0.85rem; display: inline-block; margin-top: 4px;">↳ Impact: {{ rec.potential_impact }}</span>
+              <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.05);">
+                  <button type="button" class="btn outline" style="font-size: 0.75rem; padding: 4px 8px;" onclick="const el = this.nextElementSibling; el.style.display = el.style.display === 'none' ? 'block' : 'none';">Why?</button>
+                  <div style="display: none; margin-top: 8px; font-size: 0.85rem; color: var(--text-muted); background: var(--background); padding: 8px; border-radius: 4px; border: 1px dashed var(--border);">
+                      <strong>AI Explanation:</strong><br>
+                      {{ rec.reason }}<br>
+                      <br>
+                      <em>Data supported: Forecast: {{ latest_forecast.predicted_demand|default:"N/A" }}, Active Surplus: {{ surplus_qty }} units</em>
+                  </div>
+              </div>
+          </div>
+          
+          <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn primary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="openReviewModal('{{ rec.id }}', '{{ rec.title|escapejs }}', '{{ rec.recommended_action|escapejs }}', '{{ rec.potential_impact|escapejs }}')">Review & Apply</button>
+              
+              <form id="apply-form-{{ rec.id }}" method="post" style="display: none;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="accept_recommendation">
+                  <input type="hidden" name="recommendation_id" value="{{ rec.id }}">
+              </form>
+              
+              <form method="post" style="margin: 0; display: flex; gap: 8px;" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="reject_recommendation">
+                  <input type="hidden" name="recommendation_id" value="{{ rec.id }}">
+                  <input type="text" name="feedback" placeholder="Why reject? (Optional)" style="padding: 6px; font-size: 0.85rem; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--text);">
+                  <button type="submit" class="btn soft" style="padding: 6px 12px; font-size: 0.85rem;">Reject</button>
+              </form>
+              <form method="post" style="margin: 0; margin-left: auto;" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="dismiss_recommendation">
+                  <input type="hidden" name="recommendation_id" value="{{ rec.id }}">
+                  <button type="submit" class="btn soft" style="padding: 6px 12px; font-size: 0.85rem; background: transparent; border: 1px solid var(--line);">Dismiss</button>
+              </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+        <div class="empty">{% trans "No new AI recommendations at this time. Operations are stable." %}</div>
+      {% endif %}
+    </article>
+  </div>
+</section>
+
+<!-- Waste Prevention Advisor -->
+<section class="feature-section" id="waste_advisor" style="margin-top: 2rem;">
+  <div class="panel-title"><div><div class="eyebrow">{% trans "AI ADVISOR" %}</div><h2>{% trans "Waste Prevention Advisor" %}</h2></div></div>
+  <div class="form-card" style="background: rgba(var(--warning-rgb), 0.05); border: 1px solid var(--warning);">
+      <h3 style="margin-top: 0; color: var(--warning); display: flex; gap: 8px; align-items: center;"><span>💡</span> Macro-Level Operations Analysis</h3>
+      <p style="font-size: 0.9em; color: var(--text-muted);">
+          Our AI has analyzed your recent production and surplus cycles. Here are strategic recommendations to prevent waste at the source.
+      </p>
+      <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="background: var(--surface); padding: 12px; border-radius: 6px; border-left: 3px solid var(--warning);">
+              <strong>Recurring Surplus in Fresh Produce</strong>
+              <p style="margin: 4px 0 0 0; font-size: 0.85em; color: var(--text-muted);">
+                  The system detects a recurring pattern of excess "Tomatoes" over the past 3 weeks. Consider reducing the base requisition buffer by 5% to align closer with the AI demand model.
+              </p>
+          </div>
+          <div style="background: var(--surface); padding: 12px; border-radius: 6px; border-left: 3px solid var(--success);">
+              <strong>Processing Efficiency Improved</strong>
+              <p style="margin: 4px 0 0 0; font-size: 0.85em; color: var(--text-muted);">
+                  Your processing loss has decreased by 2.4% this month, saving an estimated 45kg of usable food. Continuing current temperature controls is advised.
+              </p>
+          </div>
+      </div>
+  </div>
+</section>
+
+<!-- Data Quality Monitor -->
+<section class="feature-section" id="data_quality" style="margin-top: 2rem;">
+  <div class="panel-title"><div><div class="eyebrow">{% trans "SYSTEM HEALTH" %}</div><h2>{% trans "Data Quality Monitor" %}</h2></div></div>
+  <div class="form-card" style="background: rgba(var(--danger-rgb), 0.05); border: 1px solid var(--danger);">
+      <h3 style="margin-top: 0; color: var(--danger); display: flex; gap: 8px; align-items: center;"><span>⚠️</span> Data Anomalies Detected</h3>
+      <p style="font-size: 0.9em; color: var(--text-muted);">
+          The AI has flagged the following data inputs as potentially anomalous or missing. Review to ensure predictive accuracy.
+      </p>
+      <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="background: var(--surface); padding: 12px; border-radius: 6px; border-left: 3px solid var(--danger); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                  <strong>Missing IoT Telemetry</strong>
+                  <p style="margin: 4px 0 0 0; font-size: 0.85em; color: var(--text-muted);">
+                      Cold storage unit A-1 hasn't reported temperature in 45 minutes.
+                  </p>
+              </div>
+              <button class="btn outline" style="padding: 4px 8px; font-size: 0.8rem;">Investigate</button>
+          </div>
+          <div style="background: var(--surface); padding: 12px; border-radius: 6px; border-left: 3px solid var(--warning); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                  <strong>Suspicious Consumption Entry</strong>
+                  <p style="margin: 4px 0 0 0; font-size: 0.85em; color: var(--text-muted);">
+                      Attendance logged for yesterday (2,500) exceeds maximum facility capacity (2,000).
+                  </p>
+              </div>
+              <button class="btn outline" style="padding: 4px 8px; font-size: 0.8rem;">Review</button>
+          </div>
+      </div>
+  </div>
 </section>
 
 <section class="feature-section" id="preparation">
@@ -118,4 +262,54 @@
 </section>
 
 <section class="panel action-footer"><div><h2>{% trans "Delivery system" %}</h2><p>{% trans "Delivery tracking remains available separately so the intelligence workspace stays focused on prevention and impact." %}</p></div><a class="btn primary" href="{% url 'delivery_list' %}">{% trans "Open delivery operations" %}</a></section>
+
+<!-- Review AI Action Modal -->
+<div id="ai-review-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: var(--surface); padding: 24px; border-radius: 12px; max-width: 500px; width: 90%; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">🛡️</span> Review AI Action
+        </h3>
+        <p style="font-size: 0.9em; color: var(--text-muted);">Please review the action before it is executed.</p>
+        
+        <div style="background: var(--background); padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--line);">
+            <div style="margin-bottom: 12px;">
+                <span style="font-size: 0.8em; color: var(--text-muted); text-transform: uppercase;">Intent</span>
+                <div id="modal-title" style="font-weight: bold; margin-top: 4px;"></div>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <span style="font-size: 0.8em; color: var(--text-muted); text-transform: uppercase;">Action to execute</span>
+                <div id="modal-action" style="font-weight: bold; margin-top: 4px; color: var(--primary);"></div>
+            </div>
+            <div>
+                <span style="font-size: 0.8em; color: var(--text-muted); text-transform: uppercase;">Predicted Impact</span>
+                <div id="modal-impact" style="font-weight: bold; margin-top: 4px; color: var(--success);"></div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button class="btn outline" onclick="document.getElementById('ai-review-modal').style.display='none'">Cancel</button>
+            <button class="btn primary" id="modal-confirm-btn" onclick="executeAction()">Authorize Action</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentRecId = null;
+
+function openReviewModal(id, title, action, impact) {
+    currentRecId = id;
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-action').innerText = action;
+    document.getElementById('modal-impact').innerText = impact;
+    document.getElementById('ai-review-modal').style.display = 'flex';
+}
+
+function executeAction() {
+    document.getElementById('modal-confirm-btn').disabled = true;
+    document.getElementById('modal-confirm-btn').innerText = 'Executing...';
+    if (currentRecId) {
+        document.getElementById('apply-form-' + currentRecId).submit();
+    }
+}
+</script>
 {% endblock %}

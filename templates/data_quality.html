@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Data Quality Center - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto mt-8 relative z-10 p-6">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2">Data Quality Center</h1>
+            <p class="text-gray-300">Monitor and resolve data completeness issues for accurate AI predictions.</p>
+        </div>
+        <button class="px-5 py-2 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/50 hover:bg-indigo-500 hover:text-white transition-colors flex items-center">
+            <i class="fas fa-sync-alt mr-2"></i> Re-run Analysis
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {% for issue in issues %}
+        <div class="glass-panel p-6 fade-in stagger-{{ forloop.counter }}">
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center
+                    {% if issue.severity == 'critical' %}bg-red-500/20 text-red-400
+                    {% elif issue.severity == 'warning' %}bg-amber-500/20 text-amber-400
+                    {% else %}bg-blue-500/20 text-blue-400{% endif %}">
+                    {% if issue.severity == 'critical' %}
+                        <i class="fas fa-exclamation-triangle text-xl"></i>
+                    {% elif issue.severity == 'warning' %}
+                        <i class="fas fa-exclamation-circle text-xl"></i>
+                    {% else %}
+                        <i class="fas fa-info-circle text-xl"></i>
+                    {% endif %}
+                </div>
+                <span class="text-3xl font-bold {% if issue.count > 0 %}text-white{% else %}text-emerald-400{% endif %}">{{ issue.count }}</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">{{ issue.title }}</h3>
+            <p class="text-sm text-gray-400 mb-4 h-16">{{ issue.desc }}</p>
+            
+            {% if issue.count > 0 %}
+            <button class="w-full py-2 rounded-lg text-sm font-medium transition-colors
+                {% if issue.severity == 'critical' %}bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30
+                {% elif issue.severity == 'warning' %}bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30
+                {% else %}bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/30{% endif %}">
+                Resolve Issues
+            </button>
+            {% else %}
+            <div class="w-full py-2 rounded-lg text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-center flex items-center justify-center">
+                <i class="fas fa-check-circle mr-2"></i> Clean
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Data Lineage Map -->
+    <div class="glass-panel p-6 fade-in">
+        <h3 class="text-xl font-bold text-white mb-4">Operational Data Lineage</h3>
+        <p class="text-gray-400 text-sm mb-6">Visual representation of data flow and quality gates across the AgroFedly ecosystem.</p>
+        
+        <div class="bg-black/30 rounded-xl p-8 border border-white/10 flex flex-col md:flex-row items-center justify-between text-center overflow-x-auto gap-4">
+            <!-- Source -->
+            <div class="flex-shrink-0 relative">
+                <div class="w-20 h-20 rounded-full border-2 border-emerald-500/50 bg-emerald-500/10 flex items-center justify-center z-10 relative mb-3">
+                    <i class="fas fa-database text-2xl text-emerald-400"></i>
+                </div>
+                <h4 class="text-white text-sm font-medium">Data Ingestion</h4>
+                <p class="text-xs text-emerald-400 mt-1">100% Passed</p>
+            </div>
+            
+            <div class="hidden md:block flex-1 h-0.5 bg-gradient-to-r from-emerald-500/50 to-indigo-500/50"></div>
+            
+            <!-- Quality Engine -->
+            <div class="flex-shrink-0 relative">
+                <div class="w-20 h-20 rounded-full border-2 border-indigo-500/50 bg-indigo-500/10 flex items-center justify-center z-10 relative mb-3 mx-auto shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                    <i class="fas fa-shield-alt text-2xl text-indigo-400"></i>
+                </div>
+                <h4 class="text-white text-sm font-medium">Quality Engine</h4>
+                <p class="text-xs text-indigo-400 mt-1">4 Rules Active</p>
+            </div>
+            
+            <div class="hidden md:block flex-1 h-0.5 bg-gradient-to-r from-indigo-500/50 to-purple-500/50"></div>
+            
+            <!-- Digital Twin -->
+            <div class="flex-shrink-0 relative">
+                <div class="w-20 h-20 rounded-full border-2 border-purple-500/50 bg-purple-500/10 flex items-center justify-center z-10 relative mb-3 mx-auto">
+                    <i class="fas fa-project-diagram text-2xl text-purple-400"></i>
+                </div>
+                <h4 class="text-white text-sm font-medium">Digital Twin</h4>
+                <p class="text-xs text-purple-400 mt-1">Syncing</p>
+            </div>
+            
+            <div class="hidden md:block flex-1 h-0.5 bg-gradient-to-r from-purple-500/50 to-blue-500/50"></div>
+            
+            <!-- AI Inference -->
+            <div class="flex-shrink-0 relative">
+                <div class="w-20 h-20 rounded-full border-2 border-blue-500/50 bg-blue-500/10 flex items-center justify-center z-10 relative mb-3 mx-auto">
+                    <i class="fas fa-brain text-2xl text-blue-400"></i>
+                </div>
+                <h4 class="text-white text-sm font-medium">AI Inference</h4>
+                <p class="text-xs text-blue-400 mt-1">Ready</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

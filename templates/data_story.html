@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}AgroFedly Impact Story{% endblock %}
+
+{% block content %}
+<style>
+    /* Data Story Specific Styles */
+    .story-section {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .story-content {
+        max-width: 800px;
+        text-align: center;
+        z-index: 10;
+        position: relative;
+    }
+
+    .story-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: -webkit-linear-gradient(45deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+    }
+
+    .story-stat {
+        font-size: 5rem;
+        font-weight: 900;
+        color: var(--success);
+        margin: 20px 0;
+        text-shadow: 0 0 20px rgba(var(--success-rgb), 0.3);
+    }
+    
+    .story-desc {
+        font-size: 1.5rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+    }
+
+    .story-card {
+        background: var(--color-surface-elevated);
+        border: 1px solid var(--border);
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+    }
+    
+    /* Animation System 3.0 Overrides */
+    .reveal {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+
+<div class="data-story-container">
+    <!-- Chapter 1: The Problem -->
+    <section class="story-section">
+        <div class="story-content reveal">
+            <h1 class="story-title">The Challenge</h1>
+            <p class="story-desc">Millions of tonnes of food are wasted annually while people go hungry. AgroFedly was built to bridge this gap through intelligent operations.</p>
+        </div>
+    </section>
+
+    <!-- Chapter 2: Our Impact -->
+    <section class="story-section">
+        <div class="story-content story-card reveal">
+            <h2>Our Impact Since Launch</h2>
+            <div class="story-stat anim-scale-up">1.2M</div>
+            <p class="story-desc">Meals Saved & Redistributed</p>
+        </div>
+    </section>
+
+    <!-- Chapter 3: CO2 Reduced -->
+    <section class="story-section">
+        <div class="story-content reveal">
+            <h2>Environmental Sustainability</h2>
+            <div class="story-stat" style="color: var(--warning);">450</div>
+            <p class="story-desc">Tonnes of CO2 Emissions Prevented</p>
+        </div>
+    </section>
+
+    <!-- Chapter 4: Predictive AI -->
+    <section class="story-section">
+        <div class="story-content story-card reveal">
+            <h1 class="story-title" style="font-size: 2.5rem;">Powered by AI</h1>
+            <p class="story-desc">Our intelligent algorithms forecast demand, monitor storage temperatures, and autonomously reroute surplus to minimize waste.</p>
+            <br>
+            <a href="{% url 'dashboard' %}" class="btn primary pulse" style="font-size: 1.2rem; padding: 15px 30px;">Enter Dashboard</a>
+        </div>
+    </section>
+</div>
+
+<script>
+    // Simple Intersection Observer for scroll animations (Animation System 3.0)
+    document.addEventListener("DOMContentLoaded", function() {
+        const reveals = document.querySelectorAll(".reveal");
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("active");
+                }
+            });
+        }, { threshold: 0.3 });
+        
+        reveals.forEach(el => observer.observe(el));
+    });
+</script>
+{% endblock %}

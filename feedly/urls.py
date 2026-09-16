@@ -1,8 +1,25 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
+from django.views.generic import TemplateView
 from . import views
 
 urlpatterns = [
-    path("", views.home, name="home"),
+    # Static pages (Phase 21)
+    path("ai/trust/", TemplateView.as_view(template_name="trust.html"), name="ai_trust"),
+    path("resources/", TemplateView.as_view(template_name="resources.html"), name="resources"),
+
+    path("", views.index, name="index"),
+    path("product/", views.product, name="product"),
+    path("solutions/", views.solutions, name="solutions"),
+    path("ai/", views.ai, name="ai"),
+    path("features/", views.features, name="features"),
+    path("pricing/", views.pricing, name="pricing"),
+    path("about/", views.about, name="about"),
+    path("security/", views.security, name="security"),
+    path("privacy/", views.privacy, name="privacy"),
+    path("terms/", views.terms, name="terms"),
+    path("contact/", views.contact, name="contact"),
+
     path("health/", views.health_check, name="health"),
     path("login/", views.login_view, name="login"),
     path("login/buyer/", views.login_view, kwargs={"persona": "buyer"}, name="login_buyer"),
@@ -18,6 +35,7 @@ urlpatterns = [
     path("weather/", views.weather_data, name="weather_data"),
     path("intelligence/", views.intelligence_center, name="intelligence_center"),
     path("analytics/", views.analytics_dashboard, name="analytics_dashboard"),
+    path("story/", views.data_story, name="data_story"),
     path("logging/", views.post_meal_logging, name="post_meal_logging"),
     
     # Agriculture Extension Routes
@@ -67,8 +85,16 @@ urlpatterns = [
     path("organizations/<int:organization_id>/details/", views.organization_details_json, name="organization_details_json"),
     path("organization/switch/<int:organization_id>/", views.organization_switch, name="organization_switch"),
     path("organization/", views.organization_dashboard, name="organization_dashboard"),
+    path("organization/onboarding/", views.organization_onboarding, name="organization_onboarding"),
     path("organization/map/", views.logistics_map, name="logistics_map"),
     path("organization/edit/", views.organization_edit, name="organization_edit"),
+    
+    # Phase 22: Enterprise Administration Console
+    path("organization/admin/", views.organization_admin_dashboard, name="organization_admin_dashboard"),
+    path("organization/admin/members/", views.organization_admin_members, name="organization_admin_members"),
+    path("organization/admin/audit/", views.organization_admin_audit, name="organization_admin_audit"),
+    path("organization/admin/settings/", views.organization_admin_settings, name="organization_admin_settings"),
+    
     path("organization/members/add/", views.organization_add_member, name="organization_add_member"),
     path("organization/members/<int:member_id>/remove/", views.organization_remove_member, name="organization_remove_member"),
 
@@ -87,7 +113,23 @@ urlpatterns = [
     path("organization/leaderboard/", views.leaderboard, name="leaderboard"),
     path("deliveries/<int:delivery_id>/receipt/", views.generate_donation_receipt, name="generate_donation_receipt"),
     path("api/copilot/", views.copilot_chat, name="copilot_chat"),
+    path("api/weather/", views.api_weather, name="api_weather"),
+    path("api/search/", views.api_global_search, name="api_global_search"),
+    path("data-quality/", views.data_quality_center, name="data_quality_center"),
     
+    # AI Endpoints (Phase 18)
+    path("api/ai/scenario/", views.api_ai_scenario, name="api_ai_scenario"),
+    path("api/ai/action_preview/", views.api_ai_action_preview, name="api_ai_action_preview"),
+
+
+    # Digital Twin (Phase 19)
+    path("twin/", views.digital_twin, name="digital_twin"),
+    path("passport/<str:batch_id>/", views.produce_passport, name="produce_passport"),
+    path("import/", views.data_import, name="data_import"),
+    
+    # Community & Gamification
+    # path("community/", views.community_hub, name="community_hub"),
+
     # PHASE 3 ROUTES
     # PHASE 3 ROUTES
     path("agriculture/skyview/", views.agri_skyview, name="agri_skyview"),

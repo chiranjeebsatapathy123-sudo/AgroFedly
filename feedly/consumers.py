@@ -7,22 +7,28 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
             
-        # Group based on user ID or organization ID
-        self.group_name = f"user_{self.scope['user'].id}"
-        
-        # Join room group
+        # Join user-specific group
+        self.user_group_name = f"user_{self.scope['user'].id}"
         await self.channel_layer.group_add(
-            self.group_name,
+            self.user_group_name,
             self.channel_name
         )
+
+        # Join organization groups if available
+        self.org_groups = []
+        if hasattr(self.scope['user'], 'organization_memberships'):
+            # In a real async environment, we need database_sync_to_async to query
+            pass # We'll do it safely
+
+        # For simplicity and safety in async WebSocket consumers without DB queries,
+        # we can just listen to the user group, and signals.py will loop through org members.
         
         await self.accept()
 
     async def disconnect(self, close_code):
-        if hasattr(self, 'group_name'):
-            # Leave room group
+        if hasattr(self, 'user_group_name'):
             await self.channel_layer.group_discard(
-                self.group_name,
+                self.user_group_name,
                 self.channel_name
             )
 

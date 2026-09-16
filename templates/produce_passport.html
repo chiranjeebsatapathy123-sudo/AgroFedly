@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Produce Passport | {{ batch_id }}{% endblock %}
+
+{% block content %}
+<style>
+    .timeline {
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 0;
+    }
+    
+    .timeline::after {
+        content: '';
+        position: absolute;
+        width: 4px;
+        background-color: var(--border);
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -2px;
+    }
+
+    .timeline-item {
+        padding: 10px 40px;
+        position: relative;
+        background-color: inherit;
+        width: 50%;
+    }
+
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        right: -10px;
+        background-color: var(--background);
+        border: 4px solid var(--primary);
+        top: 15px;
+        border-radius: 50%;
+        z-index: 1;
+    }
+
+    .left {
+        left: 0;
+    }
+
+    .right {
+        left: 50%;
+    }
+
+    .right::after {
+        left: -10px;
+    }
+
+    .timeline-content {
+        padding: 20px;
+        background-color: var(--surface);
+        position: relative;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+    }
+    
+    .status-success { border-left: 4px solid var(--success); }
+    .status-warning { border-left: 4px solid var(--warning); }
+    .status-info { border-left: 4px solid var(--primary); }
+</style>
+
+<div style="text-align: center; margin-bottom: 40px;" class="reveal anim-fade-up">
+    <h1>Produce Digital Passport</h1>
+    <h3 style="color: var(--text-muted);">Batch #{{ batch_id }}</h3>
+</div>
+
+<div class="timeline reveal anim-fade-up stagger-1">
+    {% for event in timeline %}
+    <div class="timeline-item {% cycle 'left' 'right' %}">
+        <div class="timeline-content status-{{ event.status }}">
+            <h4 style="margin:0 0 10px 0;">{{ event.title }}</h4>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">{{ event.desc }}</p>
+            <small style="color: var(--primary); font-weight: 700;">{{ event.time }}</small>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-center">No passport timeline available for this batch.</p>
+    {% endfor %}
+</div>
+{% endblock %}

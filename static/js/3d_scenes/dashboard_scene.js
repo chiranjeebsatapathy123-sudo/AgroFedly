@@ -5,67 +5,110 @@ export class DashboardScene {
         this.engine = engine;
         this.group = new THREE.Group();
         this.themeColor = engine.isDarkTheme ? 0x1ba45e : 0x159653;
-        this.dataNodes = [];
+        this.nodes = [];
+        this.particles = [];
+        this.paths = [];
     }
 
     init() {
         this.engine.scene.add(this.group);
-        this.engine.scene.fog = new THREE.FogExp2(this.engine.isDarkTheme ? 0x0a1410 : 0xf4f8f5, 0.03);
+        this.engine.scene.fog = new THREE.FogExp2(this.engine.isDarkTheme ? 0x0a1410 : 0xf4f8f5, 0.02);
         
-        // Use central engine for camera (start from a wider angle and swoop in)
-        this.engine.camera.position.set(0, 5, 30);
-        this.engine.setCameraTarget(new THREE.Vector3(0, 15, 20), new THREE.Vector3(0, 0, 0));
+        // Setup Camera
+        this.engine.camera.position.set(0, 15, 40);
+        this.engine.setCameraTarget(new THREE.Vector3(0, 20, 40), new THREE.Vector3(0, 0, 0));
 
-        // Move the global AI core to a specific spot for the dashboard
-        if (this.engine.aiCore) {
-            this.engine.aiCore.group.position.set(10, 2, -5);
-        }
-
-        // Grid helper to anchor the data environment
+        // Create Grid
         const gridColor = this.engine.isDarkTheme ? 0x1f382c : 0xdce6e0;
-        this.grid = new THREE.GridHelper(50, 25, gridColor, gridColor);
-        this.grid.position.y = -5;
+        this.grid = new THREE.GridHelper(80, 40, gridColor, gridColor);
+        this.grid.position.y = -2;
         this.group.add(this.grid);
 
-        // Abstract Data Pillars representing statistics
-        const pillarGeo = new THREE.BoxGeometry(1, 1, 1);
-        const pillarMat = new THREE.MeshStandardMaterial({
-            color: this.themeColor,
-            transparent: true,
-            opacity: 0.8
+        // Define nodes in the supply chain
+        const chain = [
+            { id: 'farm', label: 'Farm', pos: new THREE.Vector3(-20, 0, -10), color: 0x228B22 },
+            { id: 'produce', label: 'Produce', pos: new THREE.Vector3(-10, 0, 0), color: 0x32CD32 },
+            { id: 'processing', label: 'Processing', pos: new THREE.Vector3(0, 0, 5), color: 0x808080 },
+            { id: 'storage', label: 'Storage', pos: new THREE.Vector3(10, 0, 0), color: 0x4682B4 },
+            { id: 'delivery', label: 'Delivery', pos: new THREE.Vector3(20, 0, -10), color: 0xFFA500 }
+        ];
+
+        // Create nodes
+        chain.forEach((nodeInfo, index) => {
+            // Base platform
+            const platformGeo = new THREE.CylinderGeometry(3, 3, 0.5, 32);
+            const platformMat = new THREE.MeshStandardMaterial({ color: nodeInfo.color, roughness: 0.8 });
+            const platform = new THREE.Mesh(platformGeo, platformMat);
+            platform.position.copy(nodeInfo.pos);
+            
+            // Add a simple geometric representation above the platform
+            let iconMesh;
+            if (nodeInfo.id === 'farm') {
+                iconMesh = new THREE.Mesh(new THREE.ConeGeometry(1.5, 3, 4), new THREE.MeshStandardMaterial({color: 0x00FF00}));
+            } else if (nodeInfo.id === 'produce') {
+                iconMesh = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), new THREE.MeshStandardMaterial({color: 0xFF6347}));
+            } else if (nodeInfo.id === 'processing') {
+                iconMesh = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({color: 0xA9A9A9}));
+            } else if (nodeInfo.id === 'storage') {
+                iconMesh = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 3, 16), new THREE.MeshStandardMaterial({color: 0xADD8E6}));
+            } else {
+                iconMesh = new THREE.Mesh(new THREE.BoxGeometry(3, 1.5, 1.5), new THREE.MeshStandardMaterial({color: 0xFFD700}));
+            }
+            
+            iconMesh.position.set(0, 2, 0);
+            platform.add(iconMesh);
+            
+            // Add slight hover animation data
+            platform.userData = { 
+                baseY: nodeInfo.pos.y,
+                hoverPhase: Math.random() * Math.PI * 2
+            };
+
+            this.group.add(platform);
+            this.nodes.push(platform);
+
+            // Create Path to next node
+            if (index < chain.length - 1) {
+                const nextNode = chain[index + 1];
+                const points = [
+                    new THREE.Vector3(nodeInfo.pos.x, 0.5, nodeInfo.pos.z),
+                    new THREE.Vector3(nextNode.pos.x, 0.5, nextNode.pos.z)
+                ];
+                const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+                const lineMat = new THREE.LineBasicMaterial({ 
+                    color: this.engine.isDarkTheme ? 0x334433 : 0xcccccc,
+                    transparent: true,
+                    opacity: 0.5
+                });
+                const line = new THREE.Line(lineGeo, lineMat);
+                this.group.add(line);
+                
+                // Save path for particles
+                this.paths.push({
+                    start: points[0],
+                    end: points[1],
+                    length: points[0].distanceTo(points[1])
+                });
+            }
         });
 
-        // Create a few pillars
+        // Create Particles flowing along paths
         if (!this.engine.reducedMotion) {
-            for (let i = 0; i < 8; i++) {
-                const mesh = new THREE.Mesh(pillarGeo, pillarMat);
-                
-                const height = Math.random() * 8 + 2;
-                mesh.scale.y = height;
-                
-                mesh.position.set(
-                    (Math.random() - 0.5) * 30,
-                    (height / 2) - 5, // Rest on the grid
-                    (Math.random() - 0.5) * 20 - 10
-                );
-                
-                mesh.userData = {
-                    targetHeight: height,
-                    currentHeight: 0.1,
-                    speed: Math.random() * 2 + 1
-                };
-                
-                // Start flat
-                mesh.scale.y = 0.1;
-                
-                this.group.add(mesh);
-                this.dataNodes.push(mesh);
+            const particleGeo = new THREE.SphereGeometry(0.2, 8, 8);
+            const particleMat = new THREE.MeshBasicMaterial({ color: 0x1ba45e });
+            
+            for (let i = 0; i < 15; i++) {
+                const p = new THREE.Mesh(particleGeo, particleMat);
+                // Assign to a random path
+                p.userData.pathIndex = Math.floor(Math.random() * this.paths.length);
+                p.userData.progress = Math.random(); // 0 to 1
+                p.userData.speed = (0.2 + Math.random() * 0.3); // units per second
+                this.group.add(p);
+                this.particles.push(p);
             }
         }
 
-        this.targetY = 0;
         this.scrollY = 0;
-        
         this.scrollHandler = () => {
             this.scrollY = window.scrollY;
         };
@@ -73,20 +116,32 @@ export class DashboardScene {
     }
 
     update(delta, time) {
-        // Animate pillars growing
-        this.dataNodes.forEach(node => {
-            if (node.scale.y < node.userData.targetHeight) {
-                node.scale.y += delta * node.userData.speed * 5;
-                node.position.y = (node.scale.y / 2) - 5;
-            }
+        // Gently bob the nodes
+        this.nodes.forEach(node => {
+            node.position.y = node.userData.baseY + Math.sin(time + node.userData.hoverPhase) * 0.5;
         });
 
-        // Gentle camera rotation
-        this.group.rotation.y = Math.sin(time * 0.05) * 0.2;
+        // Move particles along paths
+        this.particles.forEach(p => {
+            const path = this.paths[p.userData.pathIndex];
+            p.userData.progress += (p.userData.speed * delta) / path.length;
+            
+            if (p.userData.progress >= 1) {
+                p.userData.progress = 0;
+                // Move to next path
+                p.userData.pathIndex = (p.userData.pathIndex + 1) % this.paths.length;
+            }
+            
+            const currentPath = this.paths[p.userData.pathIndex];
+            p.position.lerpVectors(currentPath.start, currentPath.end, p.userData.progress);
+        });
+
+        // Gentle camera/scene rotation
+        this.group.rotation.y = Math.sin(time * 0.05) * 0.1;
         
         // Scroll parallax
-        this.targetY = this.scrollY * -0.01;
-        this.group.position.y += (this.targetY - this.group.position.y) * 0.1;
+        const targetY = this.scrollY * -0.015;
+        this.group.position.y += (targetY - this.group.position.y) * 0.1;
     }
 
     onThemeChange(isDark) {
@@ -94,17 +149,10 @@ export class DashboardScene {
         this.themeColor = isDark ? 0x1ba45e : 0x159653;
         
         const gridColor = isDark ? 0x1f382c : 0xdce6e0;
-        
-        // Unfortunately, GridHelper colors cannot be easily updated after creation.
-        // Recreate it for simplicity.
         this.group.remove(this.grid);
-        this.grid = new THREE.GridHelper(50, 25, gridColor, gridColor);
-        this.grid.position.y = -5;
+        this.grid = new THREE.GridHelper(80, 40, gridColor, gridColor);
+        this.grid.position.y = -2;
         this.group.add(this.grid);
-
-        this.dataNodes.forEach(node => {
-            node.material.color.setHex(this.themeColor);
-        });
     }
 
     dispose() {

@@ -28,6 +28,9 @@ export class ExperienceManager {
         this.setupNavigationInterceptor();
         window.addEventListener('popstate', (e) => this.handlePopState(e));
 
+        // Setup WebSocket
+        this.initWebSocket();
+
         // Setup Keyboard Shortcuts
         this.setupShortcuts();
 
@@ -61,14 +64,6 @@ export class ExperienceManager {
 
                 e.preventDefault();
                 
-                // Close navigation drawer if it's open
-                const drawer = document.getElementById('drawer');
-                if (drawer && drawer.classList.contains('open')) {
-                    drawer.classList.remove('open');
-                    const backdrop = document.getElementById('backdrop');
-                    if (backdrop) backdrop.classList.remove('show');
-                }
-
                 this.navigateTo(url.pathname + url.search);
             }
         });
@@ -193,7 +188,14 @@ export class ExperienceManager {
 
     setupShortcuts() {
         document.addEventListener('keydown', (e) => {
-            // Ignore if typing in an input
+            // 'Ctrl/Cmd + K' -> Global Search
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                this.openGlobalSearch();
+                return;
+            }
+
+            // Ignore if typing in an input for single-key shortcuts
             if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable) {
                 return;
             }
@@ -237,7 +239,48 @@ export class ExperienceManager {
         if (modal) {
             modal.classList.add('active');
             const input = modal.querySelector('input');
-            if (input) setTimeout(() => input.focus(), 100);
+            if (input) {
+                setTimeout(() => input.focus(), 100);
+                
+                // Bind input event if not already bound
+                if (!input.dataset.bound) {
+                    let debounceTimer;
+                    input.addEventListener('input', (e) => {
+                        clearTimeout(debounceTimer);
+                        debounceTimer = setTimeout(async () => {
+                            const query = e.target.value.trim();
+                            const resultsContainer = modal.querySelector('.search-results');
+                            if (!query) {
+                                resultsContainer.innerHTML = '<div class="search-category">Quick Links</div><a href="/surplus/">▣ Food Surplus</a><a href="/deliveries/">📦 Deliveries</a><a href="/intelligence/">⌁ AI Operations Center</a><a href="/agriculture/">🌾 Agri Command</a><a href="/impact/">🌍 Impact Dashboard</a><a href="/predict/">📈 ML Forecast</a>';
+                                return;
+                            }
+                            
+                            try {
+                                const response = await fetch(`/api/search/?q=${encodeURIComponent(query)}`);
+                                const data = await response.json();
+                                
+                                if (data.results && data.results.length > 0) {
+                                    let html = '<div class="search-category">Results</div>';
+                                    data.results.forEach(item => {
+                                        html += `
+                                            <a href="${item.url}" class="search-result-item" style="display:flex; justify-content:space-between; align-items:center;">
+                                                <span>${item.icon} ${item.title}</span>
+                                                <small style="color:var(--color-text-secondary);">${item.subtitle}</small>
+                                            </a>
+                                        `;
+                                    });
+                                    resultsContainer.innerHTML = html;
+                                } else {
+                                    resultsContainer.innerHTML = '<div style="padding:1rem; text-align:center; color:var(--color-text-secondary);">No results found.</div>';
+                                }
+                            } catch (error) {
+                                console.error('Search error:', error);
+                            }
+                        }, 300);
+                    });
+                    input.dataset.bound = "true";
+                }
+            }
         }
     }
 
@@ -267,5 +310,82 @@ export class ExperienceManager {
         }, observerOptions);
 
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    }
+
+    initWebSocket() {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws/notifications/`;
+        
+        this.ws = new WebSocket(wsUrl);
+        
+        this.ws.onmessage = (e) => {
+            try {
+                const data = JSON.parse(e.data);
+                if (data.message && data.message.type) {
+                    this.showToast(data.message.title, data.message.message, data.message.type);
+                    
+                    // Specific event handling
+                    if (data.message.type === 'SURPLUS_CREATED' || data.message.type === 'DELIVERY_STATUS_CHANGED') {
+                        // Optimistically update some counters or triggers if they exist on the page
+                        const surplusBadge = document.querySelector('.metric-card[data-metric="surplus"] .value');
+                        if (surplusBadge && data.message.type === 'SURPLUS_CREATED') {
+                            // In a real app we'd parse the number, for demo we just trigger a flash animation
+                            surplusBadge.classList.add('flash');
+                            setTimeout(() => surplusBadge.classList.remove('flash'), 1000);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("WS Parse Error:", err);
+            }
+        };
+
+        this.ws.onclose = (e) => {
+            console.log('Socket closed, retrying in 5s');
+            setTimeout(() => this.initWebSocket(), 5000);
+        };
+    }
+
+    showToast(title, message, type = 'info') {
+        const toastContainer = document.getElementById('toast-container') || this.createToastContainer();
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type.toLowerCase().split('_')[0]} fade-in`;
+        
+        let icon = 'ℹ️';
+        if (type.includes('CREATE') || type === 'success') icon = '✅';
+        if (type.includes('UPDATE') || type === 'info') icon = '🔄';
+        if (type.includes('ALERT') || type === 'error') icon = '⚠️';
+        
+        toast.innerHTML = `
+            <div class="toast-icon">${icon}</div>
+            <div class="toast-content">
+                <strong>${title}</strong>
+                <p>${message}</p>
+            </div>
+            <button class="toast-close">&times;</button>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        toast.querySelector('.toast-close').onclick = () => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 300);
+        };
+        
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 5000);
+    }
+    
+    createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+        return container;
     }
 }

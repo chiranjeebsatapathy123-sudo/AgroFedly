@@ -2,7 +2,131 @@
 {% load i18n %}
 {% block title %}7-Day Forecast{% endblock %}
 {% block content %}
-<section class="page-head"><div><div class="eyebrow">{% trans "PLANNING OUTLOOK" %}</div><h1>{% trans "7-Day demand forecast" %}</h1><p>{% trans "Scenario planning for the coming week." %}</p></div></section>
-<div class="form-card compact"><form method="post" class="inline-form">{% csrf_token %}<label>{% trans "Daily attendance" %}<input name="attendance" type="number" min="1" required></label><label>{% trans "Today is holiday?" %}<select name="holiday"><option value="0">{% trans "No" %}</option><option value="1">{% trans "Yes" %}</option></select></label><button class="btn primary">{% trans "Generate" %}</button></form></div>
-{% if forecasts %}<div class="forecast-grid">{% for f in forecasts %}<article class="forecast-card"><span>{{ f.date|date:"D, d M" }}</span><b>{{ f.prediction }}</b><small>Prepare {{ f.recommended }} · {{ f.confidence }}%</small><em class="{{ f.risk|lower }}">{{ f.risk }} risk</em>{% if f.produce_requirements %}<div style="margin-top:10px; font-size:0.85em; border-top:1px solid #eee; padding-top:10px; text-align:left; color:var(--text-light);"><strong>{% trans "Produce Req:" %}</strong><br>{% for req in f.produce_requirements %}{{ req.name }}: {{ req.required }} {{ req.unit }}<br>{% endfor %}</div>{% endif %}</article>{% endfor %}</div>{% endif %}
+<section class="page-head"><div><div class="eyebrow">{% trans "PLANNING OUTLOOK" %}</div><h1>{% trans "7-Day demand forecast & Simulation" %}</h1><p>{% trans "Scenario planning for the coming week using AI simulations." %}</p></div></section>
+<div class="form-card compact" style="display: flex; gap: 20px; align-items: stretch; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 300px;">
+        <h3 style="margin-top: 0; font-size: 1em; color: var(--text-muted); text-transform: uppercase;">Manual Override</h3>
+        <form method="post" class="inline-form" id="forecast-form">
+            {% csrf_token %}
+            <input type="hidden" name="scenario" id="scenario-input" value="manual">
+            <label>{% trans "Daily attendance base" %}<input name="attendance" id="attendance-input" type="number" min="1" required></label>
+            <label>{% trans "Today is holiday?" %}
+                <select name="holiday" id="holiday-input">
+                    <option value="0">{% trans "No" %}</option>
+                    <option value="1">{% trans "Yes" %}</option>
+                </select>
+            </label>
+            <button class="btn primary" type="submit">{% trans "Generate Full Week" %}</button>
+        </form>
+    </div>
+    <div style="flex: 1; min-width: 300px; border-left: 1px solid var(--border); padding-left: 20px;">
+        <h3 style="margin-top: 0; font-size: 1em; color: var(--text-muted); text-transform: uppercase;">What-If Simulator 2.0 (Live Preview)</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+            <label style="width: 100%;">Planned Production (Units): <input type="number" id="sim_production" value="1000" style="width: 100px;"></label>
+            <button class="btn outline" onclick="runSim(800)">Low Demand (800)</button>
+            <button class="btn outline" onclick="runSim(1200)">Balanced (1200)</button>
+            <button class="btn outline" onclick="runSim(1800)">High (1800)</button>
+        </div>
+        <div id="sim-result" style="margin-top: 15px; padding: 10px; background: var(--surface); border: 1px dashed var(--primary); border-radius: 4px; display: none;">
+            <h4 style="margin: 0 0 5px 0;">Simulation Result</h4>
+            <p style="margin: 0; font-size: 0.9em;" id="sim-text"></p>
+        </div>
+    </div>
+</div>
+<script>
+    function runScenario(name, attendance, holiday) {
+        document.getElementById('scenario-input').value = name;
+        document.getElementById('attendance-input').value = attendance;
+        document.getElementById('holiday-input').value = holiday;
+        document.getElementById('forecast-form').submit();
+    }
+    function runSim(attendance) {
+        const prod = document.getElementById('sim_production').value;
+        fetch('/api/ai/scenario/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({attendance: attendance, production: prod, temperature: 25.0, rainfall: 0.0})
+        }).then(r => r.json()).then(data => {
+            const el = document.getElementById('sim-result');
+            const txt = document.getElementById('sim-text');
+            el.style.display = 'block';
+            if (data.success) {
+                txt.innerHTML = `AI predicts ${data.prediction} demand.<br>Simulated Surplus: <b>${data.simulated_surplus}</b> (Risk: ${data.risk})`;
+            } else {
+                txt.innerHTML = `Error: ${data.error}`;
+            }
+        });
+    }
+</script>
+{% if forecasts %}
+<div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+    <!-- Base Plan -->
+    <div style="flex: 1; min-width: 300px; background: var(--surface); padding: 20px; border-radius: 8px; border: 1px solid var(--border);">
+        <h3 style="margin-top:0; border-bottom: 2px solid var(--primary); padding-bottom: 10px;">{% trans "Base AI Forecast" %}</h3>
+        <p style="font-size: 0.85em; color: var(--text-muted);">Standard operations without overrides.</p>
+        <div class="forecast-grid" style="grid-template-columns: 1fr; gap: 10px; margin-top: 15px;">
+        {% for f in forecasts %}
+            <article class="forecast-card" style="padding: 10px;">
+                <span style="font-size: 0.9em;">{{ f.date|date:"D, d M" }}</span>
+                <b style="font-size: 1.2em;">{{ f.prediction }} meals</b>
+                <small>Prepare {{ f.recommended }} · Risk: {{ f.risk }}</small>
+            </article>
+        {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Scenario Plan -->
+    {% if scenario_forecasts %}
+    <div style="flex: 1; min-width: 300px; background: var(--color-surface-elevated); padding: 20px; border-radius: 8px; border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <h3 style="margin-top:0; border-bottom: 2px solid var(--primary); padding-bottom: 10px; color: var(--primary);">{% trans "Custom Scenario Plan" %}</h3>
+        <p style="font-size: 0.85em; color: var(--text-muted);">Simulated demand with your overrides applied.</p>
+        <div class="forecast-grid" style="grid-template-columns: 1fr; gap: 10px; margin-top: 15px;">
+        {% for f in scenario_forecasts %}
+            <article class="forecast-card" style="padding: 10px; border-left: 4px solid var(--primary);">
+                <span style="font-size: 0.9em;">{{ f.date|date:"D, d M" }}</span>
+                <b style="font-size: 1.2em;">{{ f.prediction }} meals</b>
+                <small>Prepare {{ f.recommended }} · Risk: {{ f.risk }}</small>
+            </article>
+        {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Surplus & Shortage Prediction -->
+<div style="margin-top: 30px;">
+    <div class="panel-title">
+        <div><div class="eyebrow">{% trans "RESOURCE BALANCE" %}</div><h2>{% trans "Expected Surplus & Potential Shortage" %}</h2></div>
+    </div>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <!-- Surplus Prediction -->
+        <div style="flex: 1; background: rgba(var(--success-rgb), 0.05); padding: 20px; border-radius: 8px; border: 1px solid var(--success);">
+            <h3 style="margin-top: 0; color: var(--success);">📈 Expected Surplus</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                {% for f in scenario_forecasts|default:forecasts|slice:":3" %}
+                <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--surface); border-radius: 4px; border: 1px solid var(--border);">
+                    <span>{{ f.date|date:"l" }}</span>
+                    <strong>{% if f.expected_surplus > 0 %}{{ f.expected_surplus }} units{% else %}None{% endif %}</strong>
+                    <span class="badge" style="background: {% if f.risk == 'HIGH' %}var(--danger){% elif f.risk == 'MEDIUM' %}var(--warning){% else %}var(--success){% endif %}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em;">{{ f.risk }} Risk</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Shortage Prediction -->
+        <div style="flex: 1; background: rgba(var(--danger-rgb), 0.05); padding: 20px; border-radius: 8px; border: 1px solid var(--danger);">
+            <h3 style="margin-top: 0; color: var(--danger);">📉 Potential Shortage</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                {% for f in scenario_forecasts|default:forecasts|slice:":3" %}
+                <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--surface); border-radius: 4px; border: 1px solid var(--border);">
+                    <span>{{ f.date|date:"l" }}</span>
+                    <strong>{% if f.expected_surplus <= 0 and f.prediction > f.recommended %}Shortage Likely{% else %}Adequate Supply{% endif %}</strong>
+                    <span style="font-size: 0.8em; color: var(--text-muted);">Req: {{ f.prediction }} | Prep: {{ f.recommended }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

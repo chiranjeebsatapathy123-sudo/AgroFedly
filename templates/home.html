@@ -2,11 +2,28 @@
 {% load static i18n %}
 {% block title %}{% trans "Home" %}{% endblock %}
 {% block content %}
+<div id="cinematic-intro" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--background); z-index: 99999; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 1.5s ease-out, transform 1.5s cubic-bezier(0.19, 1, 0.22, 1); pointer-events: none;">
+    <div style="font-size: 2rem; font-weight: bold; letter-spacing: 4px; background: linear-gradient(90deg, var(--primary), var(--secondary, #34d399)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: cinematic-text-glow 2s infinite;">AgroFedly AI</div>
+    <div style="margin-top: 10px; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">Initializing Agriculture Operating System...</div>
+</div>
+<script>
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const intro = document.getElementById('cinematic-intro');
+            if (intro) {
+                intro.style.opacity = '0';
+                intro.style.transform = 'scale(1.05)';
+                setTimeout(() => intro.remove(), 1500);
+            }
+        }, 800);
+    });
+</script>
+
 <section class="hero scene-3d-container">
-  <div class="hero-copy card-3d">
+  <div class="hero-copy card-3d reveal anim-fade-up">
     <div class="eyebrow">{% trans "SMART FOOD OPERATIONS PLATFORM" %}</div>
-    <h1>{% trans "Plan better meals." %}<br><span>{% trans "Move surplus smarter." %}</span></h1>
-    <p>{% trans "Fedly connects AI demand planning, food safety, organizations and last-mile delivery in one operational workspace." %}</p>
+    <h1>{% trans "Intelligent Agriculture." %}<br><span>{% trans "Smarter Production." %}</span><br><span>{% trans "Less Food Waste." %}</span></h1>
+    <p>{% trans "AgroFedly connects agricultural production, AI demand forecasting, produce management and intelligent surplus redistribution in one data-driven ecosystem." %}</p>
     <div class="hero-actions">
       {% if user.is_authenticated %}
         <a class="btn primary" href="{% url 'dashboard' %}">{% trans "Open Dashboard" %}</a>
@@ -18,9 +35,19 @@
     </div>
   </div>
   <div class="hero-panel card-3d">
-    <div class="panel-top"><span>{% trans "LIVE OPERATIONS" %}</span><b>● {% trans "Operational" %}</b></div>
-    <div class="orbit"><div class="orbit-core">🍲</div><span class="orb o1">{% trans "AI" %}</span><span class="orb o2">{% trans "SAFE" %}</span><span class="orb o3">{% trans "MOVE" %}</span></div>
-    <div class="mini-grid"><div><b>7D</b><span>{% trans "Forecast" %}</span></div><div><b>24/7</b><span>{% trans "Tracking" %}</span></div><div><b>1</b><span>{% trans "Workspace" %}</span></div></div>
+    <div class="panel-top"><span>{% trans "LIVE ECOSYSTEM" %}</span><b>● {% trans "Operational" %}</b></div>
+    <div class="orbit">
+        <div class="orbit-core">🌾</div>
+        <span class="orb o1">{% trans "AI" %}</span>
+        <span class="orb o2">{% trans "PRODUCE" %}</span>
+        <span class="orb o3">{% trans "SURPLUS" %}</span>
+        <span class="orb o4" style="animation-delay: -4s;">{% trans "IMPACT" %}</span>
+    </div>
+    <div class="mini-grid">
+        <div><b>🌾</b><span>{% trans "Agriculture" %}</span></div>
+        <div><b>🧠</b><span>{% trans "AI Demand" %}</span></div>
+        <div><b>🚚</b><span>{% trans "Redistribution" %}</span></div>
+    </div>
   </div>
 </section>
 

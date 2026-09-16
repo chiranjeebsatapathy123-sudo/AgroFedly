@@ -1,67 +1,43 @@
 from functools import wraps
 from django.contrib import messages
 from django.shortcuts import redirect
-from .models import OrganizationMember
-from functools import wraps
-from django.shortcuts import redirect
-from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
-def require_org_role(allowed_roles):
+def require_organization(view_func):
     """
-    Decorator for views that checks that the user has a specific role
-    within their active organization.
-    Assumes @_organization_required has already populated request.membership.
+    Ensures the user has an active organization in their context via OrganizationMiddleware.
+    """
+    @wraps(view_func)
+    @login_required
+    def wrapped(request, *args, **kwargs):
+        if not hasattr(request, 'organization') or not request.organization:
+            messages.info(request, 'Register or join an organization to use this workspace.')
+            return redirect('organization_onboarding')
+            
+        # Backward compatibility for old views relying on request.membership
+        request.membership = request.org_membership
+        return view_func(request, *args, **kwargs)
+    return wrapped
+
+def require_role(roles):
+    """
+    Decorator to ensure the user's active membership role is in the allowed `roles` list.
     """
     def decorator(view_func):
         @wraps(view_func)
-        @_organization_required
+        @require_organization
         def _wrapped_view(request, *args, **kwargs):
-            if request.membership.role not in allowed_roles:
-                messages.error(request, f"Permission denied. Required role: {', '.join(allowed_roles)}")
-                return redirect("organization_dashboard")
+            if request.org_membership.role not in roles:
+                messages.error(request, f"Permission denied. Required role: {', '.join(roles)}")
+                return redirect("dashboard")
             return view_func(request, *args, **kwargs)
         return _wrapped_view
     return decorator
 
+# Backwards compatibility names
+_organization_required = require_organization
 
+def _manager_required(view_func):
+    return require_role(['OWNER', 'ADMIN', 'MANAGER'])(view_func)
 
-
-
-
-
-
-from django.contrib.auth.decorators import login_required
-def _membership(request):
-    memberships = OrganizationMember.objects.select_related('organization').filter(user=request.user, is_active=True, organization__is_active=True)
-    active_id = request.session.get('active_organization_id')
-    if active_id:
-        active = memberships.filter(organization_id=active_id).first()
-        if active:
-            return active
-    return memberships.order_by('-joined_at').first()
-
-def _organization_required(view):
-
-    @wraps(view)
-    @login_required
-    def wrapped(request, *args, **kwargs):
-        membership = _membership(request)
-        if not membership:
-            messages.info(request, 'Register or join an organization to use this workspace.')
-            return redirect('organization_register')
-        request.membership = membership
-        request.organization = membership.organization
-        return view(request, *args, **kwargs)
-    return wrapped
-
-def _manager_required(view):
-
-    @wraps(view)
-    @_organization_required
-    def wrapped(request, *args, **kwargs):
-        if request.membership.role not in {'OWNER', 'ADMIN', 'MANAGER'}:
-            messages.error(request, 'Manager permission is required for this action.')
-            return redirect('organization_dashboard')
-        return view(request, *args, **kwargs)
-    return wrapped
-
+require_org_role = require_role

@@ -29,6 +29,7 @@ class MealRecord(models.Model):
         return str(self.date)
 
 class DemandForecast(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="demandforecasts", null=True, blank=True)
     date = models.DateField()
     predicted_demand = models.PositiveIntegerField(default=0)
     recommended_preparation = models.PositiveIntegerField(default=0)
@@ -62,6 +63,10 @@ class Organization(models.Model):
     city = models.CharField(max_length=100, blank=True)
     state = models.CharField(max_length=100, blank=True)
     country = models.CharField(max_length=100, default="India")
+    
+    # Onboarding Status
+    onboarding_step = models.IntegerField(default=1)
+    onboarding_completed = models.BooleanField(default=False)
     website = models.URLField(blank=True)
     capacity = models.PositiveIntegerField(default=0)
     is_verified = models.BooleanField(default=False)
@@ -88,15 +93,22 @@ class OrganizationMember(models.Model):
     ROLE_CHOICES = [
         ("OWNER", "Owner"),
         ("ADMIN", "Administrator"),
-        ("MANAGER", "Food Manager"),
+        ("MANAGER", "Manager"),
         ("STAFF", "Staff"),
         ("VIEWER", "Viewer"),
     ]
+    STATUS_CHOICES = [
+        ("INVITED", "Invited"),
+        ("ACTIVE", "Active"),
+        ("SUSPENDED", "Suspended"),
+        ("REMOVED", "Removed"),
+    ]
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="members")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="organization_memberships")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="organization_memberships", null=True, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="STAFF")
-    is_active = models.BooleanField(default=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="ACTIVE")
+    is_active = models.BooleanField(default=True) # DEPRECATED: Use status
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -122,6 +134,7 @@ class VolunteerProfile(models.Model):
         return f"{self.user.get_full_name() or self.user.username} (Volunteer)"
 
 class Recipient(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="recipients", null=True, blank=True)
     name = models.CharField(max_length=150)
     recipient_type = models.CharField(max_length=100)
     capacity = models.PositiveIntegerField(default=0)
@@ -167,6 +180,7 @@ class SurplusFood(models.Model):
         return self.food_name
 
 class Redistribution(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="redistributions", null=True, blank=True)
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     surplus = models.ForeignKey(SurplusFood, on_delete=models.CASCADE, related_name="redistributions")
     recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE, related_name="redistributions")
@@ -176,6 +190,7 @@ class Redistribution(models.Model):
         return f"{self.surplus.food_name} → {self.recipient.name}"
 
 class IoTTemperatureReading(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="iottemperaturereadings", null=True, blank=True)
     STATUS_CHOICES = [("SAFE", "Safe"), ("ALERT", "Alert")]
     sensor_name = models.CharField(max_length=100, default="Manual / IoT Sensor")
     food_name = models.CharField(max_length=100)
@@ -201,8 +216,8 @@ class Delivery(models.Model):
         ("CANCELLED", "Cancelled"),
     ]
 
-    sender = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="outgoing_deliveries")
-    receiver = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="incoming_deliveries")
+    sender = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="outgoing_deliveries")
+    receiver = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="incoming_deliveries")
     surplus = models.ForeignKey(SurplusFood, on_delete=models.SET_NULL, null=True, blank=True, related_name="deliveries")
     food_name = models.CharField(max_length=150)
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
@@ -237,6 +252,7 @@ class Delivery(models.Model):
         return f"{self.tracking_code} — {self.food_name}"
 
 class Ingredient(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="ingredients", null=True, blank=True)
     name = models.CharField(max_length=100)
     unit = models.CharField(max_length=20, default="kg")
     quantity_per_meal = models.FloatField(help_text="Quantity required per meal")
@@ -247,7 +263,7 @@ class Ingredient(models.Model):
         return self.name
 
 class AgriculturalProduce(models.Model):
-    supplier = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="produce_inventory")
+    supplier = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="produce_inventory")
     farm = models.ForeignKey('FarmField', on_delete=models.SET_NULL, null=True, blank=True, related_name='produces')
     name = models.CharField(max_length=150)
     category = models.CharField(max_length=100)
@@ -280,6 +296,7 @@ class AgriculturalProduce(models.Model):
             return "High"
 
 class ProcessingRecord(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="processingrecords", null=True, blank=True)
     input_produce = models.ForeignKey(AgriculturalProduce, on_delete=models.CASCADE, related_name="processing_records")
     input_quantity = models.FloatField(validators=[MinValueValidator(0.1)])
     processing_type = models.CharField(max_length=150)
@@ -316,7 +333,7 @@ class AgriculturalSupplyRequest(models.Model):
         ("COMPLETED", "Completed"),
         ("CANCELLED", "Cancelled"),
     ]
-    requester = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="supply_requests")
+    requester = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="supply_requests")
     produce = models.ForeignKey(AgriculturalProduce, on_delete=models.CASCADE, related_name="supply_requests")
     requested_quantity = models.FloatField(validators=[MinValueValidator(0.1)])
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
@@ -327,7 +344,7 @@ class AgriculturalSupplyRequest(models.Model):
         return f"{self.requester.name} requested {self.requested_quantity} of {self.produce.name}"
 
 class BuyerDemand(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="buyer_demands")
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="buyer_demands")
     produce_name = models.CharField(max_length=150)
     required_quantity = models.FloatField(validators=[MinValueValidator(0.1)])
     unit = models.CharField(max_length=20, default="kg")
@@ -360,6 +377,7 @@ class SupplyMatch(models.Model):
         return f"Match: {self.demand.produce_name} ({self.match_score}%)"
 
 class QualityInspection(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="qualityinspections", null=True, blank=True)
     inspector_name = models.CharField(max_length=150)
     inspection_date = models.DateTimeField(auto_now_add=True)
     grade = models.CharField(max_length=20)
@@ -368,6 +386,7 @@ class QualityInspection(models.Model):
     produce = models.ForeignKey('AgriculturalProduce', on_delete=models.CASCADE, related_name='inspections')
 
 class CropDiseaseScan(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="cropdiseasescans", null=True, blank=True)
     farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     crop_name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='disease_scans/', null=True, blank=True)
@@ -377,6 +396,7 @@ class CropDiseaseScan(models.Model):
     scanned_at = models.DateTimeField(auto_now_add=True)
 
 class AgriculturalShipment(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="agriculturalshipments", null=True, blank=True)
     tracking_code = models.CharField(unique=True, max_length=20)
     supply_match = models.ForeignKey('SupplyMatch', on_delete=models.CASCADE, related_name='shipments')
     status = models.CharField(max_length=20, default='IN_TRANSIT')
@@ -394,6 +414,7 @@ class GovernmentScheme(models.Model):
     application_link = models.URLField(blank=True)
 
 class Equipment(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="equipments", null=True, blank=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=150)
     equipment_type = models.CharField(max_length=100)
@@ -404,6 +425,7 @@ class Equipment(models.Model):
     image = models.ImageField(upload_to='equipment/', null=True, blank=True)
 
 class EquipmentRental(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="equipmentrentals", null=True, blank=True)
     equipment = models.ForeignKey('Equipment', on_delete=models.CASCADE, related_name='rentals')
     renter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='equipment_rentals')
     start_time = models.DateTimeField()
@@ -413,7 +435,7 @@ class EquipmentRental(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class FarmField(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='farms', null=True, blank=True)
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='farms', null=True, blank=True)
     name = models.CharField(max_length=150)
     crop_type = models.CharField(max_length=100)
     area_acres = models.FloatField()
@@ -445,6 +467,7 @@ class LedgerTransaction(models.Model):
     escrow_status = models.CharField(max_length=20, default='RELEASED')
 
 class CropYieldPrediction(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="cropyieldpredictions", null=True, blank=True)
     farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='yield_predictions')
     crop_type = models.CharField(max_length=100)
     area_hectares = models.DecimalField(max_digits=10, decimal_places=2)
@@ -455,6 +478,7 @@ class CropYieldPrediction(models.Model):
 
 class FoodLedger(models.Model):
     """Immutable blockchain-style ledger for tracing food chain of custody"""
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="foodledgers", null=True, blank=True)
     surplus_food = models.ForeignKey('SurplusFood', on_delete=models.CASCADE, related_name='ledger_entries')
     action_type = models.CharField(max_length=50, help_text="e.g. LOGGED, DISPATCHED, DELIVERED, TEMPERATURE_CHECK")
     performed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
@@ -473,6 +497,7 @@ class FoodLedger(models.Model):
             self.block_hash = hashlib.sha256(data_string).hexdigest()
         super().save(*args, **kwargs)
 
+
 # ----------------- PHASE 2: NEXT-GEN FEATURES -----------------
 
 class MarketPricePrediction(models.Model):
@@ -489,6 +514,7 @@ class MarketPricePrediction(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class Warehouse(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="warehouses", null=True, blank=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="warehouses")
     name = models.CharField(max_length=200)
     location = models.CharField(max_length=255)
@@ -499,6 +525,7 @@ class Warehouse(models.Model):
     is_active = models.BooleanField(default=True)
 
 class WarehouseBooking(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="warehousebookings", null=True, blank=True)
     farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="warehouse_bookings")
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     palettes = models.IntegerField()
@@ -513,6 +540,7 @@ class WarehouseBooking(models.Model):
 # ----------------- PHASE 3: SUPER APP FEATURES -----------------
 
 class DroneImagery(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="droneimageries", null=True, blank=True)
     farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="drone_maps")
     scan_date = models.DateTimeField(auto_now_add=True)
     image_url = models.URLField(max_length=500, blank=True)
@@ -534,76 +562,7 @@ class InfrastructureProject(models.Model):
     ), default='FUNDING')
 
 class SoilTest(models.Model):
-    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="soil_tests")
-    test_date = models.DateField(auto_now_add=True)
-    npk_nitrogen = models.DecimalField(max_digits=5, decimal_places=2)
-    npk_phosphorus = models.DecimalField(max_digits=5, decimal_places=2)
-    npk_potassium = models.DecimalField(max_digits=5, decimal_places=2)
-    ph_level = models.DecimalField(max_digits=4, decimal_places=2)
-
-# Removed Duplicate FoodLedger
-
-# ----------------- PHASE 2: NEXT-GEN FEATURES -----------------
-
-class MarketPricePrediction(models.Model):
-    crop_name = models.CharField(max_length=100)
-    current_price_per_kg = models.DecimalField(max_digits=10, decimal_places=2)
-    predicted_price_next_week = models.DecimalField(max_digits=10, decimal_places=2)
-    predicted_price_month = models.DecimalField(max_digits=10, decimal_places=2)
-    confidence_score = models.IntegerField(help_text="0-100")
-    recommendation = models.CharField(max_length=50, choices=(
-        ('SELL_NOW', 'Sell Now'),
-        ('HOLD', 'Hold for Better Price'),
-        ('SELL_PARTIAL', 'Sell Partial')
-    ))
-    updated_at = models.DateTimeField(auto_now=True)
-
-class Warehouse(models.Model):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="warehouses")
-    name = models.CharField(max_length=200)
-    location = models.CharField(max_length=255)
-    total_palettes = models.IntegerField()
-    available_palettes = models.IntegerField()
-    price_per_palette_day = models.DecimalField(max_digits=10, decimal_places=2)
-    current_temp_celsius = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    is_active = models.BooleanField(default=True)
-
-class WarehouseBooking(models.Model):
-    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="warehouse_bookings")
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-    palettes = models.IntegerField()
-    start_date = models.DateField()
-    end_date = models.DateField()
-    status = models.CharField(max_length=50, choices=(
-        ('PENDING', 'Pending'),
-        ('ACTIVE', 'Active / Stored'),
-        ('COMPLETED', 'Completed')
-    ), default='PENDING')
-
-# ----------------- PHASE 3: SUPER APP FEATURES -----------------
-
-class DroneImagery(models.Model):
-    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="drone_maps")
-    scan_date = models.DateTimeField(auto_now_add=True)
-    image_url = models.URLField(max_length=500, blank=True)
-    ndvi_score = models.DecimalField(max_digits=5, decimal_places=2, help_text="-1.0 to 1.0")
-    issues_detected = models.TextField(blank=True, help_text="AI output string")
-    status = models.CharField(max_length=50, default="ANALYZED")
-
-class InfrastructureProject(models.Model):
-    farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects")
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    goal_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    current_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    roi_percentage = models.DecimalField(max_digits=5, decimal_places=2, help_text="e.g. 15.0 for 15%")
-    status = models.CharField(max_length=50, choices=(
-        ('FUNDING', 'Funding Active'),
-        ('FUNDED', 'Fully Funded'),
-        ('COMPLETED', 'Project Completed')
-    ), default='FUNDING')
-
-class SoilTest(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="soiltests", null=True, blank=True)
     farmer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="soil_tests")
     test_date = models.DateField(auto_now_add=True)
     npk_nitrogen = models.DecimalField(max_digits=5, decimal_places=2)
@@ -622,7 +581,7 @@ class SMSAlert(models.Model):
 # ----------------- PHASE 4: ORGANIZATION ENTERPRISE FEATURES -----------------
 
 class FleetRoute(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="fleet_routes")
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="fleet_routes")
     driver_name = models.CharField(max_length=150)
     vehicle_plate = models.CharField(max_length=50)
     optimized_path_json = models.TextField(help_text="JSON array of stops in optimized order")
@@ -635,7 +594,7 @@ class FleetRoute(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class ESGReport(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="esg_reports")
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="esg_reports")
     report_month = models.CharField(max_length=50, help_text="e.g. October 2026")
     total_food_rescued_kg = models.DecimalField(max_digits=10, decimal_places=2)
     total_meals_provided = models.IntegerField()
@@ -651,7 +610,7 @@ class ProduceTraceabilityLedger(models.Model):
     transaction_id = models.CharField(max_length=100, unique=True)
     transaction_type = models.CharField(max_length=100) # e.g. CREATED, HARVESTED, PROCESSED, STORED, SURPLUS, ALLOCATED, DELIVERED
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
+    organization = models.ForeignKey('Organization', on_delete=models.SET_NULL, null=True, blank=True)
     produce = models.ForeignKey(AgriculturalProduce, on_delete=models.SET_NULL, null=True, blank=True)
     surplus = models.ForeignKey(SurplusFood, on_delete=models.SET_NULL, null=True, blank=True)
     batch_number = models.CharField(max_length=100, blank=True)
@@ -669,7 +628,7 @@ class StorageRecord(models.Model):
         ("ATTENTION", "Attention Required - Deviation Detected"),
         ("CRITICAL", "Critical - Spoilage Risk"),
     ]
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="storage_records")
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="storage_records")
     produce = models.ForeignKey(AgriculturalProduce, on_delete=models.CASCADE, related_name="storage_records", null=True, blank=True)
     surplus = models.ForeignKey(SurplusFood, on_delete=models.CASCADE, related_name="storage_records", null=True, blank=True)
     batch_number = models.CharField(max_length=50)
@@ -696,7 +655,7 @@ class EcosystemAlliance(models.Model):
 
 class AllianceMember(models.Model):
     alliance = models.ForeignKey(EcosystemAlliance, on_delete=models.CASCADE, related_name='members')
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='alliances')
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='alliances')
     joined_at = models.DateTimeField(auto_now_add=True)
     role = models.CharField(max_length=50, default="Member") # Admin, Member
     
@@ -712,8 +671,8 @@ class SharedTask(models.Model):
     alliance = models.ForeignKey(EcosystemAlliance, on_delete=models.CASCADE, related_name='tasks')
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='created_shared_tasks')
-    assigned_to = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_shared_tasks')
+    created_by = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='created_shared_tasks')
+    assigned_to = models.ForeignKey('Organization', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_shared_tasks')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='TODO')
     due_date = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -723,7 +682,7 @@ class SharedTask(models.Model):
 
 class Notification(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
     notification_type = models.CharField(max_length=50)
     message = models.TextField()
     is_read = models.BooleanField(default=False, db_index=True)
@@ -731,3 +690,233 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"Notification: {self.message[:20]}"
+
+class AIRecommendation(models.Model):
+    STATUS_CHOICES = [
+        ('NEW', 'New'),
+        ('VIEWED', 'Viewed'),
+        ('ACCEPTED', 'Accepted'),
+        ('REJECTED', 'Rejected'),
+        ('COMPLETED', 'Completed'),
+        ('EXPIRED', 'Expired'),
+    ]
+    PRIORITY_CHOICES = [
+        ('LOW', 'Low'),
+        ('MEDIUM', 'Medium'),
+        ('HIGH', 'High'),
+        ('URGENT', 'Urgent'),
+    ]
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='ai_recommendations')
+    title = models.CharField(max_length=250)
+    category = models.CharField(max_length=100)
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='MEDIUM')
+    reason = models.TextField()
+    recommended_action = models.TextField()
+    potential_impact = models.CharField(max_length=250, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NEW')
+    feedback_notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"[{self.priority}] {self.title}"
+
+class AIAuditLog(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='ai_audit_logs')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    request_intent = models.CharField(max_length=250)
+    ai_module = models.CharField(max_length=100)
+    model_version = models.CharField(max_length=100, default='AgroFedly AI 1.0')
+    inputs_snapshot = models.TextField(blank=True, help_text="JSON representation of inputs")
+    recommendation = models.TextField()
+    confidence = models.CharField(max_length=50, blank=True)
+    action_requested = models.CharField(max_length=200, blank=True)
+    user_decision = models.CharField(max_length=50, blank=True)
+    execution_result = models.CharField(max_length=50, blank=True)
+    failure_reason = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.ai_module} at {self.timestamp.strftime('%H:%M:%S')}"
+
+# ----------------------------------------------------------------------------
+# PHASE 19 MODELS
+# ----------------------------------------------------------------------------
+
+class SystemEvent(models.Model):
+    """Logs system events for the Digital Twin and Timelines."""
+    SEVERITY_CHOICES = [
+        ('INFO', 'Info'),
+        ('WARNING', 'Warning'),
+        ('CRITICAL', 'Critical'),
+    ]
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='system_events')
+    event_type = models.CharField(max_length=100) # e.g., 'SurplusDetected', 'StorageAnomaly'
+    entity_id = models.CharField(max_length=50, blank=True, null=True) # e.g., 'Produce Batch #482'
+    description = models.TextField()
+    severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES, default='INFO')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    metadata = models.JSONField(default=dict, blank=True)
+
+    def __str__(self):
+        return f"{self.timestamp} - {self.event_type}"
+
+class WorkflowRule(models.Model):
+    """Configures rules for AI Workflow Engine."""
+    AUTOMATION_CHOICES = [
+        ('MANUAL', 'Manual'),
+        ('SUPERVISED', 'Supervised Automation'),
+        ('AUTOMATED', 'Automated'),
+    ]
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    trigger_event = models.CharField(max_length=100)
+    conditions_json = models.JSONField(default=dict, blank=True)
+    automation_level = models.CharField(max_length=20, choices=AUTOMATION_CHOICES, default='SUPERVISED')
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.name
+
+class WorkflowExecution(models.Model):
+    """Logs execution of workflows."""
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="workflowexecutions", null=True, blank=True)
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('WAITING_APPROVAL', 'Waiting for Approval'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed'),
+    ]
+    rule = models.ForeignKey(WorkflowRule, on_delete=models.CASCADE)
+    triggering_event = models.ForeignKey(SystemEvent, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    failure_reason = models.TextField(blank=True, null=True)
+    retry_count = models.IntegerField(default=0)
+    execution_log = models.JSONField(default=list, blank=True)
+    
+    def __str__(self):
+        return f"Execution of {self.rule.name} - {self.status}"
+
+class UserTask(models.Model):
+    """Tasks for the My Tasks center (approvals, reviews, etc.)."""
+    STATUS_CHOICES = [
+        ('OPEN', 'Open'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    PRIORITY_CHOICES = [
+        ('LOW', 'Low'),
+        ('MEDIUM', 'Medium'),
+        ('HIGH', 'High'),
+        ('URGENT', 'Urgent'),
+    ]
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='MEDIUM')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPEN')
+    due_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    action_url = models.CharField(max_length=255, blank=True, null=True)
+    related_entity = models.CharField(max_length=100, blank=True, null=True) # e.g., 'Redistribution #12'
+    
+    def __str__(self):
+        return self.title
+
+class DataImport(models.Model):
+    """Logs data imports."""
+    STATUS_CHOICES = [
+        ('UPLOADING', 'Uploading'),
+        ('MAPPING', 'Mapping Columns'),
+        ('VALIDATING', 'Validating'),
+        ('IMPORTING', 'Importing'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed'),
+    ]
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
+    filename = models.CharField(max_length=255)
+    import_type = models.CharField(max_length=50) # 'PRODUCE', 'RECIPIENTS', etc.
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='UPLOADING')
+    total_rows = models.IntegerField(default=0)
+    imported_rows = models.IntegerField(default=0)
+    error_rows = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    mapping_config = models.JSONField(default=dict, blank=True)
+    errors_log = models.JSONField(default=list, blank=True)
+
+    def __str__(self):
+        return f"{self.filename} - {self.status}"
+
+
+import uuid
+
+class OrganizationInvitation(models.Model):
+    ROLE_CHOICES = OrganizationMember.ROLE_CHOICES
+    STATUS_CHOICES = [
+        ("PENDING", "Pending"),
+        ("ACCEPTED", "Accepted"),
+        ("EXPIRED", "Expired"),
+        ("REVOKED", "Revoked"),
+    ]
+    
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="invitations")
+    email = models.EmailField()
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="STAFF")
+    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    invited_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="sent_invitations")
+
+    def __str__(self):
+        return f"Invite {self.email} to {self.organization.name} ({self.status})"
+
+
+class TenantAuditLog(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='audit_logs')
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='performed_actions')
+    action = models.CharField(max_length=50)
+    entity_name = models.CharField(max_length=100)
+    entity_id = models.CharField(max_length=50, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.action} on {self.entity_name} by {self.actor} at {self.timestamp}"
+
+
+import secrets
+
+class APIKey(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='api_keys')
+    name = models.CharField(max_length=100)
+    prefix = models.CharField(max_length=8, unique=True, editable=False)
+    hashed_key = models.CharField(max_length=128, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    scopes = models.JSONField(default=list, blank=True) # e.g. ["produce:read", "surplus:write"]
+    
+    def __str__(self):
+        return f"{self.name} ({self.prefix}...)"
+
+class Webhook(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='webhooks')
+    endpoint_url = models.URLField()
+    secret = models.CharField(max_length=64, default=secrets.token_urlsafe)
+    events = models.JSONField(default=list) # e.g. ["produce.created", "surplus.detected"]
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_triggered = models.DateTimeField(null=True, blank=True)
+    failure_count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"Webhook {self.endpoint_url} for {self.organization.name}"

@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Members - {{ active_org.name }}{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto mt-16">
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2">Members</h1>
+            <p class="text-gray-400">Manage access and roles for your organization.</p>
+        </div>
+        <button onclick="document.getElementById('inviteModal').classList.remove('hidden')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors">
+            <i class="fas fa-user-plus mr-2"></i> Invite Member
+        </button>
+    </div>
+
+    <!-- Active Members -->
+    <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-white/10">
+            <h3 class="text-lg font-bold text-white">Active Members</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-black/20 text-gray-400 text-sm">
+                    <tr>
+                        <th class="px-6 py-3 font-medium">User</th>
+                        <th class="px-6 py-3 font-medium">Role</th>
+                        <th class="px-6 py-3 font-medium">Joined</th>
+                        <th class="px-6 py-3 font-medium text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/10 text-gray-300">
+                    {% for member in members %}
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mr-3 font-bold">
+                                    {{ member.user.username|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <div class="font-medium text-white">{{ member.user.username }}</div>
+                                    <div class="text-xs text-gray-500">{{ member.user.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                {% if member.role == 'OWNER' %}bg-purple-100 text-purple-800
+                                {% elif member.role == 'ADMIN' %}bg-blue-100 text-blue-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ member.get_role_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm">{{ member.joined_at|date:"M d, Y" }}</td>
+                        <td class="px-6 py-4 text-right">
+                            {% if member.role != 'OWNER' or active_membership.role == 'OWNER' %}
+                            <button class="text-gray-400 hover:text-white"><i class="fas fa-ellipsis-v"></i></button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">No members found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pending Invitations -->
+    {% if invitations %}
+    <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-white/10">
+            <h3 class="text-lg font-bold text-white">Pending Invitations</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-black/20 text-gray-400 text-sm">
+                    <tr>
+                        <th class="px-6 py-3 font-medium">Email</th>
+                        <th class="px-6 py-3 font-medium">Role</th>
+                        <th class="px-6 py-3 font-medium">Invited By</th>
+                        <th class="px-6 py-3 font-medium">Expires</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/10 text-gray-300">
+                    {% for inv in invitations %}
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4">{{ inv.email }}</td>
+                        <td class="px-6 py-4">{{ inv.get_role_display }}</td>
+                        <td class="px-6 py-4 text-sm">{{ inv.invited_by.username }}</td>
+                        <td class="px-6 py-4 text-sm">{{ inv.expires_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Invite Modal -->
+<div id="inviteModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-[#1e2330] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-white">Invite Member</h3>
+            <button onclick="document.getElementById('inviteModal').classList.add('hidden')" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="invite">
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-300 mb-1">Email Address</label>
+                <input type="email" name="email" required class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-300 mb-1">Role</label>
+                <select name="role" class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500">
+                    <option value="STAFF">Staff</option>
+                    <option value="MANAGER">Manager</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="VIEWER">Viewer</option>
+                </select>
+                <p class="text-xs text-gray-500 mt-2">Admins can manage settings. Managers can handle operations. Staff execute assigned tasks.</p>
+            </div>
+            
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('inviteModal').classList.add('hidden')" class="px-4 py-2 bg-transparent text-gray-300 hover:text-white font-medium rounded-lg">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg shadow">Send Invitation</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -177,13 +177,36 @@ export class AgroFedly3D {
     }
 
     setAdaptiveQuality() {
-        // High-end desktop: PR 2, Shadows. Low-end/Mobile: PR 1, No Shadows
+        // Initial setup
         const isMobile = window.innerWidth < 768;
         const pixelRatio = isMobile || this.reducedMotion ? 1 : Math.min(window.devicePixelRatio, 2);
         this.renderer.setPixelRatio(pixelRatio);
         this.renderer.shadowMap.enabled = !isMobile && !this.reducedMotion;
         if (this.renderer.shadowMap.enabled) {
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        }
+        
+        // Frame rate monitoring for dynamic downgrade
+        this.frames = 0;
+        this.lastTime = performance.now();
+        this.fpsThreshold = 30; // downgrade if FPS drops below 30
+        this.downgraded = false;
+    }
+    
+    checkPerformance() {
+        if (this.downgraded) return;
+        this.frames++;
+        const time = performance.now();
+        if (time >= this.lastTime + 1000) {
+            const fps = (this.frames * 1000) / (time - this.lastTime);
+            if (fps < this.fpsThreshold && this.renderer.getPixelRatio() > 1) {
+                console.warn(`[AgroFedly3D] FPS dropped to ${Math.round(fps)}. Downgrading 3D quality.`);
+                this.renderer.setPixelRatio(1);
+                this.renderer.shadowMap.enabled = false;
+                this.downgraded = true;
+            }
+            this.lastTime = time;
+            this.frames = 0;
         }
     }
 
@@ -256,6 +279,15 @@ export class AgroFedly3D {
         this.targetCameraLookAt.copy(lookAt);
     }
 
+    triggerCinematicPan(targetPos, targetLook, duration = 2.0) {
+        if (!this.enabled) return;
+        this.targetCameraPosition.copy(targetPos);
+        this.targetCameraLookAt.copy(targetLook);
+        
+        // Disptach event to trigger UI fade or sync
+        document.dispatchEvent(new CustomEvent('agrofedly:3d:cinematic_pan', { detail: { duration } }));
+    }
+
     loadScene(SceneControllerClass) {
         if (!this.enabled) return;
 
@@ -287,6 +319,8 @@ export class AgroFedly3D {
 
     animate() {
         if (!this.enabled) return;
+        
+        this.checkPerformance();
         
         const delta = this.clock.getDelta();
         const time = this.clock.getElapsedTime();

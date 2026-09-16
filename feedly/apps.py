@@ -3,3 +3,7 @@ from django.apps import AppConfig
 class FeedlyConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "feedly"
+
+    def ready(self):
+        import feedly.signals
+        import feedly.ai.workflows

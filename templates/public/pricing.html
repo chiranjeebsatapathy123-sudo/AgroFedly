@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Pricing — AgroFedly{% endblock %}
+
+{% block content %}
+<section style="padding: 60px 20px; max-width: 800px; margin: 0 auto; text-align: center;">
+    <h1 style="font-size: 3rem; margin-bottom: 20px;">Simple, Transparent Pricing</h1>
+    <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 50px;">
+        Flexible plans designed to scale with your agriculture operations.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; text-align: left;">
+        <div class="card" style="padding: 30px; border: 1px solid var(--border);">
+            <h3>Starter</h3>
+            <p style="color: var(--text-muted);">For smaller operations</p>
+            <ul style="margin: 20px 0; padding-left: 20px;">
+                <li>Basic Farm Management</li>
+                <li>Produce Tracking</li>
+                <li>Standard Support</li>
+            </ul>
+        </div>
+        <div class="card" style="padding: 30px; border: 2px solid var(--primary); transform: scale(1.05);">
+            <h3>Growth</h3>
+            <p style="color: var(--text-muted);">For growing organizations</p>
+            <ul style="margin: 20px 0; padding-left: 20px;">
+                <li>Advanced Analytics</li>
+                <li>AI Demand Forecasting</li>
+                <li>Priority Support</li>
+            </ul>
+        </div>
+        <div class="card" style="padding: 30px; border: 1px solid var(--border);">
+            <h3>Enterprise</h3>
+            <p style="color: var(--text-muted);">For larger operations</p>
+            <ul style="margin: 20px 0; padding-left: 20px;">
+                <li>Custom Integrations</li>
+                <li>Dedicated Account Manager</li>
+                <li>SLA Guarantees</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="margin-top: 50px;">
+        <h2>Ready to upgrade your operations?</h2>
+        <br>
+        <a href="{% url 'contact' %}" class="btn primary">Contact Sales</a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Contact — AgroFedly{% endblock %}
+
+{% block content %}
+<section style="padding: 60px 20px; max-width: 600px; margin: 0 auto;">
+    <h1 style="font-size: 3rem; margin-bottom: 20px;">Let's build better agriculture operations.</h1>
+    <p style="color: var(--text-muted); margin-bottom: 40px;">Reach out to our team to learn how AgroFedly can streamline your workflows.</p>
+
+    <form class="card" style="padding: 30px; display: flex; flex-direction: column; gap: 15px;" onsubmit="event.preventDefault(); alert('Message sent successfully!');">
+        <label>Name</label>
+        <input type="text" required style="padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--background); color: var(--text);">
+        
+        <label>Work Email</label>
+        <input type="email" required style="padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--background); color: var(--text);">
+        
+        <label>Organization</label>
+        <input type="text" required style="padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--background); color: var(--text);">
+        
+        <label>Message</label>
+        <textarea rows="5" required style="padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--background); color: var(--text);"></textarea>
+        
+        <button type="submit" class="btn primary" style="margin-top: 10px;">Send Message</button>
+    </form>
+</section>
+{% endblock %}

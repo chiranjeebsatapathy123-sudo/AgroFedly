@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Security — AgroFedly{% endblock %}
+
+{% block content %}
+<section style="padding: 60px 20px; max-width: 800px; margin: 0 auto;">
+    <h1 style="font-size: 3rem; margin-bottom: 30px;">Security at AgroFedly</h1>
+    
+    <div class="card" style="padding: 30px; margin-bottom: 20px;">
+        <h3>Authentication & Authorization</h3>
+        <p>We enforce strict role-based access control and organization-level data isolation to ensure users only see what they are permitted to see.</p>
+    </div>
+    
+    <div class="card" style="padding: 30px; margin-bottom: 20px;">
+        <h3>Data Protection</h3>
+        <p>All communication with AgroFedly APIs is encrypted in transit using industry-standard TLS. User sessions are protected against CSRF and related vulnerabilities.</p>
+    </div>
+    
+    <div class="card" style="padding: 30px; margin-bottom: 20px;">
+        <h3>Audit Logging</h3>
+        <p>Critical operational events and AI-recommended actions are logged immutably, ensuring accountability and full traceability.</p>
+    </div>
+</section>
+{% endblock %}

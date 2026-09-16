@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}AgroFedly | Digital Twin Command Center{% endblock %}
+
+{% block content %}
+<style>
+    .twin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .risk-radar {
+        display: flex;
+        gap: 20px;
+        background: var(--surface);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        border-left: 4px solid var(--warning);
+    }
+    
+    .risk-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 100px;
+    }
+    .risk-score {
+        display: flex;
+        gap: 5px;
+        margin-top: 5px;
+    }
+    .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--border);
+    }
+    .dot.active.low { background: var(--success); }
+    .dot.active.med { background: var(--warning); }
+    .dot.active.high { background: var(--danger); }
+
+    .ecosystem-graph {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+        background: var(--surface);
+        padding: 40px;
+        border-radius: 12px;
+        position: relative;
+        min-height: 300px;
+        align-items: center;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    .node {
+        background: var(--background);
+        padding: 20px;
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid var(--primary);
+        z-index: 10;
+        margin: 0 auto;
+        position: relative;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .node:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.4);
+    }
+
+    .line {
+        position: absolute;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        top: 50%;
+        z-index: 5;
+        opacity: 0.5;
+    }
+
+    .event-stream {
+        background: var(--surface);
+        padding: 20px;
+        border-radius: 12px;
+        height: 400px;
+        overflow-y: auto;
+    }
+
+    .event-item {
+        padding: 15px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+        transition: background 0.3s ease;
+    }
+    .event-item:hover {
+        background: var(--background);
+    }
+
+    .time-machine-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: var(--success);
+    }
+    
+    .pulse-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--success);
+        box-shadow: 0 0 10px var(--success);
+        animation: pulse 2s infinite;
+    }
+</style>
+
+<div class="twin-header reveal anim-fade-up">
+    <div>
+        <h1>Digital Twin Command Center</h1>
+        <div class="status-indicator">
+            <div class="pulse-dot"></div>
+            LIVE OPERATIONS SYNCED
+        </div>
+    </div>
+    
+    <div class="time-machine-controls">
+        <button class="btn ghost">← -24h (Simulated)</button>
+        <button class="btn primary">Now</button>
+        <button class="btn secondary">Look Ahead +24h →</button>
+    </div>
+</div>
+
+<div class="row reveal anim-fade-up" style="margin-bottom: 30px;">
+    <div class="col-md-12">
+        <div class="risk-radar">
+            <h4 style="margin:0; align-self:center; margin-right: 20px;">Risk Radar</h4>
+            
+            <div class="risk-item">
+                <span>Surplus Risk</span>
+                <div class="risk-score">
+                    <div class="dot active low"></div>
+                    <div class="dot {% if surplus_risk >= 2 %}active med{% endif %}"></div>
+                    <div class="dot {% if surplus_risk == 3 %}active high{% endif %}"></div>
+                </div>
+            </div>
+            
+            <div class="risk-item">
+                <span>Storage Pressure</span>
+                <div class="risk-score">
+                    <div class="dot active low"></div>
+                    <div class="dot {% if storage_risk >= 2 %}active med{% endif %}"></div>
+                    <div class="dot {% if storage_risk == 3 %}active high{% endif %}"></div>
+                </div>
+            </div>
+            
+            <div class="risk-item">
+                <span>Demand Risk</span>
+                <div class="risk-score">
+                    <div class="dot active low"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 reveal anim-fade-up">
+        <h3>Operational Ecosystem (2D Mode)</h3>
+        <div class="ecosystem-graph">
+            <div class="line" style="width: 80%; left: 10%;"></div>
+            
+            <div class="node">
+                <span style="font-size: 2rem;">🌾</span>
+                <strong>Agriculture</strong>
+            </div>
+            <div class="node">
+                <span style="font-size: 2rem;">⚙️</span>
+                <strong>Processing</strong>
+            </div>
+            <div class="node">
+                <span style="font-size: 2rem;">📦</span>
+                <strong>Storage</strong>
+            </div>
+            <div class="node">
+                <span style="font-size: 2rem;">🥗</span>
+                <strong>Surplus</strong>
+            </div>
+            <div class="node">
+                <span style="font-size: 2rem;">🚚</span>
+                <strong>Delivery</strong>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 reveal anim-fade-up" style="animation-delay: 0.2s;">
+        <h3>Live Event Stream</h3>
+        <div class="event-stream">
+            {% for event in events %}
+            <div class="event-item">
+                <div style="font-weight: 700; color: var(--primary);">{{ event.timestamp|time:"H:i:s" }}</div>
+                <div>
+                    <strong>{{ event.event_type }}</strong>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">{{ event.description }}</div>
+                    {% if event.entity_id %}
+                    <span class="badge">{{ event.entity_id }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center p-4">
+                <p>No operational events recorded yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Features — AgroFedly{% endblock %}
+
+{% block content %}
+<section style="padding: 60px 20px; max-width: 1200px; margin: 0 auto;">
+    <h1 style="font-size: 3rem; margin-bottom: 50px; text-align: center;">Platform Features</h1>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+        <div class="card" style="padding: 25px;">
+            <h3>AI Demand Forecasting</h3>
+            <p>Anticipate market needs with intelligent, real-time demand modeling.</p>
+        </div>
+        <div class="card" style="padding: 25px;">
+            <h3>Farm Management</h3>
+            <p>Track fields, soil health, and agricultural metrics from a central dashboard.</p>
+        </div>
+        <div class="card" style="padding: 25px;">
+            <h3>Produce Tracking</h3>
+            <p>Maintain an immutable digital passport for every batch of produce.</p>
+        </div>
+        <div class="card" style="padding: 25px;">
+            <h3>Surplus Detection</h3>
+            <p>Automatically identify excess food inventory before it becomes waste.</p>
+        </div>
+        <div class="card" style="padding: 25px;">
+            <h3>Recipient Matching</h3>
+            <p>Coordinate directly with verified organizations for rapid surplus redistribution.</p>
+        </div>
+        <div class="card" style="padding: 25px;">
+            <h3>Delivery Management</h3>
+            <p>Live GPS tracking and IoT integration for all your food shipments.</p>
+        </div>
+        <div class="card" style="padding: 25px;">
+            <h3>Analytics & Impact</h3>
+            <p>Generate automated reports on operational efficiency and environmental impact.</p>
+        </div>
+        <div class="card" style="padding: 25px;">
+            <h3>Voice Assistant</h3>
+            <p>Interact with your data hands-free using natural language commands.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
