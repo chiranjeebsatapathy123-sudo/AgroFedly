@@ -105,41 +105,46 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Simulating Live WebSocket Data
+    // Simulating Live API Telemetry Stream
     setInterval(() => {
-        // Randomly fluctuate values slightly
-        const moisture = (40 + Math.random() * 5).toFixed(1);
-        const temp = (23 + Math.random() * 3).toFixed(1);
-        const humidity = (60 + Math.random() * 10).toFixed(1);
-        const nitrogen = (130 + Math.random() * 20).toFixed(0);
+        fetch('/api/agri-iot-stream/')
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    const moisture = data.data.moisture;
+                    const temp = data.data.temperature;
+                    const humidity = data.data.humidity;
+                    const nitrogen = data.data.nitrogen;
 
-        // Update Gauges
-        document.getElementById('val-moisture').innerText = moisture + '%';
-        document.getElementById('bar-moisture').style.width = moisture + '%';
+                    // Update Gauges
+                    document.getElementById('val-moisture').innerText = moisture + '%';
+                    document.getElementById('bar-moisture').style.width = moisture + '%';
 
-        document.getElementById('val-temp').innerText = temp + '°C';
-        document.getElementById('bar-temp').style.width = (temp * 2) + '%';
+                    document.getElementById('val-temp').innerText = temp + '°C';
+                    document.getElementById('bar-temp').style.width = (temp * 2) + '%';
 
-        document.getElementById('val-humidity').innerText = humidity + '%';
-        document.getElementById('bar-humidity').style.width = humidity + '%';
+                    document.getElementById('val-humidity').innerText = humidity + '%';
+                    document.getElementById('bar-humidity').style.width = humidity + '%';
 
-        document.getElementById('val-nitrogen').innerText = nitrogen + ' ppm';
-        document.getElementById('bar-nitrogen').style.width = (nitrogen / 2) + '%';
+                    document.getElementById('val-nitrogen').innerText = nitrogen + ' ppm';
+                    document.getElementById('bar-nitrogen').style.width = (nitrogen / 2) + '%';
 
-        // Update Chart
-        const timeLabel = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-        
-        liveChart.data.labels.push(timeLabel);
-        liveChart.data.labels.shift();
-        
-        liveChart.data.datasets[0].data.push(moisture);
-        liveChart.data.datasets[0].data.shift();
-        
-        liveChart.data.datasets[1].data.push(temp);
-        liveChart.data.datasets[1].data.shift();
+                    // Update Chart
+                    const timeLabel = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                    
+                    liveChart.data.labels.push(timeLabel);
+                    liveChart.data.labels.shift();
+                    
+                    liveChart.data.datasets[0].data.push(moisture);
+                    liveChart.data.datasets[0].data.shift();
+                    
+                    liveChart.data.datasets[1].data.push(temp);
+                    liveChart.data.datasets[1].data.shift();
 
-        liveChart.update();
-
+                    liveChart.update();
+                }
+            })
+            .catch(err => console.error("Error fetching IoT stream:", err));
     }, 2500); // Updates every 2.5 seconds
 });
 </script>

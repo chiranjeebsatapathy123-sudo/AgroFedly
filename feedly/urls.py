@@ -57,6 +57,7 @@ urlpatterns = [
     path("agriculture/scanner/", views.agri_disease_scanner, name="agri_disease_scanner"),
     path("agriculture/yield/", views.agri_yield_predictor, name="agri_yield_predictor"),
     path("agriculture/iot/", views.agri_iot_dashboard, name="agri_iot_dashboard"),
+    path("api/agri-iot-stream/", views.api_agri_iot_stream, name="api_agri_iot_stream"),
     path("agriculture/map/", views.agri_field_map, name="agri_field_map"),
     path("agriculture/equipment/", views.agri_equipment_hub, name="agri_equipment_hub"),
     path("agriculture/equipment/add/", views.agri_equipment_add, name="agri_equipment_add"),

@@ -17,10 +17,7 @@ from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionFo
 from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact, StorageRecord
 User = get_user_model()
 from ..forms import PostMealRecordForm
-from ..models import AgriculturalProduce, ProcessingRecord, AgriculturalSupplyRequest
-from ..forms import AgriculturalProduceForm, ProcessingRecordForm, AgriculturalSupplyRequestForm
-from django.db.models import Sum
-from ..models import AgriculturalProduce, ProcessingRecord, AgriculturalSupplyRequest
+from ..models import AgriculturalProduce, ProcessingRecord, AgriculturalSupplyRequest, FarmField, Equipment, CropDiseaseScan
 from ..forms import AgriculturalProduceForm, ProcessingRecordForm, AgriculturalSupplyRequestForm
 from django.db.models import Sum
 from ..models import BuyerDemand, SupplyMatch
@@ -342,10 +339,17 @@ def agri_disease_scanner(request):
     if request.method == 'POST':
         crop_name = request.POST.get('crop_name', 'Unknown Crop')
         scan_type = request.POST.get('scan_type', 'disease')
+        image_file = request.FILES.get('image')
+        
         if scan_type == 'grading':
             grades = [('Grade A (Export Quality)', 98.2, 'Optimal size, color, and zero blemishes. Premium pricing recommended.'), ('Grade B (Local Market)', 89.4, 'Minor superficial blemishes. Standard market pricing.'), ('Grade C (Processing/Juicing)', 92.1, 'Substandard shape or color. Recommend selling for processing.')]
             disease, confidence, treatment = grades[0]
             msg = f'Grading complete! Result: {disease}'
+            ai_report = [
+                {'label': 'Color Consistency', 'score': 95},
+                {'label': 'Shape Uniformity', 'score': 92},
+                {'label': 'Surface Blemishes', 'score': 4}
+            ]
         else:
             from ..services.agri_apis import analyze_plant_disease
             result = analyze_plant_disease("base64_or_url_placeholder")
@@ -353,10 +357,25 @@ def agri_disease_scanner(request):
             confidence = result['confidence']
             treatment = result['treatment']
             msg = f'Scan complete! Diagnosis: {disease}'
-        scan = CropDiseaseScan.objects.create(farmer=request.user, crop_name=crop_name, detected_disease=disease, confidence=confidence, recommended_treatment=treatment)
+            ai_report = [
+                {'label': disease, 'score': confidence},
+                {'label': 'Early Blight (Alternative)', 'score': round((100 - confidence) * 0.6, 1)},
+                {'label': 'Healthy', 'score': round((100 - confidence) * 0.4, 1)}
+            ]
+            
+        scan = CropDiseaseScan.objects.create(
+            farmer=request.user, 
+            crop_name=crop_name, 
+            detected_disease=disease, 
+            confidence=confidence, 
+            recommended_treatment=treatment,
+            image=image_file
+        )
         messages.success(request, msg)
-        return render(request, 'agri_disease_scanner.html', {'scan': scan})
-    return render(request, 'agri_disease_scanner.html')
+        return render(request, 'agri_disease_scanner.html', {'scan': scan, 'ai_report': ai_report})
+        
+    history = CropDiseaseScan.objects.filter(farmer=request.user).order_by('-scanned_at')[:5]
+    return render(request, 'agri_disease_scanner.html', {'history': history})
 
 @login_required
 def agri_yield_predictor(request):
@@ -389,6 +408,30 @@ def agri_iot_dashboard(request):
     Simulates live data for Soil Moisture, Temperature, Humidity, and Nitrogen levels.
     """
     return render(request, 'agri_iot_dashboard.html', {})
+
+from django.http import JsonResponse
+import random
+
+@login_required
+def api_agri_iot_stream(request):
+    """
+    Returns simulated real-time telemetry data for agriculture IoT sensors.
+    Fluctuates slightly to simulate live sensor jitter.
+    """
+    moisture = round(40 + random.uniform(0, 5), 1)
+    temp = round(23 + random.uniform(0, 3), 1)
+    humidity = round(60 + random.uniform(0, 10), 1)
+    nitrogen = int(130 + random.uniform(0, 20))
+    
+    return JsonResponse({
+        'status': 'success',
+        'data': {
+            'moisture': moisture,
+            'temperature': temp,
+            'humidity': humidity,
+            'nitrogen': nitrogen
+        }
+    })
 
 @login_required
 def agri_field_map(request):
