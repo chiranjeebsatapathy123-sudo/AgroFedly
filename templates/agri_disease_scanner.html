@@ -15,11 +15,38 @@
     {% if scan %}
         <!-- Scan Result -->
         <div class="form-card" style="text-align:center; padding:40px 20px;">
-            <div style="font-size:50px; margin-bottom:20px;">
-                {% if scan.detected_disease == "Healthy" %}🌱{% else %}⚠️{% endif %}
-            </div>
+            {% if scan.image %}
+                <div style="margin-bottom:20px; position:relative; display:inline-block; max-width:100%;">
+                    <img src="{{ scan.image.url }}" alt="Uploaded Crop" style="max-width:100%; max-height:300px; border-radius:10px; border:2px solid var(--primary); object-fit:contain;">
+                    <!-- Simulated bounding box overlay -->
+                    <div style="position:absolute; top:30%; left:20%; width:40%; height:40%; border:2px dashed var(--danger); background:rgba(220,38,38,0.2); border-radius:8px;"></div>
+                </div>
+            {% else %}
+                <div style="font-size:50px; margin-bottom:20px;">
+                    {% if scan.detected_disease == "Healthy" %}🌱{% else %}⚠️{% endif %}
+                </div>
+            {% endif %}
+            
             <h2 style="margin:0 0 10px; font-size:2rem;">{{ scan.detected_disease }}</h2>
             <p style="color:var(--muted); margin-bottom:20px;">Crop: {{ scan.crop_name }} &bull; Confidence: {{ scan.confidence }}%</p>
+            
+            <!-- AI Probabilities Table -->
+            {% if ai_report %}
+            <div style="margin-bottom:20px; text-align:left; background:var(--surface); padding:20px; border-radius:10px; border:1px solid var(--line);">
+                <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem;">{% trans "AI Probability Distribution" %}</h3>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    {% for item in ai_report %}
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="width:180px; font-size:0.9rem; color:var(--ink);">{{ item.label }}</span>
+                        <div style="flex:1; height:8px; background:var(--bg); border-radius:4px; overflow:hidden;">
+                            <div style="height:100%; width:{{ item.score }}%; background:var(--primary);"></div>
+                        </div>
+                        <span style="width:50px; text-align:right; font-size:0.9rem; font-weight:bold; color:var(--ink);">{{ item.score }}%</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
             
             <div style="background:var(--soft); padding:20px; border-radius:15px; border:1px solid var(--line); text-align:left;">
                 <h3 style="margin-top:0;">{% trans "Recommended Action" %}</h3>
