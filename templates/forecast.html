@@ -3,33 +3,51 @@
 {% block title %}7-Day Forecast{% endblock %}
 {% block content %}
 <section class="page-head"><div><div class="eyebrow">{% trans "PLANNING OUTLOOK" %}</div><h1>{% trans "7-Day demand forecast & Simulation" %}</h1><p>{% trans "Scenario planning for the coming week using AI simulations." %}</p></div></section>
-<div class="form-card compact" style="display: flex; gap: 20px; align-items: stretch; flex-wrap: wrap;">
-    <div style="flex: 1; min-width: 300px;">
-        <h3 style="margin-top: 0; font-size: 1em; color: var(--rd-text-sub); text-transform: uppercase;">Manual Override</h3>
-        <form method="post" class="inline-form" id="forecast-form">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+    <!-- Manual Override Card -->
+    <div class="card">
+        <h3 class="h3" style="margin-bottom: 1.5rem;">Manual Override</h3>
+        <form method="post" id="forecast-form" style="display: flex; flex-direction: column; gap: 1rem;">
             {% csrf_token %}
             <input type="hidden" name="scenario" id="scenario-input" value="manual">
-            <label>{% trans "Daily attendance base" %}<input name="attendance" id="attendance-input" type="number" min="1" required></label>
-            <label>{% trans "Today is holiday?" %}
-                <select name="holiday" id="holiday-input">
+            
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label class="small" style="font-weight: 600;">{% trans "Daily attendance base" %}</label>
+                <input name="attendance" id="attendance-input" type="number" min="1" required style="padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-primary); color: var(--text-primary); font-family: inherit;">
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label class="small" style="font-weight: 600;">{% trans "Today is holiday?" %}</label>
+                <select name="holiday" id="holiday-input" style="padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-primary); color: var(--text-primary); font-family: inherit;">
                     <option value="0">{% trans "No" %}</option>
                     <option value="1">{% trans "Yes" %}</option>
                 </select>
-            </label>
-            <button class="btn primary" type="submit">{% trans "Generate Full Week" %}</button>
+            </div>
+            
+            <button class="btn primary" type="submit" style="margin-top: 0.5rem;">{% trans "Generate Full Week" %}</button>
         </form>
     </div>
-    <div style="flex: 1; min-width: 300px; border-left: 1px solid var(--rd-border); padding-left: 20px;">
-        <h3 style="margin-top: 0; font-size: 1em; color: var(--rd-text-sub); text-transform: uppercase;">What-If Simulator 2.0 (Live Preview)</h3>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-            <label style="width: 100%;">Planned Production (Units): <input type="number" id="sim_production" value="1000" style="width: 100px;"></label>
-            <button class="btn outline" onclick="runSim(800)">Low Demand (800)</button>
-            <button class="btn outline" onclick="runSim(1200)">Balanced (1200)</button>
-            <button class="btn outline" onclick="runSim(1800)">High (1800)</button>
+    
+    <!-- What-If Simulator -->
+    <div class="card">
+        <h3 class="h3" style="margin-bottom: 1.5rem;">What-If Simulator 2.0 (Live Preview)</h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label class="small" style="font-weight: 600;">Planned Production (Units)</label>
+                <input type="number" id="sim_production" value="1000" style="padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-primary); color: var(--text-primary); font-family: inherit; width: 100%;">
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn secondary" onclick="runSim(800)">Low Demand</button>
+                <button class="btn secondary" onclick="runSim(1200)">Balanced</button>
+                <button class="btn secondary" onclick="runSim(1800)">High</button>
+            </div>
         </div>
-        <div id="sim-result" style="margin-top: 15px; padding: 10px; background: var(--rd-surface); border: 1px dashed var(--rd-primary); border-radius: 4px; display: none;">
-            <h4 style="margin: 0 0 5px 0;">Simulation Result</h4>
-            <p style="margin: 0; font-size: 0.9em;" id="sim-text"></p>
+        
+        <div id="sim-result" style="margin-top: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-sm); display: none;">
+            <h4 class="small" style="margin: 0 0 0.5rem 0; font-weight: 700;">Simulation Result</h4>
+            <p class="body" style="margin: 0;" id="sim-text"></p>
         </div>
     </div>
 </div>

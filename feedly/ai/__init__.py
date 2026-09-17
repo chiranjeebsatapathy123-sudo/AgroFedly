@@ -1,1 +1,3 @@
-# feedly.ai module
+from .gateway import AIGateway
+
+__all__ = ['AIGateway']

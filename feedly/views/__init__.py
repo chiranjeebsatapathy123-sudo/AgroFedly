@@ -11,3 +11,4 @@ from .agriculture import *
 from .community import *
 from .errors import *
 from .public import *
+from .profile import *

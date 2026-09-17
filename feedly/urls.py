@@ -1,9 +1,19 @@
+from .views import kitchen
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 from . import views
 
 urlpatterns = [
+    # Phase 8: Kitchen Module
+    path('kitchen/dashboard/', kitchen.kitchen_dashboard, name='kitchen_dashboard'),
+    path('kitchen/meal-planning/', kitchen.meal_planning, name='kitchen_meal_planning'),
+    path('kitchen/production/', kitchen.production_tracking, name='kitchen_production'),
+    path('kitchen/surplus/register/', kitchen.register_surplus, name='kitchen_register_surplus'),
+    path('kitchen/redistribution/', kitchen.redistribution_queue, name='kitchen_redistribution'),
+    path('kitchen/inventory/', kitchen.inventory, name='kitchen_inventory'),
+    path('kitchen/analytics/', kitchen.kitchen_analytics, name='kitchen_analytics'),
+
     # Static pages (Phase 21)
     path("ai/trust/", TemplateView.as_view(template_name="trust.html"), name="ai_trust"),
     path("resources/", TemplateView.as_view(template_name="resources.html"), name="resources"),
@@ -23,12 +33,10 @@ urlpatterns = [
     path("health/", views.health_liveness, name="health"),
     path("readiness/", views.health_readiness, name="readiness"),
     path("liveness/", views.health_liveness, name="liveness"),
-    path("login/", views.login_view, name="login"),
-    path("login/buyer/", views.login_view, kwargs={"persona": "buyer"}, name="login_buyer"),
-    path("login/supplier/", views.login_view, kwargs={"persona": "supplier"}, name="login_supplier"),
-    path("login/organization/", views.login_view, kwargs={"persona": "organization"}, name="login_organization"),
-    path("login/farmer/", views.login_view, kwargs={"persona": "farmer"}, name="login_farmer"),
-    path("login/user/", views.login_view, kwargs={"persona": "user"}, name="login_user"),
+    # Authentication & Role Selection (Phase 2, 4, 5)
+    path("login/", views.role_selection_view, name="role_selection"),
+    path("login/<str:role>/", views.role_login_view, name="role_login"),
+    path("register/<str:role>/", views.register_view, name="register_role"),
     path("logout/", views.logout_view, name="logout"),
 
     path("dashboard/", views.dashboard, name="dashboard"),
@@ -42,6 +50,12 @@ urlpatterns = [
     
     # Agriculture Extension Routes
     path("agriculture/", views.agri_dashboard, name="agri_dashboard"),
+    path("agriculture/farms/", views.agri_farm_list, name="agri_farm_list"),
+    path("agriculture/farms/add/", views.agri_farm_add, name="agri_farm_add"),
+    path("agriculture/fields/", views.agri_field_list, name="agri_field_list"),
+    path("agriculture/fields/add/", views.agri_field_add, name="agri_field_add"),
+    path("agriculture/calendar/", views.agri_calendar, name="agri_calendar"),
+    path("agriculture/calendar/add/", views.agri_event_add, name="agri_event_add"),
     path("agriculture/produce/", views.agri_produce_list, name="agri_produce_list"),
     path("agriculture/produce/add/", views.agri_produce_add, name="agri_produce_add"),
     path("agriculture/processing/", views.agri_processing_list, name="agri_processing_list"),
@@ -56,8 +70,12 @@ urlpatterns = [
     path("agriculture/inspection/add/", views.agri_inspection_add, name="agri_inspection_add"),
     path("agriculture/scanner/", views.agri_disease_scanner, name="agri_disease_scanner"),
     path("agriculture/yield/", views.agri_yield_predictor, name="agri_yield_predictor"),
+    path("agriculture/weather/", views.agri_weather_page, name="agri_weather_page"),
+    path("agriculture/crop-recommendation/", views.agri_crop_recommendation, name="agri_crop_recommendation"),
     path("agriculture/iot/", views.agri_iot_dashboard, name="agri_iot_dashboard"),
     path("api/agri-iot-stream/", views.api_agri_iot_stream, name="api_agri_iot_stream"),
+    path("api/notifications/", views.api_notifications, name="api_notifications"),
+    path("api/notifications/read/", views.api_notifications_read, name="api_notifications_read"),
     path("agriculture/map/", views.agri_field_map, name="agri_field_map"),
     path("agriculture/equipment/", views.agri_equipment_hub, name="agri_equipment_hub"),
     path("agriculture/equipment/add/", views.agri_equipment_add, name="agri_equipment_add"),
@@ -139,6 +157,10 @@ urlpatterns = [
     path("agriculture/soil/", views.agri_soil, name="agri_soil"),
     path("agriculture/comms/", views.agri_comms, name="agri_comms"),
 
+    # PHASE 4 ROUTES (AI & ADVANCED)
+    path("agri/intelligence/", views.agri_intelligence, name="agri_intelligence"),
+    path("agri/intelligence/models/", views.model_monitoring, name="model_monitoring"),
+
     # PHASE 4 ROUTES (ORGANIZATION)
     path("organization/routing/", views.org_fleet_routing, name="org_fleet_routing"),
 
@@ -151,4 +173,8 @@ urlpatterns = [
     path('org/ecosystem/', views.ecosystem_coordination, name='ecosystem_coordination'),
     path('org/ecosystem/create/', views.create_alliance, name='create_alliance'),
     path('org/ecosystem/join/', views.join_alliance, name='join_alliance'),
+    
+    # Profile & Security (Phase 4)
+    path("profile/", views.user_profile, name="user_profile"),
+    path("security/", views.security_center, name="security_center"),
 ]

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Security Center{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <div class="eyebrow" style="color:var(--danger); font-weight:bold; letter-spacing:2px;">{% trans "SECURITY" %}</div>
+        <h1>{% trans "Security Center" %}</h1>
+        <p>{% trans "Monitor your account activity and security settings." %}</p>
+    </div>
+</section>
+
+<div class="form-grid">
+    <div class="form-card">
+        <h2>{% trans "Password & Authentication" %}</h2>
+        <p style="color:var(--text-muted); margin-bottom:15px;">{% trans "Manage your password and two-factor authentication settings." %}</p>
+        <div style="margin-bottom:15px;">
+            <strong>{% trans "Last Password Change" %}:</strong> <span style="color:var(--text-muted);">90 days ago</span>
+        </div>
+        <button class="btn" style="margin-right:10px;">{% trans "Change Password" %}</button>
+        <button class="btn glass">{% trans "Enable 2FA" %}</button>
+    </div>
+    
+    <div class="form-card">
+        <h2>{% trans "Active Sessions" %}</h2>
+        <p style="color:var(--text-muted); margin-bottom:15px;">{% trans "Review devices currently logged into your account." %}</p>
+        
+        <ul style="list-style:none; padding:0; margin:0;">
+            <li style="padding:15px; border:1px solid var(--color-border); border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <strong style="display:block;">Windows 11 (Chrome)</strong>
+                    <span style="font-size:0.85rem; color:var(--text-muted);">Current Session • Pune, IN</span>
+                </div>
+                <span style="color:var(--success); font-weight:bold; font-size:0.8rem; background:var(--color-success-bg); padding:4px 8px; border-radius:4px;">{% trans "ACTIVE" %}</span>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

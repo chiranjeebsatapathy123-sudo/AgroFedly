@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}AI Crop Recommendation - AgroFedly{% endblock %}
+{% block content %}
+
+<section class="page-head">
+    <div>
+        <div class="eyebrow">{% trans "MACHINE LEARNING" %}</div>
+        <h1>{% trans "Crop Recommendation Engine" %}</h1>
+        <p>{% trans "Input soil nutrients and weather conditions to get optimal crop recommendations." %}</p>
+    </div>
+</section>
+
+<div class="form-page single" style="max-width:800px; padding-top:20px;">
+    {% if recommendations %}
+        <div class="form-card" style="padding:40px 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0;">{% trans "Top Recommendations" %}</h2>
+                <a href="{% url 'agri_crop_recommendation' %}" class="btn glass btn-sm">{% trans "New Analysis" %}</a>
+            </div>
+            
+            <p style="color:var(--text-muted); margin-bottom: 30px;">Based on your soil analysis (<strong>{{ soil }}</strong>).</p>
+            
+            <div style="display:flex; flex-direction:column; gap:20px;">
+                {% for rec in recommendations %}
+                <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; align-items:center; gap:20px; box-shadow:var(--shadow-subtle);">
+                    <div style="font-size:3rem; width:80px; text-align:center;">
+                        {% if rec.name == 'Rice' %}🌾
+                        {% elif rec.name == 'Wheat' %}🍞
+                        {% elif rec.name == 'Potato' %}🥔
+                        {% elif rec.name == 'Corn (Maize)' %}🌽
+                        {% else %}🌱{% endif %}
+                    </div>
+                    <div style="flex:1;">
+                        <h3 style="margin:0 0 5px 0;">{{ rec.name }}</h3>
+                        <p style="margin:0 0 10px 0; color:var(--text-muted); font-size:0.95rem;">{{ rec.reason }}</p>
+                        
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:0.85rem; font-weight:600;">Match:</span>
+                            <div style="flex:1; height:6px; background:var(--background); border-radius:3px; overflow:hidden;">
+                                <div style="height:100%; width:{{ rec.confidence }}%; background:var(--primary);"></div>
+                            </div>
+                            <span style="font-size:0.85rem; font-weight:bold; color:var(--primary);">{{ rec.confidence }}%</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="form-card" id="inputCard">
+            <form method="post" action="{% url 'agri_crop_recommendation' %}" class="form-grid">
+                {% csrf_token %}
+                
+                <label>
+                    {% trans "Soil Type" %}
+                    <select name="soil_type" required>
+                        <option value="Loamy">Loamy</option>
+                        <option value="Clay">Clay</option>
+                        <option value="Sandy">Sandy</option>
+                        <option value="Silty">Silty</option>
+                        <option value="Peaty">Peaty</option>
+                    </select>
+                </label>
+                
+                <label>
+                    {% trans "Nitrogen (N) Content" %}
+                    <input type="number" name="nitrogen" required min="0" max="200" value="50">
+                </label>
+                
+                <label>
+                    {% trans "Phosphorus (P) Content" %}
+                    <input type="number" name="phosphorus" required min="0" max="200" value="50">
+                </label>
+                
+                <label>
+                    {% trans "Potassium (K) Content" %}
+                    <input type="number" name="potassium" required min="0" max="200" value="50">
+                </label>
+                
+                <label>
+                    {% trans "Soil pH" %}
+                    <input type="number" name="ph" required step="0.1" min="0" max="14" value="6.5">
+                </label>
+                
+                <label>
+                    {% trans "Rainfall (mm)" %}
+                    <input type="number" name="rainfall" required min="0" max="1000" value="200">
+                </label>
+                
+                <div style="grid-column: 1 / -1; margin-top:20px;">
+                    <button type="submit" class="btn primary full" style="font-size:1.1rem; padding:15px;">{% trans "Get AI Recommendation" %}</button>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .form-grid label {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-weight: 500;
+    }
+    .form-grid input, .form-grid select {
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--background);
+        color: var(--text);
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .form-grid input:focus, .form-grid select:focus {
+        border-color: var(--primary);
+        outline: none;
+    }
+    @media (max-width: 600px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

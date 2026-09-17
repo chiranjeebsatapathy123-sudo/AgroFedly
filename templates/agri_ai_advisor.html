@@ -59,6 +59,54 @@
     </div>
     {% endfor %}
 </div>
+</div>
+
+{% if activities or events %}
+<div class="card-3d anim-fade-up stagger-2" style="margin-top: 40px; padding: 30px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
+    <h2 style="margin-top:0; margin-bottom: 20px; font-size:1.8rem; border-bottom: 1px solid var(--border); padding-bottom:10px;">
+        <span style="color:var(--primary);">✨</span> Personalized Farm Insights
+    </h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        
+        <div>
+            <h3 style="margin-top:0; color:var(--text-muted); font-size: 1rem; text-transform: uppercase;">Recent Field Activities</h3>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+                {% for activity in activities %}
+                <li style="padding: 15px; border: 1px solid var(--border); border-radius: 8px; border-left: 4px solid var(--info);">
+                    <strong>{{ activity.activity_type }}</strong> on {{ activity.field.name }}
+                    <br>
+                    <small style="color:var(--text-muted);">{{ activity.date|date:"M d, Y" }}</small>
+                    <div style="margin-top: 5px; font-size: 0.9rem; color: var(--text);">
+                        <em>AI Suggestion: Based on this activity, consider checking soil moisture levels in the next 3 days.</em>
+                    </div>
+                </li>
+                {% empty %}
+                <li style="color:var(--text-muted);">No recent activities logged.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div>
+            <h3 style="margin-top:0; color:var(--text-muted); font-size: 1rem; text-transform: uppercase;">Upcoming Farm Events</h3>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+                {% for event in events %}
+                <li style="padding: 15px; border: 1px solid var(--border); border-radius: 8px; border-left: 4px solid var(--warning);">
+                    <strong>{{ event.title }}</strong> ({{ event.event_type }})
+                    <br>
+                    <small style="color:var(--text-muted);">Scheduled for {{ event.date|date:"M d, Y" }}</small>
+                    <div style="margin-top: 5px; font-size: 0.9rem; color: var(--text);">
+                        <em>AI Suggestion: Ensure required inputs are stocked and weather conditions are optimal for {{ event.event_type }}.</em>
+                    </div>
+                </li>
+                {% empty %}
+                <li style="color:var(--text-muted);">No upcoming events scheduled.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+    </div>
+</div>
+{% endif %}
 
 <style>
 @keyframes pulse {

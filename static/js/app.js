@@ -34,7 +34,7 @@
 
 // Dark Theme Persistence for Redesign
 document.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('agro_theme');
+    const savedTheme = localStorage.getItem('agrofedly-theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
     }
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         themeBtn.addEventListener('click', () => {
             document.body.classList.toggle('dark-theme');
             const isDark = document.body.classList.contains('dark-theme');
-            localStorage.setItem('agro_theme', isDark ? 'dark' : 'light');
+            localStorage.setItem('agrofedly-theme', isDark ? 'dark' : 'light');
         });
     }
 });

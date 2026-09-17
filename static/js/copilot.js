@@ -73,18 +73,42 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    const closeWidget = () => {
+        widget.classList.add("collapsed");
+        document.body.style.marginRight = "0"; // reset margin if we pushed content
+    };
+
+    const openWidget = () => {
+        widget.classList.remove("collapsed");
+        inputField.focus();
+    };
+
     // Toggle widget
     const toggleWidget = (e) => {
-        // If clicking on header when collapsed, open it
         if (widget.classList.contains("collapsed")) {
-            widget.classList.remove("collapsed");
-            inputField.focus();
-        } else if (e.target === toggleBtn) {
-            widget.classList.add("collapsed");
+            openWidget();
+        } else {
+            closeWidget();
         }
     };
 
-    header.addEventListener("click", toggleWidget);
+    if (toggleBtn) toggleBtn.addEventListener("click", toggleWidget);
+    
+    // Close on Escape
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !widget.classList.contains("collapsed")) {
+            closeWidget();
+        }
+    });
+
+    // Support opening from sidebar button
+    const sidebarBtn = document.getElementById("copilot-sidebar-btn");
+    if (sidebarBtn) {
+        sidebarBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            openWidget();
+        });
+    }
 
     // Voice button
     voiceBtn.addEventListener("mousedown", startRecording);
@@ -224,7 +248,9 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
         const sidebarBtn = document.getElementById("copilot-sidebar-btn");
         if (sidebarBtn) {
-            sidebarBtn.addEventListener("click", () => {
+            sidebarBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 const widget = document.getElementById("copilot-widget");
                 if (widget) {
                     widget.classList.remove("collapsed");

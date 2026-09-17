@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Redistribution Queue - AgroFedly{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1><i class="fas fa-exchange-alt"></i> Redistribution Queue</h1>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; overflow-x: auto; padding-bottom: 20px;">
+    <!-- Column 1 -->
+    <div style="background: var(--color-surface); border-radius: 12px; padding: 15px; border: 1px solid var(--color-border);">
+        <h3 style="font-size: 14px; text-transform: uppercase; margin-bottom: 15px; color: var(--color-text-secondary);">Safety Review ({{ columns.draft.count }})</h3>
+        {% for s in columns.draft %}
+        <div class="card card-hover" style="padding: 15px; margin-bottom: 10px;">
+            <strong>{{ s.food_name }}</strong> ({{ s.quantity }})
+        </div>
+        {% endfor %}
+    </div>
+    <!-- Column 2 -->
+    <div style="background: var(--color-surface); border-radius: 12px; padding: 15px; border: 1px solid var(--color-border);">
+        <h3 style="font-size: 14px; text-transform: uppercase; margin-bottom: 15px; color: var(--color-text-secondary);">Eligible ({{ columns.safety.count }})</h3>
+        {% for s in columns.safety %}
+        <div class="card card-hover" style="padding: 15px; margin-bottom: 10px;">
+            <strong>{{ s.food_name }}</strong> ({{ s.quantity }})
+        </div>
+        {% endfor %}
+    </div>
+    <!-- Column 3 -->
+    <div style="background: var(--color-surface); border-radius: 12px; padding: 15px; border: 1px solid var(--color-border);">
+        <h3 style="font-size: 14px; text-transform: uppercase; margin-bottom: 15px; color: var(--color-text-secondary);">Matched ({{ columns.matched.count }})</h3>
+        {% for s in columns.matched %}
+        <div class="card card-hover" style="padding: 15px; margin-bottom: 10px;">
+            <strong>{{ s.food_name }}</strong> ({{ s.quantity }})
+        </div>
+        {% endfor %}
+    </div>
+    <!-- Column 4 -->
+    <div style="background: var(--color-surface); border-radius: 12px; padding: 15px; border: 1px solid var(--color-border);">
+        <h3 style="font-size: 14px; text-transform: uppercase; margin-bottom: 15px; color: var(--color-text-secondary);">Delivered ({{ columns.delivered.count }})</h3>
+        {% for s in columns.delivered %}
+        <div class="card card-hover" style="padding: 15px; margin-bottom: 10px;">
+            <strong>{{ s.food_name }}</strong> ({{ s.quantity }})
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

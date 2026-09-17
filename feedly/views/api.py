@@ -242,6 +242,46 @@ def require_api_key(view_func):
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 
+@login_required
+def api_notifications(request):
+    """Fetch unread notifications for the user."""
+    from ..models import Notification
+    
+    # Get user specific or org specific notifications
+    if hasattr(request.user, 'profile') and request.user.profile.role == 'FPO':
+        org_member = request.user.organization_memberships.first()
+        if org_member:
+            notifs = Notification.objects.filter(organization=org_member.organization, is_read=False).order_by('-created_at')[:10]
+        else:
+            notifs = Notification.objects.filter(user=request.user, is_read=False).order_by('-created_at')[:10]
+    else:
+        notifs = Notification.objects.filter(user=request.user, is_read=False).order_by('-created_at')[:10]
+        
+    data = [{'id': n.id, 'type': n.notification_type, 'message': n.message, 'time': n.created_at.isoformat()} for n in notifs]
+    return JsonResponse({'status': 'success', 'notifications': data})
+
+@login_required
+@csrf_exempt
+def api_notifications_read(request):
+    """Mark notifications as read."""
+    if request.method == 'POST':
+        from ..models import Notification
+        try:
+            body = json.loads(request.body)
+            notif_id = body.get('id')
+            if notif_id:
+                notif = Notification.objects.filter(id=notif_id).first()
+                if notif:
+                    notif.is_read = True
+                    notif.save()
+            else:
+                # Mark all as read
+                Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error'}, status=405)
+
 @require_api_key
 def api_erp_attendance(request):
     """External API endpoint for ERP to push attendance data."""
@@ -300,9 +340,20 @@ def copilot_chat(request):
             if not user_message:
                 return JsonResponse({'error': 'No message provided'}, status=400)
                 
+            from feedly.models import AIChatHistory
+            from feedly.ai.advisor import get_copilot_response
+            
+            # Save user message
+            AIChatHistory.objects.create(
+                user=request.user,
+                message_role='USER',
+                content=user_message,
+                context_used={'url_context': context}
+            )
+                
             # Hardcoded NLP rules for Demo workflows (Phase 19)
             if "pause surplus alerts" in user_message or "pause alerts" in user_message:
-                return JsonResponse({
+                ai_response = {
                     'type': 'action_preview',
                     'action': 'pause_surplus_alerts',
                     'preview': {
@@ -311,18 +362,23 @@ def copilot_chat(request):
                         'New': 'Paused',
                         'Impact': 'You may stop receiving surplus alerts.'
                     }
-                })
+                }
+                AIChatHistory.objects.create(user=request.user, message_role='AI', content=json.dumps(ai_response))
+                return JsonResponse(ai_response)
             
-            ai_response = generate_copilot_response(user_message, request.organization, context)
+            # Phase 4 Advisor
+            ai_response = get_copilot_response(request.user, user_message)
             
             # If the response is a JSON string (e.g. for navigation), parse it
             try:
                 if isinstance(ai_response, str) and ai_response.strip().startswith('{'):
                     parsed = json.loads(ai_response)
+                    AIChatHistory.objects.create(user=request.user, message_role='AI', content=ai_response)
                     return JsonResponse(parsed)
             except json.JSONDecodeError:
                 pass
                 
+            AIChatHistory.objects.create(user=request.user, message_role='AI', content=ai_response)
             return JsonResponse({'response': ai_response})
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
@@ -488,3 +544,5 @@ def api_ai_action_preview(request):
         return JsonResponse({'success': True, 'preview': preview})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+

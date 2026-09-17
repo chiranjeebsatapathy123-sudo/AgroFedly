@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Agro Intelligence Dashboard{% endblock %}
+
+{% block content %}
+<div class="agro-intelligence-container" style="padding: 2rem;">
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="margin: 0; font-size: 2.5rem; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                <i class="fas fa-brain"></i> Advanced AI Intelligence
+            </h1>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">Real-time insights and autonomous monitoring for your operations.</p>
+        </div>
+        <div style="text-align: right;">
+            <div style="background: rgba(46, 204, 113, 0.1); color: var(--success); padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; border: 1px solid rgba(46, 204, 113, 0.2);">
+                <i class="fas fa-satellite-dish"></i> {{ models_active }} AI Models Online
+            </div>
+            {% if request.user.profile.role == 'ADMIN' or request.user.profile.role == 'RESEARCHER' %}
+            <a href="{% url 'model_monitoring' %}" class="btn" style="margin-top: 1rem; background: var(--surface-2); border: 1px solid var(--border);">
+                <i class="fas fa-server"></i> View Model Performance
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+        <!-- Insights Grid -->
+        <div style="grid-column: 1 / -1;">
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;"><i class="fas fa-lightbulb" style="color: var(--warning);"></i> Active Insights</h2>
+        </div>
+        
+        {% for insight in insights %}
+        <div class="insight-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; position: relative; overflow: hidden; transition: transform 0.3s ease;">
+            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: {% if insight.confidence == 'High' %}var(--success){% elif insight.confidence == 'Medium' %}var(--warning){% else %}var(--danger){% endif %};"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary);">
+                    <i class="fas {% if insight.category == 'WEATHER' %}fa-cloud-sun{% elif insight.category == 'MARKET' %}fa-chart-line{% else %}fa-leaf{% endif %}"></i> {{ insight.category }}
+                </span>
+                <span style="font-size: 0.8rem; background: var(--surface-2); padding: 0.2rem 0.6rem; border-radius: 10px;">{{ insight.confidence }} Confidence</span>
+            </div>
+            
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem;">{{ insight.title }}</h3>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1rem;">{{ insight.summary }}</p>
+            
+            <div style="background: rgba(var(--primary-rgb), 0.05); padding: 1rem; border-radius: 8px; font-size: 0.9rem; border-left: 2px solid var(--primary);">
+                <strong><i class="fas fa-robot"></i> AI Reason:</strong> {{ insight.reason }}
+            </div>
+            
+            {% if insight.recommended_action %}
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                <strong>Action Required:</strong> <span style="color: var(--primary);">{{ insight.recommended_action }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: var(--surface); border-radius: 12px; border: 1px dashed var(--border);">
+            <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--success); margin-bottom: 1rem;"></i>
+            <h3>All Clear!</h3>
+            <p style="color: var(--text-secondary);">No critical insights requiring attention right now. AI is continuously monitoring your data.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+        <div>
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;"><i class="fas fa-bell" style="color: var(--danger);"></i> Smart Alerts</h2>
+            <div style="background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden;">
+                {% for alert in alerts %}
+                <div style="padding: 1.2rem; border-bottom: 1px solid var(--border); display: flex; gap: 1rem; align-items: flex-start;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(231, 76, 60, 0.1); color: var(--danger); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0;">{{ alert.title }}</h4>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">{{ alert.description }}</p>
+                        <small style="color: var(--text-tertiary); display: block; margin-top: 0.5rem;">{{ alert.created_at|timesince }} ago</small>
+                    </div>
+                </div>
+                {% empty %}
+                <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+                    No active smart alerts.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div>
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;"><i class="fas fa-microphone" style="color: var(--primary);"></i> AI Copilot Commands</h2>
+            <div style="background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 1.5rem;">
+                <p>Try using these voice commands anywhere in the platform by pressing <kbd>Ctrl</kbd> + <kbd>Space</kbd> or clicking the microphone icon:</p>
+                <ul style="list-style: none; padding: 0; margin: 1rem 0;">
+                    <li style="padding: 0.8rem; background: var(--surface-2); margin-bottom: 0.5rem; border-radius: 8px;">
+                        <i class="fas fa-quote-left" style="color: var(--text-tertiary); margin-right: 0.5rem;"></i> "What is the expected yield for my wheat field?"
+                    </li>
+                    <li style="padding: 0.8rem; background: var(--surface-2); margin-bottom: 0.5rem; border-radius: 8px;">
+                        <i class="fas fa-quote-left" style="color: var(--text-tertiary); margin-right: 0.5rem;"></i> "Are there any weather risks this week?"
+                    </li>
+                    <li style="padding: 0.8rem; background: var(--surface-2); margin-bottom: 0.5rem; border-radius: 8px;">
+                        <i class="fas fa-quote-left" style="color: var(--text-tertiary); margin-right: 0.5rem;"></i> "Log 50kg of fertilizer for field 2."
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .insight-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}

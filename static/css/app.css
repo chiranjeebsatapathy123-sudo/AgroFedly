@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --card-glass: rgba(255, 255, 255, 0.7);
   /* Color System - Light */
   --color-primary: #159653;
@@ -330,7 +330,7 @@ main{min-height:calc(100vh - 120px)}footer{text-align:center;padding:25px;color:
 .delivery-actions{max-width:1240px;margin:0 auto 55px;padding:0 28px;display:flex;gap:9px;flex-wrap:wrap}
 .delivery-actions form{margin:0}
 
-/* Operations Intelligence — uses the existing Annadata visual language. */
+/* Operations Intelligence â€” uses the existing Annadata visual language. */
 .feature-section{max-width:1240px;margin:22px auto;padding:0 28px}.feature-section>.panel-title{margin-bottom:14px}.feature-section h2{margin:0;font-size:22px}.feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.feature-card {
   padding: var(--space-24);
   border: 1px solid var(--color-border);
@@ -528,7 +528,53 @@ html {
 
 .card-3d {
     transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- PHASE 30 MOBILE RESPONSIVENESS & UI POLISH --- */
+@media (max-width: 768px) {
+    /* Hide sidebar by default on mobile, make it an off-canvas drawer */
+    
+    
+    
+    
+    /* Main content should take full width on mobile */
+    
+    
+    
+    
+    .grid, .form-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .dashboard-wrap {
+        padding: 10px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+}
+
+/* Mobile Toggle Button */
+.mobile-nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 10px;
+}
+
+@media (max-width: 768px) {
+    .mobile-nav-toggle {
+        display: block;
+    }
 }
 
 .card-3d:hover {
@@ -1030,36 +1076,11 @@ body.focus-mode .copilot-widget {
   --rd-copilot-width: 320px;
 }
 
-body.redesign-layout {
-    color: var(--rd-text-main) !important;
-  background: var(--rd-bg);
-  color: var(--rd-text-main);
-  font-family: \'Inter\', system-ui, sans-serif;
-  display: grid;
 
-  /* Fallback block layout for unauthenticated pages */
-  display: block;
-}
-body.redesign-layout.has-sidebar {
-  display: grid;
-  grid-template-columns: var(--rd-sidebar-width) 1fr var(--rd-copilot-width);
 
-  min-height: 100vh;
-  margin: 0;
-  overflow-x: hidden;
-}
 
 /* Sidebar */
-.rd-sidebar {
-  background: var(--rd-surface);
-  border-right: 1px solid var(--rd-border);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  z-index: 50;
-}
+
 .rd-brand {
   display: flex;
   align-items: center;
@@ -1145,24 +1166,10 @@ body.redesign-layout.has-sidebar {
 }
 
 /* Main Content Area */
-.rd-main {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+
 
 /* Topbar */
-.rd-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 32px;
-  background: var(--rd-surface);
-  border-bottom: 1px solid var(--rd-border);
-  position: sticky;
-  top: 0;
-  z-index: 40;
-}
+
 .rd-search {
   display: flex;
   align-items: center;
@@ -1238,9 +1245,7 @@ body.redesign-layout.has-sidebar {
 }
 
 /* Dashboard Content */
-.rd-content {
-  padding: 24px 32px;
-}
+
 
 /* Hero Section */
 .rd-hero {
@@ -1344,15 +1349,7 @@ body.redesign-layout.has-sidebar {
 }
 
 /* Copilot Panel */
-.rd-copilot {
-  background: #fcfdfd;
-  border-left: 1px solid var(--rd-border);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-}
+
 .rd-copilot-header {
   padding: 20px;
   display: flex;
@@ -1517,12 +1514,12 @@ body.redesign-layout.has-sidebar {
 .rd-qa-item i { color: var(--rd-text-sub); margin-right: 8px;}
 
 @media (max-width: 1200px) {
-  body.redesign-layout.has-sidebar { grid-template-columns: var(--rd-sidebar-width) 1fr; }
-  .rd-copilot { display: none; }
+  
+  
 }
 @media (max-width: 900px) {
-  body.redesign-layout.has-sidebar { grid-template-columns: 1fr; }
-  .rd-sidebar { display: none; }
+  
+  
   .rd-dashboard-grid { grid-template-columns: 1fr; }
   .rd-op-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -1558,14 +1555,8 @@ body.redesign-layout.has-sidebar {
 }
 
 /* Copilot collapsed state for new redesign */
-.rd-copilot.collapsed {
-    transform: translateX(120%);
-    opacity: 0;
-    pointer-events: none;
-}
-.rd-copilot {
-    transition: transform 0.3s ease, opacity 0.3s ease;
-}
+
+
 
 /* ========================================================
    REDESIGN DARK THEME OVERRIDES
@@ -1632,15 +1623,9 @@ body.dark-theme .form-grid textarea:focus {
 }
 
 /* Add accurate borders for sidebar and topbar */
-.rd-sidebar {
-    border-right: 1px solid var(--rd-border);
-}
-.rd-topbar {
-    border-bottom: 1px solid var(--rd-border);
-}
-.rd-copilot {
-    border-left: 1px solid var(--rd-border);
-}
+
+
+
 
 /* ========================================================
    DASHBOARD LEGACY CENTERING FIXES
@@ -1649,43 +1634,15 @@ body.dark-theme .form-grid textarea:focus {
    Legacy classes were designed for the public site and used margin: auto.
    Inside the sidebar layout, they should be left-aligned. 
 */
-.rd-main .page-head,
-.rd-main .section,
-.rd-main .stats-grid,
-.rd-main .quick-grid,
-.rd-main .two-panels,
-.rd-main .table-card,
-.rd-main .result-section,
-.rd-main .delivery-board,
-.rd-main .panel,
-.rd-main .action-footer,
-.rd-main .form-page,
-.rd-main .dashboard-grid {
-    margin-left: 32px !important;
-    margin-right: 32px !important;
-    max-width: 1600px !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
+
 
 /* Fix specific inline styles */
-.rd-main [style*="margin:0 auto"] {
-    margin-left: 32px !important;
-    margin-right: 32px !important;
-}
-.rd-main [style*="margin: 0 auto"] {
-    margin-left: 32px !important;
-    margin-right: 32px !important;
-}
-.rd-main [style*="margin:auto"] {
-    margin-left: 32px !important;
-    margin-right: 32px !important;
-}
+
+
+
 
 /* Ensure rd-content itself has some breathing room */
-.rd-content {
-    padding: 16px 0 40px 0;
-}
+
 
 /* Update brand icon to look more premium */
 .rd-brand-icon {
@@ -1705,26 +1662,647 @@ body.dark-theme {
 
 
 /* Global Text Visibility Fix */
-body.redesign-layout h1, 
-body.redesign-layout h2, 
-body.redesign-layout h3, 
-body.redesign-layout h4, 
-body.redesign-layout h5, 
-body.redesign-layout h6 {
-    color: var(--rd-text-main);
-}
-body.redesign-layout p,
-body.redesign-layout label,
-body.redesign-layout span {
-    color: var(--rd-text-sub);
-}
+
+
 /* Ensure form cards and standard blocks inherit properly */
-.form-card, .feature-card, .stat-card, .panel, .rd-content {
-    color: var(--rd-text-main);
-}
+.form-card, .feature-card, .stat-card, .panel, 
 .form-card h1, .form-card h2, .form-card h3 {
     color: var(--rd-text-main) !important;
 }
 .form-card p, .form-card small {
     color: var(--rd-text-sub);
+}
+
+/* Redesign App Shell CSS (Missing rd- classes) */
+
+
+.rd-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+    font-size: 20px;
+    font-weight: 800;
+    text-decoration: none;
+    color: var(--color-text-primary);
+}
+.rd-brand-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--color-primary);
+    color: white;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+}
+.rd-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 0 12px;
+}
+.rd-nav-group {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--color-text-secondary);
+    margin: 20px 12px 8px;
+    letter-spacing: 1px;
+}
+.rd-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    text-decoration: none;
+    color: var(--color-text-primary);
+    border-radius: 8px;
+    transition: 0.2s;
+    font-size: 14px;
+    font-weight: 600;
+}
+.rd-nav-item:hover, .rd-nav-item.active {
+    background: rgba(21, 150, 83, 0.1);
+    color: var(--color-primary);
+}
+.rd-sub-nav {
+    display: none;
+    flex-direction: column;
+    padding-left: 20px;
+}
+.rd-sub-nav.active {
+    display: flex;
+}
+.rd-sub-nav a {
+    padding: 8px 12px;
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    border-radius: 6px;
+    transition: 0.2s;
+    margin: 2px 0;
+}
+.rd-sub-nav a:hover {
+    color: var(--color-primary);
+    background: rgba(21, 150, 83, 0.05);
+}
+
+
+.rd-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--color-background);
+    padding: 8px 16px;
+    border-radius: 99px;
+    width: 300px;
+}
+.rd-search input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    color: var(--color-text-primary);
+    font-size: 14px;
+}
+.rd-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.rd-icon-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: 0.2s;
+}
+.rd-icon-btn:hover {
+    background: var(--color-background);
+    transform: scale(1.05);
+}
+.rd-org-pill, .rd-user-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.rd-user-avatar {
+    width: 24px;
+    height: 24px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+}
+.rd-fab {
+    width: 36px;
+    height: 36px;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-subtle);
+}
+
+/* =========================================================================
+   EMERGENCY UI REPAIR OVERRIDES 
+   ========================================================================= */
+
+/* Sidebar Repairs */
+
+
+.rd-nav-item, .rd-sub-nav a {
+    color: var(--text-secondary) !important;
+    font-weight: 500 !important;
+    padding: 0.6rem 1rem !important;
+    border-radius: var(--radius-sm) !important;
+    transition: all 0.2s ease !important;
+}
+
+.rd-nav-item:hover, .rd-sub-nav a:hover {
+    background: var(--surface-hover) !important;
+    color: var(--brand-primary) !important;
+}
+
+.rd-nav-item.active, .rd-sub-nav a.active {
+    background: var(--surface-elevated) !important;
+    color: var(--brand-primary) !important;
+    border-left: 3px solid var(--brand-primary) !important;
+    font-weight: 600 !important;
+}
+
+.rd-nav-group {
+    color: var(--text-muted) !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+    padding: 0 1rem !important;
+}
+
+.rd-brand {
+    color: var(--text-primary) !important;
+}
+
+/* Topbar Repairs */
+
+
+.rd-search {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 20px !important;
+    padding: 0.3rem 1rem !important;
+}
+
+.rd-search:focus-within {
+    border-color: var(--brand-primary) !important;
+    background: var(--surface) !important;
+}
+
+.rd-search input {
+    color: var(--text-primary) !important;
+}
+
+.rd-search input::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.rd-icon-btn, .rd-user-pill, .rd-org-pill {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-secondary) !important;
+}
+
+.rd-icon-btn:hover, .rd-user-pill:hover, .rd-org-pill:hover {
+    background: var(--surface-hover) !important;
+    color: var(--brand-primary) !important;
+    border-color: var(--border-hover) !important;
+}
+
+.rd-user-avatar {
+    background: var(--brand-primary) !important;
+    color: white !important;
+}
+
+/* Base Body and Text Fixes */
+
+
+.rd-dashboard-title, .rd-section-title {
+    color: var(--text-primary) !important;
+}
+/* =========================================================================
+   APP SHELL LAYOUT FIX OVERRIDES 
+   ========================================================================= */
+
+
+
+
+
+
+
+
+/* Ensure mobile sidebar is hidden by default using old classes */
+@media (max-width: 900px) {
+    
+    
+}
+
+
+/* =========================================================================
+   PHASE 6: UNIFIED APP SHELL ARCHITECTURE
+   ========================================================================= */
+
+body.redesign-layout {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh !important;
+    background: var(--color-background) !important;
+    display: grid !important;
+    grid-template-columns: 280px minmax(0, 1fr) !important;
+    grid-template-rows: auto !important;
+    grid-template-areas: "sidebar main" !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important; height: auto !important; /* Allow native html scrolling */
+}
+
+body.redesign-layout:not(.has-sidebar) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas: "main" !important;
+}
+
+.rd-sidebar {
+    grid-area: sidebar !important;
+    width: 280px !important;
+    background: var(--color-surface) !important;
+    border-right: 1px solid var(--color-border) !important;
+    position: sticky !important;
+    top: 0 !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    z-index: 50 !important;
+    transition: transform 0.3s ease !important;
+}
+
+.rd-main {
+    grid-area: main !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important; 
+    }
+
+.rd-topbar {
+    height: 64px !important;
+    min-height: 64px !important;
+    background: var(--color-surface) !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 24px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 40 !important;
+    width: 100% !important;
+}
+
+.rd-content {
+    flex: 1 !important;
+    padding: 24px 32px 64px 32px !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+@media (max-width: 1024px) {
+    body.redesign-layout.has-sidebar {
+        grid-template-columns: 260px minmax(0, 1fr) !important;
+    }
+    .rd-sidebar { width: 260px !important; }
+}
+
+@media (max-width: 900px) {
+    body.redesign-layout.has-sidebar {
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-areas: "main" !important;
+    }
+    .rd-sidebar {
+        position: fixed !important;
+        transform: translateX(-100%) !important;
+        z-index: 1000 !important;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1) !important;
+    }
+    .rd-sidebar.open {
+        transform: translateX(0) !important;
+    }
+    .rd-content {
+        padding: 16px 16px 40px 16px !important;
+    }
+}
+
+/* Premium Topbar Actions Redesign */
+.rd-top-actions {
+    gap: 16px !important;
+}
+.rd-icon-btn {
+    background: var(--color-surface) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+    color: var(--color-text-primary) !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    display: grid !important;
+    place-items: center !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+body.dark-theme .rd-icon-btn {
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+.rd-icon-btn:hover {
+    background: var(--color-background) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    color: var(--color-primary) !important;
+}
+.rd-org-pill, .rd-user-pill {
+    background: var(--color-surface) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+    color: var(--color-text-primary) !important;
+    padding: 6px 16px 6px 6px !important;
+    border-radius: 100px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+}
+body.dark-theme .rd-org-pill, body.dark-theme .rd-user-pill {
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+.rd-org-pill:hover, .rd-user-pill:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    border-color: var(--color-primary) !important;
+}
+.rd-org-pill i.far.fa-building {
+    background: rgba(21, 150, 83, 0.1) !important;
+    color: var(--color-primary) !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    display: grid !important;
+    place-items: center !important;
+}
+.rd-user-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    background: linear-gradient(135deg, var(--color-primary), #0e5e3a) !important;
+    color: white !important;
+    border-radius: 50% !important;
+    display: grid !important;
+    place-items: center !important;
+    font-size: 12px !important;
+    box-shadow: 0 2px 6px rgba(21,150,83,0.3) !important;
+}
+.rd-fab {
+    width: 44px !important;
+    height: 44px !important;
+    background: linear-gradient(135deg, var(--color-primary), #0e5e3a) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 50% !important;
+    display: grid !important;
+    place-items: center !important;
+    font-size: 18px !important;
+    box-shadow: 0 4px 14px rgba(21,150,83,0.4) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+.rd-fab:hover {
+    transform: translateY(-2px) scale(1.05) !important;
+    box-shadow: 0 6px 20px rgba(21,150,83,0.5) !important;
+}
+
+/* Premium Dropdown Styles */
+.rd-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+.rd-dropdown-menu {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    width: 220px;
+    background: var(--color-surface);
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 9999;
+}
+.rd-dropdown-container.active .rd-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+body.dark-theme .rd-dropdown-menu {
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.rd-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+}
+.rd-dropdown-item:hover {
+    background: var(--color-background);
+    color: var(--color-primary);
+    transform: translateX(4px);
+}
+.rd-dropdown-divider {
+    height: 1px;
+    background: var(--color-border);
+    margin: 6px 0;
+}
+﻿/* ========================================================
+   GLOBAL 3D UI OVERHAUL (GLOSSY TACTILE SYSTEM)
+   ======================================================== */
+
+/* 1. 3D Floating Cards & Panels */
+.card, .panel, .form-card, .stat-card, .delivery-card {
+    background: var(--color-surface) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 
+        -4px -4px 12px rgba(255, 255, 255, 0.8), /* Top-left highlight */
+        8px 8px 24px rgba(0, 0, 0, 0.08),        /* Main drop shadow */
+        inset 0px 2px 4px rgba(255, 255, 255, 0.6) !important; /* Inner top lip */
+    border-radius: 16px !important;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+body.dark-theme .card, body.dark-theme .panel, body.dark-theme .form-card, body.dark-theme .stat-card, body.dark-theme .delivery-card {
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 
+        -4px -4px 12px rgba(255, 255, 255, 0.02),
+        8px 8px 24px rgba(0, 0, 0, 0.4),
+        inset 0px 1px 2px rgba(255, 255, 255, 0.08) !important;
+}
+
+.card:hover, .panel:hover {
+    transform: translateY(-5px) scale(1.01) !important;
+    box-shadow: 
+        -6px -6px 16px rgba(255, 255, 255, 0.9),
+        12px 12px 32px rgba(0, 0, 0, 0.12),
+        inset 0px 2px 4px rgba(255, 255, 255, 0.8) !important;
+}
+body.dark-theme .card:hover, body.dark-theme .panel:hover {
+    box-shadow: 
+        -6px -6px 16px rgba(255, 255, 255, 0.03),
+        12px 12px 32px rgba(0, 0, 0, 0.5),
+        inset 0px 1px 2px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 2. Tactile 3D Buttons */
+.btn {
+    border: none !important;
+    background: linear-gradient(180deg, var(--color-surface) 0%, rgba(0,0,0,0.05) 100%) !important;
+    box-shadow: 
+        0px 4px 10px rgba(0, 0, 0, 0.1),
+        inset 0px 2px 4px rgba(255, 255, 255, 0.8),
+        inset 0px -2px 4px rgba(0, 0, 0, 0.05) !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    transition: all 0.15s ease !important;
+    position: relative;
+    border-bottom: 2px solid rgba(0,0,0,0.1) !important;
+}
+
+.btn.primary {
+    background: linear-gradient(180deg, #1ca55d 0%, #159653 100%) !important;
+    color: white !important;
+    box-shadow: 
+        0px 6px 14px rgba(21, 150, 83, 0.3),
+        inset 0px 2px 4px rgba(255, 255, 255, 0.3),
+        inset 0px -2px 4px rgba(0, 0, 0, 0.2) !important;
+    border-bottom: 2px solid #0e5e3a !important;
+}
+
+.btn:active, .btn.primary:active {
+    transform: translateY(3px) !important;
+    box-shadow: 
+        0px 1px 2px rgba(0, 0, 0, 0.1),
+        inset 0px 4px 8px rgba(0, 0, 0, 0.2) !important;
+    border-bottom-width: 0px !important;
+    margin-bottom: 2px; /* Prevent layout shift */
+}
+
+/* 3. Extruded Structural Navbars */
+.rd-sidebar, .rd-topbar {
+    box-shadow: 
+        4px 0px 16px rgba(0, 0, 0, 0.04),
+        inset -1px 0px 2px rgba(0, 0, 0, 0.02) !important;
+    z-index: 100;
+}
+body.dark-theme .rd-sidebar, body.dark-theme .rd-topbar {
+    box-shadow: 
+        4px 0px 16px rgba(0, 0, 0, 0.3),
+        inset -1px 0px 2px rgba(255, 255, 255, 0.02) !important;
+}
+.rd-topbar {
+    box-shadow: 
+        0px 4px 16px rgba(0, 0, 0, 0.04),
+        inset 0px -1px 2px rgba(0, 0, 0, 0.02) !important;
+}
+body.dark-theme .rd-topbar {
+    box-shadow: 
+        0px 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0px -1px 2px rgba(255, 255, 255, 0.02) !important;
+}
+
+/* 4. Engraved / Inset 3D Inputs */
+input[type="text"], input[type="password"], input[type="number"], input[type="email"], textarea, select, .rd-search {
+    background: #f7f9f8 !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-top-color: rgba(0, 0, 0, 0.15) !important; /* Deeper top edge */
+    box-shadow: inset 0px 3px 6px rgba(0, 0, 0, 0.04) !important; /* Inner carved shadow */
+    border-radius: 10px !important;
+    transition: all 0.2s ease !important;
+}
+
+body.dark-theme input[type="text"], body.dark-theme input[type="password"], body.dark-theme input[type="number"], body.dark-theme input[type="email"], body.dark-theme textarea, body.dark-theme select, body.dark-theme .rd-search {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-top-color: rgba(0, 0, 0, 0.4) !important;
+    box-shadow: inset 0px 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+input:focus, textarea:focus, select:focus, .rd-search:focus-within {
+    box-shadow: 
+        inset 0px 2px 4px rgba(0, 0, 0, 0.02),
+        0px 0px 0px 3px rgba(21, 150, 83, 0.2) !important;
+    border-color: var(--color-primary) !important;
+}
+
+/* Make existing Top Actions match the Glossy 3D */
+.rd-icon-btn, .rd-org-pill, .rd-user-pill, .rd-dropdown-menu {
+    background: linear-gradient(180deg, var(--color-surface) 0%, rgba(0,0,0,0.02) 100%) !important;
+    box-shadow: 
+        -2px -2px 6px rgba(255, 255, 255, 0.8),
+        4px 4px 12px rgba(0, 0, 0, 0.06),
+        inset 0px 1px 2px rgba(255, 255, 255, 0.5) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+}
+body.dark-theme .rd-icon-btn, body.dark-theme .rd-org-pill, body.dark-theme .rd-user-pill, body.dark-theme .rd-dropdown-menu {
+    background: linear-gradient(180deg, var(--color-surface) 0%, rgba(0,0,0,0.2) 100%) !important;
+    box-shadow: 
+        -2px -2px 6px rgba(255, 255, 255, 0.02),
+        4px 4px 12px rgba(0, 0, 0, 0.4),
+        inset 0px 1px 2px rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+.rd-icon-btn:active, .rd-org-pill:active, .rd-user-pill:active {
+    transform: translateY(2px) !important;
+    box-shadow: inset 0px 4px 8px rgba(0,0,0,0.1) !important;
 }

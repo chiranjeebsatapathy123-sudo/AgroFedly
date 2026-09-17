@@ -13,9 +13,11 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="{% static 'manifest.json' %}">
     <title>{% block title %}AgroFedly{% endblock %} — AI-Powered Agriculture & Produce Intelligence</title>
-<link rel="stylesheet" href="{% static 'css/app.css' %}">
-<link rel="stylesheet" href="{% static 'css/motion.css' %}">
-<link rel="stylesheet" href="{% static 'css/copilot.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/app.css' %}?v=3.0">
+<link rel="stylesheet" href="{% static 'css/design_system.css' %}?v=3.0">
+<link rel="stylesheet" href="{% static 'css/motion.css' %}?v=3.0">
+<link rel="stylesheet" href="{% static 'css/copilot.css' %}?v=3.0">
 
 
 <script type="importmap">
@@ -49,6 +51,7 @@
 </script>
 </head>
 <body class="redesign-layout {% if user.is_authenticated %}has-sidebar{% endif %}">
+<canvas id="agrofedly-3d-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;"></canvas>
 {% if user.is_authenticated %}
   <!-- Sidebar -->
   <aside class="rd-sidebar">
@@ -80,6 +83,20 @@
         <a href="{% url 'recipient_list' %}" class="rd-nav-item"><i class="fas fa-users"></i> Recipients</a>
         <a href="{% url 'delivery_list' %}" class="rd-nav-item"><i class="fas fa-truck"></i> Delivery</a>
         
+        <div class="rd-nav-group">Food & Kitchen</div>
+        <button type="button" class="rd-nav-item rd-nav-expand" onclick="this.classList.toggle('active'); this.nextElementSibling.classList.toggle('active')" style="width:100%; border:none; background:transparent; cursor:pointer; text-align:left;">
+            <i class="fas fa-utensils"></i> Kitchen Operations <i class="fas fa-chevron-down" style="margin-left:auto;font-size:10px; transition: transform 0.2s;"></i>
+        </button>
+        <div class="rd-sub-nav">
+           <a href="{% url 'kitchen_dashboard' %}">Dashboard</a>
+           <a href="{% url 'kitchen_meal_planning' %}">Meal Planning</a>
+           <a href="{% url 'kitchen_production' %}">Production Tracking</a>
+           <a href="{% url 'kitchen_register_surplus' %}">Register Surplus</a>
+           <a href="{% url 'kitchen_redistribution' %}">Redistribution Queue</a>
+           <a href="{% url 'kitchen_inventory' %}">Inventory</a>
+           <a href="{% url 'kitchen_analytics' %}">Analytics</a>
+        </div>
+
         <div class="rd-nav-group">Intelligence</div>
         <a href="{% url 'impact_dashboard' %}" class="rd-nav-item"><i class="fas fa-chart-pie"></i> Analytics</a>
         <a href="{% url 'delivery_list' %}" class="rd-nav-item"><i class="fas fa-map-marker-alt"></i> Traceability</a>
@@ -114,21 +131,39 @@
         
         <div class="rd-top-actions">
            {% if user.is_authenticated %}
-           <button class="rd-icon-btn"><i class="far fa-bell"></i></button>
+           <button class="rd-icon-btn" onclick="alert('No new notifications');"><i class="far fa-bell"></i></button>
            <button class="rd-icon-btn" onclick="document.body.classList.toggle('dark-theme')"><i class="far fa-sun"></i></button>
            
-           {% if active_org %}
-           <div class="rd-org-pill">
-              <i class="far fa-building"></i> {{ active_org.name }} <i class="fas fa-chevron-down" style="font-size:10px;"></i>
-           </div>
-           {% endif %}
            
-           <div class="rd-user-pill">
-              <div class="rd-user-avatar"><i class="fas fa-user"></i></div>
-              {{ user.username }} <i class="fas fa-chevron-down" style="font-size:10px;"></i>
-           </div>
+             {% if active_org %}
+             <div class="rd-dropdown-container" id="org-dropdown">
+                 <div class="rd-org-pill" onclick="document.getElementById('org-dropdown').classList.toggle('active')">
+                    <i class="far fa-building"></i> {{ active_org.name }} <i class="fas fa-chevron-down" style="font-size:10px;"></i>
+                 </div>
+                 <div class="rd-dropdown-menu">
+                     <a href="{% url 'organization_dashboard' %}" class="rd-dropdown-item"><i class="fas fa-info-circle" style="width:20px;text-align:center;"></i> Org Profile</a>
+                     <a href="{% url 'organization_admin_members' %}" class="rd-dropdown-item"><i class="fas fa-users" style="width:20px;text-align:center;"></i> Manage Team</a>
+                 </div>
+             </div>
+             {% endif %}
+
            
-           <button class="rd-fab"><i class="fas fa-plus"></i></button>
+           
+             <div class="rd-dropdown-container" id="user-dropdown">
+                 <div class="rd-user-pill" onclick="document.getElementById('user-dropdown').classList.toggle('active')">
+                    <div class="rd-user-avatar"><i class="fas fa-user"></i></div>
+                    {{ user.username }} <i class="fas fa-chevron-down" style="font-size:10px;"></i>
+                 </div>
+                 <div class="rd-dropdown-menu">
+                     <a href="{% url 'dashboard' %}" class="rd-dropdown-item"><i class="fas fa-home" style="width:20px;text-align:center;"></i> Dashboard</a>
+                     <a href="{% url 'organization_dashboard' %}" class="rd-dropdown-item"><i class="fas fa-cog" style="width:20px;text-align:center;"></i> Settings</a>
+                     <div class="rd-dropdown-divider"></div>
+                     <a href="{% url 'logout' %}" class="rd-dropdown-item" style="color:var(--color-danger);"><i class="fas fa-sign-out-alt" style="width:20px;text-align:center;"></i> Logout</a>
+                 </div>
+             </div>
+
+
+           <button class="rd-fab" onclick="document.querySelector('.cp-backdrop').style.visibility='visible'; document.querySelector('.cp-backdrop').style.opacity='1';"><i class="fas fa-plus"></i></button>
            {% else %}
            <a href="{% url 'login' %}" style="font-weight:bold;color:var(--rd-primary);text-decoration:none;">Login</a>
            {% endif %}
@@ -142,7 +177,9 @@
      <!-- Content -->
      <main class="rd-content">
         {% block content %}{% endblock %}
+
      </main>
+     <footer style="text-align: center; padding: 20px; color: var(--color-text-secondary); font-size: 0.9rem; margin-top: auto; border-top: 1px solid var(--color-border); width: 100%; background: var(--color-background); box-sizing: border-box;">AgroFedly &middot; AI-assisted food planning &middot; Safety &middot; Redistribution &middot; Delivery</footer>
   </div>
 
   <!-- Copilot -->
@@ -194,7 +231,7 @@
   {% endif %}
 
 
-<footer>AgroFedly · AI-assisted food planning · Safety · Redistribution · Delivery</footer>
+
 <script src="{% static 'js/ui_core.js' %}?v=1.0"></script>
 <script src="{% static 'js/app.js' %}?v=1.2"></script>
 <script src="{% static 'js/copilot.js' %}"></script>
@@ -316,5 +353,17 @@
 {% endif %}
 
 {% include 'command_palette.html' %}
+
+<script>
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.rd-dropdown-container')) {
+            document.querySelectorAll('.rd-dropdown-container.active').forEach(function(el) {
+                el.classList.remove('active');
+            });
+        }
+    });
+</script>
+
 </body>
 </html>

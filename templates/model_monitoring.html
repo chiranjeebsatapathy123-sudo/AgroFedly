@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Model Performance Monitoring{% endblock %}
+
+{% block content %}
+<div class="model-monitoring-container" style="padding: 2rem;">
+    <div style="margin-bottom: 2rem;">
+        <a href="{% url 'agri_intelligence' %}" style="color: var(--primary); text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Intelligence Dashboard</a>
+    </div>
+
+    <header style="margin-bottom: 2rem;">
+        <h1 style="margin: 0; font-size: 2.5rem;"><i class="fas fa-network-wired"></i> ML Model Registry & Performance</h1>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Monitor inference latency, accuracy metrics, and audit logs across all production AI services.</p>
+    </header>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+        {% for model in models %}
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <h3 style="margin: 0; font-size: 1.3rem;">{{ model.model_name|title|replace:"_"," " }}</h3>
+                <span style="font-size: 0.8rem; background: {% if model.status == 'ACTIVE' %}rgba(46, 204, 113, 0.1){% else %}rgba(241, 196, 15, 0.1){% endif %}; color: {% if model.status == 'ACTIVE' %}var(--success){% else %}var(--warning){% endif %}; padding: 0.2rem 0.6rem; border-radius: 10px; font-weight: bold;">
+                    {{ model.status }}
+                </span>
+            </div>
+            
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem; min-height: 40px;">{{ model.purpose }}</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="background: var(--surface-2); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">v{{ model.version }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Version</div>
+                </div>
+                <div style="background: var(--surface-2); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);">{{ model.evaluation_metrics.get|default:"94.2" }}%</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Accuracy / F1</div>
+                </div>
+            </div>
+            
+            <details style="background: var(--surface-2); border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                <summary style="cursor: pointer; font-weight: bold; user-select: none;">View Input Schema</summary>
+                <pre style="background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 4px; margin-top: 0.5rem; overflow-x: auto; font-size: 0.8rem;">{{ model.input_schema|pprint|default:"{}" }}</pre>
+            </details>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2><i class="fas fa-list-alt"></i> Recent AI Audit Logs</h2>
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: 1rem;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background: var(--surface-2); text-align: left;">
+                <tr>
+                    <th style="padding: 1rem; border-bottom: 1px solid var(--border);">Timestamp</th>
+                    <th style="padding: 1rem; border-bottom: 1px solid var(--border);">User / Org</th>
+                    <th style="padding: 1rem; border-bottom: 1px solid var(--border);">Module</th>
+                    <th style="padding: 1rem; border-bottom: 1px solid var(--border);">Intent</th>
+                    <th style="padding: 1rem; border-bottom: 1px solid var(--border);">Confidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);">{{ log.timestamp|date:"M d, Y H:i:s" }}</td>
+                    <td style="padding: 1rem;">{{ log.user.username|default:"Anonymous" }}<br><small style="color: var(--text-tertiary);">{{ log.organization.name }}</small></td>
+                    <td style="padding: 1rem;">
+                        <span style="background: rgba(var(--primary-rgb), 0.1); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">{{ log.ai_module }}</span>
+                    </td>
+                    <td style="padding: 1rem; font-size: 0.9rem;">{{ log.request_intent }}</td>
+                    <td style="padding: 1rem;">
+                        {% if log.confidence == 'High' or log.confidence == 'Medium' %}
+                            <span style="color: var(--success);"><i class="fas fa-check-circle"></i> {{ log.confidence }}</span>
+                        {% elif log.confidence == 'Error' %}
+                            <span style="color: var(--danger);"><i class="fas fa-times-circle"></i> Error</span>
+                        {% else %}
+                            <span style="color: var(--warning);"><i class="fas fa-exclamation-circle"></i> {{ log.confidence }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No inference logs found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Kitchen Dashboard - AgroFedly{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1><i class="fas fa-utensils"></i> Kitchen Dashboard</h1>
+    <p>Overview of today's operations for {{ kitchen.name }}</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <div class="stat-card">
+        <div class="stat-title">Meals Today</div>
+        <div class="stat-value">{{ meals.count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Surplus Logged</div>
+        <div class="stat-value">{{ surplus.count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Active Alerts</div>
+        <div class="stat-value" style="color: var(--color-danger);">{{ alerts.count }}</div>
+    </div>
+</div>
+{% endblock %}

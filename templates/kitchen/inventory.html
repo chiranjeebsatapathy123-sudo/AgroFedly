@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Kitchen Inventory - AgroFedly{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1><i class="fas fa-boxes"></i> Inventory</h1>
+    <a href="#" class="btn primary"><i class="fas fa-plus"></i> Add Item</a>
+</div>
+<div class="panel">
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.ingredient }}</td>
+                <td>{{ item.quantity }} {{ item.unit }}</td>
+                <td>{{ item.expiry_date }}</td>
+                <td><span class="badge">{{ item.status }}</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="text-align: center;">Inventory is empty.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

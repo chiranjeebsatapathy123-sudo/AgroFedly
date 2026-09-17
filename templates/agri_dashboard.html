@@ -3,13 +3,21 @@
 {% block title %}Agriculture Command Center{% endblock %}
 {% block content %}
 
-<section class="page-head">
-    <div>
-        <div class="eyebrow">{% trans "PHASE 10" %}</div>
-        <h1>{% trans "Agriculture Command Center" %}</h1>
-        <p>{% trans "Organization-wide overview of Farms, Produce, Storage, and Processing." %}</p>
+<section class="page-head" style="position: relative; overflow: hidden; min-height: 250px; display: flex; align-items: center; border-radius: 12px; margin-bottom: 20px;">
+    <div id="dashboard-3d-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.8; pointer-events: none;"></div>
+    <div style="position: relative; z-index: 1; padding: 30px; background: linear-gradient(90deg, rgba(var(--background-rgb, 255, 255, 255), 0.9) 0%, rgba(var(--background-rgb, 255, 255, 255), 0.5) 50%, transparent 100%); width: 100%;">
+        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px;">{% trans "SMART AGRICULTURE" %}</div>
+        <h1 style="font-size: 2.5rem; margin-top: 10px; margin-bottom: 5px;">{% trans "Command Center" %}</h1>
+        <p style="font-size: 1.1rem; max-width: 600px;">{% trans "Organization-wide overview of Farms, Produce, Storage, and Processing." %}</p>
     </div>
 </section>
+
+<script type="module">
+    import { initDashboard3D } from "{% static 'js/3d_dashboard.js' %}";
+    document.addEventListener("DOMContentLoaded", () => {
+        initDashboard3D('dashboard-3d-container');
+    });
+</script>
 
 <div class="result-cards" style="margin-bottom:20px;">
     <div>

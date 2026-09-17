@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Agribusiness Dashboard - AgroFedly{% endblock %}
+{% block content %}
+<section class="dashboard-wrap">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 class="anim-fade-up">Agribusiness Dashboard</h1>
+    </div>
+    
+    <div class="grid anim-fade-up stagger-3" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div class="card-3d" style="padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">📋</div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px;">Our Demands</p>
+            <h3 style="margin: 0; font-size: 1.5rem;">{{ purchase_requirements.count }}</h3>
+        </div>
+        <div class="card-3d" style="padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">📦</div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px;">Available Produce</p>
+            <h3 style="margin: 0; font-size: 1.5rem;">{{ available_produce.count }}</h3>
+        </div>
+        <div class="card-3d" style="padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">🛒</div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px;">Active Procurements</p>
+            <h3 style="margin: 0; font-size: 1.5rem;">{{ active_orders.count }}</h3>
+        </div>
+        <div class="card-3d" style="padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">🚚</div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px;">Inbound Deliveries</p>
+            <h3 style="margin: 0; font-size: 1.5rem;">{{ delivery_pipeline.count }}</h3>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="card-3d anim-fade-up stagger-4" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+            <h3 style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Available Produce Matches</h3>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+                {% for produce in available_produce %}
+                <li style="padding: 10px; border: 1px solid var(--border); border-radius: 8px;">
+                    <strong>{{ produce.name }}</strong> ({{ produce.available_quantity }} {{ produce.unit }})
+                    <br>
+                    <small style="color: var(--text-muted);">From: {{ produce.supplier.name|default:"Independent Farmer" }}</small>
+                </li>
+                {% empty %}
+                <li style="color: var(--text-muted);">No matching produce currently available.</li>
+                {% endfor %}
+            </ul>
+            <div style="margin-top: 15px;">
+                <a href="{% url 'agri_supply_matching' %}" class="btn primary btn-sm">Find Supply</a>
+            </div>
+        </div>
+        
+        <div class="card-3d anim-fade-up stagger-5" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+            <h3 style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Market Insights</h3>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+                {% for trend in market_info %}
+                <li style="padding: 10px; border: 1px solid var(--border); border-radius: 8px; display: flex; justify-content: space-between;">
+                    <strong>{{ trend.crop_name }}</strong>
+                    <span style="color: {% if trend.price_trend == 'UP' %}var(--danger){% elif trend.price_trend == 'DOWN' %}var(--success){% else %}var(--text-muted){% endif %};">
+                        {{ trend.price_trend }} ({{ trend.avg_price_per_kg }})
+                    </span>
+                </li>
+                {% empty %}
+                <li style="color: var(--text-muted);">No recent market data available.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %}

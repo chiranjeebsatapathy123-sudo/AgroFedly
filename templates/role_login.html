@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block title %}{{ role|title }} Login - AgroFedly{% endblock %}
+{% block content %}
+<section class="auth-wrap scene-3d-container">
+  <div class="auth-card card-3d anim-fade-up" style="max-width: 400px; margin: 60px auto; padding: 40px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <a href="{% url 'role_selection' %}" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; float: left;">&larr; Back</a>
+      <h1 class="anim-fade-up stagger-2" style="font-size: 1.8rem; margin-bottom: 5px; clear: both; padding-top: 20px;">
+        {{ role|title }} Login
+      </h1>
+      <p class="anim-fade-in stagger-3" style="color: var(--text-muted);">Sign in to your AgroFedly account</p>
+    </div>
+    
+    <form method="post" class="form-grid anim-scale-in stagger-4" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button[type=submit]'), true)" style="display: flex; flex-direction: column; gap: 20px;">
+      {% csrf_token %}
+      <label style="display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-weight: 500;">
+          {% if role == 'FARMER' %}Mobile Number / Email
+          {% elif role == 'FPO' or role == 'AGRIBUSINESS' or role == 'NGO' %}Organization Email
+          {% elif role == 'OFFICER' %}Official Email
+          {% elif role == 'RESEARCHER' %}Institutional Email
+          {% else %}Email / Username{% endif %}
+        </span>
+        <input name="username" required autocomplete="username" placeholder="Enter your credentials" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--text);">
+      </label>
+      <label style="display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-weight: 500;">Password</span>
+        <input name="password" type="password" required autocomplete="current-password" placeholder="••••••••" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--text);">
+      </label>
+      
+      <button type="submit" class="btn primary full" style="padding: 14px; font-size: 1.1rem; margin-top: 10px; border-radius: 8px;">Sign In</button>
+    </form>
+    
+    {% if role != 'ADMIN' %}
+    <div class="auth-foot anim-fade-in stagger-5" style="margin-top: 25px; text-align: center; font-size: 0.9rem;">
+      Don't have an account? <br>
+      <a href="{% url 'register_role' role %}" style="color: var(--primary); text-decoration: none; font-weight: bold; display: inline-block; margin-top: 10px;">Register as {{ role|title }}</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- 3D Login Scene Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      if (window.agrofedly3D && window.LoginSceneController) {
+          window.agrofedly3D.loadScene(window.LoginSceneController);
+      } else {
+          setTimeout(() => {
+              if (window.agrofedly3D && window.LoginSceneController) {
+                  window.agrofedly3D.loadScene(window.LoginSceneController);
+              }
+          }, 500);
+      }
+      
+      const card = document.querySelector('.auth-card');
+      if (card && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.addEventListener('mousemove', (e) => {
+              const x = (window.innerWidth / 2 - e.clientX) / 50;
+              const y = (window.innerHeight / 2 - e.clientY) / 50;
+              card.style.transform = `translateY(-8px) translateZ(30px) rotateY(${x}deg) rotateX(${y}deg)`;
+          });
+      }
+  });
+</script>
+{% endblock %}

@@ -347,3 +347,108 @@ export class AgroFedly3D {
         this.renderer.render(this.scene, this.camera);
     }
 }
+
+// Scene Controllers
+export class LandingSceneController {
+    constructor(engine) {
+        this.engine = engine;
+        this.group = new THREE.Group();
+        this.particles = null;
+    }
+    
+    init() {
+        this.engine.scene.add(this.group);
+        
+        // Setup a beautiful floating particle field for the landing page
+        const particleGeo = new THREE.BufferGeometry();
+        const particleCount = 2000;
+        
+        const posArray = new Float32Array(particleCount * 3);
+        for(let i = 0; i < particleCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 60;
+        }
+        
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particleMat = new THREE.PointsMaterial({
+            size: 0.1,
+            color: this.engine.isDarkTheme ? 0x1ba45e : 0x0a4a29,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+        
+        this.particles = new THREE.Points(particleGeo, particleMat);
+        this.group.add(this.particles);
+        
+        // Move camera to a nice vantage point
+        this.engine.setCameraTarget(new THREE.Vector3(0, 0, 20), new THREE.Vector3(0, 0, 0));
+        
+        // Move the AI core to the center
+        this.engine.aiCore.group.position.set(0, 0, 0);
+    }
+    
+    update(delta, time) {
+        if(this.particles) {
+            this.particles.rotation.y += delta * 0.05;
+            this.particles.rotation.x += delta * 0.02;
+        }
+    }
+    
+    onThemeChange(isDark) {
+        if(this.particles) {
+            this.particles.material.color.setHex(isDark ? 0x1ba45e : 0x0a4a29);
+        }
+    }
+    
+    dispose() {
+        // Cleanup happens in engine.loadScene automatically, but we can do specific cleanup here
+    }
+}
+
+export class LoginSceneController {
+    constructor(engine) {
+        this.engine = engine;
+        this.group = new THREE.Group();
+    }
+    
+    init() {
+        this.engine.scene.add(this.group);
+        
+        // Create an abstract geometric representation of "security" or "gates"
+        const geo = new THREE.TorusGeometry(8, 0.2, 16, 100);
+        const mat = new THREE.MeshPhysicalMaterial({
+            color: this.engine.isDarkTheme ? 0x1ba45e : 0x159653,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.3
+        });
+        
+        this.ring1 = new THREE.Mesh(geo, mat);
+        this.ring1.rotation.x = Math.PI / 2;
+        this.group.add(this.ring1);
+        
+        this.ring2 = new THREE.Mesh(geo, mat);
+        this.ring2.rotation.y = Math.PI / 2;
+        this.group.add(this.ring2);
+        
+        // Move camera closer, off-center
+        this.engine.setCameraTarget(new THREE.Vector3(10, 5, 15), new THREE.Vector3(0, 0, 0));
+        
+        // Move AI core inside the rings
+        this.engine.aiCore.group.position.set(0, 0, 0);
+    }
+    
+    update(delta, time) {
+        if(this.ring1) this.ring1.rotation.z += delta * 0.2;
+        if(this.ring2) this.ring2.rotation.x += delta * 0.3;
+    }
+    
+    onThemeChange(isDark) {
+        const color = isDark ? 0x1ba45e : 0x159653;
+        if(this.ring1) this.ring1.material.color.setHex(color);
+        if(this.ring2) this.ring2.material.color.setHex(color);
+    }
+}
+
+window.LandingSceneController = LandingSceneController;
+window.LoginSceneController = LoginSceneController;

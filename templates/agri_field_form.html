@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Add Field - AgroFedly{% endblock %}
+{% block content %}
+<section class="dashboard-wrap">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="{% url 'agri_field_list' %}{% if request.GET.farm_id %}?farm_id={{ request.GET.farm_id }}{% endif %}" style="color: var(--text-muted); text-decoration: none;">&larr; Back to Fields</a>
+        </div>
+        
+        <div class="card-3d anim-fade-up" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 40px;">
+            <h1 style="margin-bottom: 5px; font-size: 1.8rem;">Add New Field</h1>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">Register a new field within your farm.</p>
+            
+            <form method="post" class="form-grid" style="display: flex; flex-direction: column; gap: 20px;">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    {% if not field.is_hidden %}
+                    <label style="display: flex; flex-direction: column; gap: 8px;">
+                        <span style="font-weight: 500;">{{ field.label }}</span>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div style="color: var(--danger); font-size: 0.85rem; margin-top: 5px;">{{ field.errors }}</div>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 5px;">{{ field.help_text }}</div>
+                        {% endif %}
+                    </label>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                {% endfor %}
+                
+                <div style="margin-top: 10px;">
+                    <button type="submit" class="btn primary full" style="padding: 14px; font-size: 1.1rem; border-radius: 8px;">Save Field</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+    .form-grid input, .form-grid select, .form-grid textarea {
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--background);
+        color: var(--text);
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+    }
+</style>
+{% endblock %}

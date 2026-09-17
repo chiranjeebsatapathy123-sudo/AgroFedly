@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Smart Farm Calendar - AgroFedly{% endblock %}
+{% block content %}
+<section class="dashboard-wrap">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <h1 class="anim-fade-up">Smart Farm Calendar</h1>
+            <p style="color: var(--text-muted); margin-top: 5px;">Track operations, events, and lifecycle tasks across all fields.</p>
+        </div>
+        <div class="anim-fade-in stagger-2">
+            <a href="{% url 'agri_event_add' %}{% if current_farm_id %}?farm_id={{ current_farm_id }}{% endif %}" class="btn primary">+ Add Event</a>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 20px;">
+        
+        <div class="card-3d anim-fade-up stagger-3" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+            <h3 style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Upcoming Schedule</h3>
+            
+            {% if events or activities %}
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 15px;">
+                    {% for event in events %}
+                    <li style="padding: 15px; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; gap: 15px; border-left: 4px solid var(--primary);">
+                        <div style="background: rgba(var(--primary-rgb), 0.1); color: var(--primary); font-weight: bold; padding: 10px; border-radius: 8px; text-align: center; min-width: 60px;">
+                            {{ event.date|date:"M d" }}
+                        </div>
+                        <div style="flex: 1;">
+                            <strong style="display: block; font-size: 1.1rem;">{{ event.title }}</strong>
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">Farm: {{ event.farm.name }} • Type: {{ event.event_type }}</span>
+                        </div>
+                        {% if event.is_completed %}
+                            <span style="color: var(--success); font-weight: bold;">✓ Completed</span>
+                        {% else %}
+                            <span style="color: var(--warning); font-weight: bold;">Pending</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                    
+                    {% for activity in activities %}
+                    <li style="padding: 15px; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; gap: 15px; border-left: 4px solid var(--info);">
+                        <div style="background: rgba(0, 150, 255, 0.1); color: var(--info); font-weight: bold; padding: 10px; border-radius: 8px; text-align: center; min-width: 60px;">
+                            {{ activity.date|date:"M d" }}
+                        </div>
+                        <div style="flex: 1;">
+                            <strong style="display: block; font-size: 1.1rem;">{{ activity.activity_type }}</strong>
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">Field: {{ activity.field.name }} (Farm: {{ activity.field.farm.name }})</span>
+                        </div>
+                        <span style="color: var(--text-muted);">Logged Activity</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">📅</div>
+                    <p>No upcoming events or logged activities.</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="card-3d anim-fade-up stagger-4" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; align-self: start;">
+            <h3 style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Filter by Farm</h3>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+                <li>
+                    <a href="{% url 'agri_calendar' %}" style="text-decoration: none; display: block; padding: 10px; border-radius: 8px; background: {% if not current_farm_id %}rgba(var(--primary-rgb), 0.1){% else %}transparent{% endif %}; color: {% if not current_farm_id %}var(--primary){% else %}var(--text){% endif %}; font-weight: {% if not current_farm_id %}bold{% else %}normal{% endif %};">
+                        All Farms
+                    </a>
+                </li>
+                {% for farm in farms %}
+                <li>
+                    <a href="{% url 'agri_calendar' %}?farm_id={{ farm.id }}" style="text-decoration: none; display: block; padding: 10px; border-radius: 8px; background: {% if current_farm_id == farm.id %}rgba(var(--primary-rgb), 0.1){% else %}transparent{% endif %}; color: {% if current_farm_id == farm.id %}var(--primary){% else %}var(--text){% endif %}; font-weight: {% if current_farm_id == farm.id %}bold{% else %}normal{% endif %};">
+                        {{ farm.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+    </div>
+</section>
+{% endblock %}

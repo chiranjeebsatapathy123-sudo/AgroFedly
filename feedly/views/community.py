@@ -32,7 +32,7 @@ import random
 import json
 from django.utils import timezone
 from ..forms import VolunteerProfileForm
-from ..models import VolunteerProfile, OrganizationImpact
+from ..models import VolunteerProfile, OrganizationImpact, EcosystemAlliance, SharedTask, Warehouse, AllianceMember
 import io
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
@@ -44,6 +44,7 @@ import json
 from ..copilot import generate_copilot_response
 import qrcode
 from django.http import HttpResponse
+from django.urls import reverse
 
 @login_required
 def volunteer_register(request):

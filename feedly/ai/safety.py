@@ -1,46 +1,44 @@
-from feedly.models import OrganizationMember
-import logging
+from feedly.models import FarmField, AgriculturalProduce, StorageRecord, AIModelRegistry
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 
-logger = logging.getLogger(__name__)
-
-class AISafetyGuard:
+class DataQualityEngine:
     """
-    Validates AI-driven actions to ensure they are transaction-safe, authorized, and non-destructive.
+    Validates data integrity and flags anomalies before AI inference or critical workflows.
     """
     
     @staticmethod
-    def validate_action(action_type, user, organization, target_object=None, **kwargs):
+    def validate_farm_field(field_id):
+        field = FarmField.objects.filter(id=field_id).first()
+        if not field:
+            return False, "Field not found"
+        if field.area_hectares <= 0:
+            return False, "Invalid field area (must be > 0)"
+        return True, "Valid"
+        
+    @staticmethod
+    def validate_produce_quantity(quantity):
+        if quantity < 0:
+            return False, "Quantity cannot be negative"
+        if quantity > 1000000:
+            return False, "Anomalously high quantity"
+        return True, "Valid"
+        
+    @staticmethod
+    def run_full_audit():
         """
-        Validates if a user is allowed to perform a specific AI-assisted action on a target object.
-        Returns (True, "") if safe, (False, "reason") if blocked.
+        Background task to find corrupted records.
         """
-        if not user or not user.is_authenticated:
-            return False, "User is not authenticated."
+        issues = []
+        
+        # Check for negative areas
+        bad_fields = FarmField.objects.filter(area_hectares__lte=0)
+        for f in bad_fields:
+            issues.append(f"Field {f.id} has invalid area {f.area_hectares}")
             
-        try:
-            membership = OrganizationMember.objects.get(user=user, organization=organization, is_active=True)
-        except OrganizationMember.DoesNotExist:
-            return False, "User does not belong to this organization."
-
-        # Owner and Admin can do anything
-        if membership.role in ["OWNER", "ADMIN"]:
-            pass
-        elif membership.role == "VIEWER":
-            return False, "Viewers cannot execute AI actions."
-        else:
-            # Domain-specific constraints for MANAGER/STAFF
-            if action_type == "DELETE_RECORD":
-                return False, f"Role {membership.role} is not permitted to delete records."
-
-        # Domain specific validation
-        if action_type == "REDISTRIBUTE":
-            quantity = kwargs.get('quantity', 0)
-            if target_object and hasattr(target_object, 'quantity'):
-                if quantity > target_object.quantity:
-                    return False, f"The requested redistribution ({quantity}) exceeds available surplus ({target_object.quantity})."
+        # Check AI Models
+        models = AIModelRegistry.objects.all()
+        if not models.exists():
+            issues.append("No AI models registered in registry.")
             
-        if action_type == "APPROVE_SAFETY":
-            if membership.role not in ["OWNER", "ADMIN", "MANAGER"]:
-                return False, "Only managers or admins can approve food safety."
-
-        return True, "Action is authorized and safe."
+        return issues

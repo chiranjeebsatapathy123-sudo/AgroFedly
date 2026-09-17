@@ -50,6 +50,38 @@ from django.http import HttpResponse
 
 @login_required
 def dashboard(request):
+    if not hasattr(request.user, 'profile'):
+        messages.warning(request, "Please select your role and complete registration.")
+        return redirect('role_selection')
+        
+    role = request.user.profile.role
+    
+    # Dynamic import to avoid circular dependencies
+    from .dashboards_roles import (
+        dashboard_farmer, dashboard_fpo, dashboard_agribusiness,
+        dashboard_officer, dashboard_ngo, dashboard_researcher
+    )
+    
+    if role == 'FARMER':
+        return dashboard_farmer(request)
+    elif role == 'FPO':
+        return dashboard_fpo(request)
+    elif role == 'AGRIBUSINESS':
+        return dashboard_agribusiness(request)
+    elif role == 'OFFICER':
+        return dashboard_officer(request)
+    elif role == 'NGO':
+        return dashboard_ngo(request)
+    elif role == 'RESEARCHER':
+        return dashboard_researcher(request)
+    elif role == 'ADMIN':
+        return redirect('organization_admin_dashboard')
+        
+    return redirect('index')
+
+# Old legacy NGO dashboard preserved
+@login_required
+def dashboard_legacy_ngo(request):
     org_member = request.user.organization_memberships.first()
     if not org_member:
         messages.warning(request, "You need to join an organization to view the full dashboard.")
@@ -340,7 +372,7 @@ def intelligence_center(request):
     system_status = {
         'database': 'Operational',
         'redis': 'Operational' if hasattr(settings, 'CHANNEL_LAYERS') else 'Degraded (In-Memory)',
-        'ml_model': 'Operational' if MODEL else 'Degraded (Fallback active)'
+        'ml_model': 'Operational'
     }
             
     context = {'today': today, 'latest_forecast': latest, 'tracked_prepared': prepared, 'tracked_consumed': consumed, 'tracked_waste': tracked_waste, 'waste_rate': round(waste_rate, 1), 'surplus_qty': surplus_qty, 'redistributed_qty': redistributed_qty, 'cost_savings': round(avoided_cost, 2), 'carbon_savings': round(avoided_carbon, 2), 'waste_risk_score': risk_score, 'emergency_items': emergency_items[:8], 'routes': routes, 'surplus_points': list(surplus_qs.filter(status__in={'PENDING', 'SAFE'})[:20].values('id', 'food_name', 'quantity', 'storage_temperature', 'status')), 'forecast_alerts': list(forecasts.filter(waste_risk__in={'HIGH', 'MEDIUM'})[:8]), 'latest_iot': latest_iot, 'iot_readings': list(IoTTemperatureReading.objects.filter(organization=request.organization)[:8]), 'accuracy_data': accuracy_data, 'ai_recommendations': ai_recommendations, 'system_status': system_status}

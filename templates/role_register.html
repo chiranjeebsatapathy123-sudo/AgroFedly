@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block title %}{{ role|title }} Registration - AgroFedly{% endblock %}
+{% block content %}
+<section class="auth-wrap scene-3d-container">
+  <div class="auth-card card-3d anim-fade-up" style="max-width: 500px; margin: 40px auto; padding: 40px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <a href="{% url 'role_selection' %}" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; float: left;">&larr; Back</a>
+      <h1 class="anim-fade-up stagger-2" style="font-size: 1.8rem; margin-bottom: 5px; clear: both; padding-top: 20px;">
+        Register as {{ role|title }}
+      </h1>
+      <p class="anim-fade-in stagger-3" style="color: var(--text-muted);">Create your AgroFedly account</p>
+    </div>
+    
+    <!-- Progress Indicator -->
+    <div class="progress-bar-container" style="display: flex; justify-content: space-between; margin-bottom: 30px; position: relative;">
+        <div style="position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: var(--border); z-index: 1;"></div>
+        <div class="progress-fill" style="position: absolute; top: 50%; left: 0; width: 33%; height: 2px; background: var(--primary); z-index: 2; transition: width 0.3s ease;"></div>
+        
+        <div class="step-indicator active" style="width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; z-index: 3; font-size: 0.8rem; font-weight: bold;">1</div>
+        <div class="step-indicator" style="width: 24px; height: 24px; border-radius: 50%; background: var(--background); border: 2px solid var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; z-index: 3; font-size: 0.8rem; font-weight: bold;">2</div>
+        <div class="step-indicator" style="width: 24px; height: 24px; border-radius: 50%; background: var(--background); border: 2px solid var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; z-index: 3; font-size: 0.8rem; font-weight: bold;">3</div>
+    </div>
+
+    <form method="post" id="registrationForm" class="form-grid anim-scale-in stagger-4" style="display: flex; flex-direction: column; gap: 20px;">
+      {% csrf_token %}
+      
+      <!-- Step 1: Personal Info -->
+      <div class="form-step" id="step1">
+          <h3 style="margin-bottom: 15px;">Account Information</h3>
+          <label style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+            <span style="font-weight: 500;">Username</span>
+            <input name="username" required placeholder="Choose a username" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--text);">
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+            <span style="font-weight: 500;">Email Address</span>
+            <input name="email" type="email" required placeholder="name@example.com" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--text);">
+          </label>
+          <button type="button" class="btn primary full next-step" style="padding: 14px; font-size: 1.1rem; border-radius: 8px;">Next Step &rarr;</button>
+      </div>
+
+      <!-- Step 2: Role Info -->
+      <div class="form-step" id="step2" style="display: none;">
+          <h3 style="margin-bottom: 15px;">{{ role|title }} Details</h3>
+          {% if role == 'FARMER' %}
+              <label style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                <span style="font-weight: 500;">State & District</span>
+                <input name="location" placeholder="e.g., Maharashtra, Pune" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--text);">
+              </label>
+              <label style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                <span style="font-weight: 500;">Main Crops</span>
+                <input name="crops" placeholder="e.g., Wheat, Soybeans" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--text);">
+              </label>
+          {% else %}
+              <label style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                <span style="font-weight: 500;">Organization / Official ID</span>
+                <input name="org_id" placeholder="Enter Registration/ID Number" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--text);">
+              </label>
+          {% endif %}
+          <div style="display: flex; gap: 10px;">
+              <button type="button" class="btn glass prev-step" style="flex: 1; padding: 14px; border-radius: 8px;">&larr; Back</button>
+              <button type="button" class="btn primary next-step" style="flex: 2; padding: 14px; border-radius: 8px;">Next Step &rarr;</button>
+          </div>
+      </div>
+
+      <!-- Step 3: Security -->
+      <div class="form-step" id="step3" style="display: none;">
+          <h3 style="margin-bottom: 15px;">Security</h3>
+          <label style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+            <span style="font-weight: 500;">Password</span>
+            <input name="password" type="password" required placeholder="Create a strong password" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--text);">
+          </label>
+          <div style="display: flex; gap: 10px;">
+              <button type="button" class="btn glass prev-step" style="flex: 1; padding: 14px; border-radius: 8px;">&larr; Back</button>
+              <button type="submit" class="btn primary success" style="flex: 2; padding: 14px; font-size: 1.1rem; border-radius: 8px;">Complete Registration</button>
+          </div>
+      </div>
+    </form>
+    
+    <div class="auth-foot anim-fade-in stagger-5" style="margin-top: 25px; text-align: center; font-size: 0.9rem;">
+      Already have an account? <a href="{% url 'role_login' role %}" style="color: var(--primary); text-decoration: none; font-weight: bold;">Sign in instead</a>
+    </div>
+  </div>
+</section>
+
+<!-- Progressive Form Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let currentStep = 1;
+        const totalSteps = 3;
+        const form = document.getElementById('registrationForm');
+        
+        form.addEventListener('click', (e) => {
+            if (e.target.classList.contains('next-step')) {
+                // Basic validation before next
+                const inputs = document.getElementById('step' + currentStep).querySelectorAll('input[required]');
+                let valid = true;
+                inputs.forEach(input => { if(!input.value) valid = false; });
+                if (!valid) {
+                    window.ui && window.ui.showToast('Please fill all required fields.', 'error');
+                    return;
+                }
+                
+                if (currentStep < totalSteps) {
+                    document.getElementById('step' + currentStep).style.display = 'none';
+                    currentStep++;
+                    document.getElementById('step' + currentStep).style.display = 'block';
+                    updateProgress();
+                }
+            } else if (e.target.classList.contains('prev-step')) {
+                if (currentStep > 1) {
+                    document.getElementById('step' + currentStep).style.display = 'none';
+                    currentStep--;
+                    document.getElementById('step' + currentStep).style.display = 'block';
+                    updateProgress();
+                }
+            }
+        });
+
+        form.addEventListener('submit', () => {
+            const btn = form.querySelector('button[type=submit]');
+            if (window.ui) window.ui.setLoading(btn, true);
+        });
+        
+        function updateProgress() {
+            document.querySelector('.progress-fill').style.width = ((currentStep / totalSteps) * 100) + '%';
+            const indicators = document.querySelectorAll('.step-indicator');
+            indicators.forEach((ind, index) => {
+                if (index < currentStep) {
+                    ind.style.background = 'var(--primary)';
+                    ind.style.color = 'white';
+                    ind.style.border = 'none';
+                } else {
+                    ind.style.background = 'var(--background)';
+                    ind.style.color = 'var(--text-muted)';
+                    ind.style.border = '2px solid var(--border)';
+                }
+            });
+        }
+    });
+</script>
+
+<script type="module">
+  import { HeroScene } from "{% static 'js/3d_scenes/hero_scene.js' %}";
+  document.addEventListener('DOMContentLoaded', () => {
+      if (window.agrofedly3D) {
+          window.agrofedly3D.loadScene(HeroScene);
+      }
+  });
+</script>
+{% endblock %}

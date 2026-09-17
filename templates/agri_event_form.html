@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Add Event - AgroFedly{% endblock %}
+{% block content %}
+<section class="dashboard-wrap">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="{% url 'agri_calendar' %}" style="color: var(--text-muted); text-decoration: none;">&larr; Back to Calendar</a>
+        </div>
+        
+        <div class="card-3d anim-fade-up" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 40px;">
+            <h1 style="margin-bottom: 5px; font-size: 1.8rem;">Add Calendar Event</h1>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">Schedule a future event or task for your farm.</p>
+            
+            <form method="post" class="form-grid" style="display: flex; flex-direction: column; gap: 20px;">
+                {% csrf_token %}
+                
+                <label style="display: flex; flex-direction: column; gap: 8px;">
+                    <span style="font-weight: 500;">Farm *</span>
+                    <select name="farm_id" required>
+                        <option value="">Select a farm...</option>
+                        {% for farm in farms %}
+                            <option value="{{ farm.id }}" {% if request.GET.farm_id == farm.id|stringformat:"s" %}selected{% endif %}>{{ farm.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                
+                <label style="display: flex; flex-direction: column; gap: 8px;">
+                    <span style="font-weight: 500;">Event Title *</span>
+                    <input type="text" name="title" required placeholder="e.g. Tomato Harvesting Week">
+                </label>
+                
+                <label style="display: flex; flex-direction: column; gap: 8px;">
+                    <span style="font-weight: 500;">Event Type *</span>
+                    <input type="text" name="event_type" required placeholder="e.g. Harvest, Meeting, Delivery">
+                </label>
+                
+                <label style="display: flex; flex-direction: column; gap: 8px;">
+                    <span style="font-weight: 500;">Date *</span>
+                    <input type="date" name="date" required>
+                </label>
+                
+                <label style="display: flex; flex-direction: column; gap: 8px;">
+                    <span style="font-weight: 500;">Notes</span>
+                    <textarea name="notes" rows="3" placeholder="Additional details..."></textarea>
+                </label>
+                
+                <div style="margin-top: 10px;">
+                    <button type="submit" class="btn primary full" style="padding: 14px; font-size: 1.1rem; border-radius: 8px;">Add Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+    .form-grid input, .form-grid select, .form-grid textarea {
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--background);
+        color: var(--text);
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}My Farms & GIS Map - AgroFedly{% endblock %}
+{% block content %}
+<!-- Leaflet CSS & JS for GIS Mapping -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<style>
+    #farm-gis-map {
+        height: 400px;
+        width: 100%;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        z-index: 1; /* Keep under topbar */
+    }
+    @media (max-width: 768px) {
+        #farm-gis-map {
+            display: none; /* Do not load heavy map on mobile by default unless requested */
+        }
+        .mobile-map-warning {
+            display: block !important;
+        }
+    }
+    .mobile-map-warning {
+        display: none;
+        padding: 1rem;
+        background: var(--bg-primary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<section class="dashboard-wrap">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+            <div class="eyebrow" style="color: var(--brand-primary); font-weight: 700; letter-spacing: 1px; font-size: 0.75rem;">FIELD INTELLIGENCE</div>
+            <h1 class="h1" style="margin: 0;">GIS Farm Map</h1>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'agri_farm_add' %}" class="btn primary">+ Add New Farm</a>
+        </div>
+    </div>
+    
+    <!-- Remote Sensing / GIS Map Container -->
+    <div class="card" style="margin-bottom: 2rem; padding: 0.5rem;">
+        <div class="mobile-map-warning">
+            <p class="small" style="color: var(--text-muted); margin: 0;">GIS Map hidden to save bandwidth on mobile. <button onclick="document.getElementById('farm-gis-map').style.display='block'; this.parentElement.style.display='none'; initMap();" class="btn secondary btn-sm" style="margin-left: 10px;">Load Map</button></p>
+        </div>
+        <div id="farm-gis-map"></div>
+        <div style="display: flex; justify-content: space-between; padding: 0.5rem 1rem;">
+            <p class="small" style="color: var(--text-muted); margin: 0;"><strong>Active Layers:</strong> Farm Boundaries, Default Terrain</p>
+            <p class="small" style="color: var(--warning); margin: 0; font-weight: 600;">⚠️ Remote sensing (NDVI/Satellite) integration not configured.</p>
+        </div>
+    </div>
+    
+    <!-- Farm List Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+        {% for farm in farms %}
+        <div class="card" style="display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <div>
+                    <h3 class="h3" style="margin: 0;">{{ farm.name }}</h3>
+                    <p class="small" style="color: var(--text-muted); margin: 0;">📍 {{ farm.location|default:"No Location Logged" }}</p>
+                </div>
+                <span style="background: var(--surface-elevated); color: var(--brand-primary); padding: 4px 10px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 700; border: 1px solid var(--border-hover);">{{ farm.area_acres }} Acres</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                <div style="display: flex; justify-content: space-between;">
+                    <span class="small" style="color: var(--text-muted);">Active Fields</span>
+                    <strong style="color: var(--text-primary);">{{ farm.fields.count }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span class="small" style="color: var(--text-muted);">Soil Type</span>
+                    <strong style="color: var(--text-primary);">{{ farm.soil_type|default:"Unknown" }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span class="small" style="color: var(--text-muted);">Irrigation</span>
+                    <strong style="color: var(--text-primary);">{{ farm.irrigation_type|default:"Unknown" }}</strong>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: auto;">
+                <a href="{% url 'agri_field_list' %}?farm_id={{ farm.id }}" class="btn secondary" style="flex: 1; text-align: center;">View Intelligence</a>
+                <a href="#" class="btn primary outline" style="flex: 1; text-align: center;">+ Add Field</a>
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; background: var(--surface); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🚜</div>
+            <h3 class="h3">No Farms Found</h3>
+            <p class="body" style="color: var(--text-muted); margin-bottom: 1.5rem;">You haven't registered any farms in the system yet.</p>
+            <a href="{% url 'agri_farm_add' %}" class="btn primary">Add Your First Farm</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<script>
+    let mapInitialized = false;
+    
+    function initMap() {
+        if (mapInitialized) return;
+        
+        // Default to a central location if no farms have geodata (e.g. Center of India)
+        const map = L.map('farm-gis-map').setView([20.5937, 78.9629], 5);
+        
+        // Standard OpenStreetMap tiles (free, reliable)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors | AgroFedly GIS'
+        }).addTo(map);
+
+        // We would normally parse {{ farm.geojson_boundary }} here.
+        // For now, we will just add a bounds array if any exist.
+        let bounds = [];
+        
+        {% for farm in farms %}
+            {% if farm.location %}
+                // In a production system, this would geocode the location string or use the geojson_boundary.
+                // We are preventing fake data generation as per Phase 5 instructions.
+            {% endif %}
+        {% endfor %}
+        
+        if (bounds.length > 0) {
+            map.fitBounds(bounds);
+        }
+        
+        mapInitialized = true;
+    }
+
+    // Auto-init on desktop
+    if (window.innerWidth > 768) {
+        initMap();
+    }
+</script>
+{% endblock %}

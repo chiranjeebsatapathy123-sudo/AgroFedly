@@ -6,62 +6,66 @@
 <section class="page-head">
     <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
         <div>
-            <div class="eyebrow" style="color: #22c55e;">● {% trans "LIVE TELEMETRY" %}</div>
-            <h1>{% trans "IoT Sensor Fleet" %}</h1>
-            <p>{% trans "Real-time micro-climate monitoring for active fields." %}</p>
+            <div class="eyebrow" style="color: #22c55e;">● {% trans "TELEMETRY" %}</div>
+            <h1 class="h1" style="margin: 0;">{% trans "IoT Sensor Fleet" %}</h1>
+            <p class="body" style="color: var(--text-muted);">{% trans "Micro-climate monitoring for active fields." %}</p>
         </div>
         <div style="text-align: right;">
             <div style="font-size: 0.8rem; color: var(--text-light);">{% trans "Network Status" %}</div>
-            <div style="color: #22c55e; font-weight: bold;">{% trans "12/12 Sensors Online" %}</div>
+            {% if sensor_count > 0 %}
+                <div style="color: var(--success); font-weight: bold;">{{ sensor_count }} {% trans "Sensors Registered" %}</div>
+            {% else %}
+                <div style="color: var(--text-muted); font-weight: bold;">{% trans "No Active Sensors" %}</div>
+            {% endif %}
         </div>
     </div>
 </section>
 
-<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top:20px;">
-    
+<!-- Alerts Section -->
+{% if recent_alerts %}
+<div class="card" style="margin-top: 1.5rem; background: rgba(216, 80, 88, 0.05); border: 1px solid var(--danger);">
+    <h3 class="h3" style="color: var(--danger); margin-bottom: 1rem;">🚨 Active Sensor Alerts</h3>
+    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+        {% for alert in recent_alerts %}
+        <li style="padding: 0.8rem; background: var(--bg-primary); border: 1px solid var(--border); border-left: 3px solid var(--danger); border-radius: var(--radius-sm); display: flex; justify-content: space-between;">
+            <div>
+                <strong style="color: var(--text-primary);">{{ alert.message }}</strong>
+                <p class="small" style="margin: 0; color: var(--text-muted);">Threshold Breached: {{ alert.severity }}</p>
+            </div>
+            <span class="small" style="color: var(--text-muted);">{{ alert.created_at|date:"M d, H:i" }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top:2rem;">
     <!-- Soil Moisture Gauge -->
-    <div class="form-card" style="text-align:center; position:relative; overflow:hidden;">
-        <h3 style="font-size:1.1rem; color:var(--text-light); margin-bottom:15px;">{% trans "Avg Soil Moisture" %}</h3>
-        <div style="font-size:3rem; font-weight:900; color:var(--color-info);" id="val-moisture">42%</div>
-        <div style="font-size:0.9rem; color:var(--text-light); margin-top:10px;">Target: 40% - 60%</div>
-        <div style="height:4px; width:100%; background: var(--line); border-radius:2px; margin-top:15px; overflow:hidden;">
-            <div id="bar-moisture" style="height:100%; width:42%; background:var(--color-info); transition: width 1s ease-in-out;"></div>
+    <div class="card" style="text-align:center; position:relative; overflow:hidden;">
+        <h3 class="h3" style="color:var(--text-secondary); margin-bottom:1rem;">{% trans "Avg Soil Moisture" %}</h3>
+        <div style="font-size:3rem; font-weight:900; color:var(--brand-primary);" id="val-moisture">--%</div>
+        <div class="small" style="color:var(--text-muted); margin-top:0.5rem;">Target: 40% - 60%</div>
+        <div style="height:4px; width:100%; background: var(--border); border-radius:2px; margin-top:1rem; overflow:hidden;">
+            <div id="bar-moisture" style="height:100%; width:0%; background:var(--brand-primary); transition: width 1s ease-in-out;"></div>
         </div>
     </div>
 
     <!-- Temperature Gauge -->
-    <div class="form-card" style="text-align:center; position:relative; overflow:hidden;">
-        <h3 style="font-size:1.1rem; color:var(--text-light); margin-bottom:15px;">{% trans "Ambient Temp" %}</h3>
-        <div style="font-size:3rem; font-weight:900; color:var(--color-danger);" id="val-temp">24.5°C</div>
-        <div style="font-size:0.9rem; color:var(--text-light); margin-top:10px;">Optimal: 20°C - 28°C</div>
-        <div style="height:4px; width:100%; background: var(--line); border-radius:2px; margin-top:15px; overflow:hidden;">
-            <div id="bar-temp" style="height:100%; width:50%; background:var(--color-danger); transition: width 1s ease-in-out;"></div>
-        </div>
-    </div>
-
-    <!-- Humidity Gauge -->
-    <div class="form-card" style="text-align:center; position:relative; overflow:hidden;">
-        <h3 style="font-size:1.1rem; color:var(--text-light); margin-bottom:15px;">{% trans "Relative Humidity" %}</h3>
-        <div style="font-size:3rem; font-weight:900; color:#0ea5e9;" id="val-humidity">65%</div>
-        <div style="font-size:0.9rem; color:var(--text-light); margin-top:10px;">Target: 60% - 80%</div>
-        <div style="height:4px; width:100%; background: var(--line); border-radius:2px; margin-top:15px; overflow:hidden;">
-            <div id="bar-humidity" style="height:100%; width:65%; background:#0ea5e9; transition: width 1s ease-in-out;"></div>
-        </div>
-    </div>
-
-    <!-- Nitrogen Gauge -->
-    <div class="form-card" style="text-align:center; position:relative; overflow:hidden;">
-        <h3 style="font-size:1.1rem; color:var(--text-light); margin-bottom:15px;">{% trans "Soil Nitrogen (N)" %}</h3>
-        <div style="font-size:3rem; font-weight:900; color:#22c55e;" id="val-nitrogen">140 ppm</div>
-        <div style="font-size:0.9rem; color:var(--text-light); margin-top:10px;">Target: 120 - 160 ppm</div>
-        <div style="height:4px; width:100%; background: var(--line); border-radius:2px; margin-top:15px; overflow:hidden;">
-            <div id="bar-nitrogen" style="height:100%; width:70%; background:#22c55e; transition: width 1s ease-in-out;"></div>
+    <div class="card" style="text-align:center; position:relative; overflow:hidden;">
+        <h3 class="h3" style="color:var(--text-secondary); margin-bottom:1rem;">{% trans "Ambient Temp" %}</h3>
+        <div style="font-size:3rem; font-weight:900; color:var(--danger);" id="val-temp">--°C</div>
+        <div class="small" style="color:var(--text-muted); margin-top:0.5rem;">Optimal: 20°C - 28°C</div>
+        <div style="height:4px; width:100%; background: var(--border); border-radius:2px; margin-top:1rem; overflow:hidden;">
+            <div id="bar-temp" style="height:100%; width:0%; background:var(--danger); transition: width 1s ease-in-out;"></div>
         </div>
     </div>
 </div>
 
-<div class="form-card" style="margin-top:20px;">
-    <h2 style="font-size:1.2rem; margin-bottom:15px;">📈 {% trans "Live Telemetry Feed" %}</h2>
+<div class="card" style="margin-top:2rem;">
+    <h2 class="h2" style="margin-bottom:1rem;">📈 {% trans "Live Telemetry Feed" %}</h2>
+    <div id="no-data-msg" style="text-align: center; padding: 2rem; color: var(--text-muted); display: none;">
+        No live telemetry data available from actual sensors.
+    </div>
     <canvas id="liveChart" height="80"></canvas>
 </div>
 
@@ -74,18 +78,18 @@ document.addEventListener("DOMContentLoaded", function() {
     const liveChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['Now', '-10s', '-20s', '-30s', '-40s', '-50s', '-60s'].reverse(),
+            labels: [],
             datasets: [
                 {
                     label: 'Moisture (%)',
-                    data: [41, 42, 42, 43, 42, 41, 42],
-                    borderColor: 'var(--color-info)',
+                    data: [],
+                    borderColor: 'var(--brand-primary)',
                     tension: 0.4
                 },
                 {
                     label: 'Temp (°C)',
-                    data: [24.1, 24.3, 24.5, 24.4, 24.6, 24.5, 24.5],
-                    borderColor: 'var(--color-danger)',
+                    data: [],
+                    borderColor: 'var(--danger)',
                     tension: 0.4
                 }
             ]
@@ -93,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function() {
         options: {
             responsive: true,
             animation: {
-                duration: 500, // Smooth transition for live updates
+                duration: 500,
             },
             plugins: {
                 legend: { position: 'top' }
@@ -105,16 +109,20 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Simulating Live API Telemetry Stream
-    setInterval(() => {
+    // Fetch actual live API telemetry stream
+    function fetchTelemetry() {
         fetch('/api/agri-iot-stream/')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('No Data');
+                return response.json();
+            })
             .then(data => {
                 if(data.status === 'success') {
-                    const moisture = data.data.moisture;
-                    const temp = data.data.temperature;
-                    const humidity = data.data.humidity;
-                    const nitrogen = data.data.nitrogen;
+                    document.getElementById('no-data-msg').style.display = 'none';
+                    document.getElementById('liveChart').style.display = 'block';
+
+                    const moisture = data.data.moisture || 0;
+                    const temp = data.data.temperature || 0;
 
                     // Update Gauges
                     document.getElementById('val-moisture').innerText = moisture + '%';
@@ -123,29 +131,31 @@ document.addEventListener("DOMContentLoaded", function() {
                     document.getElementById('val-temp').innerText = temp + '°C';
                     document.getElementById('bar-temp').style.width = (temp * 2) + '%';
 
-                    document.getElementById('val-humidity').innerText = humidity + '%';
-                    document.getElementById('bar-humidity').style.width = humidity + '%';
-
-                    document.getElementById('val-nitrogen').innerText = nitrogen + ' ppm';
-                    document.getElementById('bar-nitrogen').style.width = (nitrogen / 2) + '%';
-
                     // Update Chart
                     const timeLabel = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
                     
                     liveChart.data.labels.push(timeLabel);
-                    liveChart.data.labels.shift();
+                    if (liveChart.data.labels.length > 7) liveChart.data.labels.shift();
                     
                     liveChart.data.datasets[0].data.push(moisture);
-                    liveChart.data.datasets[0].data.shift();
+                    if (liveChart.data.datasets[0].data.length > 7) liveChart.data.datasets[0].data.shift();
                     
                     liveChart.data.datasets[1].data.push(temp);
-                    liveChart.data.datasets[1].data.shift();
+                    if (liveChart.data.datasets[1].data.length > 7) liveChart.data.datasets[1].data.shift();
 
                     liveChart.update();
                 }
             })
-            .catch(err => console.error("Error fetching IoT stream:", err));
-    }, 2500); // Updates every 2.5 seconds
+            .catch(err => {
+                console.warn("IoT stream inactive or no real data:", err);
+                document.getElementById('no-data-msg').style.display = 'block';
+                document.getElementById('liveChart').style.display = 'none';
+            });
+    }
+
+    // Initial fetch and set interval for real data
+    fetchTelemetry();
+    setInterval(fetchTelemetry, 10000); // Check every 10 seconds to save DB load
 });
 </script>
 {% endblock %}

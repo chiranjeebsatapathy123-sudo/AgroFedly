@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}User Profile{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <div class="eyebrow">{% trans "ACCOUNT" %}</div>
+        <h1>{% trans "User Profile" %}</h1>
+        <p>{% trans "Manage your personal information and organization memberships." %}</p>
+    </div>
+</section>
+
+<div class="form-grid">
+    <div class="form-card">
+        <h2>{% trans "Personal Information" %}</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div style="margin-bottom:15px;">
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">{% trans "Username" %}</label>
+                <input type="text" value="{{ user.username }}" disabled style="width:100%; padding:8px; border:1px solid var(--color-border); border-radius:6px; background:var(--surface-soft);">
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">{% trans "Email" %}</label>
+                <input type="email" value="{{ user.email }}" disabled style="width:100%; padding:8px; border:1px solid var(--color-border); border-radius:6px; background:var(--surface-soft);">
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">{% trans "Role" %}</label>
+                <input type="text" value="{{ profile.get_role_display }}" disabled style="width:100%; padding:8px; border:1px solid var(--color-border); border-radius:6px; background:var(--surface-soft);">
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">{% trans "Phone Number" %}</label>
+                <input type="text" name="phone_number" value="{{ profile.phone_number }}" placeholder="Optional" style="width:100%; padding:8px; border:1px solid var(--color-border); border-radius:6px;">
+            </div>
+            <button type="submit" class="btn primary">{% trans "Update Profile" %}</button>
+        </form>
+    </div>
+    
+    <div class="form-card">
+        <h2>{% trans "Organization Memberships" %}</h2>
+        {% if memberships %}
+            <ul style="list-style:none; padding:0; margin:0;">
+                {% for membership in memberships %}
+                    <li style="padding:15px; border:1px solid var(--color-border); border-radius:8px; margin-bottom:10px;">
+                        <strong style="font-size:1.1rem; display:block; margin-bottom:5px;">{{ membership.organization.name }}</strong>
+                        <span style="display:inline-block; padding:4px 8px; background:var(--color-primary); color:white; border-radius:4px; font-size:0.8rem; font-weight:bold;">{{ membership.get_role_display }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p style="color:var(--text-muted);">{% trans "You are not a member of any organization." %}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

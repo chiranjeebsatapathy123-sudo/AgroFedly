@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Meal Planning - AgroFedly{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1><i class="fas fa-calendar-alt"></i> Meal Planning</h1>
+    <a href="#" class="btn primary"><i class="fas fa-plus"></i> New Session</a>
+</div>
+<div class="panel">
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Session</th>
+                <th>Expected Attendance</th>
+                <th>Mode</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for meal in meals %}
+            <tr>
+                <td>{{ meal.date }}</td>
+                <td>{{ meal.meal_session }}</td>
+                <td>{{ meal.expected_attendance }}</td>
+                <td><span class="badge">{{ meal.event_mode }}</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="text-align: center;">No meal sessions planned.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
