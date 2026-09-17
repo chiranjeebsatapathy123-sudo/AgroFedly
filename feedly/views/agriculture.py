@@ -46,7 +46,7 @@ from django.http import HttpResponse
 
 @login_required
 def agri_dashboard(request):
-    org_member = request.user.organizations.first()
+    org_member = request.user.organization_memberships.first()
     org = org_member.organization if org_member else None
     
     if not org:
@@ -80,7 +80,7 @@ def agri_dashboard(request):
 
 @login_required
 def agri_produce_list(request):
-    org_member = request.user.organizations.first()
+    org_member = request.user.organization_memberships.first()
     if not org_member:
         return redirect('home')
     produce_list = AgriculturalProduce.objects.filter(supplier=org_member.organization).order_by('-harvest_date')
@@ -88,7 +88,7 @@ def agri_produce_list(request):
 
 @login_required
 def agri_produce_add(request):
-    org_member = request.user.organizations.first()
+    org_member = request.user.organization_memberships.first()
     if request.method == 'POST':
         form = AgriculturalProduceForm(request.POST)
         if org_member:
@@ -110,7 +110,7 @@ def agri_produce_add(request):
 
 @login_required
 def agri_processing_list(request):
-    org_member = request.user.organizations.first()
+    org_member = request.user.organization_memberships.first()
     if not org_member:
         return redirect('home')
     processing_records = ProcessingRecord.objects.filter(input_produce__supplier=org_member.organization).order_by('-processing_date')
@@ -118,7 +118,7 @@ def agri_processing_list(request):
 
 @login_required
 def agri_processing_add(request):
-    org = request.user.organizations.first()
+    org = request.user.organization_memberships.first()
     if request.method == 'POST':
         form = ProcessingRecordForm(request.POST, supplier=org.organization if org else None)
         if form.is_valid():
@@ -138,7 +138,7 @@ def agri_processing_add(request):
 
 @login_required
 def agri_supply_matching(request):
-    org = request.user.organizations.first()
+    org = request.user.organization_memberships.first()
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'create_demand':
@@ -212,7 +212,7 @@ def agri_supply_matching(request):
 
 @login_required
 def agri_supply_requests_list(request):
-    user_org = request.user.organizations.first()
+    user_org = request.user.organization_memberships.first()
     if user_org:
         org = user_org.organization
         requests = AgriculturalSupplyRequest.objects.filter(models.Q(requester=org) | models.Q(produce__supplier=org)).order_by('-created_at')
@@ -222,7 +222,7 @@ def agri_supply_requests_list(request):
 
 @login_required
 def agri_supply_request_add(request):
-    org = request.user.organizations.first()
+    org = request.user.organization_memberships.first()
     if request.method == 'POST':
         form = AgriculturalSupplyRequestForm(request.POST)
         if form.is_valid():
@@ -239,7 +239,7 @@ def agri_supply_request_add(request):
 def agri_supply_request_accept(request, request_id):
     if request.method == 'POST':
         supply_request = get_object_or_404(AgriculturalSupplyRequest, id=request_id)
-        user_org = request.user.organizations.first()
+        user_org = request.user.organization_memberships.first()
         if not user_org or supply_request.produce.supplier != user_org.organization:
             messages.error(request, 'You are not authorized to accept this request.')
             return redirect('agri_supply_requests_list')
@@ -309,7 +309,7 @@ def agri_inspection_add(request):
 
 @login_required
 def agri_ledger(request):
-    org = request.user.organizations.first()
+    org = request.user.organization_memberships.first()
     if not org:
         messages.error(request, 'You must belong to an organization to view the ledger.')
         return redirect('agri_dashboard')
@@ -456,7 +456,7 @@ def agri_forum_detail(request, post_id):
 def agri_subsidy_finder(request):
     fields = FarmField.objects.filter(farmer=request.user)
     my_crop_types = [f.crop_type.lower() for f in fields]
-    produce = AgriculturalProduce.objects.filter(producer=request.user.organizations.first().organization if request.user.organizations.exists() else None)
+    produce = AgriculturalProduce.objects.filter(producer=request.user.organization_memberships.first().organization if request.user.organization_memberships.exists() else None)
     my_crop_types.extend([p.name.lower() for p in produce])
     my_crop_types = set(my_crop_types)
     all_schemes = GovernmentScheme.objects.all()

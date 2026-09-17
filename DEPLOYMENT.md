@@ -31,21 +31,31 @@ OPENAI_API_KEY=your-openai-api-key
 API_KEY=your-custom-internal-api-key
 ```
 
-## 3. Installation & Preparation
-1. **Clone the repository.**
-2. **Install dependencies:**
+## 1. Local Development (Docker)
+
+Ensure Docker Desktop is running on Windows.
+
+1. Clone the repository and navigate to the Annadata folder.
+2. Configure environment:
+   - Copy `.env.example` to `.env`
+   - Set development variables in `.env`
+3. Build the containers:
    ```bash
-   pip install -r requirements.txt
+   docker-compose build
    ```
-3. **Run database migrations:**
+4. Start the stack:
    ```bash
-   python manage.py migrate
+   docker-compose up -d
    ```
-4. **Collect Static Files:**
-   WhiteNoise is configured to serve static files in production.
+5. Apply database migrations:
    ```bash
-   python manage.py collectstatic --noinput
+   docker-compose exec web python manage.py migrate
    ```
+6. (Optional) Preload seed data:
+   ```bash
+   docker-compose exec web python manage.py shell < load_agri_demo.py
+   ```
+7. View application at http://localhost:8000
 
 ## 4. Running the ASGI Server (Daphne)
 Since AgroFedly uses WebSockets, you must use an ASGI server. Daphne is highly recommended.

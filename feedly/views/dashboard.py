@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.db import transaction, models
 from django.db.models import Sum, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,6 +15,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionForm, SurplusFoodForm
 from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact, SystemEvent, Warehouse, UserTask, DataImport
+from ..services.surplus import SurplusCalculator
 User = get_user_model()
 from ..forms import PostMealRecordForm
 from ..models import AgriculturalProduce, ProcessingRecord, AgriculturalSupplyRequest
@@ -49,7 +50,7 @@ from django.http import HttpResponse
 
 @login_required
 def dashboard(request):
-    org_member = request.user.organizations.first()
+    org_member = request.user.organization_memberships.first()
     if not org_member:
         messages.warning(request, "You need to join an organization to view the full dashboard.")
         return redirect('index')
@@ -73,9 +74,12 @@ def dashboard(request):
     
     # Real KPI calculations
     total_predicted = predictions.aggregate(v=Sum('predicted_demand'))['v'] or 0
-    total_surplus = surplus.aggregate(v=Sum('quantity'))['v'] or 0
+    
+    surplus_calc = SurplusCalculator(org)
+    total_surplus = surplus_calc.get_total_surplus_quantity()
+    safe_food_count = surplus_calc.get_safe_surplus_quantity()
+    
     total_redistributed = redistributions.aggregate(v=Sum('quantity'))['v'] or 0
-    safe_food_count = surplus.filter(status='SAFE').count()
 
     # Priority Center Logic using AI Orchestrator
     from ..ai.orchestrator import AIOrchestrator
@@ -105,14 +109,22 @@ def dashboard(request):
     if briefing['signals']:
         briefing_text = "Today's operations show " + ", ".join([s['message'].lower().replace('.', '') for s in briefing['signals'][:3]]) + "."
 
+    # Calculate additional metrics for redesign
+    production_total = AgriculturalProduce.objects.filter(organization=org).aggregate(v=Sum('quantity_kg'))['v'] or 0
+    available_produce = AgriculturalProduce.objects.filter(organization=org, status='HARVESTED').aggregate(v=Sum('quantity_kg'))['v'] or 0
+
     context = {
+        'production_total': round(production_total, 1),
+        'demand_forecast_total': round(total_predicted, 1),
+        'available_produce': round(available_produce, 1),
         'total_predictions': predictions.count(), 
         'total_predicted': total_predicted, 
-        'total_surplus': total_surplus, 
+        'total_surplus': round(total_surplus, 1), 
         'safe_food': safe_food_count, 
-        'redistributed': total_redistributed, 
-        'recipients': Recipient.objects.count(), 
-        'verified_recipients': Recipient.objects.filter(verified=True).count(), 
+        'redistributed': round(total_redistributed, 1),
+        'impact': f"{round(total_redistributed * 2.5 / 1000, 1)}k", # 2.5 meals per kg
+        'recipients': Recipient.objects.filter(organization=org).count(), 
+        'verified_recipients': Recipient.objects.filter(organization=org, verified=True).count(), 
         'recent_predictions': predictions[:6], 
         'recent_surplus': surplus[:6], 
         'recent_deliveries': recent_deliveries, 
@@ -197,7 +209,7 @@ def data_import(request):
 @login_required
 def intelligence_center(request):
     """Unified operations intelligence workspace."""
-    org_member = request.user.organizations.first()
+    org_member = request.user.organization_memberships.first()
     if not org_member:
         messages.warning(request, "You need to join an organization to view intelligence.")
         return redirect('home')
@@ -211,15 +223,18 @@ def intelligence_center(request):
     # Actually filter MealRecord by organization if it were linked, but MealRecord currently is global per project
     # We will assume MealRecord belongs to the current org context for this demo
     meal_qs = MealRecord.objects.order_by('-date', '-id')
-    verified = Recipient.objects.filter(verified=True, capacity__gt=0)
+    verified = Recipient.objects.filter(organization=org, verified=True, capacity__gt=0)
     
     latest = forecasts.first()
     recent_meals = list(meal_qs[:30])
     prepared = sum((m.meals_prepared for m in recent_meals))
     consumed = sum((m.meals_consumed for m in recent_meals))
     tracked_waste = max(prepared - consumed, 0)
-    surplus_qty = surplus_qs.aggregate(v=Sum('quantity'))['v'] or 0
-    latest_iot = IoTTemperatureReading.objects.order_by('-recorded_at').first()
+    
+    surplus_calc = SurplusCalculator(org)
+    surplus_qty = surplus_calc.get_total_surplus_quantity()
+    
+    latest_iot = IoTTemperatureReading.objects.filter(organization=org).order_by('-recorded_at').first()
     
     redistributed_qty = Delivery.objects.filter(sender=org, status='DELIVERED').aggregate(v=Sum('quantity'))['v'] or 0
     meal_cost = 35.0
@@ -274,9 +289,10 @@ def intelligence_center(request):
                 attendance = int(request.POST.get('attendance', 0))
                 if attendance < 0:
                     raise ValueError('Attendance cannot be negative.')
-                result = _predict(attendance, 25, 0, 0)
-                DemandForecast.objects.create(date=today, predicted_demand=result['prediction'], recommended_preparation=result['recommended'], lower_bound=result['lower'], upper_bound=result['upper'], confidence=result['confidence'], expected_surplus=result['expected_surplus'], waste_risk=result['risk'], model_name=result['model_name'])
-                messages.success(request, f"Preparation recommendation: {result['recommended']} meals.")
+                from ..services.forecasting import DemandForecastingPipeline
+                pipeline = DemandForecastingPipeline(org)
+                result = pipeline.predict_demand(attendance, target_date=today)
+                messages.success(request, f"Preparation recommendation: {result.recommended_preparation} meals.")
             elif action in ['accept_recommendation', 'reject_recommendation', 'dismiss_recommendation']:
                 from feedly.models import AIRecommendation
                 rec_id = request.POST.get('recommendation_id')

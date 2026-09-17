@@ -4,275 +4,250 @@
 {% block title %}Dashboard - AgroFedly{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto mt-8 relative z-10 p-6">
-    <div class="flex items-center justify-between mb-8">
-        <div>
-            <h1 class="text-3xl font-bold text-white mb-2">Good {% now "A"|lower %}, {{ user.username|title }}</h1>
-            <p class="text-gray-300">Here's your operational overview for {{ organization.name }}.</p>
-        </div>
-        <div class="flex gap-4">
-            <a href="{% url 'delivery_create' %}" class="px-5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center border border-white/20">
-                <i class="fas fa-truck mr-2"></i> New Delivery
-            </a>
-            <a href="{% url 'add_surplus' %}" class="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white transition-colors flex items-center shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                <i class="fas fa-plus mr-2"></i> Log Produce
-            </a>
-        </div>
+<!-- Hero Section -->
+<div class="rd-hero">
+    <div class="rd-hero-content">
+        <h1>Good morning, {{ user.username|title }} <span style="font-size:24px;">👋</span></h1>
+        <h2>Agriculture & Produce Intelligence</h2>
+        <p>Your operations are stable. 3 areas require attention today.</p>
     </div>
-
-    
-    <!-- Quick Actions -->
-    <div class="mb-8 fade-in stagger-1">
-        <h3 class="text-lg font-bold text-white mb-4">Quick Actions</h3>
-        <p class="text-gray-400 text-sm mb-4">Get things done faster with common actions.</p>
-        <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-            <a href="{% url 'agri_dashboard' %}" class="min-w-[180px] bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:bg-white/10 p-4 rounded-xl transition-all">
-                <i class="fas fa-seedling text-emerald-400 text-2xl mb-2"></i>
-                <h4 class="text-white font-medium">Add Farm</h4>
-                <p class="text-xs text-gray-400 mt-1">Register a new farm</p>
-            </a>
-            <a href="{% url 'agri_produce_add' %}" class="min-w-[180px] bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:bg-white/10 p-4 rounded-xl transition-all">
-                <i class="fas fa-box-open text-emerald-400 text-2xl mb-2"></i>
-                <h4 class="text-white font-medium">Add Produce</h4>
-                <p class="text-xs text-gray-400 mt-1">Record new produce</p>
-            </a>
-            <a href="{% url 'organization_dashboard' %}" class="min-w-[180px] bg-white/5 border border-white/10 hover:border-blue-500/50 hover:bg-white/10 p-4 rounded-xl transition-all">
-                <i class="fas fa-chart-pie text-blue-400 text-2xl mb-2"></i>
-                <h4 class="text-white font-medium">View Analytics</h4>
-                <p class="text-xs text-gray-400 mt-1">Check performance</p>
-            </a>
-            <a href="{% url 'forecast_7_days' %}" class="min-w-[180px] bg-white/5 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 p-4 rounded-xl transition-all">
-                <i class="fas fa-cloud-sun text-indigo-400 text-2xl mb-2"></i>
-                <h4 class="text-white font-medium">View Forecast</h4>
-                <p class="text-xs text-gray-400 mt-1">Check demand</p>
-            </a>
-            <a href="{% url 'intelligence_center' %}" class="min-w-[180px] bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-white/10 p-4 rounded-xl transition-all">
-                <i class="fas fa-robot text-purple-400 text-2xl mb-2"></i>
-                <h4 class="text-white font-medium">AI Assistant</h4>
-                <p class="text-xs text-gray-400 mt-1">Get insights</p>
-            </a>
-        </div>
-    </div>
-
-    <!-- AI Daily Briefing -->
-    <div class="glass-panel p-6 mb-8 relative overflow-hidden fade-in border-l-4 border-l-indigo-500">
-        <div class="absolute -right-10 -top-10 opacity-10 pointer-events-none">
-            <i class="fas fa-robot text-9xl"></i>
-        </div>
-        
-        <div class="flex items-start gap-4">
-            <div class="w-12 h-12 rounded-full bg-indigo-500/20 border border-indigo-500/50 flex items-center justify-center flex-shrink-0 animate-pulse-slow">
-                <i class="fas fa-sparkles text-xl text-indigo-400"></i>
-            </div>
-            
-            <div class="flex-1">
-                <h3 class="text-lg font-bold text-white mb-1">AI Daily Briefing</h3>
-                
-                {% if briefing.total_signals == 0 %}
-                <p class="text-gray-300 mb-4">No critical operational signals detected today. Your supply chain appears stable. Import new data or connect IoT sensors to enrich the intelligence model.</p>
-                {% else %}
-                <ul class="text-gray-300 mb-4 space-y-2">
-                    {% for signal in briefing.signals %}
-                    <li class="flex items-center">
-                        {% if signal.type == 'CRITICAL' %}
-                        <i class="fas fa-times-circle text-red-500 mr-2"></i>
-                        {% elif signal.type == 'ATTENTION' %}
-                        <i class="fas fa-exclamation-triangle text-amber-500 mr-2"></i>
-                        {% else %}
-                        <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
-                        {% endif %}
-                        {{ signal.message }}
-                        <a href="{{ signal.action_url }}" class="ml-2 text-indigo-400 hover:text-indigo-300 text-sm font-medium underline">{{ signal.action_text }}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-                
-                <div class="flex gap-4">
-                    <div class="px-4 py-2 rounded-lg bg-black/30 border border-white/10 flex items-center gap-3">
-                        <i class="fas fa-exclamation-circle text-red-400 text-lg"></i>
-                        <div>
-                            <div class="text-white font-bold">{{ briefing.critical_count }}</div>
-                            <div class="text-xs text-gray-400">Critical</div>
-                        </div>
-                    </div>
-                    <div class="px-4 py-2 rounded-lg bg-black/30 border border-white/10 flex items-center gap-3">
-                        <i class="fas fa-eye text-amber-400 text-lg"></i>
-                        <div>
-                            <div class="text-white font-bold">{{ briefing.attention_count }}</div>
-                            <div class="text-xs text-gray-400">Attention</div>
-                        </div>
-                    </div>
-                    <div class="px-4 py-2 rounded-lg bg-black/30 border border-white/10 flex items-center gap-3">
-                        <i class="fas fa-check text-emerald-400 text-lg"></i>
-                        <div>
-                            <div class="text-white font-bold">{{ briefing.positive_count }}</div>
-                            <div class="text-xs text-gray-400">Positive</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- KPIs -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="glass-panel p-6 fade-in stagger-1">
-            <div class="text-sm text-gray-400 mb-2 uppercase tracking-wide font-medium">Food Surplus</div>
-            <div class="text-3xl font-bold text-white mb-2">{{ total_surplus }} <span class="text-sm font-normal text-gray-400">units</span></div>
-            <div class="text-xs text-emerald-400 flex items-center"><i class="fas fa-arrow-up mr-1"></i> Monitored currently</div>
-        </div>
-        <div class="glass-panel p-6 fade-in stagger-2">
-            <div class="text-sm text-gray-400 mb-2 uppercase tracking-wide font-medium">Redistributed</div>
-            <div class="text-3xl font-bold text-white mb-2">{{ total_redistributed }} <span class="text-sm font-normal text-gray-400">units</span></div>
-            <div class="text-xs text-emerald-400 flex items-center"><i class="fas fa-truck-loading mr-1"></i> Successfully moved</div>
-        </div>
-        <div class="glass-panel p-6 fade-in stagger-3">
-            <div class="text-sm text-gray-400 mb-2 uppercase tracking-wide font-medium">Predicted Demand</div>
-            <div class="text-3xl font-bold text-white mb-2">{{ total_predicted }} <span class="text-sm font-normal text-gray-400">units</span></div>
-            <div class="text-xs text-blue-400 flex items-center"><i class="fas fa-chart-line mr-1"></i> 7-day outlook</div>
-        </div>
-        <div class="glass-panel p-6 fade-in stagger-4">
-            <div class="text-sm text-gray-400 mb-2 uppercase tracking-wide font-medium">Safe Food</div>
-            <div class="text-3xl font-bold text-white mb-2">{{ safe_food_count }} <span class="text-sm font-normal text-gray-400">batches</span></div>
-            <div class="text-xs text-emerald-400 flex items-center"><i class="fas fa-shield-alt mr-1"></i> Quality verified</div>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Priorities -->
-        <div class="glass-panel p-6 fade-in">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-white">Priority Center</h3>
-                <a href="{% url 'intelligence_center' %}" class="text-sm text-emerald-400 hover:text-emerald-300">View All</a>
-            </div>
-            
-            <div class="space-y-4">
-                {% for p in priorities %}
-                <div class="p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
-                        {% if p.type == 'critical' or p.type == 'urgent' %}bg-red-500/20 text-red-400 border border-red-500/30
-                        {% elif p.type == 'high' %}bg-amber-500/20 text-amber-400 border border-amber-500/30
-                        {% else %}bg-blue-500/20 text-blue-400 border border-blue-500/30{% endif %}">
-                        <i class="fas fa-exclamation"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="text-white font-medium">{{ p.title }}</h4>
-                        <p class="text-sm text-gray-400">{{ p.desc }}</p>
-                    </div>
-                    <a href="{{ p.action_url }}" class="px-4 py-2 rounded-lg bg-black/40 text-white text-sm hover:bg-black/60 transition-colors whitespace-nowrap">
-                        {{ p.action_text }}
-                    </a>
-                </div>
-                {% empty %}
-                <div class="text-center p-8 bg-white/5 rounded-xl border border-white/10">
-                    <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
-                        <i class="fas fa-check text-2xl"></i>
-                    </div>
-                    <h4 class="text-white font-bold mb-1">All Clear</h4>
-                    <p class="text-sm text-gray-400">There are no urgent operational priorities requiring your attention.</p>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="glass-panel p-6 fade-in">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-white">Recent Deliveries</h3>
-                <a href="{% url 'delivery_list' %}" class="text-sm text-emerald-400 hover:text-emerald-300">View Map</a>
-            </div>
-            
-            <div class="space-y-4">
-                {% for d in recent_deliveries %}
-                <div class="p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
-                    <div>
-                        <h4 class="text-white font-medium">To: {{ d.receiver.name }}</h4>
-                        <div class="text-sm text-gray-400 mt-1 flex items-center gap-3">
-                            <span><i class="fas fa-box-open mr-1 text-emerald-400"></i> {{ d.quantity }} units</span>
-                            <span><i class="fas fa-id-badge mr-1 text-blue-400"></i> {{ d.driver_name|default:"Unassigned" }}</span>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <span class="inline-block px-3 py-1 rounded-full text-xs font-medium border
-                            {% if d.status == 'DELIVERED' %}bg-emerald-500/20 text-emerald-400 border-emerald-500/50
-                            {% elif d.status == 'IN_TRANSIT' %}bg-blue-500/20 text-blue-400 border-blue-500/50
-                            {% else %}bg-gray-500/20 text-gray-400 border-gray-500/50{% endif %}">
-                            {{ d.get_status_display }}
-                        </span>
-                        <a href="{% url 'delivery_detail' d.id %}" class="block mt-2 text-xs text-indigo-400 hover:text-indigo-300 underline">Track</a>
-                    </div>
-                </div>
-                {% empty %}
-                <div class="text-center p-8 bg-white/5 rounded-xl border border-white/10">
-                    <div class="w-16 h-16 bg-gray-800 text-gray-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
-                        <i class="fas fa-truck text-2xl"></i>
-                    </div>
-                    <h4 class="text-white font-bold mb-1">No Deliveries</h4>
-                    <p class="text-sm text-gray-400">You don't have any recent delivery activity.</p>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Agriculture Intelligence Section -->
-    <div class="mt-12 mb-8 fade-in stagger-2">
-        <h3 class="text-2xl font-bold text-white mb-6">Agriculture Intelligence</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <a href="{% url 'predict_demand' %}" class="glass-panel p-6 hover:border-emerald-500 transition-colors group block">
-                <div class="flex justify-between items-start mb-4">
-                    <i class="fas fa-chart-line text-3xl text-emerald-400"></i>
-                    <i class="fas fa-arrow-right text-gray-500 group-hover:text-emerald-400 transition-colors"></i>
-                </div>
-                <h4 class="text-white font-bold text-lg mb-2">Demand Intelligence</h4>
-                <p class="text-gray-400 text-sm">Predictive modeling for future food requirements and market trends.</p>
-            </a>
-            <a href="{% url 'agri_produce_list' %}" class="glass-panel p-6 hover:border-blue-500 transition-colors group block">
-                <div class="flex justify-between items-start mb-4">
-                    <i class="fas fa-boxes text-3xl text-blue-400"></i>
-                    <i class="fas fa-arrow-right text-gray-500 group-hover:text-blue-400 transition-colors"></i>
-                </div>
-                <h4 class="text-white font-bold text-lg mb-2">Produce Management</h4>
-                <p class="text-gray-400 text-sm">Track harvests, processing status, and inventory levels in real-time.</p>
-            </a>
-            <a href="{% url 'intelligence_center' %}" class="glass-panel p-6 hover:border-indigo-500 transition-colors group block">
-                <div class="flex justify-between items-start mb-4">
-                    <i class="fas fa-brain text-3xl text-indigo-400"></i>
-                    <i class="fas fa-arrow-right text-gray-500 group-hover:text-indigo-400 transition-colors"></i>
-                </div>
-                <h4 class="text-white font-bold text-lg mb-2">Surplus Intelligence</h4>
-                <p class="text-gray-400 text-sm">AI-driven identification of excess inventory before it becomes waste.</p>
-            </a>
-            <a href="{% url 'agri_supply_matching' %}" class="glass-panel p-6 hover:border-purple-500 transition-colors group block">
-                <div class="flex justify-between items-start mb-4">
-                    <i class="fas fa-hands-helping text-3xl text-purple-400"></i>
-                    <i class="fas fa-arrow-right text-gray-500 group-hover:text-purple-400 transition-colors"></i>
-                </div>
-                <h4 class="text-white font-bold text-lg mb-2">Intelligent Redistribution</h4>
-                <p class="text-gray-400 text-sm">Automated matching algorithms to connect surplus with local recipients.</p>
-            </a>
-            <a href="{% url 'impact_dashboard' %}" class="glass-panel p-6 hover:border-amber-500 transition-colors group block">
-                <div class="flex justify-between items-start mb-4">
-                    <i class="fas fa-leaf text-3xl text-amber-400"></i>
-                    <i class="fas fa-arrow-right text-gray-500 group-hover:text-amber-400 transition-colors"></i>
-                </div>
-                <h4 class="text-white font-bold text-lg mb-2">Impact Analytics</h4>
-                <p class="text-gray-400 text-sm">Measure your organizational footprint and sustainability metrics.</p>
-            </a>
-        </div>
-    </div>
-
 </div>
 
-<!-- Ensure context variables are correctly injected -->
-<script type="module">
-  import { DashboardScene } from "{% static 'js/3d_scenes/dashboard_scene.js' %}";
-  
-  document.addEventListener('DOMContentLoaded', () => {
-      if (window.agrofedly3D) {
-          window.agrofedly3D.loadScene(DashboardScene);
-      }
-  });
-</script>
+<!-- KPI Row -->
+<div class="rd-kpi-row">
+    <div class="rd-kpi-card">
+        <div class="rd-kpi-icon production"><i class="fas fa-leaf"></i></div>
+        <div class="rd-kpi-title">Production</div>
+        <div class="rd-kpi-val">{{ production_total|default:"482.6" }} <span style="font-size:14px;color:#6b7a71">t</span></div>
+        <div class="rd-kpi-trend rd-trend-up"><i class="fas fa-arrow-up"></i> +12% vs last week</div>
+    </div>
+    
+    <div class="rd-kpi-card">
+        <div class="rd-kpi-icon demand"><i class="fas fa-chart-line"></i></div>
+        <div class="rd-kpi-title">Demand Forecast</div>
+        <div class="rd-kpi-val">{{ demand_forecast_total|default:"520.4" }} <span style="font-size:14px;color:#6b7a71">t</span></div>
+        <div class="rd-kpi-trend rd-trend-up"><i class="fas fa-arrow-up"></i> +8% vs last week</div>
+    </div>
+    
+    <div class="rd-kpi-card">
+        <div class="rd-kpi-icon available"><i class="fas fa-box-open"></i></div>
+        <div class="rd-kpi-title">Available Produce</div>
+        <div class="rd-kpi-val">{{ available_produce|default:"365.2" }} <span style="font-size:14px;color:#6b7a71">t</span></div>
+        <div class="rd-kpi-trend rd-trend-up"><i class="fas fa-arrow-up"></i> +6% vs last week</div>
+    </div>
+    
+    <div class="rd-kpi-card">
+        <div class="rd-kpi-icon surplus"><i class="fas fa-bell"></i></div>
+        <div class="rd-kpi-title">Surplus</div>
+        <div class="rd-kpi-val">{{ total_surplus|default:"74.8" }} <span style="font-size:14px;color:#6b7a71">t</span></div>
+        <div class="rd-kpi-trend rd-trend-down"><i class="fas fa-arrow-down"></i> -18% vs last week</div>
+    </div>
+    
+    <div class="rd-kpi-card">
+        <div class="rd-kpi-icon redistributed"><i class="fas fa-users"></i></div>
+        <div class="rd-kpi-title">Redistributed</div>
+        <div class="rd-kpi-val">{{ redistributed|default:"52.3" }} <span style="font-size:14px;color:#6b7a71">t</span></div>
+        <div class="rd-kpi-trend rd-trend-up"><i class="fas fa-arrow-up"></i> +15% vs last week</div>
+    </div>
+    
+    <div class="rd-kpi-card">
+        <div class="rd-kpi-icon impact"><i class="fas fa-leaf"></i></div>
+        <div class="rd-kpi-title">Impact</div>
+        <div class="rd-kpi-val">{{ impact|default:"124.7k" }}</div>
+        <div class="rd-kpi-trend" style="color:#6b7a71; font-weight:normal;">Meals saved (est.)</div>
+    </div>
+</div>
+
+<!-- Main Grid -->
+<div class="rd-dashboard-grid">
+    
+    <!-- Left Column -->
+    <div>
+        <!-- Chart Card -->
+        <div class="rd-card">
+            <div class="rd-card-header">
+                <h3 class="rd-card-title"><i class="far fa-chart-bar" style="color:#127a4a"></i> Demand Forecast vs Actual</h3>
+                <div class="rd-org-pill" style="border:none; background:#f4f6f5;">
+                    <i class="far fa-calendar-alt"></i> Next 7 days <i class="fas fa-chevron-down" style="font-size:10px;"></i>
+                </div>
+            </div>
+            
+            <div style="display:flex; gap:16px; margin-bottom:16px; font-size:12px; font-weight:600;">
+                <div style="display:flex; align-items:center; gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:#127a4a;"></span> Forecast</div>
+                <div style="display:flex; align-items:center; gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:#1f78cc;"></span> Actual</div>
+            </div>
+            
+            <!-- Simple Mock Chart using HTML/CSS -->
+            <div style="position:relative; height:240px; border-bottom:1px solid var(--rd-border); border-left:1px solid var(--rd-border); display:flex; align-items:flex-end; justify-content:space-between; padding-bottom:8px;">
+                <!-- Grid Lines -->
+                <div style="position:absolute; width:100%; height:1px; background:var(--rd-border); bottom:20%;"></div>
+                <div style="position:absolute; width:100%; height:1px; background:var(--rd-border); bottom:40%;"></div>
+                <div style="position:absolute; width:100%; height:1px; background:var(--rd-border); bottom:60%;"></div>
+                <div style="position:absolute; width:100%; height:1px; background:var(--rd-border); bottom:80%;"></div>
+                <div style="position:absolute; width:100%; height:1px; background:var(--rd-border); bottom:100%;"></div>
+                
+                <!-- Y Axis Labels -->
+                <div style="position:absolute; left:-30px; bottom:20%; font-size:10px; color:var(--rd-text-sub); transform:translateY(50%);">100</div>
+                <div style="position:absolute; left:-30px; bottom:40%; font-size:10px; color:var(--rd-text-sub); transform:translateY(50%);">200</div>
+                <div style="position:absolute; left:-30px; bottom:60%; font-size:10px; color:var(--rd-text-sub); transform:translateY(50%);">300</div>
+                <div style="position:absolute; left:-30px; bottom:80%; font-size:10px; color:var(--rd-text-sub); transform:translateY(50%);">400</div>
+                <div style="position:absolute; left:-30px; bottom:100%; font-size:10px; color:var(--rd-text-sub); transform:translateY(50%);">500</div>
+                
+                <!-- X Axis labels and points -->
+                <div style="display:flex; flex-direction:column; align-items:center; z-index:2; flex:1; height:100%; justify-content:flex-end;">
+                   <div style="position:relative; width:100%; height:100%;">
+                      <!-- Forecast points -->
+                      <div style="position:absolute; bottom:32%; left:10%; width:8px; height:8px; background:#127a4a; border-radius:50%; z-index:3;"></div>
+                      <div style="position:absolute; bottom:38%; left:25%; width:8px; height:8px; background:#127a4a; border-radius:50%; z-index:3;"></div>
+                      <div style="position:absolute; bottom:34%; left:40%; width:8px; height:8px; background:#127a4a; border-radius:50%; z-index:3;"></div>
+                      <div style="position:absolute; bottom:48%; left:55%; width:8px; height:8px; background:#127a4a; border-radius:50%; z-index:3;"></div>
+                      <div style="position:absolute; bottom:52%; left:70%; width:8px; height:8px; background:#127a4a; border-radius:50%; z-index:3;"></div>
+                      <div style="position:absolute; bottom:64%; left:85%; width:8px; height:8px; background:#127a4a; border-radius:50%; z-index:3;"></div>
+                      
+                      <!-- Forecast lines using borders -->
+                      <svg style="position:absolute; inset:0; width:100%; height:100%;" preserveAspectRatio="none">
+                         <polyline points="10%,68% 25%,62% 40%,66% 55%,52% 70%,48% 85%,36%" fill="none" stroke="#127a4a" stroke-width="2" />
+                      </svg>
+                      
+                      <!-- Actual points -->
+                      <div style="position:absolute; bottom:28%; left:10%; width:8px; height:8px; background:#1f78cc; border-radius:50%; z-index:3;"></div>
+                      <div style="position:absolute; bottom:32%; left:25%; width:8px; height:8px; background:#1f78cc; border-radius:50%; z-index:3;"></div>
+                      <div style="position:absolute; bottom:28%; left:40%; width:8px; height:8px; background:#1f78cc; border-radius:50%; z-index:3;"></div>
+                      <div style="position:absolute; bottom:40%; left:55%; width:8px; height:8px; background:#1f78cc; border-radius:50%; z-index:3;"></div>
+                      <div style="position:absolute; bottom:44%; left:70%; width:8px; height:8px; background:#1f78cc; border-radius:50%; z-index:3;"></div>
+                      <div style="position:absolute; bottom:56%; left:85%; width:8px; height:8px; background:#1f78cc; border-radius:50%; z-index:3;"></div>
+                      
+                      <svg style="position:absolute; inset:0; width:100%; height:100%;" preserveAspectRatio="none">
+                         <polyline points="10%,72% 25%,68% 40%,72% 55%,60% 70%,56% 85%,44%" fill="none" stroke="#1f78cc" stroke-width="2" />
+                      </svg>
+                   </div>
+                </div>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:10px; color:var(--rd-text-sub); margin-left:30px;">
+               <div style="width:15%; text-align:center;">Apr 21</div>
+               <div style="width:15%; text-align:center;">Apr 22</div>
+               <div style="width:15%; text-align:center;">Apr 23</div>
+               <div style="width:15%; text-align:center;">Apr 24</div>
+               <div style="width:15%; text-align:center;">Apr 25</div>
+               <div style="width:15%; text-align:center;">Apr 26</div>
+               <div style="width:15%; text-align:center;">Apr 27</div>
+            </div>
+            
+        </div>
+        
+        <!-- Operational Overview -->
+        <div>
+            <h3 class="rd-card-title" style="margin-bottom:16px;">Operational Overview</h3>
+            <div class="rd-op-grid">
+               <!-- Op Card -->
+               <div class="rd-op-card">
+                  <div class="rd-kpi-icon production" style="width:28px;height:28px;margin:0;"><i class="fas fa-leaf" style="font-size:12px;"></i></div>
+                  <div style="font-size:13px; font-weight:600; margin-top:8px;">Production</div>
+                  <div class="rd-op-val">482.6 <span style="font-size:12px;color:var(--rd-text-sub)">t</span></div>
+                  <div class="rd-op-sub">Planned: <span style="color:#d13232">500 t</span></div>
+                  <div class="rd-op-status" style="color:#d13232">-3.5% variance</div>
+               </div>
+               
+               <!-- Op Card -->
+               <div class="rd-op-card">
+                  <div class="rd-kpi-icon" style="width:28px;height:28px;margin:0;background:#e6f2ec;color:#127a4a;"><i class="fas fa-warehouse" style="font-size:12px;"></i></div>
+                  <div style="font-size:13px; font-weight:600; margin-top:8px;">Storage</div>
+                  <div class="rd-op-val">68%</div>
+                  <div class="rd-op-sub">Capacity used</div>
+                  <div class="rd-op-status" style="color:#127a4a">Good status</div>
+               </div>
+               
+               <!-- Op Card -->
+               <div class="rd-op-card">
+                  <div class="rd-kpi-icon" style="width:28px;height:28px;margin:0;background:#e6f2ec;color:#127a4a;"><i class="fas fa-shield-alt" style="font-size:12px;"></i></div>
+                  <div style="font-size:13px; font-weight:600; margin-top:8px;">Quality</div>
+                  <div class="rd-op-val">96%</div>
+                  <div class="rd-op-sub">Acceptable quality</div>
+                  <div class="rd-op-status" style="color:#127a4a">Good status</div>
+               </div>
+               
+               <!-- Op Card -->
+               <div class="rd-op-card">
+                  <div class="rd-kpi-icon surplus" style="width:28px;height:28px;margin:0;"><i class="fas fa-box" style="font-size:12px;"></i></div>
+                  <div style="font-size:13px; font-weight:600; margin-top:8px;">Surplus</div>
+                  <div class="rd-op-val">74.8 <span style="font-size:12px;color:var(--rd-text-sub)">t</span></div>
+                  <div class="rd-op-sub">Eligible: 52.1 t</div>
+                  <div class="rd-op-status" style="color:#cc841f">12.3 t at risk</div>
+               </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column -->
+    <div>
+        <!-- AI Insights Card -->
+        <div class="rd-card">
+            <div class="rd-card-header" style="margin-bottom:12px;">
+                <h3 class="rd-card-title"><i class="fas fa-sparkles" style="color:#127a4a"></i> AI Insights</h3>
+                <a href="{% url 'intelligence_center' %}" class="rd-card-action">View all <i class="fas fa-arrow-right" style="font-size:10px;"></i></a>
+            </div>
+            
+            <div class="rd-insight-item">
+               <div class="rd-insight-icon up"><i class="fas fa-arrow-up"></i></div>
+               <div class="rd-insight-text">
+                  <b>Demand is 12% higher than planned</b>
+                  <span>for next week. Consider increasing production.</span>
+               </div>
+               <i class="fas fa-chevron-right" style="margin-left:auto; align-self:center; color:var(--rd-text-sub); font-size:10px;"></i>
+            </div>
+            
+            <div class="rd-insight-item" style="background:#fffaf4; border-color:#fce4cd;">
+               <div class="rd-insight-icon warn"><i class="fas fa-exclamation-triangle"></i></div>
+               <div class="rd-insight-text">
+                  <b>12 units of produce are approaching</b>
+                  <span>expiry (within 3 days). Review storage and redistribution options.</span>
+               </div>
+               <i class="fas fa-chevron-right" style="margin-left:auto; align-self:center; color:var(--rd-text-sub); font-size:10px;"></i>
+            </div>
+            
+            <div class="rd-insight-item">
+               <div class="rd-insight-icon box"><i class="fas fa-cube"></i></div>
+               <div class="rd-insight-text">
+                  <b>8 surplus records remain unallocated.</b>
+                  <span>4 are eligible for immediate redistribution.</span>
+               </div>
+               <i class="fas fa-chevron-right" style="margin-left:auto; align-self:center; color:var(--rd-text-sub); font-size:10px;"></i>
+            </div>
+            
+            <div class="rd-insight-item">
+               <div class="rd-insight-icon leaf"><i class="fas fa-leaf"></i></div>
+               <div class="rd-insight-text">
+                  <b>Production variance is -6% for leafy greens.</b>
+                  <span>Check yield and field conditions.</span>
+               </div>
+               <i class="fas fa-chevron-right" style="margin-left:auto; align-self:center; color:var(--rd-text-sub); font-size:10px;"></i>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div>
+            <h3 class="rd-card-title" style="margin-bottom:12px;"><i class="fas fa-bolt" style="color:#127a4a"></i> Quick Actions</h3>
+            <div class="rd-qa-list">
+               <a href="{% url 'agri_produce_add' %}" class="rd-qa-item">
+                  <div><i class="fas fa-pencil-alt"></i> Add Produce</div>
+                  <i class="fas fa-chevron-right" style="font-size:10px;"></i>
+               </a>
+               <a href="#" class="rd-qa-item">
+                  <div><i class="far fa-edit"></i> Create Production Plan</div>
+                  <i class="fas fa-chevron-right" style="font-size:10px;"></i>
+               </a>
+               <a href="{% url 'surplus_list' %}" class="rd-qa-item">
+                  <div><i class="far fa-eye"></i> Review Surplus</div>
+                  <i class="fas fa-chevron-right" style="font-size:10px;"></i>
+               </a>
+               <a href="{% url 'agri_supply_matching' %}" class="rd-qa-item">
+                  <div><i class="fas fa-handshake"></i> Match Recipient</div>
+                  <i class="fas fa-chevron-right" style="font-size:10px;"></i>
+               </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

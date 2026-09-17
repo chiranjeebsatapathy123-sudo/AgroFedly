@@ -16,31 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionForm, SurplusFoodForm
 from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact
 User = get_user_model()
-try:
-    import joblib
-except Exception:
-    joblib = None
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_bundle.pkl')
-LEGACY_MODEL_PATH = os.path.join(BASE_DIR, 'ml', 'demand_model.pkl')
-MODEL = None
-MODEL_FEATURES = []
-MODEL_NAME = 'Fedly Smart Forecast'
-RESIDUAL_P90 = 8.0
-if joblib:
-    try:
-        bundle = joblib.load(MODEL_PATH)
-        MODEL = bundle.get('model') if isinstance(bundle, dict) else bundle
-        MODEL_FEATURES = bundle.get('features', []) if isinstance(bundle, dict) else []
-        MODEL_NAME = bundle.get('model_name', MODEL_NAME) if isinstance(bundle, dict) else MODEL_NAME
-        RESIDUAL_P90 = float(bundle.get('residual_p90', 8)) if isinstance(bundle, dict) else 8
-    except Exception:
-        try:
-            MODEL = joblib.load(LEGACY_MODEL_PATH)
-            MODEL_FEATURES = ['attendance', 'temperature', 'rainfall', 'holiday', 'day_of_week']
-            MODEL_NAME = 'Legacy Demand Model'
-        except Exception:
-            pass
+from ..services.forecasting import DemandForecastingPipeline
 from ..forms import PostMealRecordForm
 from ..models import AgriculturalProduce, ProcessingRecord, AgriculturalSupplyRequest
 from ..forms import AgriculturalProduceForm, ProcessingRecordForm, AgriculturalSupplyRequestForm
@@ -72,17 +48,26 @@ from django.http import HttpResponse
 from django.db import connection
 from django.conf import settings
 
-def health_check(request):
-    health = {'status': 'ok', 'service': 'AgroFedly'}
+def health_liveness(request):
+    """
+    Basic liveness check. Returns 200 OK if the application is running.
+    """
+    return JsonResponse({'status': 'ok'})
+
+def health_readiness(request):
+    """
+    Readiness check. Verifies database and external dependencies.
+    """
+    health = {'status': 'ready'}
     status_code = 200
     
     # Check Database
     try:
         connection.ensure_connection()
-        health['database'] = 'connected'
+        health['database'] = 'ok'
     except Exception as e:
         health['status'] = 'error'
-        health['database'] = 'disconnected'
+        health['database'] = 'error'
         status_code = 503
 
     # Check Redis
@@ -91,22 +76,16 @@ def health_check(request):
             redis_url = settings.CHANNEL_LAYERS['default'].get('CONFIG', {}).get('hosts', [None])[0]
             if redis_url:
                 import redis
-                r = redis.from_url(redis_url)
+                r = redis.from_url(redis_url, socket_timeout=1)
                 r.ping()
-                health['redis'] = 'connected'
+                health['redis'] = 'ok'
             else:
-                health['redis'] = 'in-memory (dev)'
+                health['redis'] = 'ok (in-memory)'
         except Exception as e:
             health['status'] = 'error'
-            health['redis'] = 'disconnected'
+            health['redis'] = 'error'
             status_code = 503
             
-    # Check ML Model
-    if MODEL:
-        health['ml_model'] = 'loaded'
-    else:
-        health['ml_model'] = 'unavailable (fallback active)'
-
     return JsonResponse(health, status=status_code)
 
 def _weather(city):
@@ -122,44 +101,7 @@ def _weather(city):
     except Exception:
         return None
 
-def _predict(attendance, temperature=25, rainfall=0, holiday=0, humidity=70, exam_day=0, event_flag=0, target=None):
-    target = target or date.today()
-    recent_meals = list(MealRecord.objects.filter(date__lt=target).exclude(data_source='ERP').order_by('-date').values_list('meals_consumed', flat=True)[:7])
-    if recent_meals and sum(recent_meals) > 0:
-        recent_avg = sum(recent_meals) / len(recent_meals)
-    else:
-        recent = list(DemandForecast.objects.filter(date__lt=target).order_by('-date').values_list('predicted_demand', flat=True)[:7])
-        recent_avg = sum(recent) / len(recent) if recent else attendance * 0.86
-    features = {'attendance': attendance, 'temperature': temperature, 'rainfall': rainfall, 'holiday': holiday, 'day_of_week': target.weekday(), 'humidity': humidity, 'month': target.month, 'weekend': int(target.weekday() >= 5), 'exam_day': exam_day, 'event_flag': event_flag, 'recent_avg_demand': recent_avg}
-    status = 'ACTIVE'
-    fallback = False
-    if MODEL is not None:
-        try:
-            row = [[features.get(name, 0) for name in MODEL_FEATURES]]
-            prediction = max(0, int(round(float(MODEL.predict(row)[0]))))
-        except Exception:
-            prediction = max(0, int(round(attendance * (0.72 if holiday else 0.86))))
-            fallback = True
-            status = 'FALLBACK (Model Error)'
-    else:
-        prediction = max(0, int(round(attendance * (0.68 if holiday else 0.86))))
-        if target.weekday() >= 5:
-            prediction = int(round(prediction * 0.82))
-        if rainfall > 10:
-            prediction = int(round(prediction * 0.97))
-        fallback = True
-        status = 'FALLBACK (Heuristics)'
-    uncertainty = max(8, int(round(RESIDUAL_P90)))
-    lower = max(0, prediction - uncertainty)
-    upper = prediction + uncertainty
-    confidence = max(50.0, min(99.0, 100 - uncertainty / max(prediction, 1) * 100))
-    buffer = max(2, int(round((upper - prediction) * 0.2)))
-    recommended = prediction + buffer
-    expected_surplus = max(0, recommended - prediction)
-    ratio = expected_surplus / max(recommended, 1)
-    risk = 'HIGH' if ratio >= 0.12 or expected_surplus >= 80 else 'MEDIUM' if ratio >= 0.05 or expected_surplus >= 30 else 'LOW'
-    return {'prediction': prediction, 'lower': lower, 'upper': upper, 'recommended': recommended, 'confidence': round(confidence, 1), 'expected_surplus': expected_surplus, 'risk': risk, 'model_name': MODEL_NAME, 'status': status, 'fallback': fallback, 'features': features}
-
+# Legacy _predict removed in favor of DemandForecastingPipeline
 @login_required
 def predict_demand(request):
     result = None
@@ -182,8 +124,25 @@ def predict_demand(request):
             humidity = weather['humidity'] if weather else 70
             temperature = weather['temperature'] if weather else 25
             rainfall = weather['rainfall'] if weather else 0
-            result = _predict(attendance=attendance, temperature=temperature, rainfall=rainfall, holiday=holiday, humidity=humidity, exam_day=exam_day, event_flag=event_flag)
-            DemandForecast.objects.create(date=date.today(), predicted_demand=result['prediction'], recommended_preparation=result['recommended'], lower_bound=result['lower'], upper_bound=result['upper'], confidence=result['confidence'], expected_surplus=result['expected_surplus'], waste_risk=result['risk'], model_name=result['model_name'])
+            org = request.user.organization_memberships.first().organization if request.user.organization_memberships.exists() else None
+            pipeline = DemandForecastingPipeline(org)
+            # This handles creating the model internally.
+            forecast_obj = pipeline.predict_demand(
+                attendance=attendance, temperature=temperature, rainfall=rainfall, 
+                holiday=holiday, humidity=humidity, exam_day=exam_day, event_flag=event_flag
+            )
+            # Create a mock result dictionary for the template to render
+            result = {
+                'prediction': forecast_obj.predicted_demand,
+                'recommended': forecast_obj.recommended_preparation,
+                'lower': forecast_obj.lower_bound,
+                'upper': forecast_obj.upper_bound,
+                'confidence': forecast_obj.confidence,
+                'expected_surplus': forecast_obj.expected_surplus,
+                'risk': forecast_obj.waste_risk,
+                'model_name': forecast_obj.model_name
+            }
+            messages.success(request, 'AI forecast saved successfully.')
             messages.success(request, 'AI forecast saved successfully.')
         except (ValueError, TypeError) as exc:
             error = str(exc)
@@ -209,7 +168,7 @@ def predict_demand(request):
         ingredients = Ingredient.objects.filter(is_active=True)
         for ingredient in ingredients:
             produce_requirements.append({'name': ingredient.name, 'unit': ingredient.unit, 'required': round(result['prediction'] * ingredient.quantity_per_meal, 2), 'recommended': round(result['recommended'] * ingredient.quantity_per_meal, 2), 'buffer': round((result['recommended'] - result['prediction']) * ingredient.quantity_per_meal, 2)})
-    return render(request, 'predict.html', {'result': result, 'weather': weather, 'error': error, 'model_name': MODEL_NAME, 'default_attendance': default_attendance, 'produce_requirements': produce_requirements, 'model_metrics': model_metrics})
+    return render(request, 'predict.html', {'result': result, 'weather': weather, 'error': error, 'model_name': "AgroFedly AI 2.0", 'default_attendance': default_attendance, 'produce_requirements': produce_requirements, 'model_metrics': model_metrics})
 
 @login_required
 def forecast_7_days(request):
@@ -221,23 +180,37 @@ def forecast_7_days(request):
             if attendance <= 0:
                 raise ValueError('Attendance must be greater than zero.')
             scenario_forecasts = []
+            org = request.user.organization_memberships.first().organization if request.user.organization_memberships.exists() else None
+            pipeline = DemandForecastingPipeline(org)
             for offset in range(7):
                 target = date.today() + timedelta(days=offset)
                 
-                # Base Model (Current AI Suggestion based on historical averages)
-                base_item = _predict(int(round(attendance * (0.82 if target.weekday() >= 5 else 1))), 25, 0, int(target.weekday() >= 5), target)
-                base_item['date'] = target
+                # Base Model
+                base_forecast = pipeline.predict_demand(
+                    attendance=int(round(attendance * (0.82 if target.weekday() >= 5 else 1))),
+                    holiday=int(target.weekday() >= 5),
+                    target_date=target
+                )
+                base_item = {
+                    'date': target, 'prediction': base_forecast.predicted_demand, 'recommended': base_forecast.recommended_preparation, 'risk': base_forecast.waste_risk
+                }
                 
-                # Custom Scenario (User provided overrides)
-                scenario_item = _predict(int(round(attendance * (0.82 if target.weekday() >= 5 else 1))), 25, 0, holiday if offset == 0 else int(target.weekday() >= 5), target)
-                scenario_item['date'] = target
+                # Custom Scenario
+                scenario_forecast = pipeline.predict_demand(
+                    attendance=int(round(attendance * (0.82 if target.weekday() >= 5 else 1))),
+                    holiday=holiday if offset == 0 else int(target.weekday() >= 5),
+                    target_date=target
+                )
+                scenario_item = {
+                    'date': target, 'prediction': scenario_forecast.predicted_demand, 'recommended': scenario_forecast.recommended_preparation, 'risk': scenario_forecast.waste_risk
+                }
                 
                 forecasts.append(base_item)
                 scenario_forecasts.append(scenario_item)
                 
         except (ValueError, TypeError) as exc:
             messages.error(request, str(exc))
-    return render(request, 'forecast.html', {'forecasts': forecasts, 'scenario_forecasts': scenario_forecasts if request.method == 'POST' else None, 'model_name': MODEL_NAME})
+    return render(request, 'forecast.html', {'forecasts': forecasts, 'scenario_forecasts': scenario_forecasts if request.method == 'POST' else None, 'model_name': "AgroFedly AI 2.0"})
 
 @login_required
 def weather_data(request):
@@ -363,7 +336,7 @@ def api_global_search(request):
         return JsonResponse({'results': []})
         
     results = []
-    org_member = request.user.organizations.first()
+    org_member = request.user.organization_memberships.filter(is_active=True).first()
     org = org_member.organization if org_member else None
     
     q_lower = q.lower()
@@ -459,20 +432,23 @@ def api_ai_scenario(request):
         rainfall = float(data.get('rainfall', 0.0))
         production = int(data.get('production', 0))
         
-        # Calculate base using the _predict function
-        result = _predict(attendance, temperature, rainfall)
+        org = request.user.organization_memberships.first().organization if request.user.organization_memberships.exists() else None
+        pipeline = DemandForecastingPipeline(org)
+        
+        # Calculate base using pipeline
+        forecast_obj = pipeline.predict_demand(attendance=attendance, temperature=temperature, rainfall=rainfall)
         
         # Overlay user custom production vs AI recommended
-        simulated_surplus = max(0, production - result['prediction'])
+        simulated_surplus = max(0, production - forecast_obj.predicted_demand)
         ratio = simulated_surplus / max(production, 1)
         risk = 'HIGH' if ratio >= 0.12 or simulated_surplus >= 80 else 'MEDIUM' if ratio >= 0.05 or simulated_surplus >= 30 else 'LOW'
         
         return JsonResponse({
             'success': True,
-            'prediction': result['prediction'],
+            'prediction': forecast_obj.predicted_demand,
             'simulated_surplus': simulated_surplus,
             'risk': risk,
-            'confidence': result['confidence']
+            'confidence': forecast_obj.confidence
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)

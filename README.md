@@ -10,6 +10,8 @@ We provide a real-time operational digital twin of the agriculture and food supp
 - **Predictive AI Demand Forecasting**: Advanced machine-learning integration to accurately forecast food demand and yield, dynamically adapting to local climate and consumption patterns.
 - **Intelligent Operations Center**: A real-time digital twin generating actionable AI-driven operational insights, alerts, and orchestration directives.
 - **Food Safety & Compliance**: End-to-end traceability of produce batches, including IoT temperature telemetry integrations and automated safety audits.
+
+Please see [DEPLOYMENT.md](DEPLOYMENT.md) for full deployment instructions and [PRODUCTION_READINESS.md](PRODUCTION_READINESS.md) for a checklist of production requirements, architecture, and operational procedures.
 - **Logistics & Fleet Management**: Complete routing, transit tracking, status workflows, and visual delivery dashboards.
 - **Automated Subsidy Matching**: Deterministic capability matching against agricultural schemes for certified farmers.
 

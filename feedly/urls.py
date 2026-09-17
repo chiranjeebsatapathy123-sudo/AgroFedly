@@ -20,7 +20,9 @@ urlpatterns = [
     path("terms/", views.terms, name="terms"),
     path("contact/", views.contact, name="contact"),
 
-    path("health/", views.health_check, name="health"),
+    path("health/", views.health_liveness, name="health"),
+    path("readiness/", views.health_readiness, name="readiness"),
+    path("liveness/", views.health_liveness, name="liveness"),
     path("login/", views.login_view, name="login"),
     path("login/buyer/", views.login_view, kwargs={"persona": "buyer"}, name="login_buyer"),
     path("login/supplier/", views.login_view, kwargs={"persona": "supplier"}, name="login_supplier"),

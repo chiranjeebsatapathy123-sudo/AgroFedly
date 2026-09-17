@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
 <link rel="stylesheet" href="{% static 'css/motion.css' %}">
 <link rel="stylesheet" href="{% static 'css/copilot.css' %}">
-<link rel="stylesheet" href="{% static 'css/premium.css' %}">
+
 
 <script type="importmap">
   {
@@ -48,203 +48,143 @@
   }
 </script>
 </head>
-<body>
-<header class="topbar">
-  
-      <a class="brand" href="{% url 'index' %}">
-        <span class="brand-mark">A</span><span>AgroFedly</span>
-      </a>
-
-  {% if user.is_authenticated %}
-  <nav class="top-nav">
-    <div class="nav-item">
-      <a href="{% url 'dashboard' %}" class="nav-link">Operations</a>
-      <div class="nav-dropdown">
-        <a href="{% url 'surplus_list' %}"><i class="fas fa-box"></i> Surplus Food</a>
-        <a href="{% url 'delivery_list' %}"><i class="fas fa-truck"></i> Deliveries</a>
-        <a href="{% url 'recipient_list' %}"><i class="fas fa-users"></i> Recipients</a>
-        <a href="{% url 'intelligence_center' %}"><i class="fas fa-brain"></i> Intelligence</a>
-        <a href="{% url 'predict_demand' %}"><i class="fas fa-chart-line"></i> AI Prediction</a>
-        <a href="{% url 'forecast_7_days' %}"><i class="fas fa-calendar-alt"></i> 7-Day Forecast</a>
-        <a href="{% url 'agri_market_trends' %}"><i class="fas fa-chart-bar"></i> Market Trends</a>
-      </div>
-    </div>
-    <div class="nav-item">
-      <a href="{% url 'agri_dashboard' %}" class="nav-link">Agriculture</a>
-      <div class="nav-dropdown">
-        <a href="{% url 'agri_produce_list' %}"><i class="fas fa-seedling"></i> Produce Inventory</a>
-        <a href="{% url 'agri_processing_list' %}"><i class="fas fa-cogs"></i> Produce Processing</a>
-        <a href="{% url 'agri_iot_dashboard' %}"><i class="fas fa-satellite-dish"></i> IoT Sensor</a>
-        <a href="{% url 'agri_disease_scanner' %}"><i class="fas fa-microscope"></i> AI Disease</a>
-        <a href="{% url 'agri_yield_predictor' %}"><i class="fas fa-chart-pie"></i> Yield Predict</a>
-        <a href="{% url 'agri_soil' %}"><i class="fas fa-flask"></i> Soil</a>
-      </div>
-    </div>
-    <div class="nav-item">
-      <a href="{% url 'ecosystem_coordination' %}" class="nav-link">Ecosystem</a>
-      <div class="nav-dropdown">
-        <a href="{% url 'ecosystem_coordination' %}"><i class="fas fa-network-wired"></i> Network</a>
-        <a href="{% url 'volunteer_dashboard' %}"><i class="fas fa-hands-helping"></i> Volunteer</a>
-        <a href="{% url 'agri_supply_matching' %}"><i class="fas fa-handshake"></i> Supply Matching</a>
-        <a href="{% url 'agri_supply_requests_list' %}"><i class="fas fa-inbox"></i> Requests</a>
-        <a href="{% url 'agri_skyview' %}"><i class="fas fa-satellite"></i> Skyview</a>
-      </div>
-    </div>
-    {% if user.organization_memberships.all %}
-    <div class="nav-item">
-      <a href="{% url 'organization_dashboard' %}" class="nav-link">Organization</a>
-      <div class="nav-dropdown">
-        <a href="{% url 'organization_dashboard' %}"><i class="fas fa-columns"></i> Dashboard</a>
-        <a href="{% url 'impact_dashboard' %}"><i class="fas fa-star"></i> Impact</a>
-        <a href="{% url 'leaderboard' %}"><i class="fas fa-trophy"></i> Leaderboard</a>
-        <a href="{% url 'org_fleet_routing' %}"><i class="fas fa-route"></i> Fleet Routing</a>
-      </div>
-    </div>
-    {% endif %}
-  </nav>
-  {% endif %}
-  <div class="top-actions">
-    <div style="position: relative; display: inline-block; margin-right:10px;">
-      <select id="themeSelector" style="padding: 4px; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-primary); cursor:pointer;">
-        <option value="light">☀️ Light</option>
-        <option value="dark">🌙 Dark</option>
-        <option value="system">💻 System</option>
-      </select>
-    </div>
-    <button onclick="document.body.classList.toggle('focus-mode')" title="Toggle Focus Mode" style="margin-right:10px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-primary); cursor:pointer;">🎯</button>
-    <form action="{% url 'set_language' %}" method="post" style="display:inline-block; margin-right:10px;">
-      {% csrf_token %}
-      <input name="next" type="hidden" value="{{ request.path }}">
-      <select name="language" onchange="this.form.submit()" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc; background: rgba(255,255,255,0.8); color: var(--ink);">
-        {% get_current_language as LANGUAGE_CODE %}
-        {% get_available_languages as LANGUAGES %}
-        {% get_language_info_list for LANGUAGES as languages %}
-        {% for language in languages %}
-          <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
-            {{ language.name_local }}
-          </option>
-        {% endfor %}
-      </select>
-    </form>
-    {% if user.is_authenticated %}
-      <!-- Organization Switcher -->
-      {% if active_org %}
-      <div style="position: relative; display: inline-block; margin-right: 15px;">
-        <button id="orgSwitcherBtn" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; padding: 6px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary);" onclick="document.getElementById('orgDropdown').classList.toggle('show')">
-          <i class="fas fa-building text-emerald-500"></i>
-          <span class="font-medium text-sm">{{ active_org.name }}</span>
-          <i class="fas fa-chevron-down text-xs text-gray-500"></i>
-        </button>
-        <div id="orgDropdown" class="notif-dropdown" style="display: none; position: absolute; right: 0; top: 100%; width: 280px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; margin-top: 5px;">
-          <div style="padding: 12px; border-bottom: 1px solid var(--border); font-weight: bold; font-size: 0.85em; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Your Workspaces</div>
-          <div style="max-height: 300px; overflow-y: auto;">
-            {% for membership in available_memberships %}
-              <a href="{% url 'organization_switch' membership.organization.id %}?next={{ request.path }}" style="display: flex; align-items: center; padding: 12px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--text); transition: background 0.2s;">
-                <div style="width: 32px; height: 32px; border-radius: 6px; background: {% if membership.organization.id == active_org.id %}rgba(16, 185, 129, 0.2){% else %}rgba(255,255,255,0.05){% endif %}; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                  <i class="fas fa-check {% if membership.organization.id == active_org.id %}text-emerald-500{% else %}opacity-0{% endif %}"></i>
-                </div>
-                <div style="flex: 1;">
-                  <div style="font-weight: 500; font-size: 0.95em;">{{ membership.organization.name }}</div>
-                  <div style="font-size: 0.75em; color: var(--text-secondary);">{{ membership.get_role_display }}</div>
-                </div>
-              </a>
-            {% endfor %}
-          </div>
-          <div style="padding: 8px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px;">
-            <a href="{% url 'organization_onboarding' %}" style="padding: 8px; font-size: 0.85em; text-align: center; color: var(--text-secondary); text-decoration: none; border-radius: 6px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><i class="fas fa-plus mr-2"></i> Create New Organization</a>
-            <a href="{% url 'organization_dashboard' %}" style="padding: 8px; font-size: 0.85em; text-align: center; color: var(--text-secondary); text-decoration: none; border-radius: 6px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><i class="fas fa-cog mr-2"></i> Manage Organizations</a>
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <div style="position: relative; display: inline-block; margin-right: 10px;">
-          <button id="notifBtn" style="background: transparent; border: none; font-size: 20px; cursor: pointer; position: relative; padding: 4px;" onclick="document.getElementById('notifDropdown').classList.toggle('show')">
-              🔔
-              <span style="position: absolute; top: 0; right: 0; background: var(--danger); color: white; border-radius: 50%; font-size: 10px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-weight: bold;">3</span>
-          </button>
-          <div id="notifDropdown" class="notif-dropdown" style="display: none; position: absolute; right: 0; top: 100%; width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100;">
-              <div style="padding: 12px; border-bottom: 1px solid var(--border); font-weight: bold; font-size: 0.9em; color: var(--primary);">AI Agent Alerts</div>
-              <div style="max-height: 300px; overflow-y: auto;">
-                  <a href="/intelligence/" style="display: block; padding: 12px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--text);">
-                      <div style="font-size: 0.85em; font-weight: bold; margin-bottom: 4px;">Surplus Agent</div>
-                      <div style="font-size: 0.8em; color: var(--text-muted);">High surplus risk predicted for tomorrow. Click to review.</div>
-                  </a>
-                  <a href="/dashboard/" style="display: block; padding: 12px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--text);">
-                      <div style="font-size: 0.85em; font-weight: bold; margin-bottom: 4px;">Logistics Agent</div>
-                      <div style="font-size: 0.8em; color: var(--text-muted);">2 deliveries require driver assignment immediately.</div>
-                  </a>
-                  <a href="/agriculture/iot/" style="display: block; padding: 12px; text-decoration: none; color: var(--text);">
-                      <div style="font-size: 0.85em; font-weight: bold; margin-bottom: 4px;">Storage Agent</div>
-                      <div style="font-size: 0.8em; color: var(--text-muted);">Temperature anomaly detected in Cold Room B.</div>
-                  </a>
-              </div>
-          </div>
-      </div>
-      <script>
-          document.addEventListener('click', function(event) {
-              var btn = document.getElementById('notifBtn');
-              var dropdown = document.getElementById('notifDropdown');
-              if (btn && dropdown && !btn.contains(event.target) && !dropdown.contains(event.target)) {
-                  dropdown.classList.remove('show');
-                  dropdown.style.display = 'none';
-              } else if (btn && btn.contains(event.target)) {
-                  dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-              }
-          });
-      </script>
-      <span class="user-chip">● {{ user.username }}</span>
-      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="logout-mini">{% trans "Logout" %}</button></form>
-    {% else %}
-      <a class="login-mini" href="{% url 'login' %}">{% trans "Login" %}</a>
-    {% endif %}
-  </div>
-</header>
-
-
-
-
-
-{% if messages %}
-<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>
-{% endif %}
-
-<!-- Global 3D Engine Canvas -->
-<canvas id="agrofedly-3d-canvas"></canvas>
-
-
-
-<main>{% block content %}{% endblock %}</main>
-
-<!-- AI Copilot Widget -->
+<body class="redesign-layout {% if user.is_authenticated %}has-sidebar{% endif %}">
 {% if user.is_authenticated %}
-<div id="copilot-widget" class="copilot-widget collapsed">
-  <div class="copilot-header">
-    <span>AgroFedly AI</span>
-    <button id="copilot-toggle-btn" class="copilot-btn-icon">💬</button>
-  </div>
-  <div class="copilot-body">
-    <div id="copilot-messages" class="copilot-messages">
-      <div class="copilot-msg ai-msg">Hi! I'm your AgroFedly AI assistant. How can I help you today?</div>
-    </div>
-    <div class="copilot-input-area">
-      <input type="text" id="copilot-input" placeholder="{% trans 'Ask about yields, weather, etc...' %}">
-      <button id="copilot-voice-btn" class="copilot-btn-icon" title="Hold to speak">🎙️</button>
-      <button id="copilot-send-btn" class="copilot-btn-icon">➤</button>
-    </div>
-  </div>
-</div>
-
-<!-- Universal Quick Action Button -->
-<div id="universal-quick-action" style="position: fixed; bottom: 30px; right: 30px; z-index: 999; display: flex; flex-direction: column; align-items: flex-end;">
-    <div id="quick-action-menu" style="display: none; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 10px; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); flex-direction: column; gap: 10px; align-items: flex-end;">
-        <a href="{% url 'add_surplus' %}" class="btn outline" style="border-radius: 20px; padding: 8px 16px; white-space: nowrap;">+ Log Surplus</a>
-        <a href="{% url 'delivery_create' %}" class="btn outline" style="border-radius: 20px; padding: 8px 16px; white-space: nowrap;">+ New Delivery</a>
-        <a href="{% url 'agri_produce_add' %}" class="btn outline" style="border-radius: 20px; padding: 8px 16px; white-space: nowrap;">+ Add Produce</a>
-    </div>
-    <button onclick="const menu = document.getElementById('quick-action-menu'); menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';" class="btn primary" style="border-radius: 50%; width: 56px; height: 56px; font-size: 28px; box-shadow: 0 10px 25px rgba(16,185,129,0.4); display: flex; justify-content: center; align-items: center; padding: 0; line-height: 1; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="Quick Actions">+</button>
-</div>
+  <!-- Sidebar -->
+  <aside class="rd-sidebar">
+     <a class="rd-brand" href="{% url 'index' %}">
+        <div class="rd-brand-icon">A</div>
+        AgroFedly
+     </a>
+     
+     <nav class="rd-nav">
+        <a href="{% url 'dashboard' %}" class="rd-nav-item active"><i class="fas fa-home"></i> Dashboard</a>
+        
+        <div class="rd-nav-group">Agriculture</div>
+        <a href="{% url 'agri_produce_list' %}" class="rd-nav-item"><i class="fas fa-seedling"></i> Agriculture <i class="fas fa-chevron-down" style="margin-left:auto;font-size:10px;"></i></a>
+        <div class="rd-sub-nav">
+           <a href="{% url 'agri_dashboard' %}">Farms</a>
+           <a href="{% url 'agri_produce_list' %}">Produce</a>
+           <a href="{% url 'forecast_7_days' %}">Demand Forecast</a>
+           <a href="{% url 'agri_processing_list' %}">Production</a>
+           <a href="{% url 'agri_iot_dashboard' %}">Processing & Storage</a>
+           <a href="{% url 'weather_data' %}">Weather</a>
+           <a href="{% url 'agri_disease_scanner' %}">Quality</a>
+        </div>
+        
+        <div class="rd-nav-group">Operations</div>
+        <a href="{% url 'surplus_list' %}" class="rd-nav-item"><i class="fas fa-box"></i> Surplus</a>
+        <a href="{% url 'ecosystem_coordination' %}" class="rd-nav-item"><i class="fas fa-network-wired"></i> Redistribution</a>
+        <a href="{% url 'recipient_list' %}" class="rd-nav-item"><i class="fas fa-users"></i> Recipients</a>
+        <a href="{% url 'delivery_list' %}" class="rd-nav-item"><i class="fas fa-truck"></i> Delivery</a>
+        
+        <div class="rd-nav-group">Intelligence</div>
+        <a href="{% url 'impact_dashboard' %}" class="rd-nav-item"><i class="fas fa-chart-pie"></i> Analytics</a>
+        <a href="{% url 'delivery_list' %}" class="rd-nav-item"><i class="fas fa-map-marker-alt"></i> Traceability</a>
+        <a href="{% url 'intelligence_center' %}" class="rd-nav-item"><i class="fas fa-brain"></i> AI Insights</a>
+        
+        <div class="rd-nav-group">System</div>
+        <a href="{% url 'organization_dashboard' %}" class="rd-nav-item"><i class="fas fa-cog"></i> Settings</a>
+     </nav>
+  </aside>
 {% endif %}
+
+  <!-- Main Area -->
+  <div class="rd-main">
+     <!-- Topbar -->
+     <header class="rd-topbar">
+        {% if user.is_authenticated %}
+        <div class="rd-search">
+           <i class="fas fa-search" style="color:#a0b0a6"></i>
+           <input type="text" placeholder="Search farms, produce, recipients, deliveries...">
+        </div>
+        {% else %}
+        <a class="rd-brand" href="{% url 'index' %}" style="padding:0;">
+          <div class="rd-brand-icon">A</div> AgroFedly
+        </a>
+        {% endif %}
+        
+        <div class="rd-top-actions">
+           {% if user.is_authenticated %}
+           <button class="rd-icon-btn"><i class="far fa-bell"></i></button>
+           <button class="rd-icon-btn" onclick="document.body.classList.toggle('dark-theme')"><i class="far fa-sun"></i></button>
+           
+           {% if active_org %}
+           <div class="rd-org-pill">
+              <i class="far fa-building"></i> {{ active_org.name }} <i class="fas fa-chevron-down" style="font-size:10px;"></i>
+           </div>
+           {% endif %}
+           
+           <div class="rd-user-pill">
+              <div class="rd-user-avatar"><i class="fas fa-user"></i></div>
+              {{ user.username }} <i class="fas fa-chevron-down" style="font-size:10px;"></i>
+           </div>
+           
+           <button class="rd-fab"><i class="fas fa-plus"></i></button>
+           {% else %}
+           <a href="{% url 'login' %}" style="font-weight:bold;color:var(--rd-primary);text-decoration:none;">Login</a>
+           {% endif %}
+        </div>
+     </header>
+
+     {% if messages %}
+     <div class="messages" style="padding: 24px 32px 0;">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>
+     {% endif %}
+     
+     <!-- Content -->
+     <main class="rd-content">
+        {% block content %}{% endblock %}
+     </main>
+  </div>
+
+  <!-- Copilot -->
+  {% if user.is_authenticated %}
+  <aside class="rd-copilot" id="copilot-widget">
+      <div class="rd-copilot-header">
+         <div>
+            <div class="rd-copilot-title">
+               <div class="rd-copilot-icon"><i class="fas fa-robot"></i></div>
+               AgroFedly Copilot
+            </div>
+            <div class="rd-copilot-subtitle">Your AI assistant for smarter agriculture decisions.</div>
+         </div>
+         <button class="rd-icon-btn" id="copilot-toggle-btn"><i class="fas fa-times"></i></button>
+      </div>
+      
+      <div class="rd-copilot-body" id="copilot-messages">
+         <div class="rd-copilot-action">
+            <div><i class="fas fa-box" style="color:#a0b0a6; margin-right:8px;"></i> Show today's surplus</div>
+            <i class="fas fa-chevron-right" style="color:#a0b0a6; font-size:10px;"></i>
+         </div>
+         <div class="rd-copilot-action">
+            <div><i class="fas fa-chart-line" style="color:#a0b0a6; margin-right:8px;"></i> Open demand forecast</div>
+            <i class="fas fa-chevron-right" style="color:#a0b0a6; font-size:10px;"></i>
+         </div>
+         <div class="rd-copilot-action">
+            <div><i class="fas fa-truck" style="color:#a0b0a6; margin-right:8px;"></i> Show delayed deliveries</div>
+            <i class="fas fa-chevron-right" style="color:#a0b0a6; font-size:10px;"></i>
+         </div>
+         <div class="rd-copilot-action">
+            <div><i class="fas fa-map-marker-alt" style="color:#a0b0a6; margin-right:8px;"></i> Find farms near me</div>
+            <i class="fas fa-chevron-right" style="color:#a0b0a6; font-size:10px;"></i>
+         </div>
+         <div class="rd-copilot-action">
+            <div><i class="fas fa-chart-pie" style="color:#a0b0a6; margin-right:8px;"></i> Show analytics</div>
+            <i class="fas fa-chevron-right" style="color:#a0b0a6; font-size:10px;"></i>
+         </div>
+      </div>
+      
+      <div class="rd-copilot-input">
+         <div class="rd-input-box">
+            <button id="copilot-voice-btn" style="background:transparent;border:none;color:#a0b0a6;cursor:pointer;"><i class="fas fa-microphone"></i></button>
+            <input type="text" id="copilot-input" placeholder="Ask me anything about AgroFedly...">
+            <div style="font-size:10px; color:#a0b0a6;">0/500</div>
+            <button class="rd-send-btn" id="copilot-send-btn"><i class="fas fa-paper-plane" style="font-size:12px;"></i></button>
+         </div>
+      </div>
+  </aside>
+  {% endif %}
+
 
 <footer>AgroFedly · AI-assisted food planning · Safety · Redistribution · Delivery</footer>
 <script src="{% static 'js/ui_core.js' %}?v=1.0"></script>

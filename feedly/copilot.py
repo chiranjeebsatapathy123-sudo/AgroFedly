@@ -19,7 +19,9 @@ def get_active_deliveries(organization_id: int):
                 "food": d.food_name,
                 "quantity": d.quantity,
                 "status": d.status,
-                "driver": d.driver_name or "Unassigned"
+                "driver": d.driver_name or "Unassigned",
+                "receiver": d.receiver.name if d.receiver else "Unknown",
+                "url": f"/deliveries/{d.id}/"
             })
         return json.dumps(data)
     except Exception as e:

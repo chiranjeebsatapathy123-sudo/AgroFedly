@@ -7,7 +7,7 @@
     <strong style="font-size:1.1em;">✦ Model: {{ model_name }}</strong>
     {% if result %}
         {% if result.fallback %}
-        <span style="color:var(--danger); font-size:0.9em; font-weight:bold;">⚠️ DEMO / SIMULATION ({{ result.status }})</span>
+        <span style="color:var(--warning); font-size:0.9em; font-weight:bold;">⚠️ Fallback Mode ({{ result.status }})</span>
         {% else %}
         <span style="color:var(--success); font-size:0.9em;">✓ Status: {{ result.status }}</span>
         {% endif %}

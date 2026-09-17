@@ -250,7 +250,7 @@ def data_quality_center(request):
     unknown_quality = AgriculturalProduce.objects.filter(supplier=org, quality_grade='').count()
     
     # 3. Recipients Missing Capacity
-    missing_capacity = Recipient.objects.filter(capacity=0).count()
+    missing_capacity = Recipient.objects.filter(organization=org, capacity=0).count()
     
     # 4. Old Deliveries still marked IN_TRANSIT
     from django.utils import timezone

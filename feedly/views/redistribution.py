@@ -96,7 +96,7 @@ def redistribute_food(request, food_id):
                     
                     messages.success(request, 'Surplus redistributed and delivery requested.')
                     return redirect('surplus_list')
-            return render(request, 'redistribute.html', {'form': form, 'food': food, 'verified_recipient_count': Recipient.objects.filter(verified=True, capacity__gt=0).count()})
+            return render(request, 'redistribute.html', {'form': form, 'food': food, 'verified_recipient_count': Recipient.objects.filter(organization=request.organization, verified=True, capacity__gt=0).count()})
     else:
         food = get_object_or_404(SurplusFood, id=food_id)
         if food.organization not in {request.organization, None}:
@@ -106,7 +106,7 @@ def redistribute_food(request, food_id):
             messages.error(request, 'Only SAFE surplus can be redistributed.')
             return redirect('surplus_list')
         form = RedistributionForm()
-        return render(request, 'redistribute.html', {'form': form, 'food': food, 'verified_recipient_count': Recipient.objects.filter(verified=True, capacity__gt=0).count()})
+        return render(request, 'redistribute.html', {'form': form, 'food': food, 'verified_recipient_count': Recipient.objects.filter(organization=request.organization, verified=True, capacity__gt=0).count()})
 
 @login_required
 def recipient_list(request):
@@ -133,7 +133,7 @@ def add_recipient(request):
                 raise ValueError('Distance cannot be negative.')
             if not 0 <= urgency <= 100:
                 raise ValueError('Urgency must be between 0 and 100.')
-            recipient = Recipient.objects.create(name=name, recipient_type=recipient_type, capacity=capacity, distance_km=distance, urgency_score=urgency, verified=verify_now)
+            recipient = Recipient.objects.create(organization=request.organization, name=name, recipient_type=recipient_type, capacity=capacity, distance_km=distance, urgency_score=urgency, verified=verify_now)
             if verify_now:
                 messages.success(request, f'{recipient.name} was added and verified. It is now available in the redistribution dropdown.')
             else:
@@ -148,7 +148,7 @@ def verify_recipient(request, recipient_id):
     if request.method != 'POST':
         messages.info(request, 'Use the Verify button to verify a recipient.')
         return redirect('recipient_list')
-    recipient = get_object_or_404(Recipient, id=recipient_id)
+    recipient = get_object_or_404(Recipient, id=recipient_id, organization=request.organization)
     recipient.verified = True
     recipient.save(update_fields=['verified'])
     messages.success(request, f'{recipient.name} is now verified and available for redistribution.')
@@ -160,7 +160,7 @@ def recipient_recommendations(request, food_id):
     if food.status != 'SAFE':
         return JsonResponse({'error': 'Only SAFE food can be recommended.'}, status=400)
     ranked = []
-    for recipient in Recipient.objects.filter(verified=True, capacity__gt=0):
+    for recipient in Recipient.objects.filter(organization=request.organization, verified=True, capacity__gt=0):
         fit = min(food.quantity, recipient.capacity) / max(food.quantity, 1)
         distance = 1 / (1 + max(recipient.distance_km, 0))
         urgency = min(max(recipient.urgency_score, 0), 100) / 100

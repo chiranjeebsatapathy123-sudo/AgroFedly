@@ -246,6 +246,25 @@ class Delivery(models.Model):
     def save(self, *args, **kwargs):
         if not self.tracking_code:
             self.tracking_code = f"ANN-{uuid.uuid4().hex[:8].upper()}"
+            
+        if self.pk:
+            # Enforce state machine rules for existing records
+            old_instance = Delivery.objects.get(pk=self.pk)
+            old_status = old_instance.status
+            new_status = self.status
+            
+            valid_transitions = {
+                'REQUESTED': ['ASSIGNED', 'CANCELLED'],
+                'ASSIGNED': ['PICKED_UP', 'CANCELLED'],
+                'PICKED_UP': ['IN_TRANSIT', 'CANCELLED'],
+                'IN_TRANSIT': ['DELIVERED', 'CANCELLED'],
+                'DELIVERED': [],
+                'CANCELLED': []
+            }
+            
+            if old_status != new_status and new_status not in valid_transitions.get(old_status, []):
+                raise ValueError(f"Illegal transition from {old_status} to {new_status}.")
+                
         super().save(*args, **kwargs)
 
     def __str__(self):

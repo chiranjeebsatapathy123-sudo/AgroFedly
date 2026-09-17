@@ -220,7 +220,7 @@ def delivery_proof(request, delivery_id):
 def generate_donation_receipt(request, delivery_id):
     delivery = get_object_or_404(Delivery, id=delivery_id)
     if not request.user.is_superuser:
-        if delivery.sender not in request.user.organizations.values_list('organization', flat=True):
+        if delivery.sender not in request.user.organization_memberships.values_list('organization', flat=True):
             messages.error(request, 'You do not have permission to view this receipt.')
             return redirect('delivery_list')
     if delivery.status != 'DELIVERED':

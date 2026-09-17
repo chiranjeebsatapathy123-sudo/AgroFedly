@@ -2,6 +2,7 @@ import logging
 from datetime import date
 from django.utils import timezone
 from feedly.models import AIRecommendation, SurplusFood, Delivery, StorageRecord, IoTTemperatureReading, DemandForecast, MealRecord
+from feedly.services.data_quality import DataQualityEngine
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,17 @@ class AIOrchestrator:
                 "message": f"{critical_temps.count()} temperature anomalies detected today.",
                 "action_url": "/intelligence/",
                 "action_text": "Investigate"
+            })
+            
+        # Data Quality Issues
+        dq_engine = DataQualityEngine(self.organization)
+        dq_result = dq_engine.run_audit()
+        if dq_result['issue_count'] > 0:
+            signals.append({
+                "type": "CRITICAL" if dq_result['status'] == 'critical' else "WARNING",
+                "message": f"Detected {dq_result['issue_count']} data quality anomalies.",
+                "action_url": "/intelligence/",
+                "action_text": "Review Data"
             })
             
         storage_alerts = StorageRecord.objects.filter(organization=self.organization, status__in=['ATTENTION', 'CRITICAL'])
@@ -111,6 +123,17 @@ class AIOrchestrator:
                 "severity": "HIGH",
                 "action_url": f"/surplus/",
                 "action_text": "Review Quality"
+            })
+            
+        dq_engine = DataQualityEngine(self.organization)
+        dq_result = dq_engine.run_audit()
+        for issue in dq_result['issues']:
+            attention_items.append({
+                "title": f"Data Quality: {issue['category']}",
+                "description": issue['message'],
+                "severity": issue['severity'],
+                "action_url": "/intelligence/",
+                "action_text": "Resolve"
             })
 
         # Storage capacity nearing limits or temp alerts

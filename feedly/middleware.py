@@ -10,6 +10,10 @@ class OrganizationMiddleware(MiddlewareMixin):
         request.organization = None
         request.org_membership = None
         
+        # Bypass DB for health checks
+        if request.path.startswith('/health/') or request.path.startswith('/liveness/') or request.path.startswith('/readiness/'):
+            return
+            
         if request.user.is_authenticated:
             # Check session for selected org, otherwise use first active membership
             org_id = request.session.get('active_organization_id')

@@ -2,22 +2,18 @@
 
 (function() {
     const initUI = () => {
-        const searchModal = document.getElementById("global-search-modal");
-        const searchInput = document.getElementById("global-search-input");
-        
-        const closeSearch = () => {
-            if(searchModal) searchModal.classList.remove("active");
-        };
+        const searchInput = document.querySelector(".rd-search input");
 
         document.addEventListener("keydown", e => {
             if (e.key === "Escape") {
-                closeSearch();
+                if(document.activeElement === searchInput) {
+                    searchInput.blur();
+                }
             }
             if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
                 e.preventDefault();
-                if(searchModal) {
-                    searchModal.classList.add("active");
-                    if(searchInput) setTimeout(() => searchInput.focus(), 100);
+                if(searchInput) {
+                    searchInput.focus();
                 }
             }
         });
@@ -35,3 +31,22 @@
         initUI();
     }
 })();
+
+// Dark Theme Persistence for Redesign
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('agro_theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+    }
+    
+    const themeBtn = document.querySelector('.rd-top-actions .fa-sun')?.parentElement;
+    if (themeBtn) {
+        // Remove the inline onclick attribute
+        themeBtn.removeAttribute('onclick');
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('agro_theme', isDark ? 'dark' : 'light');
+        });
+    }
+});
