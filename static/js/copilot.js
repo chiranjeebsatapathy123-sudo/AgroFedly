@@ -219,3 +219,18 @@ document.addEventListener("DOMContentLoaded", () => {
         return cookieValue;
     }
 });
+
+    // Fix: Add listener for the new sidebar Copilot button
+    setTimeout(() => {
+        const sidebarBtn = document.getElementById("copilot-sidebar-btn");
+        if (sidebarBtn) {
+            sidebarBtn.addEventListener("click", () => {
+                const widget = document.getElementById("copilot-widget");
+                if (widget) {
+                    widget.classList.remove("collapsed");
+                    const inputField = document.getElementById("copilot-input");
+                    if(inputField) inputField.focus();
+                }
+            });
+        }
+    }, 100);

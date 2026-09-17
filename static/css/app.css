@@ -1118,10 +1118,17 @@ body.redesign-layout.has-sidebar {
 /* Sub-nav */
 .rd-sub-nav {
   margin-left: 36px;
-  display: flex;
+  display: none; /* Hidden by default */
   flex-direction: column;
   gap: 4px;
   margin-top: 4px;
+}
+.rd-sub-nav.active {
+  display: flex; /* Shown when toggled */
+}
+/* Rotate chevron when active */
+.rd-nav-expand.active i.fa-chevron-down {
+  transform: rotate(180deg);
 }
 .rd-sub-nav a {
   padding: 8px;

@@ -61,7 +61,9 @@
         <a href="{% url 'dashboard' %}" class="rd-nav-item active"><i class="fas fa-home"></i> Dashboard</a>
         
         <div class="rd-nav-group">Agriculture</div>
-        <a href="{% url 'agri_produce_list' %}" class="rd-nav-item"><i class="fas fa-seedling"></i> Agriculture <i class="fas fa-chevron-down" style="margin-left:auto;font-size:10px;"></i></a>
+        <button type="button" class="rd-nav-item rd-nav-expand" onclick="this.classList.toggle('active'); this.nextElementSibling.classList.toggle('active')" style="width:100%; border:none; background:transparent; cursor:pointer; text-align:left;">
+            <i class="fas fa-seedling"></i> Agriculture Operations <i class="fas fa-chevron-down" style="margin-left:auto;font-size:10px; transition: transform 0.2s;"></i>
+        </button>
         <div class="rd-sub-nav">
            <a href="{% url 'agri_dashboard' %}">Farms</a>
            <a href="{% url 'agri_produce_list' %}">Produce</a>
@@ -85,6 +87,12 @@
         
         <div class="rd-nav-group">System</div>
         <a href="{% url 'organization_dashboard' %}" class="rd-nav-item"><i class="fas fa-cog"></i> Settings</a>
+        
+        <div style="margin-top:auto; padding:24px;">
+            <button id="copilot-sidebar-btn" type="button" class="rd-nav-item" style="width:100%; border:none; background:var(--rd-primary); color:white; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(18,122,74,0.3);">
+                <i class="fas fa-robot"></i> AI Copilot
+            </button>
+        </div>
      </nav>
   </aside>
 {% endif %}
