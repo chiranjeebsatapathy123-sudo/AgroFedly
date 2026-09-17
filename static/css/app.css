@@ -1,12 +1,13 @@
 :root {
+  --card-glass: rgba(255, 255, 255, 0.7);
   /* Color System - Light */
   --color-primary: #159653;
   --color-primary-hover: #117a43;
   --color-background: #f4f8f5;
   --color-surface: #ffffff;
   --color-surface-elevated: #ffffff;
-  --color-text-primary: #10251c;
-  --color-text-secondary: #6d7f75;
+  --color-text-primary: var(--rd-text-main);
+  --color-text-secondary: var(--rd-text-sub);
   --color-border: #dce6e0;
   
   --color-success: #159653;
@@ -76,8 +77,8 @@
   --color-background: #0a1410;
   --color-surface: #12241d;
   --color-surface-elevated: #162c23;
-  --color-text-primary: #f0f4f2;
-  --color-text-secondary: #9cb3a6;
+  --color-text-primary: var(--rd-text-main);
+  --color-text-secondary: var(--rd-text-sub);
   --color-border: #1f382c;
   
   --color-success: #1ba45e;
@@ -437,7 +438,7 @@ input:focus, select:focus, textarea:focus {
 
 /* Phase 10: Extreme Glassmorphism */
 .feature-card, .form-card, .stat-card, .delivery-card, .panel, .quick, .live-card {
-    background: var(--card-glass) !important;
+    background: var(--card-glass);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid var(--card-border) !important;
@@ -1030,6 +1031,7 @@ body.focus-mode .copilot-widget {
 }
 
 body.redesign-layout {
+    color: var(--rd-text-main) !important;
   background: var(--rd-bg);
   color: var(--rd-text-main);
   font-family: \'Inter\', system-ui, sans-serif;
@@ -1569,6 +1571,7 @@ body.redesign-layout.has-sidebar {
    REDESIGN DARK THEME OVERRIDES
    ======================================================== */
 body.dark-theme {
+  --card-glass: rgba(26, 32, 29, 0.7);
   --rd-bg: #121614;
   --rd-surface: #1a201d;
   --rd-border: #2a332e;
@@ -1698,4 +1701,30 @@ body.dark-theme {
 }
 :root {
     --rd-text-main: #1a231e;
+}
+
+
+/* Global Text Visibility Fix */
+body.redesign-layout h1, 
+body.redesign-layout h2, 
+body.redesign-layout h3, 
+body.redesign-layout h4, 
+body.redesign-layout h5, 
+body.redesign-layout h6 {
+    color: var(--rd-text-main);
+}
+body.redesign-layout p,
+body.redesign-layout label,
+body.redesign-layout span {
+    color: var(--rd-text-sub);
+}
+/* Ensure form cards and standard blocks inherit properly */
+.form-card, .feature-card, .stat-card, .panel, .rd-content {
+    color: var(--rd-text-main);
+}
+.form-card h1, .form-card h2, .form-card h3 {
+    color: var(--rd-text-main) !important;
+}
+.form-card p, .form-card small {
+    color: var(--rd-text-sub);
 }

@@ -5,7 +5,7 @@
 <section class="page-head"><div><div class="eyebrow">{% trans "PLANNING OUTLOOK" %}</div><h1>{% trans "7-Day demand forecast & Simulation" %}</h1><p>{% trans "Scenario planning for the coming week using AI simulations." %}</p></div></section>
 <div class="form-card compact" style="display: flex; gap: 20px; align-items: stretch; flex-wrap: wrap;">
     <div style="flex: 1; min-width: 300px;">
-        <h3 style="margin-top: 0; font-size: 1em; color: var(--text-muted); text-transform: uppercase;">Manual Override</h3>
+        <h3 style="margin-top: 0; font-size: 1em; color: var(--rd-text-sub); text-transform: uppercase;">Manual Override</h3>
         <form method="post" class="inline-form" id="forecast-form">
             {% csrf_token %}
             <input type="hidden" name="scenario" id="scenario-input" value="manual">
@@ -19,15 +19,15 @@
             <button class="btn primary" type="submit">{% trans "Generate Full Week" %}</button>
         </form>
     </div>
-    <div style="flex: 1; min-width: 300px; border-left: 1px solid var(--border); padding-left: 20px;">
-        <h3 style="margin-top: 0; font-size: 1em; color: var(--text-muted); text-transform: uppercase;">What-If Simulator 2.0 (Live Preview)</h3>
+    <div style="flex: 1; min-width: 300px; border-left: 1px solid var(--rd-border); padding-left: 20px;">
+        <h3 style="margin-top: 0; font-size: 1em; color: var(--rd-text-sub); text-transform: uppercase;">What-If Simulator 2.0 (Live Preview)</h3>
         <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
             <label style="width: 100%;">Planned Production (Units): <input type="number" id="sim_production" value="1000" style="width: 100px;"></label>
             <button class="btn outline" onclick="runSim(800)">Low Demand (800)</button>
             <button class="btn outline" onclick="runSim(1200)">Balanced (1200)</button>
             <button class="btn outline" onclick="runSim(1800)">High (1800)</button>
         </div>
-        <div id="sim-result" style="margin-top: 15px; padding: 10px; background: var(--surface); border: 1px dashed var(--primary); border-radius: 4px; display: none;">
+        <div id="sim-result" style="margin-top: 15px; padding: 10px; background: var(--rd-surface); border: 1px dashed var(--rd-primary); border-radius: 4px; display: none;">
             <h4 style="margin: 0 0 5px 0;">Simulation Result</h4>
             <p style="margin: 0; font-size: 0.9em;" id="sim-text"></p>
         </div>
@@ -61,9 +61,9 @@
 {% if forecasts %}
 <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
     <!-- Base Plan -->
-    <div style="flex: 1; min-width: 300px; background: var(--surface); padding: 20px; border-radius: 8px; border: 1px solid var(--border);">
-        <h3 style="margin-top:0; border-bottom: 2px solid var(--primary); padding-bottom: 10px;">{% trans "Base AI Forecast" %}</h3>
-        <p style="font-size: 0.85em; color: var(--text-muted);">Standard operations without overrides.</p>
+    <div style="flex: 1; min-width: 300px; background: var(--rd-surface); padding: 20px; border-radius: 8px; border: 1px solid var(--rd-border);">
+        <h3 style="margin-top:0; border-bottom: 2px solid var(--rd-primary); padding-bottom: 10px;">{% trans "Base AI Forecast" %}</h3>
+        <p style="font-size: 0.85em; color: var(--rd-text-sub);">Standard operations without overrides.</p>
         <div class="forecast-grid" style="grid-template-columns: 1fr; gap: 10px; margin-top: 15px;">
         {% for f in forecasts %}
             <article class="forecast-card" style="padding: 10px;">
@@ -77,12 +77,12 @@
     
     <!-- Scenario Plan -->
     {% if scenario_forecasts %}
-    <div style="flex: 1; min-width: 300px; background: var(--color-surface-elevated); padding: 20px; border-radius: 8px; border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-        <h3 style="margin-top:0; border-bottom: 2px solid var(--primary); padding-bottom: 10px; color: var(--primary);">{% trans "Custom Scenario Plan" %}</h3>
-        <p style="font-size: 0.85em; color: var(--text-muted);">Simulated demand with your overrides applied.</p>
+    <div style="flex: 1; min-width: 300px; background: var(--rd-surface); padding: 20px; border-radius: 8px; border: 2px solid var(--rd-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <h3 style="margin-top:0; border-bottom: 2px solid var(--rd-primary); padding-bottom: 10px; color: var(--rd-primary);">{% trans "Custom Scenario Plan" %}</h3>
+        <p style="font-size: 0.85em; color: var(--rd-text-sub);">Simulated demand with your overrides applied.</p>
         <div class="forecast-grid" style="grid-template-columns: 1fr; gap: 10px; margin-top: 15px;">
         {% for f in scenario_forecasts %}
-            <article class="forecast-card" style="padding: 10px; border-left: 4px solid var(--primary);">
+            <article class="forecast-card" style="padding: 10px; border-left: 4px solid var(--rd-primary);">
                 <span style="font-size: 0.9em;">{{ f.date|date:"D, d M" }}</span>
                 <b style="font-size: 1.2em;">{{ f.prediction }} meals</b>
                 <small>Prepare {{ f.recommended }} · Risk: {{ f.risk }}</small>
@@ -100,28 +100,28 @@
     </div>
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
         <!-- Surplus Prediction -->
-        <div style="flex: 1; background: rgba(var(--success-rgb), 0.05); padding: 20px; border-radius: 8px; border: 1px solid var(--success);">
-            <h3 style="margin-top: 0; color: var(--success);">📈 Expected Surplus</h3>
+        <div style="flex: 1; background: rgba(27, 164, 94, 0.05); padding: 20px; border-radius: 8px; border: 1px solid var(--rd-primary);">
+            <h3 style="margin-top: 0; color: var(--rd-primary);">📈 Expected Surplus</h3>
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 {% for f in scenario_forecasts|default:forecasts|slice:":3" %}
-                <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--surface); border-radius: 4px; border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--rd-surface); border-radius: 4px; border: 1px solid var(--rd-border);">
                     <span>{{ f.date|date:"l" }}</span>
                     <strong>{% if f.expected_surplus > 0 %}{{ f.expected_surplus }} units{% else %}None{% endif %}</strong>
-                    <span class="badge" style="background: {% if f.risk == 'HIGH' %}var(--danger){% elif f.risk == 'MEDIUM' %}var(--warning){% else %}var(--success){% endif %}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em;">{{ f.risk }} Risk</span>
+                    <span class="badge" style="background: {% if f.risk == 'HIGH' %}#d85058{% elif f.risk == 'MEDIUM' %}var(--warning){% else %}var(--rd-primary){% endif %}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em;">{{ f.risk }} Risk</span>
                 </div>
                 {% endfor %}
             </div>
         </div>
         
         <!-- Shortage Prediction -->
-        <div style="flex: 1; background: rgba(var(--danger-rgb), 0.05); padding: 20px; border-radius: 8px; border: 1px solid var(--danger);">
-            <h3 style="margin-top: 0; color: var(--danger);">📉 Potential Shortage</h3>
+        <div style="flex: 1; background: rgba(216, 80, 88, 0.05); padding: 20px; border-radius: 8px; border: 1px solid #d85058;">
+            <h3 style="margin-top: 0; color: #d85058;">📉 Potential Shortage</h3>
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 {% for f in scenario_forecasts|default:forecasts|slice:":3" %}
-                <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--surface); border-radius: 4px; border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--rd-surface); border-radius: 4px; border: 1px solid var(--rd-border);">
                     <span>{{ f.date|date:"l" }}</span>
                     <strong>{% if f.expected_surplus <= 0 and f.prediction > f.recommended %}Shortage Likely{% else %}Adequate Supply{% endif %}</strong>
-                    <span style="font-size: 0.8em; color: var(--text-muted);">Req: {{ f.prediction }} | Prep: {{ f.recommended }}</span>
+                    <span style="font-size: 0.8em; color: var(--rd-text-sub);">Req: {{ f.prediction }} | Prep: {{ f.recommended }}</span>
                 </div>
                 {% endfor %}
             </div>
