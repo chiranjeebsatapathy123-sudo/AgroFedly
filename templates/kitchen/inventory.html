@@ -11,9 +11,41 @@
         </div>
     </div>
     <div class="detail-actions" style="display: flex; gap: 12px; align-items: center;">
-        <button class="btn primary" onclick="alert('Feature coming soon')"><i class="fas fa-plus"></i> Add Item</button>
+        <button class="btn primary" onclick="addItem()"><i class="fas fa-plus"></i> Add Item</button>
     </div>
 </div>
+
+<form id="inventoryForm" method="POST" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="action" id="invAction">
+    <input type="hidden" name="ingredient_name" id="invName">
+    <input type="hidden" name="quantity" id="invQty">
+    <input type="hidden" name="unit" id="invUnit" value="kg">
+    <input type="hidden" name="item_id" id="invItemId">
+</form>
+
+<script>
+function addItem() {
+    let name = prompt("Enter ingredient name:");
+    if (!name) return;
+    let qty = prompt("Enter quantity (kg):");
+    if (!qty) return;
+    document.getElementById('invAction').value = 'add';
+    document.getElementById('invName').value = name;
+    document.getElementById('invQty').value = qty;
+    document.getElementById('inventoryForm').submit();
+}
+
+function updateItem(id, currentName, currentQty) {
+    let qty = prompt("Update quantity for " + currentName + ":", currentQty);
+    if (qty !== null) {
+        document.getElementById('invAction').value = 'update';
+        document.getElementById('invItemId').value = id;
+        document.getElementById('invQty').value = qty;
+        document.getElementById('inventoryForm').submit();
+    }
+}
+</script>
 
 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
     <div class="table-card">
@@ -46,7 +78,7 @@
                         <span style="font-size: 0.8rem; color: var(--color-text-secondary);">{{ item.unit }}</span>
                     </td>
                     <td>
-                        {{ item.expiry_date|date:"M d, Y" }}
+                        {{ item.expiry_date|date:"M d, Y"|default:"N/A" }}
                     </td>
                     <td>
                         {% if item.quantity < 10 %}
@@ -56,7 +88,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        <button class="btn small outline" onclick="alert('Edit inventory coming soon')">Update</button>
+                        <button class="btn small outline" onclick="updateItem('{{ item.id }}', '{{ item.ingredient }}', '{{ item.quantity }}')">Update</button>
                     </td>
                 </tr>
                 {% empty %}
@@ -89,7 +121,7 @@
                         </div>
                         <div style="font-size: 0.85rem; color: var(--color-text-secondary);">Suggested Reorder: <strong>50 {{ item.unit }}</strong></div>
                         <div style="margin-top: 4px;">
-                            <button class="btn small primary" onclick="alert('Procurement integration coming soon')">Create PO</button>
+                            <button class="btn small primary" onclick="updateItem('{{ item.id }}', '{{ item.ingredient }}', parseInt('{{ item.quantity }}') + 50)">Create PO (Add 50)</button>
                         </div>
                     </li>
                     {% endif %}

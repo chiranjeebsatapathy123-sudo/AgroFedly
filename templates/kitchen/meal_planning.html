@@ -70,7 +70,7 @@
                     {% endif %}
                 </td>
                 <td>
-                    <button class="btn small outline" onclick="alert('Feature coming soon')">Edit Plan</button>
+                    <button class="btn small outline" onclick="updatePlan('{{ meal.id }}', '{{ meal.date|date:"Y-m-d" }}', '{{ meal.meal_session }}', '{{ meal.expected_attendance }}')">Edit Plan</button>
                 </td>
             </tr>
             {% empty %}
@@ -84,4 +84,23 @@
         </tbody>
     </table>
 </div>
+
+<form id="planForm" method="POST" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="update">
+    <input type="hidden" name="meal_id" id="planMealId">
+    <input type="hidden" name="expected_attendance" id="planAttendance">
+</form>
+
+<script>
+function updatePlan(id, date, session, currentAttendance) {
+    let attendance = prompt("Update Human Approved Attendance for " + date + " " + session + ":", currentAttendance);
+    if (attendance !== null) {
+        document.getElementById('planMealId').value = id;
+        document.getElementById('planAttendance').value = attendance;
+        document.getElementById('planForm').submit();
+    }
+}
+</script>
+
 {% endblock %}

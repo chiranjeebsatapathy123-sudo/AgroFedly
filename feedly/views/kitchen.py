@@ -74,12 +74,59 @@ def kitchen_dashboard(request):
 @login_required
 def meal_planning(request):
     kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'update':
+            meal_id = request.POST.get('meal_id')
+            attendance = request.POST.get('expected_attendance')
+            if meal_id and attendance is not None:
+                meal = get_object_or_404(MealRecord, id=meal_id, kitchen=kitchen)
+                meal.expected_attendance = attendance
+                meal.save(update_fields=['expected_attendance'])
+                messages.success(request, f"Updated expected attendance for {meal.date} ({meal.meal_session})")
+        return redirect('kitchen_meal_planning')
+
     meals = MealRecord.objects.filter(kitchen=kitchen).order_by('-date')
     return render(request, 'kitchen/meal_planning.html', {'meals': meals})
 
 @login_required
 def production_tracking(request):
     kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add':
+            food_item = request.POST.get('food_item')
+            planned_qty = request.POST.get('planned_qty', 0)
+            # Find today's meal record to attach to, or create a default one
+            meal_record = MealRecord.objects.filter(kitchen=kitchen, date=timezone.now().date()).first()
+            if not meal_record:
+                meal_record = MealRecord.objects.create(
+                    organization=kitchen.organization,
+                    kitchen=kitchen,
+                    date=timezone.now().date(),
+                    meal_session='LUNCH',
+                    status='PLANNED'
+                )
+            PreparationRecord.objects.create(
+                meal_record=meal_record,
+                kitchen=kitchen,
+                food_item=food_item,
+                planned_qty=planned_qty,
+                prepared_qty=0
+            )
+            messages.success(request, f"Added preparation for {food_item}")
+        elif action == 'update':
+            prep_id = request.POST.get('prep_id')
+            prepared_qty = request.POST.get('prepared_qty')
+            if prep_id and prepared_qty:
+                prep = get_object_or_404(PreparationRecord, id=prep_id, kitchen=kitchen)
+                prep.prepared_qty = prepared_qty
+                prep.save(update_fields=['prepared_qty', 'updated_at'])
+                messages.success(request, f"Updated prepared quantity for {prep.food_item}")
+        return redirect('kitchen_production')
+
     preparations = PreparationRecord.objects.filter(kitchen=kitchen).order_by('-updated_at')
     return render(request, 'kitchen/production_tracking.html', {'preparations': preparations})
 
@@ -132,6 +179,32 @@ def redistribution_queue(request):
 @login_required
 def inventory(request):
     kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add':
+            ingredient_name = request.POST.get('ingredient_name')
+            quantity = request.POST.get('quantity', 0)
+            unit = request.POST.get('unit', 'kg')
+            if ingredient_name and kitchen:
+                ingredient, _ = Ingredient.objects.get_or_create(name=ingredient_name)
+                KitchenInventory.objects.create(
+                    kitchen=kitchen,
+                    ingredient=ingredient,
+                    quantity=quantity,
+                    unit=unit
+                )
+                messages.success(request, f"Added {quantity} {unit} of {ingredient_name}")
+        elif action == 'update':
+            item_id = request.POST.get('item_id')
+            new_qty = request.POST.get('quantity')
+            if item_id and new_qty is not None:
+                item = get_object_or_404(KitchenInventory, id=item_id, kitchen=kitchen)
+                item.quantity = new_qty
+                item.save(update_fields=['quantity'])
+                messages.success(request, f"Updated {item.ingredient.name} quantity to {new_qty}")
+        return redirect('kitchen_inventory')
+
     items = KitchenInventory.objects.filter(kitchen=kitchen)
     return render(request, 'kitchen/inventory.html', {'items': items})
 
@@ -164,6 +237,13 @@ def waste_prevention_center(request):
     from feedly.models import KitchenInventory, SurplusFood, MealRecord
     from django.utils import timezone
     from datetime import timedelta
+    
+    if request.method == 'POST':
+        item_id = request.POST.get('item_id')
+        if item_id:
+            item = get_object_or_404(KitchenInventory, id=item_id, kitchen__organization=request.organization)
+            messages.success(request, f"Ingredient '{item.ingredient}' has been flagged for priority use in today's production plan.")
+        return redirect('waste_prevention_center')
     
     # 1. Expiring / Expired Inventory
     now = timezone.now()

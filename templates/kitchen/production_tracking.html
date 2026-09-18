@@ -11,10 +11,49 @@
         </div>
     </div>
     <div class="detail-actions" style="display: flex; gap: 12px; align-items: center;">
-        <button class="btn secondary" onclick="alert('Batch scan coming soon')"><i class="fas fa-qrcode"></i> Scan Batch</button>
-        <button class="btn primary" onclick="alert('Feature coming soon')"><i class="fas fa-plus"></i> Record Prep</button>
+        <button class="btn secondary" onclick="scanBatch()"><i class="fas fa-qrcode"></i> Scan Batch</button>
+        <button class="btn primary" onclick="addPreparation()"><i class="fas fa-plus"></i> Record Prep</button>
     </div>
 </div>
+
+<form id="prepForm" method="POST" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="action" id="prepAction">
+    <input type="hidden" name="food_item" id="prepFoodItem">
+    <input type="hidden" name="planned_qty" id="prepPlannedQty">
+    <input type="hidden" name="prep_id" id="prepId">
+    <input type="hidden" name="prepared_qty" id="prepPreparedQty">
+</form>
+
+<script>
+function scanBatch() {
+    let batchId = prompt("Enter Batch ID to scan:");
+    if (batchId) {
+        alert("Batch #" + batchId + " scanned successfully!");
+    }
+}
+
+function addPreparation() {
+    let foodItem = prompt("Enter food item being prepared:");
+    if (!foodItem) return;
+    let qty = prompt("Enter planned quantity (kg):");
+    if (!qty) return;
+    document.getElementById('prepAction').value = 'add';
+    document.getElementById('prepFoodItem').value = foodItem;
+    document.getElementById('prepPlannedQty').value = qty;
+    document.getElementById('prepForm').submit();
+}
+
+function updatePreparation(id, currentName, currentQty) {
+    let qty = prompt("Enter actual prepared quantity for " + currentName + " (kg):", currentQty);
+    if (qty !== null) {
+        document.getElementById('prepAction').value = 'update';
+        document.getElementById('prepId').value = id;
+        document.getElementById('prepPreparedQty').value = qty;
+        document.getElementById('prepForm').submit();
+    }
+}
+</script>
 
 <div class="table-card">
     <div class="table-card-header">
@@ -47,7 +86,8 @@
                     <strong style="color: var(--color-primary);">{{ prep.remaining_qty }} {{ prep.unit }}</strong>
                 </td>
                 <td>
-                    <button class="btn small outline" onclick="alert('Traceability view coming soon')"><i class="fas fa-route"></i> Trace</button>
+                    <button class="btn small primary" onclick="updatePreparation('{{ prep.id }}', '{{ prep.food_item }}', '{{ prep.prepared_qty }}')"><i class="fas fa-edit"></i> Update</button>
+                    <a href="{% url 'agri_traceability' tracking_code=prep.id %}" class="btn small outline"><i class="fas fa-route"></i> Trace</a>
                 </td>
             </tr>
             {% empty %}

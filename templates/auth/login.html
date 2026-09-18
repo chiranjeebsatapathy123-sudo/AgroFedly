@@ -61,7 +61,7 @@
     </form>
     
     <div class="auth-foot anim-fade-in stagger-5" style="margin-top: 32px; text-align: center; font-size: 0.95rem; display: flex; flex-direction: column; gap: 12px;">
-      <a href="#" style="color: var(--text-muted); text-decoration: none; transition: color 0.2s;">Forgot password?</a>
+      <a href="#" onclick="alert('Password reset functionality is disabled in the beta. Please contact your Organization Admin.')" style="color: var(--text-muted); text-decoration: none; transition: color 0.2s;">Forgot password?</a>
       <div>
         <span style="color: var(--text-muted);">Don't have an account?</span> 
         <a href="{% url 'register_role' 'FARMER' %}" style="color: var(--primary); text-decoration: none; font-weight: 600; margin-left: 4px;">Register</a>

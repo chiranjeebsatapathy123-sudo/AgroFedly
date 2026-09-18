@@ -37,7 +37,11 @@
                     <td style="text-align: right;">{{ item.quantity }} <span style="font-size: 0.8rem; color: var(--color-text-secondary);">{{ item.unit }}</span></td>
                     <td><span style="color: var(--warning); font-weight: 500;">{{ item.expiry_date|date:"M d, Y" }}</span></td>
                     <td>
-                        <button class="btn small primary" onclick="alert('Feature coming soon')">Prioritize Use</button>
+                        <form method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="item_id" value="{{ item.id }}">
+                            <button type="submit" class="btn small primary">Prioritize Use</button>
+                        </form>
                     </td>
                 </tr>
                 {% empty %}
