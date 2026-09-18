@@ -3,27 +3,71 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from ..models import Kitchen, MealRecord, PreparationRecord, SurplusFood, KitchenInventory, KitchenAlert, Ingredient
-from ..decorators import require_role, require_org_role, _organization_required
+from ..decorators import require_role, require_org_role, _organization_required, require_sector
 
 @login_required
+@require_sector('KITCHEN')
 def kitchen_dashboard(request):
     kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
     if not kitchen:
         return render(request, 'kitchen/no_kitchen.html')
         
     today = timezone.now().date()
-    meals_today = MealRecord.objects.filter(kitchen=kitchen, date=today)
-    surplus_today = SurplusFood.objects.filter(kitchen=kitchen, created_at__date=today)
-    alerts = KitchenAlert.objects.filter(kitchen=kitchen, is_resolved=False)
     
-    timeline = PreparationRecord.objects.filter(kitchen=kitchen, date=today).order_by('updated_at')
+    # 1. Meals Today
+    meals_today = MealRecord.objects.filter(kitchen=kitchen, date=today)
+    
+    from django.db.models import Sum
+    
+    # KPIs
+    kpi_expected = meals_today.aggregate(total=Sum('expected_attendance'))['total'] or 0
+    kpi_to_prepare = meals_today.aggregate(total=Sum('recommended_production'))['total'] or 0
+    kpi_prepared = meals_today.aggregate(total=Sum('meals_prepared'))['total'] or 0
+    kpi_served = meals_today.aggregate(total=Sum('meals_consumed'))['total'] or 0
+    
+    surplus_today = SurplusFood.objects.filter(kitchen=kitchen, created_at__date=today)
+    kpi_surplus = surplus_today.aggregate(total=Sum('quantity'))['total'] or 0
+    
+    # Waste (Unsafe surplus + explicitly discarded meals)
+    discarded = meals_today.aggregate(total=Sum('discarded_meals'))['total'] or 0
+    unsafe_surplus = surplus_today.filter(status='UNSAFE').aggregate(total=Sum('quantity'))['total'] or 0
+    kpi_waste = discarded + unsafe_surplus
+    
+    # Surplus breakdown
+    surplus_safe = surplus_today.filter(status='SAFE').aggregate(total=Sum('quantity'))['total'] or 0
+    surplus_pending = surplus_today.filter(status='PENDING').aggregate(total=Sum('quantity'))['total'] or 0
+    surplus_unsafe = unsafe_surplus
+    
+    # Live Status Counts
+    count_planned = meals_today.filter(status='PLANNED').count()
+    count_preparing = meals_today.filter(status='PREPARING').count()
+    count_serving = meals_today.filter(status='SERVING').count()
+    count_completed = meals_today.filter(status='COMPLETED').count()
+
+    # Alerts & Needs Attention
+    alerts = KitchenAlert.objects.filter(kitchen=kitchen, is_resolved=False).order_by('-created_at')
+    
+    # Today's Production Table
+    # Using meals_today directly
     
     context = {
         'kitchen': kitchen,
-        'meals': meals_today,
-        'surplus': surplus_today,
+        'meals_today': meals_today.order_by('meal_session'),
+        'kpi_expected': kpi_expected,
+        'kpi_to_prepare': kpi_to_prepare,
+        'kpi_prepared': kpi_prepared,
+        'kpi_served': kpi_served,
+        'kpi_surplus': kpi_surplus,
+        'kpi_waste': kpi_waste,
+        'surplus_safe': surplus_safe,
+        'surplus_pending': surplus_pending,
+        'surplus_unsafe': surplus_unsafe,
+        'count_planned': count_planned,
+        'count_preparing': count_preparing,
+        'count_serving': count_serving,
+        'count_completed': count_completed,
         'alerts': alerts,
-        'timeline': timeline
+        'today': today
     }
     return render(request, 'kitchen/dashboard.html', context)
 

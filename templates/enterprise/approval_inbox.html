@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Approval Inbox | AgroFedly{% endblock %}
+{% block content %}
+<div class="container mx-auto p-4 sm:p-6 lg:p-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Approval Inbox</h1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Review and action pending operational workflows.</p>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden border border-gray-100 dark:border-gray-700">
+        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+            {% for req in pending_approvals %}
+            <li class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ req.workflow.name }}</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Requested by <strong>{{ req.requester.get_full_name|default:req.requester.username }}</strong> on {{ req.created_at|date:"M d, Y H:i" }}
+                    </p>
+                    <p class="text-sm text-indigo-600 dark:text-indigo-400 mt-2 font-medium">Entity: {{ req.target_model }} #{{ req.target_object_id }}</p>
+                </div>
+                <div class="flex space-x-3">
+                    <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">Approve</button>
+                    <button class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">Reject</button>
+                    <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-lg text-sm font-medium transition-colors">Details</button>
+                </div>
+            </li>
+            {% empty %}
+            <li class="p-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">All caught up</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No pending approvals require your attention.</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

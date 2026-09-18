@@ -1,24 +1,64 @@
 {% extends 'base.html' %}
 {% block title %}Production Tracking - AgroFedly{% endblock %}
 {% block content %}
-<div class="page-head">
-    <h1><i class="fas fa-fire"></i> Live Production</h1>
-    <a href="{% url 'kitchen_production' %}?action=add" class="btn primary"><i class="fas fa-plus"></i> Record Prep</a>
-</div>
-<div class="panel" style="display: grid; gap: 20px;">
-    {% for prep in preparations %}
-    <div class="card" style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h3 style="margin: 0 0 5px 0;">{{ prep.food_item }}</h3>
-            <p style="margin: 0; color: var(--color-text-secondary);">{{ prep.meal_record.meal_session }}</p>
+<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h1 style="margin: 0; font-size: 1.8rem; color: var(--color-text-primary, #000);"><i class="fas fa-fire" style="color:var(--danger); margin-right: 8px;"></i> Live Production Tracking</h1>
         </div>
-        <div style="text-align: right;">
-            <div>Prepared: <strong>{{ prep.prepared_qty }} {{ prep.unit }}</strong></div>
-            <div style="color: var(--color-primary);">Remaining: <strong>{{ prep.remaining_qty }} {{ prep.unit }}</strong></div>
+        <div style="color: var(--color-text-secondary, #666); font-size: 0.95rem; display: flex; align-items: center; gap: 16px;">
+            <span><i class="fas fa-info-circle"></i> Track active preparation batches and ingredient usage.</span>
         </div>
     </div>
-    {% empty %}
-    <p>No active production.</p>
-    {% endfor %}
+    <div class="detail-actions" style="display: flex; gap: 12px; align-items: center;">
+        <button class="btn secondary" onclick="alert('Batch scan coming soon')"><i class="fas fa-qrcode"></i> Scan Batch</button>
+        <button class="btn primary" onclick="alert('Feature coming soon')"><i class="fas fa-plus"></i> Record Prep</button>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-card-header">
+        <h2 style="font-size: 1.2rem; margin: 0;">Active Batches</h2>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Batch / Food Item</th>
+                <th>Meal Session</th>
+                <th style="text-align: right;">Planned</th>
+                <th style="text-align: right;">Prepared</th>
+                <th style="text-align: right;">Served</th>
+                <th style="text-align: right;">Remaining</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prep in preparations %}
+            <tr>
+                <td>
+                    <strong>{{ prep.food_item }}</strong><br>
+                    <span style="font-size: 0.8rem; color: var(--color-text-secondary);">Batch #{{ prep.id|stringformat:"05d" }}</span>
+                </td>
+                <td>{{ prep.meal_record.meal_session }}<br><span style="font-size: 0.8rem; color: var(--color-text-secondary);">{{ prep.meal_record.date|date:"M d" }}</span></td>
+                <td style="text-align: right;">{{ prep.planned_qty }} {{ prep.unit }}</td>
+                <td style="text-align: right;">{{ prep.prepared_qty }} {{ prep.unit }}</td>
+                <td style="text-align: right;">{{ prep.served_qty }} {{ prep.unit }}</td>
+                <td style="text-align: right;">
+                    <strong style="color: var(--color-primary);">{{ prep.remaining_qty }} {{ prep.unit }}</strong>
+                </td>
+                <td>
+                    <button class="btn small outline" onclick="alert('Traceability view coming soon')"><i class="fas fa-route"></i> Trace</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 32px; color: var(--color-text-secondary);">
+                    <i class="fas fa-fire-extinguisher" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.5;"></i>
+                    <p>No active production tracked.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

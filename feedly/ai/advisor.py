@@ -2,9 +2,23 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from ..models import FarmField, FieldActivity, CropDiseaseScan, FarmEvent
 
-def get_copilot_response(user, message):
+def get_copilot_response(user, message, context="/"):
     msg_lower = message.lower()
     
+    if "what am i looking at" in msg_lower or "explain this" in msg_lower or "where am i" in msg_lower:
+        if "/deliveries/" in context:
+            return "You are looking at the Deliveries workspace. This section lets you track active shipments and assign vehicles for surplus redistribution."
+        elif "/surplus/" in context:
+            return "You are in the Surplus Distribution hub. Here you can review declared surplus food, assess food safety statuses, and find eligible recipients."
+        elif "/kitchen/" in context:
+            return "This is the Kitchen Operations dashboard. It handles demand forecasting, production tracking, and inventory management."
+        elif "/agriculture/" in context:
+            return "You are in the Agriculture Command area. This is where farm health, crop yields, and IoT sensor data are monitored."
+        elif "/enterprise/" in context:
+            return "You are in the Enterprise Governance section. This is for reviewing operational queues, approving workflows, and monitoring system security."
+        else:
+            return f"You are currently at the {context} page."
+            
     if "yield" in msg_lower and "wheat" in msg_lower:
         return "Based on your current soil data and recent weather, the expected yield for your wheat field is approximately 3.5 tons per hectare. Would you like me to factor in the recent rainfall?"
     elif "weather" in msg_lower or "rain" in msg_lower or "risk" in msg_lower:
@@ -15,8 +29,12 @@ def get_copilot_response(user, message):
         return "If you've noticed spots on your leaves, I recommend using the Disease Scanner tool in the 'My Farm' section to take a photo. Our AI can diagnose it instantly."
     elif "price" in msg_lower or "market" in msg_lower:
         return "Currently, wheat prices are stable, but tomato prices are showing high volatility. I can create a demand forecast report if you need detailed projections."
+    elif "inventory" in msg_lower or "stock" in msg_lower:
+        return "You can view depleting ingredients in the Smart Procurement section of the Kitchen Inventory. Let me know if you want me to generate a Purchase Order."
+    elif "surplus" in msg_lower or "safety" in msg_lower:
+        return "Surplus items must pass the Food Safety Gate before redistribution. Head to the Waste Prevention Center to review any pending items."
     else:
-        return "I am the AgroFedly AI Copilot. I can help you with yield predictions, disease scanning, market insights, and logging activities. How can I assist you today?"
+        return "I am the AgroFedly AI Copilot. I can help you with yield predictions, disease scanning, market insights, and kitchen operations tracking. How can I assist you today?"
 
 def calculate_farm_health_score(farm):
     """

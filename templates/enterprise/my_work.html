@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}My Work | AgroFedly{% endblock %}
+{% block content %}
+<div class="container mx-auto p-4 sm:p-6 lg:p-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">My Work</h1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Personal productivity dashboard.</p>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">My Assigned Tasks</h2>
+            <ul class="space-y-4">
+                {% for task in my_tasks %}
+                <li class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-md font-medium text-gray-900 dark:text-white">{{ task.title }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Due: {{ task.due_date|date:"M d, Y" }}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{{ task.status }}</span>
+                </li>
+                {% empty %}
+                <li class="text-gray-500 text-sm">No tasks assigned to you.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">My Approvals</h2>
+            <ul class="space-y-4">
+                {% for req in my_approvals %}
+                <li class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <h3 class="text-md font-medium text-gray-900 dark:text-white">{{ req.workflow.name }}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Requires your review.</p>
+                </li>
+                {% empty %}
+                <li class="text-gray-500 text-sm">No pending approvals.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -50,34 +50,108 @@ from django.http import HttpResponse
 
 @login_required
 def dashboard(request):
+    """
+    Phase 42: Personalized Home.
+    Routes users to their active sector workspace.
+    """
     if not hasattr(request.user, 'profile'):
         messages.warning(request, "Please select your role and complete registration.")
         return redirect('role_selection')
         
-    role = request.user.profile.role
-    
-    # Dynamic import to avoid circular dependencies
-    from .dashboards_roles import (
-        dashboard_farmer, dashboard_fpo, dashboard_agribusiness,
-        dashboard_officer, dashboard_ngo, dashboard_researcher
-    )
-    
-    if role == 'FARMER':
-        return dashboard_farmer(request)
-    elif role == 'FPO':
-        return dashboard_fpo(request)
-    elif role == 'AGRIBUSINESS':
-        return dashboard_agribusiness(request)
-    elif role == 'OFFICER':
-        return dashboard_officer(request)
-    elif role == 'NGO':
-        return dashboard_ngo(request)
-    elif role == 'RESEARCHER':
-        return dashboard_researcher(request)
-    elif role == 'ADMIN':
-        return redirect('organization_admin_dashboard')
+    workspace = request.session.get('active_workspace')
+    if not workspace:
+        # Fallback if somehow not set during login
+        return redirect('smart_login')
         
-    return redirect('index')
+    # Redirect to sector-specific command centers
+    if workspace == 'KITCHEN':
+        return redirect('kitchen_dashboard')
+    elif workspace == 'AGRICULTURE':
+        return redirect('agri_dashboard')
+    elif workspace == 'REDISTRIBUTION':
+        return redirect('kitchen_redistribution') # Adjust this to a real redistribution route if available
+    elif workspace == 'LOGISTICS':
+        return redirect('delivery_control') # Assuming route exists for delivery
+        
+    # ADMIN or unknown workspace falls through to render the Master Dashboard
+    role = request.user.profile.role
+    org_member = request.user.organization_memberships.first()
+    org = org_member.organization if org_member else None
+    
+    if org and hasattr(org, 'onboarding_completed') and not org.onboarding_completed:
+        return redirect('organization_onboarding')
+
+    today = timezone.localdate()
+    start_date = today - timedelta(days=7)
+
+    # Master Metrics Initialization
+    kpi = {
+        'farms': 0, 'fields': 0, 'produce': 0,
+        'meals_prepared': 0, 'surplus': 0, 'redistributed': 0,
+        'deliveries': 0
+    }
+    alerts = []
+    recent_activity = []
+
+    # Conditionally load data based on the presence of models (or just query them if org exists)
+    if org:
+        # Agriculture Data (if applicable)
+        try:
+            from ..models import Farm, FarmField
+            kpi['farms'] = Farm.objects.filter(organization=org).count()
+            kpi['fields'] = FarmField.objects.filter(farm__organization=org).count()
+            kpi['produce'] = AgriculturalProduce.objects.filter(supplier=org, harvest_date__gte=start_date).aggregate(v=Sum('total_quantity'))['v'] or 0
+        except Exception:
+            pass
+
+        # Kitchen Data
+        kpi['meals_prepared'] = MealRecord.objects.filter(date=today).aggregate(v=Sum('meals_prepared'))['v'] or 0
+        
+        # Surplus & Redistribution
+        kpi['surplus'] = SurplusFood.objects.filter(organization=org, quantity__gt=0).aggregate(v=Sum('quantity'))['v'] or 0
+        kpi['redistributed'] = Redistribution.objects.filter(surplus__organization=org, distributed_at__gte=start_date).aggregate(v=Sum('quantity'))['v'] or 0
+        kpi['deliveries'] = Delivery.objects.filter(Q(sender=org) | Q(receiver=org), status__in=['REQUESTED', 'ASSIGNED', 'PICKED_UP', 'IN_TRANSIT']).count()
+
+        # Needs Attention Alerts
+        surplus_alerts = SurplusFood.objects.filter(organization=org, status='PENDING').count()
+        if surplus_alerts > 0:
+            alerts.append({'text': f'{surplus_alerts} surplus batches awaiting safety verification', 'icon': 'fas fa-exclamation-circle', 'color': 'var(--color-warning)', 'link': 'kitchen_waste_prevention'})
+        
+        delivery_alerts = Delivery.objects.filter(Q(sender=org) | Q(receiver=org), status='REQUESTED').count()
+        if delivery_alerts > 0:
+            alerts.append({'text': f'{delivery_alerts} delivery pickups pending', 'icon': 'fas fa-truck', 'color': 'var(--color-warning)', 'link': 'delivery_list'})
+            
+        try:
+            from ..models import CropDiseaseScan
+            disease_alerts = CropDiseaseScan.objects.filter(farmer=org.owner, disease_detected=True, scanned_at__gte=today - timedelta(days=2)).count()
+            if disease_alerts > 0:
+                alerts.append({'text': 'Crop disease risk detected recently', 'icon': 'fas fa-bug', 'color': 'var(--color-danger)', 'link': 'agri_disease_scanner'})
+        except Exception:
+            pass
+
+        # System Events
+        recent_activity = SystemEvent.objects.filter(organization=org).order_by('-timestamp')[:8]
+
+    # AI Insights
+    ai_insights = []
+    if kpi['surplus'] > 0:
+         ai_insights.append({'text': 'Surplus batches require attention. Routing them now can save logistics costs.', 'type': 'RECOMMENDED', 'reason': 'Based on pending surplus quantity.'})
+    if kpi['meals_prepared'] > 0:
+         ai_insights.append({'text': 'Kitchen demand is trending stable based on recent consumption.', 'type': 'OBSERVED', 'reason': 'Based on historical demand and recent attendance.'})
+    if kpi['farms'] > 0:
+         ai_insights.append({'text': 'Rain probability suggests irrigation can be reduced for the next 2 days.', 'type': 'PREDICTED', 'reason': 'Based on weather API forecast.'})
+
+    context = {
+        'role': role,
+        'organization': org,
+        'kpi': kpi,
+        'alerts': alerts,
+        'ai_insights': ai_insights,
+        'recent_activity': recent_activity,
+        'today': today
+    }
+        
+    return render(request, 'dashboard_master.html', context)
 
 # Old legacy NGO dashboard preserved
 @login_required

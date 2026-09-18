@@ -124,14 +124,8 @@
             
             <div id="default-commands">
                 <div class="cp-section-title">Quick Actions</div>
-                <a href="{% url 'delivery_create' %}" class="cp-item">
-                    <div class="cp-item-icon blue"><i class="fas fa-truck"></i></div>
-                    <span style="flex:1">Schedule New Delivery</span>
-                </a>
-                <a href="{% url 'add_surplus' %}" class="cp-item">
-                    <div class="cp-item-icon emerald"><i class="fas fa-leaf"></i></div>
-                    <span style="flex:1">Declare Surplus Produce</span>
-                </a>
+                
+                {% if request.organization.organization_type == 'SUPPLIER' or request.organization.organization_type == 'COMPANY' %}
                 <a href="{% url 'agri_farm_add' %}" class="cp-item">
                     <div class="cp-item-icon amber"><i class="fas fa-tractor"></i></div>
                     <span style="flex:1">Create Farm</span>
@@ -144,9 +138,57 @@
                     <div class="cp-item-icon amber"><i class="fas fa-clipboard-list"></i></div>
                     <span style="flex:1">Record Harvest</span>
                 </a>
+                {% endif %}
+                
+                {% if request.organization.organization_type != 'SUPPLIER' %}
+                <a href="{% url 'kitchen_production' %}" class="cp-item">
+                    <div class="cp-item-icon blue"><i class="fas fa-utensils"></i></div>
+                    <span style="flex:1">Record Production</span>
+                </a>
+                <a href="{% url 'kitchen_register_surplus' %}" class="cp-item">
+                    <div class="cp-item-icon emerald"><i class="fas fa-leaf"></i></div>
+                    <span style="flex:1">Declare Surplus Produce</span>
+                </a>
+                {% else %}
+                <a href="{% url 'add_surplus' %}" class="cp-item">
+                    <div class="cp-item-icon emerald"><i class="fas fa-leaf"></i></div>
+                    <span style="flex:1">Declare Surplus Produce</span>
+                </a>
+                {% endif %}
+                
+                <a href="{% url 'delivery_create' %}" class="cp-item">
+                    <div class="cp-item-icon blue"><i class="fas fa-truck"></i></div>
+                    <span style="flex:1">Schedule New Delivery</span>
+                </a>
                 <a href="{% url 'surplus_list' %}" class="cp-item">
                     <div class="cp-item-icon blue"><i class="fas fa-search"></i></div>
                     <span style="flex:1">Find Eligible Recipients</span>
+                </a>
+                
+                <div class="cp-section-title" style="margin-top:10px;">Enterprise & Governance</div>
+                <a href="{% url 'approval_inbox' %}" class="cp-item">
+                    <div class="cp-item-icon amber"><i class="fas fa-check-circle"></i></div>
+                    <span style="flex:1">Approve Requests</span>
+                </a>
+                <a href="{% url 'my_work' %}" class="cp-item">
+                    <div class="cp-item-icon blue"><i class="fas fa-tasks"></i></div>
+                    <span style="flex:1">My Work</span>
+                </a>
+                <a href="{% url 'operations_queue' %}" class="cp-item">
+                    <div class="cp-item-icon emerald"><i class="fas fa-layer-group"></i></div>
+                    <span style="flex:1">Operations Queue</span>
+                </a>
+                <a href="{% url 'security_center' %}" class="cp-item">
+                    <div class="cp-item-icon gray"><i class="fas fa-shield-alt"></i></div>
+                    <span style="flex:1">Security Center</span>
+                </a>
+                <a href="{% url 'system_health' %}" class="cp-item">
+                    <div class="cp-item-icon blue"><i class="fas fa-heartbeat"></i></div>
+                    <span style="flex:1">System Health</span>
+                </a>
+                <a href="{% url 'data_quality' %}" class="cp-item">
+                    <div class="cp-item-icon amber"><i class="fas fa-database"></i></div>
+                    <span style="flex:1">Data Quality</span>
                 </a>
 
                 <div class="cp-section-title" style="margin-top:10px;">Navigation</div>
@@ -288,32 +330,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         searchResults.innerHTML = '<div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Search Results</div>';
                         
                         data.results.forEach(item => {
-                            let icon = 'fa-search';
-                            let url = '#';
-                            let colorClass = 'text-gray-400 bg-gray-500/20';
-                            
-                            if (item.type === 'Produce') {
-                                icon = 'fa-leaf';
-                                url = '/surplus/';
-                                colorClass = 'text-emerald-400 bg-emerald-500/20';
-                            } else if (item.type === 'Delivery') {
-                                icon = 'fa-truck';
-                                url = `/deliveries/${item.id}/`;
-                                colorClass = 'text-blue-400 bg-blue-500/20';
-                            } else if (item.type === 'Organization') {
-                                icon = 'fa-building';
-                                url = '#';
-                                colorClass = 'text-purple-400 bg-purple-500/20';
-                            }
-
                             const el = document.createElement('a');
-                            el.href = url;
+                            el.href = item.url || '#';
                             el.className = 'cp-item';
+                            
+                            // Determine color class based on type
+                            let iconColorClass = 'gray';
+                            if (item.type === 'Produce' || item.type === 'Surplus' || item.type === 'Field') {
+                                iconColorClass = 'emerald';
+                            } else if (item.type === 'Delivery' || item.type === 'Navigation') {
+                                iconColorClass = 'blue';
+                            } else if (item.type === 'Farm' || item.type === 'Crop') {
+                                iconColorClass = 'amber';
+                            }
+                            
+                            // Use provided icon string, or default
+                            const iconHtml = item.icon && item.icon.length < 5 ? `<span style="font-size: 1.2rem;">${item.icon}</span>` : `<i class="fas ${item.icon || 'fa-search'}"></i>`;
+
                             el.innerHTML = `
-                                <div class="cp-item-icon ${item.type === 'Produce' ? 'emerald' : item.type === 'Delivery' ? 'blue' : 'gray'}"><i class="fas ${icon}"></i></div>
+                                <div class="cp-item-icon ${iconColorClass}">${iconHtml}</div>
                                 <div style="flex:1">
-                                    <div style="font-weight:600;">${item.name}</div>
-                                    <div style="font-size:12px; color:var(--color-text-secondary);">${item.type} &middot; ${item.details || ''}</div>
+                                    <div style="font-weight:600;">${item.title || item.name || 'Unknown'}</div>
+                                    <div style="font-size:12px; color:var(--color-text-secondary);">${item.type} &middot; ${item.subtitle || item.details || ''}</div>
                                 </div>
                                 <i class="fas fa-arrow-right" style="color:var(--color-text-secondary);"></i>
                             `;

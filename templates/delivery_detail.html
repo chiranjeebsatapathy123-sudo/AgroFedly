@@ -2,14 +2,37 @@
 {% load i18n %}
 {% block title %}{{ delivery.tracking_code }}{% endblock %}
 {% block content %}
-<section class="page-head anim-fade-in">
-  <div>
-    <div class="eyebrow">{% trans "SHIPMENT TRACKING" %}</div>
-    <h1>{{ delivery.tracking_code }}</h1>
-    <p>{{ delivery.food_name }} · {{ delivery.quantity }} meals · {{ delivery.sender.name }} → {{ delivery.receiver.name }}</p>
-  </div>
-  <span class="pill {{ delivery.status|lower }} large-pill anim-scale-in stagger-1">{{ delivery.get_status_display }}</span>
-</section>
+<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
+    <!-- Title and Status -->
+    <div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h1 style="margin: 0; font-size: 1.8rem; color: var(--color-text-primary, #000);">{{ delivery.tracking_code }}</h1>
+            <span class="badge blue">{{ delivery.get_status_display }}</span>
+        </div>
+        
+        <!-- Context / Subtitle -->
+        <div style="color: var(--color-text-secondary, #666); font-size: 0.95rem; display: flex; align-items: center; gap: 16px;">
+            <span><i class="fas fa-info-circle"></i> {{ delivery.food_name }} · {{ delivery.quantity }} meals</span>
+            <span><i class="fas fa-map-marker-alt"></i> {{ delivery.sender.name }} &rarr; {{ delivery.receiver.name }}</span>
+            <span><i class="fas fa-clock"></i> Updated {{ delivery.created_at|timesince }} ago</span>
+        </div>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="detail-actions" style="display: flex; gap: 12px; align-items: center;">
+        {% if delivery.status == "REQUESTED" %}
+            <form method="post" action="{% url 'delivery_update_status' delivery.id %}" style="margin:0;">{% csrf_token %}<input type="hidden" name="status" value="ASSIGNED"><button class="btn primary">Assign driver</button></form>
+        {% elif delivery.status == "ASSIGNED" %}
+            <form method="post" action="{% url 'delivery_update_status' delivery.id %}" style="margin:0;">{% csrf_token %}<input type="hidden" name="status" value="PICKED_UP"><button class="btn primary">Mark picked up</button></form>
+        {% elif delivery.status == "PICKED_UP" %}
+            <form method="post" action="{% url 'delivery_update_status' delivery.id %}" style="margin:0;">{% csrf_token %}<input type="hidden" name="status" value="IN_TRANSIT"><button class="btn primary">Start transit</button></form>
+        {% elif delivery.status == "IN_TRANSIT" %}
+            <form method="post" action="{% url 'delivery_update_status' delivery.id %}" style="margin:0;">{% csrf_token %}<input type="hidden" name="status" value="DELIVERED"><button class="btn primary">✓ Confirm delivered</button></form>
+        {% elif delivery.status == "DELIVERED" %}
+            <a class="btn primary" href="{% url 'generate_donation_receipt' delivery.id %}">📄 Download Receipt</a>
+        {% endif %}
+    </div>
+</div>
 
 <div class="two-panels">
 <section class="panel reveal anim-slide-in stagger-2">
@@ -149,16 +172,5 @@
 
 <div class="delivery-actions anim-fade-up stagger-8">
   <a class="btn soft" href="{% url 'delivery_list' %}">{% trans "← Back to deliveries" %}</a>
-  {% if delivery.status == "REQUESTED" %}
-    <form method="post" action="{% url 'delivery_update_status' delivery.id %}" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">{% csrf_token %}<input type="hidden" name="status" value="ASSIGNED"><button class="btn primary">{% trans "Assign driver" %}</button></form>
-  {% elif delivery.status == "ASSIGNED" %}
-    <form method="post" action="{% url 'delivery_update_status' delivery.id %}" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">{% csrf_token %}<input type="hidden" name="status" value="PICKED_UP"><button class="btn primary">{% trans "Mark picked up" %}</button></form>
-  {% elif delivery.status == "PICKED_UP" %}
-    <form method="post" action="{% url 'delivery_update_status' delivery.id %}" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">{% csrf_token %}<input type="hidden" name="status" value="IN_TRANSIT"><button class="btn primary">{% trans "Start transit" %}</button></form>
-  {% elif delivery.status == "IN_TRANSIT" %}
-    <form method="post" action="{% url 'delivery_update_status' delivery.id %}" onsubmit="window.ui && window.ui.setLoading(this.querySelector('button'), true)">{% csrf_token %}<input type="hidden" name="status" value="DELIVERED"><button class="btn primary">{% trans "✓ Confirm delivered" %}</button></form>
-  {% elif delivery.status == "DELIVERED" %}
-    <a class="btn primary" href="{% url 'generate_donation_receipt' delivery.id %}">{% trans "📄 Download Receipt" %}</a>
-  {% endif %}
 </div>
 {% endblock %}

@@ -34,11 +34,13 @@ urlpatterns = [
     path("health/", views.health_liveness, name="health"),
     path("readiness/", views.health_readiness, name="readiness"),
     path("liveness/", views.health_liveness, name="liveness"),
-    # Authentication & Role Selection (Phase 2, 4, 5)
-    path("login/", views.role_selection_view, name="role_selection"),
-    path("login/<str:role>/", views.role_login_view, name="role_login"),
+    # Phase 42: Smart Login & Identity Resolution
+    path("login/", views.smart_login_view, name="smart_login"),
+    path("role-selection/", views.role_selection_view, name="role_selection"), # Legacy redirect
+    path("login/<str:role>/", views.role_login_view, name="role_login"), # Legacy redirect
     path("register/<str:role>/", views.register_view, name="register_role"),
     path("logout/", views.logout_view, name="logout"),
+    path("workspace/switch/<str:workspace>/", views.switch_workspace, name="switch_workspace"),
 
     path("dashboard/", views.dashboard, name="dashboard"),
     path("predict/", views.predict_demand, name="predict_demand"),
@@ -49,6 +51,15 @@ urlpatterns = [
     path("story/", views.data_story, name="data_story"),
     path("logging/", views.post_meal_logging, name="post_meal_logging"),
     
+    # Logistics Workspace Routes
+    path("delivery/", views.delivery_control, name="delivery_control"),
+    path("delivery/queue/", views.delivery_list, name="delivery_list"),
+    
+    # Redistribution Workspace Routes
+    path("redistribution/", views.redistribution_dashboard, name="redistribution_dashboard"),
+    path("redistribution/recipients/", views.recipient_list, name="recipient_list"),
+    path("redistribution/surplus/", views.surplus_list, name="surplus_list"),
+
     # Agriculture Extension Routes
     path("agriculture/", views.agri_dashboard, name="agri_dashboard"),
     path("agriculture/farms/", views.agri_farm_list, name="agri_farm_list"),
@@ -77,6 +88,9 @@ urlpatterns = [
     path("api/agri-iot-stream/", views.api_agri_iot_stream, name="api_agri_iot_stream"),
     path("api/notifications/", views.api_notifications, name="api_notifications"),
     path("api/notifications/read/", views.api_notifications_read, name="api_notifications_read"),
+    path("api/search/", views.api_global_search, name="api_global_search"),
+    path("api/ai/scenario/", views.api_ai_scenario, name="api_ai_scenario"),
+    path("api/ai/action-preview/", views.api_ai_action_preview, name="api_ai_action_preview"),
     path("agriculture/map/", views.agri_field_map, name="agri_field_map"),
     path("agriculture/equipment/", views.agri_equipment_hub, name="agri_equipment_hub"),
     path("agriculture/equipment/add/", views.agri_equipment_add, name="agri_equipment_add"),
@@ -148,6 +162,14 @@ urlpatterns = [
     path("api/search/", views.api_global_search, name="api_global_search"),
     path("data-quality/", views.data_quality_center, name="data_quality_center"),
     path("ai-operations/", views.ai_operations_center, name="ai_operations_center"),
+    
+    # Enterprise views
+    path("enterprise/approval-inbox/", views.enterprise.approval_inbox, name="approval_inbox"),
+    path("enterprise/my-work/", views.enterprise.my_work, name="my_work"),
+    path("enterprise/operations-queue/", views.enterprise.operations_queue, name="operations_queue"),
+    path("enterprise/system-health/", views.enterprise.system_health, name="system_health"),
+    path("enterprise/data-quality/", views.enterprise.data_quality, name="data_quality"),
+
     # AI Endpoints (Phase 18)
     path("api/ai/scenario/", views.api_ai_scenario, name="api_ai_scenario"),
     path("api/ai/action_preview/", views.api_ai_action_preview, name="api_ai_action_preview"),

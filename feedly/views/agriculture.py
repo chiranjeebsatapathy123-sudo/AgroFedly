@@ -1,4 +1,4 @@
-from ..decorators import _organization_required, _manager_required, require_org_role
+from ..decorators import _organization_required, _manager_required, require_org_role, require_sector
 import json
 import os
 from datetime import date, timedelta, datetime
@@ -44,6 +44,7 @@ from django.http import HttpResponse
 from .api import _weather
 
 @login_required
+@require_sector('AGRICULTURE')
 def agri_dashboard(request):
     org_member = request.user.organization_memberships.first()
     org = org_member.organization if org_member else None
@@ -57,15 +58,30 @@ def agri_dashboard(request):
     processing = ProcessingRecord.objects.filter(input_produce__farm__farm__organization=org)
     storage = StorageRecord.objects.filter(organization=org)
     
+    # Phase 43: Enhanced Agriculture Dashboard Context
     total_farms = farms.count()
+    fields = Field.objects.filter(farm__organization=org)
+    total_fields = fields.count()
+    total_area = fields.aggregate(total=Sum('area'))['total'] or 0
+    
+    # Crop Health (Mocking slightly if not fully modelled, but using real data where possible)
+    crops = Crop.objects.filter(field__farm__organization=org)
+    healthy_crops = crops.filter(health_status='EXCELLENT').count() + crops.filter(health_status='GOOD').count()
+    attention_crops = crops.filter(health_status='POOR').count() + crops.filter(health_status='FAIR').count()
+    
     total_produce = produce.aggregate(total=Sum('available_quantity'))['total'] or 0
     total_processed = processing.aggregate(total=Sum('output_quantity'))['total'] or 0
     total_stored = storage.aggregate(total=Sum('quantity'))['total'] or 0
     
     active_advisories = WeatherAdvisory.objects.filter(expires_at__gt=timezone.now()).order_by('-issued_at')
+    recent_alerts = QualityInspection.objects.filter(farm__organization=org, passed=False).order_by('-inspection_date')[:5]
     
     context = {
         'total_farms': total_farms,
+        'total_fields': total_fields,
+        'total_area': total_area,
+        'healthy_crops': healthy_crops,
+        'attention_crops': attention_crops,
         'total_produce': total_produce,
         'total_processed': total_processed,
         'total_stored': total_stored,
@@ -73,6 +89,7 @@ def agri_dashboard(request):
         'recent_processing': processing.order_by('-processing_date')[:5],
         'recent_storage': storage.order_by('-entry_time')[:5],
         'advisories': active_advisories,
+        'recent_alerts': recent_alerts,
         'organization': org
     }
     return render(request, 'agri_dashboard.html', context)

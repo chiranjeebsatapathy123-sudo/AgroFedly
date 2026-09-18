@@ -1,73 +1,106 @@
 {% extends 'base.html' %}
 {% block title %}Kitchen Inventory - AgroFedly{% endblock %}
 {% block content %}
-<div class="page-head">
-    <h1><i class="fas fa-boxes"></i> Inventory</h1>
-    <a href="{% url 'kitchen_inventory' %}?action=add" class="btn primary"><i class="fas fa-plus"></i> Add Item</a>
+<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h1 style="margin: 0; font-size: 1.8rem; color: var(--color-text-primary, #000);"><i class="fas fa-boxes" style="color:var(--info); margin-right: 8px;"></i> Kitchen Inventory</h1>
+        </div>
+        <div style="color: var(--color-text-secondary, #666); font-size: 0.95rem; display: flex; align-items: center; gap: 16px;">
+            <span><i class="fas fa-info-circle"></i> Track raw ingredients, low stock alerts, and expiry deadlines.</span>
+        </div>
+    </div>
+    <div class="detail-actions" style="display: flex; gap: 12px; align-items: center;">
+        <button class="btn primary" onclick="alert('Feature coming soon')"><i class="fas fa-plus"></i> Add Item</button>
+    </div>
 </div>
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
     <div class="table-card">
         <div class="table-card-header">
-            <h2 style="font-size: 16px; margin: 0;">Current Inventory</h2>
+            <h2 style="font-size: 1.2rem; margin: 0;">Current Inventory</h2>
         </div>
         <table>
             <thead>
                 <tr>
-                    <th>Item</th>
-                    <th>Quantity</th>
+                    <th>Ingredient / Batch</th>
+                    <th style="text-align: right;">Quantity</th>
                     <th>Expiry Date</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in items %}
                 <tr>
-                    <td><strong>{{ item.ingredient.name }}</strong><br><small style="color:var(--color-text-secondary);">Batch: {{ item.batch_number|default:"N/A" }}</small></td>
                     <td>
+                        <strong>{{ item.ingredient }}</strong><br>
+                        <span style="font-size: 0.8rem; color: var(--color-text-secondary);">Batch: {{ item.batch_id|default:"N/A" }}</span>
+                    </td>
+                    <td style="text-align: right;">
                         {% if item.quantity < 10 %}
-                        <span style="color:var(--color-danger); font-weight:bold;">{{ item.quantity }}</span> <i class="fas fa-exclamation-circle" style="color:var(--color-danger);" title="Low Stock"></i>
+                        <span style="color:var(--danger); font-weight:bold;">{{ item.quantity }}</span> <i class="fas fa-exclamation-circle" style="color:var(--danger);" title="Low Stock"></i>
                         {% else %}
                         {{ item.quantity }}
                         {% endif %}
-                        {{ item.unit }}
+                        <span style="font-size: 0.8rem; color: var(--color-text-secondary);">{{ item.unit }}</span>
                     </td>
                     <td>
                         {{ item.expiry_date|date:"M d, Y" }}
                     </td>
                     <td>
                         {% if item.quantity < 10 %}
-                        <span class="pill danger">LOW STOCK</span>
+                        <span class="badge danger">Low Stock</span>
                         {% else %}
-                        <span class="pill {{ item.status|lower }}">{{ item.status }}</span>
+                        <span class="badge {% if item.status == 'ACTIVE' %}emerald{% else %}gray{% endif %}">{{ item.status }}</span>
                         {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn small outline" onclick="alert('Edit inventory coming soon')">Update</button>
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="4" style="text-align: center;">Inventory is empty.</td></tr>
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 32px; color: var(--color-text-secondary);">
+                        <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.5;"></i>
+                        <p>Inventory is empty. Start adding ingredients.</p>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
     <!-- Smart Procurement Signals -->
-    <div class="card" style="background-color: var(--color-surface-elevated); padding: 20px;">
-        <h3 style="margin-top:0; border-bottom:1px solid var(--color-border); padding-bottom:10px;"><i class="fas fa-shopping-cart"></i> Smart Procurement</h3>
-        <p style="font-size: 13px; color: var(--color-text-secondary);">AI-driven signals based on depletion rates. Review before purchasing.</p>
-        
-        <ul style="list-style: none; padding: 0; margin: 0;">
-            {% for item in items %}
-                {% if item.quantity < 10 %}
-                <li style="padding: 15px 0; border-bottom: 1px solid var(--color-border);">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <strong>{{ item.ingredient.name }}</strong>
-                        <span style="color:var(--color-danger);">Depleting</span>
+    <div class="card" style="margin-bottom: 24px; border: 1px solid var(--info); background: rgba(59, 130, 246, 0.02);">
+        <div class="table-card-header" style="border-bottom-color: rgba(59, 130, 246, 0.1);">
+            <h2 style="font-size: 1.1rem; margin: 0; color: var(--info);"><i class="fas fa-shopping-cart"></i> Smart Procurement</h2>
+        </div>
+        <div style="padding: 16px;">
+            <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 0;">AI-driven signals based on depletion rates. Review before purchasing.</p>
+            
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+                {% for item in items %}
+                    {% if item.quantity < 10 %}
+                    <li style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border);">
+                        <div style="display:flex; justify-content:space-between; align-items: center;">
+                            <strong style="color: var(--color-text-primary);">{{ item.ingredient }}</strong>
+                            <span class="badge danger">Depleting</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-secondary);">Suggested Reorder: <strong>50 {{ item.unit }}</strong></div>
+                        <div style="margin-top: 4px;">
+                            <button class="btn small primary" onclick="alert('Procurement integration coming soon')">Create PO</button>
+                        </div>
+                    </li>
+                    {% endif %}
+                {% empty %}
+                    <div style="text-align: center; color: var(--success); padding: 16px;">
+                        <i class="fas fa-check-circle" style="font-size: 1.5rem; margin-bottom: 8px;"></i>
+                        <p style="margin: 0; font-size: 0.9rem;">Stock levels are healthy.</p>
                     </div>
-                    <div style="font-size: 12px; margin-bottom:10px;">Suggested Reorder: 50 {{ item.unit }}</div>
-                    <span style="font-size: 11px; color: var(--color-text-secondary); border: 1px solid var(--color-border); padding: 2px 6px; border-radius: 4px;">NOT CONFIGURED</span>
-                </li>
-                {% endif %}
-            {% endfor %}
-        </ul>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Operations Queue | AgroFedly{% endblock %}
+{% block content %}
+<div class="container mx-auto p-4 sm:p-6 lg:p-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Operations Queue</h1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Intelligent prioritization of tasks, alerts, and system events.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Anomalies / Critical Events -->
+        <div class="lg:col-span-1">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span> Critical Anomalies
+            </h2>
+            <div class="space-y-4">
+                {% for anomaly in anomalies %}
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border-l-4 border-red-500">
+                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ anomaly.event_type }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ anomaly.timestamp|timesince }} ago</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-2">{{ anomaly.description }}</p>
+                </div>
+                {% empty %}
+                <p class="text-sm text-gray-500">No critical anomalies.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Smart Alerts -->
+        <div class="lg:col-span-1">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <span class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span> Active Alerts
+            </h2>
+            <div class="space-y-4">
+                {% for alert in alerts %}
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border-l-4 border-yellow-500">
+                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ alert.title }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ alert.trigger_source }}</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-2">{{ alert.description }}</p>
+                </div>
+                {% empty %}
+                <p class="text-sm text-gray-500">No active alerts.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Open Tasks -->
+        <div class="lg:col-span-1">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span> Pending Tasks
+            </h2>
+            <div class="space-y-4">
+                {% for task in tasks %}
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-between items-start">
+                        <p class="text-sm font-bold text-gray-900 dark:text-white">{{ task.title }}</p>
+                        <span class="px-2 py-1 text-[10px] uppercase font-bold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">{{ task.priority }}</span>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Due: {{ task.due_date|date:"M d" }}</p>
+                </div>
+                {% empty %}
+                <p class="text-sm text-gray-500">No open tasks.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

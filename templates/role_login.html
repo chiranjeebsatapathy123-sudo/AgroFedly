@@ -53,15 +53,6 @@
               }
           }, 500);
       }
-      
-      const card = document.querySelector('.auth-card');
-      if (card && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          document.addEventListener('mousemove', (e) => {
-              const x = (window.innerWidth / 2 - e.clientX) / 50;
-              const y = (window.innerHeight / 2 - e.clientY) / 50;
-              card.style.transform = `translateY(-8px) translateZ(30px) rotateY(${x}deg) rotateX(${y}deg)`;
-          });
-      }
   });
 </script>
 {% endblock %}

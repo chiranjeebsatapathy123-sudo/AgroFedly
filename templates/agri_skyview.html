@@ -4,10 +4,18 @@
 {% block title %}Farm Command Center - AgroFedly{% endblock %}
 
 {% block content %}
-<div class="page-head">
+<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
+    <!-- Title and Status -->
     <div>
-        <h1><i class="fas fa-tractor" style="color:var(--color-primary);"></i> Farm Command Center</h1>
-        <p>End-to-End Farm Intelligence, Harvest Planning, and Crop Risks.</p>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h1 style="margin: 0; font-size: 1.8rem; color: var(--color-text-primary, #000);"><i class="fas fa-tractor" style="color:var(--color-primary); margin-right: 8px;"></i> Farm Command Center</h1>
+            <span class="badge amber">Monitoring</span>
+        </div>
+        
+        <!-- Context / Subtitle -->
+        <div style="color: var(--color-text-secondary, #666); font-size: 0.95rem; display: flex; align-items: center; gap: 16px;">
+            <span><i class="fas fa-info-circle"></i> End-to-End Farm Intelligence, Harvest Planning, and Crop Risks.</span>
+        </div>
     </div>
 </div>
 

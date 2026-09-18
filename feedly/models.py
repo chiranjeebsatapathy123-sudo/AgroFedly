@@ -30,6 +30,15 @@ class MealRecord(models.Model):
     expected_attendance = models.PositiveIntegerField(default=0)
     meal_session = models.CharField(max_length=50, default="Lunch") # Breakfast, Lunch, Dinner, Snack
     event_mode = models.CharField(max_length=100, default="Normal") # Normal, Exam, Festival, etc.
+    status = models.CharField(max_length=30, default="PLANNED", choices=[
+        ('PLANNED', 'Planned'),
+        ('INGREDIENTS_READY', 'Ingredients Ready'),
+        ('PREPARING', 'Preparing'),
+        ('READY', 'Ready'),
+        ('SERVING', 'Serving'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'),
+    ])
 
     def __str__(self):
         return str(self.date)
@@ -79,6 +88,10 @@ class Organization(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # Phase 38: Enterprise Hierarchy and Governance
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='sub_organizations')
+    data_retention_days = models.PositiveIntegerField(default=365, help_text="Number of days to keep archived data")
 
     class Meta:
         ordering = ["name"]
@@ -94,6 +107,16 @@ class OrganizationImpact(models.Model):
     
     def __str__(self):
         return f"{self.organization.name} Impact"
+
+class CustomRole(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="custom_roles")
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    permissions_json = models.JSONField(default=dict, blank=True, help_text="e.g. {'can_approve_surplus': true, 'can_edit_users': false}")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.organization.name})"
 
 class OrganizationMember(models.Model):
     ROLE_CHOICES = [
@@ -113,8 +136,9 @@ class OrganizationMember(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="members")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="organization_memberships", null=True, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="STAFF")
+    custom_role = models.ForeignKey(CustomRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="ACTIVE")
-    is_active = models.BooleanField(default=True) # DEPRECATED: Use status
+    is_active = models.BooleanField(default=True) # DEPRECATED: Use statusus
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -181,6 +205,11 @@ class SurplusFood(models.Model):
     # Phase 8: Kitchen Additions
     kitchen = models.ForeignKey('Kitchen', on_delete=models.SET_NULL, null=True, blank=True, related_name="surplus_records")
     preparation_record = models.ForeignKey('PreparationRecord', on_delete=models.SET_NULL, null=True, blank=True, related_name="surplus_records")
+
+    # Phase 38: Soft Delete
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='deleted_surplus')
 
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -268,6 +297,11 @@ class Delivery(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Phase 38: Soft Delete
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='deleted_deliveries')
+
     class Meta:
         ordering = ["-created_at"]
 
@@ -337,6 +371,11 @@ class AgriculturalProduce(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # Phase 38: Soft Delete
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='deleted_produce')
 
     def __str__(self):
         return f"{self.name} ({self.available_quantity} {self.unit})"
@@ -1030,6 +1069,15 @@ class UserTask(models.Model):
     def __str__(self):
         return self.title
 
+class TaskComment(models.Model):
+    task = models.ForeignKey('UserTask', on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.task.title}"
+
 class DataImport(models.Model):
     """Logs data imports."""
     STATUS_CHOICES = [
@@ -1381,3 +1429,64 @@ class IntegrationConfig(models.Model):
     
     def __str__(self):
         return f"{self.organization.name} - {self.integration_type}"
+
+# -----------------------------------------------------------------------------
+# PHASE 38: ENTERPRISE INTELLIGENCE & GOVERNANCE
+# -----------------------------------------------------------------------------
+class ApprovalWorkflow(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="approval_workflows")
+    name = models.CharField(max_length=150)
+    trigger_model = models.CharField(max_length=100) # e.g., 'SurplusFood', 'AgriculturalProduce'
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.organization.name})"
+
+class ApprovalStep(models.Model):
+    workflow = models.ForeignKey(ApprovalWorkflow, on_delete=models.CASCADE, related_name="steps")
+    step_order = models.PositiveIntegerField(default=1)
+    approver_role = models.CharField(max_length=50, blank=True)
+    approver_custom_role = models.ForeignKey(CustomRole, on_delete=models.SET_NULL, null=True, blank=True)
+    specific_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        ordering = ['step_order']
+
+class ApprovalRequest(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending Review'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    workflow = models.ForeignKey(ApprovalWorkflow, on_delete=models.CASCADE, related_name="requests")
+    requester = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="approval_requests")
+    target_model = models.CharField(max_length=100)
+    target_object_id = models.CharField(max_length=100)
+    current_step_order = models.PositiveIntegerField(default=1)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    final_decision_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="final_approvals")
+    rejection_reason = models.TextField(blank=True)
+
+class ApprovalActionLog(models.Model):
+    request = models.ForeignKey(ApprovalRequest, on_delete=models.CASCADE, related_name="action_logs")
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    action = models.CharField(max_length=50) # 'APPROVED', 'REJECTED', 'COMMENTED'
+    comment = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+class DocumentAttachment(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="documents")
+    uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    title = models.CharField(max_length=200)
+    file = models.FileField(upload_to="org_documents/")
+    document_type = models.CharField(max_length=100, default="General")
+    related_model = models.CharField(max_length=100, blank=True)
+    related_object_id = models.CharField(max_length=100, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    is_sensitive = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title

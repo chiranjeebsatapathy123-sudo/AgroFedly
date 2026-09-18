@@ -4,25 +4,28 @@
 {% block title %}Waste Prevention Center - AgroFedly{% endblock %}
 
 {% block content %}
-<div class="page-head">
+<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
     <div>
-        <h1><i class="fas fa-trash-slash" style="color:var(--color-primary);"></i> Waste Prevention Center</h1>
-        <p>Analyze overproduction, expiring inventory, and unconsumed meals to optimize kitchen operations.</p>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h1 style="margin: 0; font-size: 1.8rem; color: var(--color-text-primary, #000);"><i class="fas fa-shield-virus" style="color:var(--primary); margin-right: 8px;"></i> Food Safety & Waste Prevention</h1>
+        </div>
+        <div style="color: var(--color-text-secondary, #666); font-size: 0.95rem; display: flex; align-items: center; gap: 16px;">
+            <span><i class="fas fa-info-circle"></i> Analyze overproduction, expiring inventory, and manage food safety checks for surplus.</span>
+        </div>
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
     <!-- Expiring Inventory -->
     <div class="table-card">
-        <div class="table-card-header" style="background-color: var(--color-warning); color: #fff;">
-            <h2 style="font-size: 16px; margin: 0;"><i class="fas fa-exclamation-triangle"></i> Expiring Inventory (Next 48h)</h2>
+        <div class="table-card-header" style="border-bottom: 2px solid var(--warning);">
+            <h2 style="font-size: 1.2rem; margin: 0; color: var(--warning);"><i class="fas fa-exclamation-triangle"></i> Expiring Inventory (Next 48h)</h2>
         </div>
-        {% if expiring_inventory %}
         <table>
             <thead>
                 <tr>
                     <th>Ingredient</th>
-                    <th>Quantity</th>
+                    <th style="text-align: right;">Quantity</th>
                     <th>Expires At</th>
                     <th>Action</th>
                 </tr>
@@ -30,34 +33,35 @@
             <tbody>
                 {% for item in expiring_inventory %}
                 <tr>
-                    <td><strong>{{ item.ingredient.name }}</strong></td>
-                    <td>{{ item.quantity }} {{ item.ingredient.unit }}</td>
-                    <td>{{ item.expiry_date|date:"M d, Y" }}</td>
+                    <td><strong>{{ item.ingredient }}</strong></td>
+                    <td style="text-align: right;">{{ item.quantity }} <span style="font-size: 0.8rem; color: var(--color-text-secondary);">{{ item.unit }}</span></td>
+                    <td><span style="color: var(--warning); font-weight: 500;">{{ item.expiry_date|date:"M d, Y" }}</span></td>
                     <td>
-                        <span style="font-size: 11px; color: var(--color-text-secondary); border: 1px solid var(--color-border); padding: 2px 6px; border-radius: 4px;">NOT CONFIGURED</span>
+                        <button class="btn small primary" onclick="alert('Feature coming soon')">Prioritize Use</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 32px; color: var(--success);">
+                        <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.8;"></i>
+                        <p>No inventory expiring soon. Great job!</p>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        {% else %}
-        <div class="empty-state" style="padding: 30px; text-align: center;">
-            <p>No inventory expiring soon. Great job!</p>
-        </div>
-        {% endif %}
     </div>
 
     <!-- Unsafe/Rejected Surplus -->
     <div class="table-card">
-        <div class="table-card-header" style="background-color: var(--color-danger); color: #fff;">
-            <h2 style="font-size: 16px; margin: 0;"><i class="fas fa-ban"></i> Rejected / Unsafe Surplus</h2>
+        <div class="table-card-header" style="border-bottom: 2px solid var(--danger);">
+            <h2 style="font-size: 1.2rem; margin: 0; color: var(--danger);"><i class="fas fa-ban"></i> Rejected / Unsafe Surplus</h2>
         </div>
-        {% if unsafe_surplus %}
         <table>
             <thead>
                 <tr>
                     <th>Food Item</th>
-                    <th>Quantity</th>
+                    <th style="text-align: right;">Quantity</th>
                     <th>Reason</th>
                     <th>Date</th>
                 </tr>
@@ -66,18 +70,20 @@
                 {% for surplus in unsafe_surplus %}
                 <tr>
                     <td><strong>{{ surplus.food_name }}</strong></td>
-                    <td>{{ surplus.quantity }}</td>
-                    <td><span style="color:var(--color-danger); font-size:12px;">{{ surplus.safety_alert|default:"Safety check failed" }}</span></td>
+                    <td style="text-align: right;">{{ surplus.quantity }} <span style="font-size: 0.8rem; color: var(--color-text-secondary);">meals</span></td>
+                    <td><span style="color:var(--danger); font-size:0.85rem;">{{ surplus.safety_alert|default:"Safety check failed" }}</span></td>
                     <td>{{ surplus.created_at|date:"M d, H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 32px; color: var(--success);">
+                        <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.8;"></i>
+                        <p>No rejected surplus recently.</p>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        {% else %}
-        <div class="empty-state" style="padding: 30px; text-align: center;">
-            <p>No rejected surplus recently.</p>
-        </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

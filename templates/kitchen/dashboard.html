@@ -1,43 +1,232 @@
 {% extends 'base.html' %}
-{% block title %}Kitchen Dashboard - AgroFedly{% endblock %}
+{% block title %}Kitchen Operations Command Center - AgroFedly{% endblock %}
 {% block content %}
-<div class="page-head">
-    <h1><i class="fas fa-utensils"></i> Kitchen Dashboard</h1>
-    <p>Overview of today's operations for {{ kitchen.name }}</p>
-</div>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
-    <div class="stat-card">
-        <div class="stat-title">Meals Today</div>
-        <div class="stat-value">{{ meals.count }}</div>
+
+<!-- Top Header -->
+<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h1 style="margin: 0; font-size: 1.8rem; color: var(--color-text-primary, #000);"><i class="fas fa-utensils" style="color:var(--color-primary); margin-right: 8px;"></i> Kitchen Operations</h1>
+            <span class="badge emerald">● Kitchen Online</span>
+        </div>
+        
+        <div style="color: var(--color-text-secondary, #666); font-size: 0.95rem; display: flex; align-items: center; gap: 16px;">
+            <span><i class="fas fa-store"></i> {{ kitchen.name }}</span>
+            <span><i class="fas fa-calendar"></i> {{ today|date:"M d, Y" }}</span>
+        </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-title">Surplus Logged</div>
-        <div class="stat-value">{{ surplus.count }}</div>
+
+    <!-- Quick Actions Top Right -->
+    <div class="detail-actions" style="display: flex; gap: 12px; align-items: center;">
+        <a href="{% url 'kitchen_meal_planning' %}" class="btn secondary"><i class="fas fa-calendar-alt"></i> Create Meal Plan</a>
+        <a href="{% url 'kitchen_production' %}" class="btn primary"><i class="fas fa-play"></i> Start Production</a>
     </div>
-    <div class="stat-card">
-        <div class="stat-title">Active Alerts</div>
-        <div class="stat-value" style="color: var(--color-danger);">{{ alerts.count }}</div>
-    </div>
-</div>
 </div>
 
-<div class="card" style="margin-top: 30px; padding: 20px;">
-    <h2>Today's Operations Timeline</h2>
-    <div class="timeline" style="margin-top: 20px; padding-left: 20px; border-left: 2px solid var(--border);">
-        {% for event in timeline %}
-        <div class="timeline-item" style="position: relative; margin-bottom: 20px; padding-left: 20px;">
-            <div style="position: absolute; left: -26px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--primary);"></div>
-            <div style="font-weight: bold; color: var(--primary);">{{ event.updated_at|time:"H:i" }}</div>
-            <h4>{{ event.meal.name|default:"Meal Preparation" }}</h4>
-            <p class="small text-muted">Status: <span style="color: {% if event.status == 'COMPLETED' %}var(--success){% elif event.status == 'IN_PROGRESS' %}var(--warning){% else %}var(--text-muted){% endif %};">{{ event.status }}</span></p>
-            {% if event.notes %}<p class="small">{{ event.notes }}</p>{% endif %}
+<!-- Primary KPI Row -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border);">
+        <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Expected Demand</div>
+        <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0;">{{ kpi_expected }}</div>
+        <div style="font-size: 0.8rem; color: var(--color-text-secondary);">AI Forecast / Attendance</div>
+    </div>
+
+    <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border);">
+        <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Meals To Prepare</div>
+        <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0;">{{ kpi_to_prepare }}</div>
+        <div style="font-size: 0.8rem; color: var(--color-text-secondary);">{% if kpi_expected > 0 %}{% widthratio kpi_to_prepare kpi_expected 100 %}% of expected{% else %}0%{% endif %}</div>
+    </div>
+
+    <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border);">
+        <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Prepared</div>
+        <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0; color: var(--color-primary);">{{ kpi_prepared }}</div>
+        <div style="font-size: 0.8rem; color: var(--color-text-secondary);">
+            {% if kpi_to_prepare > 0 %}
+                <div style="width: 100%; height: 4px; background: var(--color-border); border-radius: 2px; margin-top: 4px;">
+                    <div style="width: {% widthratio kpi_prepared kpi_to_prepare 100 %}%; height: 100%; background: var(--color-primary); border-radius: 2px;"></div>
+                </div>
+            {% else %}
+                No target set
+            {% endif %}
         </div>
-        {% empty %}
-        <div class="text-center text-muted" style="padding: 20px;">
-            <i class="fas fa-clock" style="font-size: 2rem; margin-bottom: 10px; color: var(--border);"></i>
-            <p>No operations logged today.</p>
+    </div>
+
+    <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border);">
+        <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Served</div>
+        <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0; color: var(--success);">{{ kpi_served }}</div>
+        <div style="font-size: 0.8rem; color: var(--color-text-secondary);">{% if kpi_prepared > 0 %}{% widthratio kpi_served kpi_prepared 100 %}% of prepared{% else %}0%{% endif %}</div>
+    </div>
+
+    <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border);">
+        <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Surplus</div>
+        <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0;">{{ kpi_surplus }} <span style="font-size: 1rem;">meals</span></div>
+        <div style="font-size: 0.8rem; display: flex; gap: 8px;">
+            <span style="color: var(--success);">{{ surplus_safe }} Safe</span>
+            <span style="color: var(--warning);">{{ surplus_pending }} Check</span>
         </div>
-        {% endfor %}
+    </div>
+
+    <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border);">
+        <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Food Waste</div>
+        <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0; color: var(--danger);">{{ kpi_waste }} <span style="font-size: 1rem;">meals</span></div>
+        <div style="font-size: 0.8rem; color: var(--color-text-secondary);">Unsafe & discarded</div>
     </div>
 </div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    
+    <!-- Left Column: Live Status & Today's Production -->
+    <div>
+        <!-- Live Kitchen Status -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="table-card-header">
+                <h2 style="font-size: 1.2rem; margin: 0;"><i class="fas fa-satellite-dish" style="color: var(--color-primary);"></i> Live Kitchen Status</h2>
+            </div>
+            <div style="padding: 20px;">
+                <!-- Preparation -->
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600;">
+                        <span>PREPARATION</span>
+                        <span>{{ count_preparing }} Active</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: var(--color-border); border-radius: 4px;">
+                        <div style="width: {% if count_planned|add:count_preparing > 0 %}{% widthratio count_preparing count_planned|add:count_preparing 100 %}{% else %}0{% endif %}%; height: 100%; background: var(--color-primary); border-radius: 4px; transition: width 1s ease-in-out;"></div>
+                    </div>
+                </div>
+
+                <!-- Serving -->
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600;">
+                        <span>SERVING</span>
+                        <span>{{ count_serving }} Active</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: var(--color-border); border-radius: 4px;">
+                        <div style="width: {% if count_preparing|add:count_serving > 0 %}{% widthratio count_serving count_preparing|add:count_serving 100 %}{% else %}0{% endif %}%; height: 100%; background: var(--success); border-radius: 4px; transition: width 1s ease-in-out;"></div>
+                    </div>
+                </div>
+
+                <!-- Surplus Check -->
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600;">
+                        <span>SURPLUS CHECK</span>
+                        <span style="color: var(--warning);">{{ surplus_pending }} Pending</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Production Table -->
+        <div class="table-card">
+            <div class="table-card-header">
+                <h2 style="font-size: 1.2rem; margin: 0;">Today's Production</h2>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Meal Session</th>
+                        <th style="text-align: right;">Planned</th>
+                        <th style="text-align: right;">Prepared</th>
+                        <th style="text-align: right;">Served</th>
+                        <th style="text-align: right;">Surplus</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in meals_today %}
+                    <tr>
+                        <td>
+                            <strong>{{ m.meal_session }}</strong><br>
+                            <span style="font-size: 0.8rem; color: var(--color-text-secondary);">{{ m.meal_type }}</span>
+                        </td>
+                        <td style="text-align: right;">{{ m.recommended_production|default:"-" }}</td>
+                        <td style="text-align: right;">{{ m.meals_prepared }}</td>
+                        <td style="text-align: right;">{{ m.meals_consumed }}</td>
+                        <td style="text-align: right;">{{ m.leftover_meals }}</td>
+                        <td>
+                            {% if m.status == 'COMPLETED' %}
+                            <span class="badge emerald">Completed</span>
+                            {% elif m.status == 'SERVING' %}
+                            <span class="badge primary">Serving</span>
+                            {% elif m.status == 'PREPARING' %}
+                            <span class="badge amber">Preparing</span>
+                            {% elif m.status == 'READY' %}
+                            <span class="badge blue">Ready</span>
+                            {% else %}
+                            <span class="badge gray">{{ m.status }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 32px; color: var(--color-text-secondary);">
+                            <i class="fas fa-clipboard-list" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.5;"></i>
+                            <p>No meal production planned for today.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Right Column: Quick Actions & Needs Attention -->
+    <div>
+        <!-- Needs Attention Queue -->
+        <div class="card" style="margin-bottom: 24px; border: 1px solid var(--danger); background: rgba(239, 68, 68, 0.02);">
+            <div class="table-card-header" style="border-bottom-color: rgba(239, 68, 68, 0.1);">
+                <h2 style="font-size: 1.1rem; margin: 0; color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Needs Attention</h2>
+            </div>
+            <div style="padding: 16px;">
+                {% if alerts %}
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+                        {% for alert in alerts %}
+                        <li style="display: flex; gap: 12px; align-items: flex-start; font-size: 0.9rem;">
+                            <span style="color: {% if alert.severity == 'HIGH' %}var(--danger){% elif alert.severity == 'MEDIUM' %}var(--warning){% else %}var(--info){% endif %};">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; margin-top: 6px;"></i>
+                            </span>
+                            <div>
+                                <div style="font-weight: 500; color: var(--color-text-primary);">{{ alert.reason }}</div>
+                                <div style="font-size: 0.8rem; color: var(--color-text-secondary);">{{ alert.action_required }}</div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div style="text-align: center; color: var(--success); padding: 16px;">
+                        <i class="fas fa-check-circle" style="font-size: 1.5rem; margin-bottom: 8px;"></i>
+                        <p style="margin: 0; font-size: 0.9rem;">All clear. No active alerts.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="table-card-header">
+                <h2 style="font-size: 1.1rem; margin: 0;"><i class="fas fa-bolt" style="color: var(--color-warning);"></i> Quick Actions</h2>
+            </div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+                <a href="{% url 'kitchen_meal_planning' %}" class="btn" style="text-align: left; justify-content: flex-start; padding: 12px 16px; background: var(--color-surface-elevated); border: 1px solid var(--color-border); color: var(--color-text-primary);">
+                    <i class="fas fa-calendar-alt" style="width: 24px; color: var(--color-primary);"></i> Meal Planning
+                </a>
+                <a href="{% url 'kitchen_production_tracking' %}" class="btn" style="text-align: left; justify-content: flex-start; padding: 12px 16px; background: var(--color-surface-elevated); border: 1px solid var(--color-border); color: var(--color-text-primary);">
+                    <i class="fas fa-fire" style="width: 24px; color: var(--danger);"></i> Production Tracking
+                </a>
+                <a href="{% url 'kitchen_register_surplus' %}" class="btn" style="text-align: left; justify-content: flex-start; padding: 12px 16px; background: var(--color-surface-elevated); border: 1px solid var(--color-border); color: var(--color-text-primary);">
+                    <i class="fas fa-box-open" style="width: 24px; color: var(--warning);"></i> Report Surplus
+                </a>
+                <a href="{% url 'kitchen_inventory' %}" class="btn" style="text-align: left; justify-content: flex-start; padding: 12px 16px; background: var(--color-surface-elevated); border: 1px solid var(--color-border); color: var(--color-text-primary);">
+                    <i class="fas fa-boxes" style="width: 24px; color: var(--info);"></i> Inventory Management
+                </a>
+                <a href="{% url 'kitchen_redistribution' %}" class="btn" style="text-align: left; justify-content: flex-start; padding: 12px 16px; background: var(--color-surface-elevated); border: 1px solid var(--color-border); color: var(--color-text-primary);">
+                    <i class="fas fa-truck-loading" style="width: 24px; color: var(--success);"></i> Redistribution Queue
+                </a>
+                <a href="{% url 'kitchen_waste_prevention' %}" class="btn" style="text-align: left; justify-content: flex-start; padding: 12px 16px; background: var(--color-surface-elevated); border: 1px solid var(--color-border); color: var(--color-text-primary);">
+                    <i class="fas fa-shield-virus" style="width: 24px; color: var(--primary);"></i> Safety & Waste Prevention
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

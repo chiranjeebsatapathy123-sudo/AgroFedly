@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block title %}Sign In - AgroFedly{% endblock %}
+
+{% block content %}
+<section class="auth-wrap scene-3d-container" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: var(--background);">
+  
+  <!-- Subtle Background Canvas for 3D -->
+  <div id="login3DCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.6;"></div>
+
+  <div class="auth-card card-3d anim-fade-up" style="max-width: 440px; width: 100%; margin: 20px; padding: 48px; background: var(--surface); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); z-index: 10; position: relative;">
+    
+    <div style="text-align: center; margin-bottom: 32px;">
+      <h1 class="anim-fade-up stagger-2" style="font-size: 2.2rem; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.5px; color: var(--text);">
+        AGROFEDLY
+      </h1>
+      <p class="anim-fade-in stagger-3" style="color: var(--text-muted); font-size: 1rem; line-height: 1.4;">
+        Intelligent Agriculture<br>& Food Operations Platform
+      </p>
+    </div>
+    
+    {% if messages %}
+    <div class="auth-messages anim-fade-in" style="margin-bottom: 24px;">
+      {% for message in messages %}
+        <div style="padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; font-weight: 500; {% if message.tags == 'error' %}background: rgba(220, 53, 69, 0.1); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.2);{% else %}background: rgba(40, 167, 69, 0.1); color: #28a745; border: 1px solid rgba(40, 167, 69, 0.2);{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" id="smartLoginForm" class="form-grid anim-scale-in stagger-4" style="display: flex; flex-direction: column; gap: 20px;">
+      {% csrf_token %}
+      {% if request.GET.next %}
+          <input type="hidden" name="next" value="{{ request.GET.next }}">
+      {% endif %}
+      
+      <div class="input-group" style="position: relative;">
+        <label for="username" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; color: var(--text);">Email or Username</label>
+        <input type="text" id="username" name="username" required autocomplete="username" placeholder="name@example.com" class="auth-input" style="width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--background); color: var(--text); font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s; box-sizing: border-box;">
+      </div>
+      
+      <div class="input-group" style="position: relative;">
+        <label for="password" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; color: var(--text);">Password</label>
+        <div style="position: relative;">
+            <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••" class="auth-input" style="width: 100%; padding: 14px 45px 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--background); color: var(--text); font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s; box-sizing: border-box;">
+            <button type="button" id="togglePassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+        </div>
+      </div>
+      
+      <button type="submit" id="signInBtn" class="btn primary full" style="padding: 16px; font-size: 1.1rem; font-weight: 600; margin-top: 8px; border-radius: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.3s ease;">
+        <span class="btn-text">Sign In</span>
+        <span class="btn-loader" style="display: none;">
+          <svg class="spinner" width="20" height="20" viewBox="0 0 50 50" style="animation: spin 1s linear infinite;">
+            <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="90, 150" style="opacity: 0.8;"></circle>
+          </svg>
+        </span>
+      </button>
+    </form>
+    
+    <div class="auth-foot anim-fade-in stagger-5" style="margin-top: 32px; text-align: center; font-size: 0.95rem; display: flex; flex-direction: column; gap: 12px;">
+      <a href="#" style="color: var(--text-muted); text-decoration: none; transition: color 0.2s;">Forgot password?</a>
+      <div>
+        <span style="color: var(--text-muted);">Don't have an account?</span> 
+        <a href="{% url 'register_role' 'FARMER' %}" style="color: var(--primary); text-decoration: none; font-weight: 600; margin-left: 4px;">Register</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .auth-input:focus {
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 10, 191, 83), 0.15) !important;
+      outline: none;
+  }
+  @keyframes spin {
+      100% { transform: rotate(360deg); }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      // Form submission interaction
+      const form = document.getElementById('smartLoginForm');
+      const btn = document.getElementById('signInBtn');
+      const btnText = btn.querySelector('.btn-text');
+      const btnLoader = btn.querySelector('.btn-loader');
+      
+      form.addEventListener('submit', () => {
+          btn.style.opacity = '0.9';
+          btn.style.pointerEvents = 'none';
+          btnText.textContent = 'Authenticating...';
+          btnLoader.style.display = 'inline-block';
+      });
+
+      // Password visibility toggle
+      const togglePassword = document.getElementById('togglePassword');
+      const password = document.getElementById('password');
+      
+      togglePassword.addEventListener('click', function (e) {
+          const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+          password.setAttribute('type', type);
+          // Toggle icon (simplified)
+          if (type === 'text') {
+              this.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+          } else {
+              this.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+          }
+      });
+      
+      // Setup subtle 3D scene background if available
+      if (window.agrofedly3D && window.HeroScene) {
+          // Wrap it in a way that doesn't trigger mousemove on the card
+          setTimeout(() => {
+              window.agrofedly3D.loadScene(window.HeroScene);
+          }, 100);
+      }
+  });
+</script>
+{% endblock %}

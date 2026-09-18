@@ -1,30 +1,85 @@
 {% extends 'base.html' %}
 {% block title %}Meal Planning - AgroFedly{% endblock %}
 {% block content %}
-<div class="page-head">
-    <h1><i class="fas fa-calendar-alt"></i> Meal Planning</h1>
-    <a href="{% url 'kitchen_meal_planning' %}?action=add" class="btn primary"><i class="fas fa-plus"></i> New Session</a>
+<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h1 style="margin: 0; font-size: 1.8rem; color: var(--color-text-primary, #000);"><i class="fas fa-calendar-alt" style="color:var(--color-primary); margin-right: 8px;"></i> Meal Planning</h1>
+        </div>
+        <div style="color: var(--color-text-secondary, #666); font-size: 0.95rem; display: flex; align-items: center; gap: 16px;">
+            <span><i class="fas fa-info-circle"></i> View AI demand forecasts and approve daily meal production plans.</span>
+        </div>
+    </div>
+    <div class="detail-actions" style="display: flex; gap: 12px; align-items: center;">
+        <a href="{% url 'kitchen_meal_planning' %}?action=add" class="btn primary"><i class="fas fa-plus"></i> New Session</a>
+    </div>
 </div>
-<div class="panel">
+
+<div class="table-card">
+    <div class="table-card-header">
+        <h2 style="font-size: 1.2rem; margin: 0;">Planned Meals</h2>
+    </div>
     <table>
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Session</th>
-                <th>Expected Attendance</th>
+                <th>Date / Session</th>
+                <th style="text-align: right;">AI Forecast</th>
+                <th style="text-align: right;">AI Recommendation</th>
+                <th style="text-align: right;">Human Approved</th>
                 <th>Mode</th>
+                <th>Status</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for meal in meals %}
             <tr>
-                <td>{{ meal.date }}</td>
-                <td>{{ meal.meal_session }}</td>
-                <td>{{ meal.expected_attendance }}</td>
-                <td><span class="badge">{{ meal.event_mode }}</span></td>
+                <td>
+                    <strong>{{ meal.date|date:"M d, Y" }}</strong><br>
+                    <span style="font-size: 0.8rem; color: var(--color-text-secondary);">{{ meal.meal_session }} ({{ meal.meal_type }})</span>
+                </td>
+                <td style="text-align: right;">
+                    {% if meal.predicted_demand %}
+                    <span style="color: var(--info); font-weight: 500;">{{ meal.predicted_demand }}</span>
+                    {% else %}
+                    <span style="color: var(--color-text-secondary);">-</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: right;">
+                    {% if meal.recommended_production %}
+                    <span style="color: var(--primary); font-weight: 500;">{{ meal.recommended_production }}</span>
+                    {% else %}
+                    <span style="color: var(--color-text-secondary);">-</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: right;">
+                    <strong>{{ meal.expected_attendance }}</strong>
+                </td>
+                <td><span class="badge gray">{{ meal.event_mode }}</span></td>
+                <td>
+                    {% if meal.status == 'COMPLETED' %}
+                    <span class="badge emerald">Completed</span>
+                    {% elif meal.status == 'SERVING' %}
+                    <span class="badge primary">Serving</span>
+                    {% elif meal.status == 'PREPARING' %}
+                    <span class="badge amber">Preparing</span>
+                    {% elif meal.status == 'READY' %}
+                    <span class="badge blue">Ready</span>
+                    {% else %}
+                    <span class="badge gray">{{ meal.status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="btn small outline" onclick="alert('Feature coming soon')">Edit Plan</button>
+                </td>
             </tr>
             {% empty %}
-            <tr><td colspan="4" style="text-align: center;">No meal sessions planned.</td></tr>
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 32px; color: var(--color-text-secondary);">
+                    <i class="fas fa-calendar-times" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.5;"></i>
+                    <p>No meal sessions planned.</p>
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>

@@ -61,49 +61,61 @@
      </a>
      
      <nav class="rd-nav">
-        <a href="{% url 'dashboard' %}" class="rd-nav-item active"><i class="fas fa-home"></i> Dashboard</a>
+        <!-- Universal Application Shell Navigation based on Active Workspace -->
         
-        <div class="rd-nav-group">Agriculture</div>
-        <button type="button" class="rd-nav-item rd-nav-expand" onclick="this.classList.toggle('active'); this.nextElementSibling.classList.toggle('active')" style="width:100%; border:none; background:transparent; cursor:pointer; text-align:left;">
-            <i class="fas fa-seedling"></i> Agriculture Operations <i class="fas fa-chevron-down" style="margin-left:auto;font-size:10px; transition: transform 0.2s;"></i>
-        </button>
-        <div class="rd-sub-nav">
-           <a href="{% url 'agri_dashboard' %}">Farms</a>
-           <a href="{% url 'agri_produce_list' %}">Produce</a>
-           <a href="{% url 'forecast_7_days' %}">Demand Forecast</a>
-           <a href="{% url 'agri_processing_list' %}">Production</a>
-           <a href="{% url 'agri_iot_dashboard' %}">Processing & Storage</a>
-           <a href="{% url 'weather_data' %}">Weather</a>
-           <a href="{% url 'agri_disease_scanner' %}">Quality</a>
-        </div>
-        
-        <div class="rd-nav-group">Operations</div>
-        <a href="{% url 'surplus_list' %}" class="rd-nav-item"><i class="fas fa-box"></i> Surplus</a>
-        <a href="{% url 'ecosystem_coordination' %}" class="rd-nav-item"><i class="fas fa-network-wired"></i> Redistribution</a>
+        {% if request.session.active_workspace == 'AGRICULTURE' %}
+        <div class="rd-nav-group">Agriculture Workspace</div>
+        <a href="{% url 'agri_dashboard' %}" class="rd-nav-item"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="{% url 'agri_farm_list' %}" class="rd-nav-item"><i class="fas fa-tractor"></i> Farms</a>
+        <a href="{% url 'agri_field_list' %}" class="rd-nav-item"><i class="fas fa-layer-group"></i> Fields</a>
+        <a href="{% url 'weather_data' %}" class="rd-nav-item"><i class="fas fa-cloud-sun"></i> Weather</a>
+        <a href="{% url 'agri_disease_scanner' %}" class="rd-nav-item"><i class="fas fa-microscope"></i> Disease Intelligence</a>
+        <a href="{% url 'agri_yield_predictor' %}" class="rd-nav-item"><i class="fas fa-chart-area"></i> Yield Intelligence</a>
+        <a href="{% url 'agri_iot_dashboard' %}" class="rd-nav-item"><i class="fas fa-broadcast-tower"></i> IoT</a>
+        <a href="{% url 'agri_produce_list' %}" class="rd-nav-item"><i class="fas fa-box"></i> Produce</a>
+        <a href="{% url 'agri_market_trends' %}" class="rd-nav-item"><i class="fas fa-store"></i> Market</a>
+        {% elif request.session.active_workspace == 'KITCHEN' %}
+        <div class="rd-nav-group">Kitchen Workspace</div>
+        <a href="{% url 'kitchen_dashboard' %}" class="rd-nav-item"><i class="fas fa-home"></i> Command Center</a>
+        <a href="{% url 'predict_demand' %}" class="rd-nav-item"><i class="fas fa-chart-line"></i> Demand Forecast</a>
+        <a href="{% url 'kitchen_meal_planning' %}" class="rd-nav-item"><i class="fas fa-calendar-alt"></i> Meal Planning</a>
+        <a href="{% url 'kitchen_production' %}" class="rd-nav-item"><i class="fas fa-fire"></i> Production</a>
+        <a href="{% url 'kitchen_inventory' %}" class="rd-nav-item"><i class="fas fa-boxes"></i> Inventory</a>
+        <a href="{% url 'kitchen_waste_prevention' %}" class="rd-nav-item"><i class="fas fa-shield-alt"></i> Food Safety</a>
+        <a href="{% url 'kitchen_redistribution' %}" class="rd-nav-item"><i class="fas fa-hand-holding-heart"></i> Redistribution</a>
+        <a href="{% url 'kitchen_analytics' %}" class="rd-nav-item"><i class="fas fa-chart-bar"></i> Analytics</a>
+        {% elif request.session.active_workspace == 'REDISTRIBUTION' %}
+        <div class="rd-nav-group">Redistribution Workspace</div>
+        <a href="{% url 'redistribution_dashboard' %}" class="rd-nav-item"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="{% url 'surplus_list' %}" class="rd-nav-item"><i class="fas fa-box-open"></i> Available Food</a>
         <a href="{% url 'recipient_list' %}" class="rd-nav-item"><i class="fas fa-users"></i> Recipients</a>
-        <a href="{% url 'delivery_list' %}" class="rd-nav-item"><i class="fas fa-truck"></i> Delivery</a>
+        <a href="{% url 'delivery_list' %}" class="rd-nav-item"><i class="fas fa-truck"></i> Deliveries</a>
+        <a href="#" onclick="let code=prompt('Enter Tracking Code:'); if(code) window.location.href='/trace/'+code+'/'; return false;" class="rd-nav-item"><i class="fas fa-qrcode"></i> Traceability</a>
+        {% elif request.session.active_workspace == 'LOGISTICS' %}
+        <div class="rd-nav-group">Logistics Workspace</div>
+        <a href="{% url 'delivery_control' %}" class="rd-nav-item"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="{% url 'delivery_list' %}" class="rd-nav-item"><i class="fas fa-route"></i> Delivery Queue</a>
+        {% elif request.session.active_workspace == 'ADMIN' %}
+        <div class="rd-nav-group">Administration Workspace</div>
+        <a href="{% url 'organization_dashboard' %}" class="rd-nav-item"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="{% url 'organization_admin_members' %}" class="rd-nav-item"><i class="fas fa-users"></i> Users</a>
+        <a href="{% url 'data_quality_center' %}" class="rd-nav-item"><i class="fas fa-check-double"></i> Data Quality</a>
+        <a href="{% url 'security_center' %}" class="rd-nav-item"><i class="fas fa-shield-alt"></i> Security</a>
+        <a href="{% url 'system_health' %}" class="rd-nav-item"><i class="fas fa-heartbeat"></i> System Health</a>
+        {% else %}
+        <!-- Fallback Navigation -->
+        <a href="{% url 'dashboard' %}" class="rd-nav-item active"><i class="fas fa-home"></i> Dashboard</a>
+        {% endif %}
         
-        <div class="rd-nav-group">Food & Kitchen</div>
+        <div class="rd-nav-group">Intelligence</div>
         <button type="button" class="rd-nav-item rd-nav-expand" onclick="this.classList.toggle('active'); this.nextElementSibling.classList.toggle('active')" style="width:100%; border:none; background:transparent; cursor:pointer; text-align:left;">
-            <i class="fas fa-utensils"></i> Kitchen Operations <i class="fas fa-chevron-down" style="margin-left:auto;font-size:10px; transition: transform 0.2s;"></i>
+            <i class="fas fa-brain"></i> AI & Analytics <i class="fas fa-chevron-down" style="margin-left:auto;font-size:10px; transition: transform 0.2s;"></i>
         </button>
         <div class="rd-sub-nav">
-           <a href="{% url 'kitchen_dashboard' %}">Dashboard</a>
-           <a href="{% url 'kitchen_meal_planning' %}">Meal Planning</a>
-           <a href="{% url 'kitchen_production' %}">Production Tracking</a>
-           <a href="{% url 'kitchen_register_surplus' %}">Register Surplus</a>
-           <a href="{% url 'kitchen_redistribution' %}">Redistribution Queue</a>
-           <a href="{% url 'kitchen_inventory' %}">Inventory</a>
-           <a href="{% url 'kitchen_analytics' %}">Analytics</a>
+           <a href="{% url 'intelligence_center' %}">AI Insights</a>
+           <a href="{% url 'ai_operations_center' %}">AI Monitoring</a>
+           <a href="{% url 'impact_dashboard' %}">Operations Analytics</a>
         </div>
-
-        <div class="rd-nav-group">Intelligence</div>
-        <a href="{% url 'impact_dashboard' %}" class="rd-nav-item"><i class="fas fa-chart-pie"></i> Analytics</a>
-        <a href="{% url 'delivery_list' %}" class="rd-nav-item"><i class="fas fa-map-marker-alt"></i> Traceability</a>
-        <a href="{% url 'intelligence_center' %}" class="rd-nav-item"><i class="fas fa-brain"></i> AI Insights</a>
-        
-        <div class="rd-nav-group">System</div>
-        <a href="{% url 'organization_dashboard' %}" class="rd-nav-item"><i class="fas fa-cog"></i> Settings</a>
         
         <div style="margin-top:auto; padding:24px;">
             <button id="copilot-sidebar-btn" type="button" class="rd-nav-item" style="width:100%; border:none; background:var(--rd-primary); color:white; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(18,122,74,0.3);">
@@ -145,13 +157,17 @@
            <div class="rd-dropdown-container" id="lang-dropdown">
                <button class="rd-icon-btn" onclick="document.getElementById('lang-dropdown').classList.toggle('active')"><i class="fas fa-language"></i></button>
                <div class="rd-dropdown-menu" style="width: 150px; padding: 10px;">
-                   <a href="#" class="rd-dropdown-item">English (EN)</a>
-                   <a href="#" class="rd-dropdown-item">Hindi (HI)</a>
-                   <a href="#" class="rd-dropdown-item">Odia (OR)</a>
+                   <a href="javascript:void(0)" class="rd-dropdown-item">English (EN)</a>
+                   <a href="javascript:void(0)" class="rd-dropdown-item">Hindi (HI)</a>
+                   <a href="javascript:void(0)" class="rd-dropdown-item">Odia (OR)</a>
                </div>
            </div>
            
-           <button class="rd-icon-btn" onclick="document.body.classList.toggle('dark-theme')"><i class="far fa-sun"></i></button>
+           <button class="rd-icon-btn" onclick="document.body.classList.toggle('dark-theme')" title="Toggle Theme"><i class="far fa-sun"></i></button>
+
+           <div class="connection-status online ml-2 mr-2" id="conn-status" title="Connection Status">
+               <div class="conn-dot bg-green-500 rounded-full w-2 h-2 inline-block shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
+           </div>
            
            
              {% if active_org %}
@@ -168,13 +184,28 @@
 
            
            
+             <div class="rd-dropdown-container" id="workspace-dropdown">
+                 <div class="rd-org-pill" onclick="document.getElementById('workspace-dropdown').classList.toggle('active')" style="background: var(--surface); border: 1px solid var(--border);">
+                    <i class="fas fa-layer-group"></i> {{ request.session.active_workspace|default:'Workspace'|title }} <i class="fas fa-chevron-down" style="font-size:10px;"></i>
+                 </div>
+                 <div class="rd-dropdown-menu">
+                     <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted); font-weight: bold; text-transform: uppercase;">Switch Workspace</div>
+                     <a href="{% url 'switch_workspace' 'AGRICULTURE' %}" class="rd-dropdown-item {% if request.session.active_workspace == 'AGRICULTURE' %}active{% endif %}"><i class="fas fa-seedling" style="width:20px;text-align:center;"></i> Agriculture</a>
+                     <a href="{% url 'switch_workspace' 'KITCHEN' %}" class="rd-dropdown-item {% if request.session.active_workspace == 'KITCHEN' %}active{% endif %}"><i class="fas fa-utensils" style="width:20px;text-align:center;"></i> Kitchen</a>
+                     <a href="{% url 'switch_workspace' 'REDISTRIBUTION' %}" class="rd-dropdown-item {% if request.session.active_workspace == 'REDISTRIBUTION' %}active{% endif %}"><i class="fas fa-hands-helping" style="width:20px;text-align:center;"></i> Redistribution</a>
+                     <a href="{% url 'switch_workspace' 'LOGISTICS' %}" class="rd-dropdown-item {% if request.session.active_workspace == 'LOGISTICS' %}active{% endif %}"><i class="fas fa-truck" style="width:20px;text-align:center;"></i> Logistics</a>
+                     <div class="rd-dropdown-divider"></div>
+                     <a href="{% url 'switch_workspace' 'ADMIN' %}" class="rd-dropdown-item {% if request.session.active_workspace == 'ADMIN' %}active{% endif %}"><i class="fas fa-cogs" style="width:20px;text-align:center;"></i> Administration</a>
+                 </div>
+             </div>
+
              <div class="rd-dropdown-container" id="user-dropdown">
                  <div class="rd-user-pill" onclick="document.getElementById('user-dropdown').classList.toggle('active')">
                     <div class="rd-user-avatar"><i class="fas fa-user"></i></div>
                     {{ user.username }} <i class="fas fa-chevron-down" style="font-size:10px;"></i>
                  </div>
                  <div class="rd-dropdown-menu">
-                     <a href="{% url 'dashboard' %}" class="rd-dropdown-item"><i class="fas fa-home" style="width:20px;text-align:center;"></i> Dashboard</a>
+                     <a href="{% url 'dashboard' %}" class="rd-dropdown-item"><i class="fas fa-home" style="width:20px;text-align:center;"></i> My Home</a>
                      <a href="{% url 'organization_dashboard' %}" class="rd-dropdown-item"><i class="fas fa-cog" style="width:20px;text-align:center;"></i> Settings</a>
                      <div class="rd-dropdown-divider"></div>
                      <a href="{% url 'logout' %}" class="rd-dropdown-item" style="color:var(--color-danger);"><i class="fas fa-sign-out-alt" style="width:20px;text-align:center;"></i> Logout</a>
@@ -371,9 +402,7 @@
 </script>
 {% endif %}
 
-{% include 'command_palette.html' %}
 
-<script>
     // Close dropdowns when clicking outside
     document.addEventListener('click', function(event) {
         if (!event.target.closest('.rd-dropdown-container')) {
@@ -441,6 +470,24 @@ function toggleVoiceAssistant() {
         modal.style.display = 'none';
     }
 }
+</script>
+
+<script>
+    // Connection Status Logic
+    window.addEventListener('online', () => {
+        const dot = document.querySelector('#conn-status .conn-dot');
+        if(dot) {
+            dot.className = 'conn-dot bg-green-500 rounded-full w-2 h-2 inline-block shadow-[0_0_8px_rgba(34,197,94,0.8)]';
+            dot.title = "Online";
+        }
+    });
+    window.addEventListener('offline', () => {
+        const dot = document.querySelector('#conn-status .conn-dot');
+        if(dot) {
+            dot.className = 'conn-dot bg-red-500 rounded-full w-2 h-2 inline-block shadow-[0_0_8px_rgba(239,68,68,0.8)]';
+            dot.title = "Offline (PWA mode active)";
+        }
+    });
 </script>
 
 {% include 'command_palette.html' %}

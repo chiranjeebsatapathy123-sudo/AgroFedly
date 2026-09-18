@@ -5,14 +5,25 @@
 <div class="breadcrumb" style="max-width:1240px; margin: 20px auto 0; padding: 0 28px;">
     <a href="{% url 'index' %}">AgroFedly</a> <span>/</span> <a href="{% url 'dashboard' %}">Dashboard</a> <span>/</span> <span>Surplus Food</span>
 </div>
-<section class="page-head anim-fade-in" style="padding-top:10px;">
+<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
+    <!-- Title and Status -->
     <div>
-        <div class="eyebrow">{% trans "FOOD INVENTORY" %}</div>
-        <h1>{% trans "Surplus food" %}</h1>
-        <p>{% trans "Track prepared food, consumption and eligible surplus. Only SAFE quantities can move into redistribution." %}</p>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h1 style="margin: 0; font-size: 1.8rem; color: var(--color-text-primary, #000);">Surplus Food Inventory</h1>
+            <span class="badge emerald">Active</span>
+        </div>
+        
+        <!-- Context / Subtitle -->
+        <div style="color: var(--color-text-secondary, #666); font-size: 0.95rem; display: flex; align-items: center; gap: 16px;">
+            <span><i class="fas fa-info-circle"></i> Track prepared food and eligible surplus. Only SAFE quantities can move into redistribution.</span>
+        </div>
     </div>
-    <a class="btn primary anim-scale-in stagger-1" href="{% url 'add_surplus' %}">{% trans "＋ Add Surplus" %}</a>
-</section>
+
+    <!-- Actions Bar -->
+    <div class="detail-actions" style="display: flex; gap: 12px; align-items: center;">
+        <a class="btn primary" href="{% url 'add_surplus' %}">＋ Add Surplus</a>
+    </div>
+</div>
 
 <div class="table-card reveal anim-fade-up stagger-2">
     <table>

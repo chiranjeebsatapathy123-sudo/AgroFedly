@@ -1,3 +1,4 @@
+from feedly.decorators import require_sector
 from ..decorators import _organization_required, _manager_required, require_org_role
 import json
 import os
@@ -181,3 +182,22 @@ def recipient_recommendations(request, food_id):
         ranked.append({'name': recipient.name, 'score': round(score * 100, 1), 'capacity': recipient.capacity, 'distance_km': recipient.distance_km, 'urgency': recipient.urgency_score, 'explanation': explanation})
     ranked.sort(key=lambda x: x['score'], reverse=True)
     return JsonResponse({'food': food.food_name, 'quantity': food.quantity, 'recommendations': ranked[:5]})
+
+@login_required
+@require_sector('REDISTRIBUTION')
+def redistribution_dashboard(request):
+    org_member = request.user.organization_memberships.first()
+    org = org_member.organization if org_member else None
+    
+    surplus_available = SurplusFood.objects.filter(status='SAFE', quantity__gt=0).order_by('expiry_date')
+    pending_requests = Recipient.objects.filter(organization=org)
+    active_deliveries = Delivery.objects.filter(status='IN_TRANSIT')
+    
+    context = {
+        'surplus_available': surplus_available[:10],
+        'total_surplus': surplus_available.aggregate(total=Sum('quantity'))['total'] or 0,
+        'pending_requests': pending_requests.count(),
+        'active_deliveries': active_deliveries.count(),
+        'organization': org
+    }
+    return render(request, 'redistribution/dashboard.html', context)

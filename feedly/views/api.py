@@ -367,7 +367,7 @@ def copilot_chat(request):
                 return JsonResponse(ai_response)
             
             # Phase 4 Advisor
-            ai_response = get_copilot_response(request.user, user_message)
+            ai_response = get_copilot_response(request.user, user_message, context)
             
             # If the response is a JSON string (e.g. for navigation), parse it
             try:
@@ -439,7 +439,7 @@ def api_global_search(request):
         members = OrganizationMember.objects.filter(
             organization=org,
             user__username__icontains=q
-        )
+        ).select_related('user')
         for m in members[:3]:
             results.append({
                 'title': m.user.username,
@@ -462,7 +462,7 @@ def api_global_search(request):
                 'icon': '🚜'
             })
             
-        fields = Field.objects.filter(farm__organization=org, name__icontains=q)
+        fields = Field.objects.filter(farm__organization=org, name__icontains=q).select_related('farm')
         for f in fields[:3]:
             results.append({
                 'title': f.name,
