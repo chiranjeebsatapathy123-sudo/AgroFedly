@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Greenhouse Controller - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="rd-container" style="padding-top: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h2 style="margin: 0;">Greenhouse Controller</h2>
+            <p style="color: var(--af-text-muted, #6b7280); margin-top: 0.5rem;">Manage IoT climate systems and automation.</p>
+        </div>
+        <a href="{% url 'agri_iot_dashboard' %}" class="rd-btn rd-btn-secondary">Back to IoT Dashboard</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <div class="rd-card">
+            <h3 style="margin-top: 0; display: flex; justify-content: space-between; align-items: center;">
+                Climate Control
+                <span style="font-size: 0.8rem; padding: 0.2rem 0.5rem; background: var(--af-success, #10b981); color: white; border-radius: 4px;">Online</span>
+            </h3>
+            <div style="margin-top: 1.5rem;">
+                <form method="post" action="#">
+                    {% csrf_token %}
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Target Temperature (°C)</label>
+                        <input type="number" name="temp" class="rd-input" style="width: 100%;" value="22" step="0.5">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Target Humidity (%)</label>
+                        <input type="number" name="humidity" class="rd-input" style="width: 100%;" value="65">
+                    </div>
+                    <button type="submit" class="rd-btn rd-btn-primary" style="width: 100%;">Apply Settings</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="rd-card">
+            <h3 style="margin-top: 0; display: flex; justify-content: space-between; align-items: center;">
+                Irrigation System
+                <span style="font-size: 0.8rem; padding: 0.2rem 0.5rem; background: var(--af-warning, #f59e0b); color: white; border-radius: 4px;">Standby</span>
+            </h3>
+            <div style="margin-top: 1.5rem;">
+                <form method="post" action="#">
+                    {% csrf_token %}
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Next Schedule</label>
+                        <input type="time" name="schedule" class="rd-input" style="width: 100%;" value="18:00">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Duration (minutes)</label>
+                        <input type="number" name="duration" class="rd-input" style="width: 100%;" value="30">
+                    </div>
+                    <button type="submit" class="rd-btn rd-btn-primary" style="width: 100%;">Update Schedule</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

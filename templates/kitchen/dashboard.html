@@ -19,4 +19,25 @@
         <div class="stat-value" style="color: var(--color-danger);">{{ alerts.count }}</div>
     </div>
 </div>
+</div>
+
+<div class="card" style="margin-top: 30px; padding: 20px;">
+    <h2>Today's Operations Timeline</h2>
+    <div class="timeline" style="margin-top: 20px; padding-left: 20px; border-left: 2px solid var(--border);">
+        {% for event in timeline %}
+        <div class="timeline-item" style="position: relative; margin-bottom: 20px; padding-left: 20px;">
+            <div style="position: absolute; left: -26px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--primary);"></div>
+            <div style="font-weight: bold; color: var(--primary);">{{ event.updated_at|time:"H:i" }}</div>
+            <h4>{{ event.meal.name|default:"Meal Preparation" }}</h4>
+            <p class="small text-muted">Status: <span style="color: {% if event.status == 'COMPLETED' %}var(--success){% elif event.status == 'IN_PROGRESS' %}var(--warning){% else %}var(--text-muted){% endif %};">{{ event.status }}</span></p>
+            {% if event.notes %}<p class="small">{{ event.notes }}</p>{% endif %}
+        </div>
+        {% empty %}
+        <div class="text-center text-muted" style="padding: 20px;">
+            <i class="fas fa-clock" style="font-size: 2rem; margin-bottom: 10px; color: var(--border);"></i>
+            <p>No operations logged today.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

@@ -181,6 +181,22 @@ class SurplusFood(models.Model):
     # Phase 8: Kitchen Additions
     kitchen = models.ForeignKey('Kitchen', on_delete=models.SET_NULL, null=True, blank=True, related_name="surplus_records")
     preparation_record = models.ForeignKey('PreparationRecord', on_delete=models.SET_NULL, null=True, blank=True, related_name="surplus_records")
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.pk:
+            old_instance = SurplusFood.objects.get(pk=self.pk)
+            # Cannot change status directly to REDISTRIBUTED from UNSAFE
+            if old_instance.status == 'UNSAFE' and self.status == 'REDISTRIBUTED':
+                raise ValidationError("Cannot redistribute unsafe surplus food.")
+            # Cannot redistribute if not marked safe
+            if self.status == 'REDISTRIBUTED' and not self.is_safe:
+                raise ValidationError("Food must be marked safe before redistribution.")
+                
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
     measured_temperature = models.FloatField(null=True, blank=True)
     safety_status = models.CharField(max_length=50, default="PENDING_CHECK") # PENDING_CHECK, ELIGIBLE, NOT_ELIGIBLE, EXPIRED
 
@@ -255,12 +271,9 @@ class Delivery(models.Model):
     class Meta:
         ordering = ["-created_at"]
 
-    def save(self, *args, **kwargs):
-        if not self.tracking_code:
-            self.tracking_code = f"ANN-{uuid.uuid4().hex[:8].upper()}"
-            
+    def clean(self):
+        from django.core.exceptions import ValidationError
         if self.pk:
-            # Enforce state machine rules for existing records
             old_instance = Delivery.objects.get(pk=self.pk)
             old_status = old_instance.status
             new_status = self.status
@@ -275,8 +288,12 @@ class Delivery(models.Model):
             }
             
             if old_status != new_status and new_status not in valid_transitions.get(old_status, []):
-                raise ValueError(f"Illegal transition from {old_status} to {new_status}.")
+                raise ValidationError(f"Illegal transition from {old_status} to {new_status}.")
                 
+    def save(self, *args, **kwargs):
+        if not self.tracking_code:
+            self.tracking_code = f"ANN-{uuid.uuid4().hex[:8].upper()}"
+        self.clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -310,6 +327,14 @@ class AgriculturalProduce(models.Model):
     storage_condition = models.CharField(max_length=100, default="Room Temperature")
     quality_status = models.CharField(max_length=50, default="Good")
     processing_status = models.CharField(max_length=50, default="RAW")
+    
+    # Phase 37 Marketplace fields
+    marketplace_status = models.CharField(max_length=50, default="NOT_LISTED", choices=[
+        ('NOT_LISTED', 'Not Listed'), ('LISTED', 'Listed'), ('PENDING_QUALITY_CHECK', 'Pending Quality Check'), 
+        ('BOOKED', 'Booked'), ('IN_TRANSIT', 'In Transit'), ('DELIVERED', 'Delivered')
+    ])
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -456,6 +481,14 @@ class Equipment(models.Model):
     is_available = models.BooleanField(default=True)
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to='equipment/', null=True, blank=True)
+    
+    # Phase 37 Maintenance Fields
+    last_maintenance_date = models.DateField(null=True, blank=True)
+    next_maintenance_date = models.DateField(null=True, blank=True)
+    operating_hours = models.IntegerField(default=0)
+    maintenance_status = models.CharField(max_length=20, default='OK', choices=[
+        ('OK', 'OK'), ('MAINTENANCE_DUE', 'Maintenance Due'), ('OVERDUE', 'Overdue'), ('REPORTED_ISSUE', 'Reported Issue')
+    ])
 
 class EquipmentRental(models.Model):
     organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name="equipmentrentals", null=True, blank=True)
@@ -494,6 +527,11 @@ class FarmField(models.Model):
     planting_date = models.DateField(null=True, blank=True)
     expected_harvest_date = models.DateField(null=True, blank=True)
     health_status = models.CharField(max_length=50, default='Good')
+    status = models.CharField(
+        max_length=20, 
+        choices=[('PLANNED', 'Planned'), ('APPROACHING', 'Approaching'), ('READY', 'Ready'), ('HARVESTED', 'Harvested'), ('DELAYED', 'Delayed'), ('PARTIAL', 'Partial')],
+        default='PLANNED'
+    )
     geojson_data = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -705,7 +743,70 @@ class ProduceTraceabilityLedger(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"{self.transaction_type} - {self.timestamp}"
+        return f"{self.status} error at {self.timestamp}"
+
+# -----------------------------------------------------------------------------
+# PHASE 37: LIVE IOT ARCHITECTURE & SENSOR ENGINE
+# -----------------------------------------------------------------------------
+class IoTDevice(models.Model):
+    """Generic IoT device representing a hardware node on farm, kitchen or storage."""
+    device_id = models.CharField(max_length=100, unique=True)
+    device_type = models.CharField(max_length=50) # e.g. "SOIL_SENSOR", "STORAGE_THERMOSTAT", "WEATHER_STATION"
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='iot_devices')
+    
+    # Optional physical associations
+    farm = models.ForeignKey('Farm', on_delete=models.SET_NULL, null=True, blank=True, related_name='iot_devices')
+    field = models.ForeignKey('FarmField', on_delete=models.SET_NULL, null=True, blank=True, related_name='iot_devices')
+    kitchen = models.ForeignKey('Kitchen', on_delete=models.SET_NULL, null=True, blank=True, related_name='iot_devices')
+    
+    status = models.CharField(max_length=20, default='OFFLINE', choices=[
+        ('ONLINE', 'Online'), ('OFFLINE', 'Offline'), ('WARNING', 'Warning'), ('ERROR', 'Error'), ('NOT_CONFIGURED', 'Not Configured')
+    ])
+    last_seen = models.DateTimeField(null=True, blank=True)
+    firmware_version = models.CharField(max_length=50, blank=True)
+    installation_date = models.DateField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.device_id} ({self.device_type})"
+
+class IoTSensorReading(models.Model):
+    """Extensible sensor readings for any device."""
+    device = models.ForeignKey(IoTDevice, on_delete=models.CASCADE, related_name='readings')
+    sensor_type = models.CharField(max_length=50) # e.g. "temperature", "humidity", "soil_moisture"
+    value = models.FloatField()
+    unit = models.CharField(max_length=20) # e.g. "C", "%", "lux"
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-timestamp']
+        
+    def __str__(self):
+        return f"{self.device.device_id} - {self.sensor_type}: {self.value}{self.unit}"
+
+class IoTAlertThreshold(models.Model):
+    """Configurable thresholds to trigger SmartAlerts."""
+    device = models.ForeignKey(IoTDevice, on_delete=models.CASCADE, related_name='thresholds')
+    sensor_type = models.CharField(max_length=50)
+    min_value = models.FloatField(null=True, blank=True)
+    max_value = models.FloatField(null=True, blank=True)
+    action = models.CharField(max_length=50) # e.g. "WARNING", "CRITICAL", "IRRIGATION_REVIEW", "FOOD_SAFETY_REVIEW"
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return f"Threshold for {self.device.device_id} {self.sensor_type}"
+
+class IntegrationConfig(models.Model):
+    """Enterprise Integration settings."""
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='integrations')
+    integration_type = models.CharField(max_length=50) # e.g. "WEATHER_API", "PAYMENT_GATEWAY", "ERP"
+    status = models.CharField(max_length=20, default='NOT_CONFIGURED')
+    last_sync = models.DateTimeField(null=True, blank=True)
+    last_error = models.TextField(blank=True)
+    is_enabled = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"{self.organization.name} - {self.integration_type}"
 
 class StorageRecord(models.Model):
     STATUS_CHOICES = [
@@ -797,10 +898,14 @@ class AIRecommendation(models.Model):
     category = models.CharField(max_length=100)
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='MEDIUM')
     reason = models.TextField()
+    explanation = models.TextField(blank=True, help_text="Detailed WHY for the recommendation")
+    confidence = models.FloatField(null=True, blank=True, help_text="AI Confidence 0.0 to 100.0")
+    requires_human_approval = models.BooleanField(default=True, help_text="If true, cannot be auto-executed")
     recommended_action = models.TextField()
     potential_impact = models.CharField(max_length=250, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NEW')
     feedback_notes = models.TextField(blank=True, null=True)
+    resolved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="resolved_recommendations")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -1184,3 +1289,95 @@ class KitchenAlert(models.Model):
 
     def __str__(self):
         return f"{self.severity}: {self.reason}"
+
+class AppError(models.Model):
+    """
+    Stores unhandled exceptions or critical application errors for monitoring.
+    """
+    SEVERITY_CHOICES = (
+        ('LOW', 'Low (Warning)'),
+        ('MEDIUM', 'Medium (Recoverable Error)'),
+        ('HIGH', 'High (Critical Failure)'),
+    )
+    STATUS_CHOICES = (
+        ('NEW', 'New'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('RESOLVED', 'Resolved'),
+    )
+    
+    timestamp = models.DateTimeField(auto_now_add=True)
+    error_type = models.CharField(max_length=255)
+    message = models.TextField()
+    traceback = models.TextField(blank=True, null=True)
+    path = models.CharField(max_length=255, blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
+    severity = models.CharField(max_length=15, choices=SEVERITY_CHOICES, default='MEDIUM')
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='NEW')
+    occurrence_count = models.IntegerField(default=1)
+    
+    def __str__(self):
+        return f"{self.error_type} at {self.path} ({self.timestamp.strftime('%Y-%m-%d %H:%M')})"
+
+# -----------------------------------------------------------------------------
+# PHASE 37: LIVE IOT ARCHITECTURE & SENSOR ENGINE
+# -----------------------------------------------------------------------------
+class IoTDevice(models.Model):
+    """Generic IoT device representing a hardware node on farm, kitchen or storage."""
+    device_id = models.CharField(max_length=100, unique=True)
+    device_type = models.CharField(max_length=50) # e.g. "SOIL_SENSOR", "STORAGE_THERMOSTAT", "WEATHER_STATION"
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='iot_devices')
+    
+    # Optional physical associations
+    farm = models.ForeignKey('Farm', on_delete=models.SET_NULL, null=True, blank=True, related_name='iot_devices')
+    field = models.ForeignKey('FarmField', on_delete=models.SET_NULL, null=True, blank=True, related_name='iot_devices')
+    kitchen = models.ForeignKey('Kitchen', on_delete=models.SET_NULL, null=True, blank=True, related_name='iot_devices')
+    
+    status = models.CharField(max_length=20, default='OFFLINE', choices=[
+        ('ONLINE', 'Online'), ('OFFLINE', 'Offline'), ('WARNING', 'Warning'), ('ERROR', 'Error'), ('NOT_CONFIGURED', 'Not Configured')
+    ])
+    last_seen = models.DateTimeField(null=True, blank=True)
+    firmware_version = models.CharField(max_length=50, blank=True)
+    installation_date = models.DateField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.device_id} ({self.device_type})"
+
+class IoTSensorReading(models.Model):
+    """Extensible sensor readings for any device."""
+    device = models.ForeignKey(IoTDevice, on_delete=models.CASCADE, related_name='readings')
+    sensor_type = models.CharField(max_length=50) # e.g. "temperature", "humidity", "soil_moisture"
+    value = models.FloatField()
+    unit = models.CharField(max_length=20) # e.g. "C", "%", "lux"
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-timestamp']
+        
+    def __str__(self):
+        return f"{self.device.device_id} - {self.sensor_type}: {self.value}{self.unit}"
+
+class IoTAlertThreshold(models.Model):
+    """Configurable thresholds to trigger SmartAlerts."""
+    device = models.ForeignKey(IoTDevice, on_delete=models.CASCADE, related_name='thresholds')
+    sensor_type = models.CharField(max_length=50)
+    min_value = models.FloatField(null=True, blank=True)
+    max_value = models.FloatField(null=True, blank=True)
+    action = models.CharField(max_length=50) # e.g. "WARNING", "CRITICAL", "IRRIGATION_REVIEW", "FOOD_SAFETY_REVIEW"
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return f"Threshold for {self.device.device_id} {self.sensor_type}"
+
+class IntegrationConfig(models.Model):
+    """Enterprise Integration settings."""
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='integrations')
+    integration_type = models.CharField(max_length=50) # e.g. "WEATHER_API", "PAYMENT_GATEWAY", "ERP"
+    status = models.CharField(max_length=20, default='NOT_CONFIGURED')
+    last_sync = models.DateTimeField(null=True, blank=True)
+    last_error = models.TextField(blank=True)
+    is_enabled = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"{self.organization.name} - {self.integration_type}"

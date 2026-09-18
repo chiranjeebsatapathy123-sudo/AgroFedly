@@ -85,7 +85,7 @@
 </div>
 <script>
 function confirmDeleteSurplus(foodId) {
-    if (!window.ui) return alert('UI Core not loaded');
+    if (!window.ui) return console.error('UI Core not loaded');
     window.ui.showConfirm(
         'Delete Surplus Record',
         'Are you sure you want to delete this surplus record? This action cannot be undone.',

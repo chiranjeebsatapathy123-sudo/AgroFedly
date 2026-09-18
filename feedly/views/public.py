@@ -40,8 +40,16 @@ def terms(request):
     """Terms of Service."""
     return render(request, 'public/terms.html')
 
+from django.contrib import messages
+from django.shortcuts import redirect
+
 def contact(request):
     """Contact page."""
+    if request.method == 'POST':
+        # Simulated email/database action
+        name = request.POST.get('name')
+        messages.success(request, f"Thank you {name}, your message has been sent successfully!")
+        return redirect('contact')
     return render(request, 'public/contact.html')
 
 from django.http import JsonResponse

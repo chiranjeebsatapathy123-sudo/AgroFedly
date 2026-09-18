@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recipient Request Center - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1><i class="fas fa-hand-holding-heart" style="color:var(--color-primary);"></i> Recipient Request Center</h1>
+        <p>View available safe surplus and submit food requests.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+    <!-- Available Surplus -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <h2 style="font-size: 16px; margin: 0;">Eligible Surplus Available</h2>
+        </div>
+        {% if available_surplus %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Food Item</th>
+                    <th>Available Quantity</th>
+                    <th>Source</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for surplus in available_surplus %}
+                <tr>
+                    <td><strong>{{ surplus.food_name }}</strong></td>
+                    <td>{{ surplus.quantity }}</td>
+                    <td>{{ surplus.organization.name }}</td>
+                    <td>
+                        <span style="font-size: 11px; color: var(--color-text-secondary); border: 1px solid var(--color-border); padding: 2px 6px; border-radius: 4px;">NOT CONFIGURED</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state" style="padding: 30px; text-align: center;">
+            <p>No safe surplus is currently available. Please check back later.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recipient Profile Status -->
+    <div class="card" style="padding: 20px; background-color: var(--color-surface-elevated);">
+        <h3 style="margin-top:0; border-bottom:1px solid var(--color-border); padding-bottom:10px;">Your Profile</h3>
+        {% if profile %}
+        <p><strong>Status:</strong> <span class="pill {% if profile.is_verified %}success{% else %}warning{% endif %}">{% if profile.is_verified %}Verified{% else %}Unverified{% endif %}</span></p>
+        <p><strong>Capacity:</strong> {{ profile.capacity_meals|default:"Not specified" }} meals</p>
+        <p><strong>Service Area:</strong> {{ profile.service_area|default:"Not specified" }}</p>
+        {% else %}
+        <p style="color: var(--color-warning);">No recipient profile found for your organization. Please complete your profile to increase match priority.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

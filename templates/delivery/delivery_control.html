@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delivery Control - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1><i class="fas fa-truck" style="color:var(--color-primary);"></i> Delivery Control Center</h1>
+        <p>Monitor end-to-end logistics with mandatory QR timestamp verifications.</p>
+    </div>
+</div>
+
+<div class="kanban-board" style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px;">
+
+    <!-- PENDING Column -->
+    <div class="kanban-col" style="flex: 1; min-width: 250px; background: var(--color-surface); padding: 15px; border-radius: 8px;">
+        <h3 style="border-bottom: 2px solid var(--color-border); padding-bottom: 10px;">Pending Pickup ({{ columns.pending.count }})</h3>
+        {% for del in columns.pending %}
+        <div class="card" style="margin-top: 10px; padding: 15px; border-left: 4px solid var(--color-warning);">
+            <strong>{{ del.tracking_code }}</strong>
+            <div style="font-size: 12px; margin-top: 5px;">To: {{ del.surplus.redistributions.first.recipient.name|default:"TBD" }}</div>
+            <div style="margin-top: 10px;">
+                <span style="font-size: 11px; color: var(--color-text-secondary); border: 1px solid var(--color-border); padding: 2px 6px; border-radius: 4px;">UNASSIGNED</span>
+            </div>
+        </div>
+        {% empty %}
+        <p style="font-size: 13px; color:var(--color-text-secondary); margin-top:10px;">No pending deliveries.</p>
+        {% endfor %}
+    </div>
+
+    <!-- ASSIGNED Column -->
+    <div class="kanban-col" style="flex: 1; min-width: 250px; background: var(--color-surface); padding: 15px; border-radius: 8px;">
+        <h3 style="border-bottom: 2px solid var(--color-info); padding-bottom: 10px;">Assigned ({{ columns.assigned.count }})</h3>
+        {% for del in columns.assigned %}
+        <div class="card" style="margin-top: 10px; padding: 15px; border-left: 4px solid var(--color-info);">
+            <strong>{{ del.tracking_code }}</strong>
+            <div style="font-size: 12px; margin-top: 5px;">Driver: {{ del.driver.get_full_name|default:"Unassigned" }}</div>
+        </div>
+        {% empty %}
+        <p style="font-size: 13px; color:var(--color-text-secondary); margin-top:10px;">No assigned deliveries.</p>
+        {% endfor %}
+    </div>
+
+    <!-- IN TRANSIT Column -->
+    <div class="kanban-col" style="flex: 1; min-width: 250px; background: var(--color-surface); padding: 15px; border-radius: 8px;">
+        <h3 style="border-bottom: 2px solid var(--color-primary); padding-bottom: 10px;">In Transit ({{ columns.in_transit.count }})</h3>
+        {% for del in columns.in_transit %}
+        <div class="card" style="margin-top: 10px; padding: 15px; border-left: 4px solid var(--color-primary);">
+            <strong>{{ del.tracking_code }}</strong>
+            <div style="font-size: 12px; margin-top: 5px;">Est Arrival: {{ del.estimated_delivery_time|date:"H:i" }}</div>
+            <div style="margin-top: 10px;">
+                <button class="btn primary small" onclick="window.location.href='{% url 'delivery_scan_qr' del.id %}'">Verify Delivery</button>
+            </div>
+        </div>
+        {% empty %}
+        <p style="font-size: 13px; color:var(--color-text-secondary); margin-top:10px;">Nothing in transit.</p>
+        {% endfor %}
+    </div>
+
+    <!-- DELIVERED Column -->
+    <div class="kanban-col" style="flex: 1; min-width: 250px; background: var(--color-surface); padding: 15px; border-radius: 8px;">
+        <h3 style="border-bottom: 2px solid var(--color-success); padding-bottom: 10px;">Delivered ({{ columns.delivered.count }})</h3>
+        {% for del in columns.delivered %}
+        <div class="card" style="margin-top: 10px; padding: 15px; border-left: 4px solid var(--color-success);">
+            <strong>{{ del.tracking_code }}</strong>
+            <div style="font-size: 12px; margin-top: 5px;">Time: {{ del.actual_delivery_time|date:"H:i" }}</div>
+            <div style="font-size: 11px; color:var(--color-success); margin-top:5px;"><i class="fas fa-check-circle"></i> Verified</div>
+        </div>
+        {% empty %}
+        <p style="font-size: 13px; color:var(--color-text-secondary); margin-top:10px;">No completed deliveries yet.</p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

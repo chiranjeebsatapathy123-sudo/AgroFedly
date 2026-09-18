@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Kitchen Required - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="rd-container" style="max-width: 800px; margin: 4rem auto;">
+    <div class="rd-card" style="text-align:center; padding: 4rem 2rem; border-radius: var(--af-radius-lg, 12px);">
+        <i class="fas fa-store-slash" style="font-size: 4rem; color: var(--af-warning, #f59e0b); margin-bottom: 1.5rem;"></i>
+        <h2>No Kitchen Profile Found</h2>
+        <p style="color: var(--af-text-muted, #6b7280); max-width: 500px; margin: 1rem auto;">
+            Your organization does not currently have a registered kitchen profile. To use the meal planning, production tracking, and surplus redistribution features, please register your kitchen first.
+        </p>
+        <div style="margin-top: 2.5rem; display: flex; gap: 1rem; justify-content: center;">
+            <a href="{% url 'dashboard' %}" class="rd-btn rd-btn-secondary">Return to Dashboard</a>
+            <a href="{% url 'organization_edit' %}" class="rd-btn rd-btn-primary">Update Organization</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

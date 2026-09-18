@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sync Center - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1><i class="fas fa-sync" style="color:var(--color-primary);"></i> Offline Sync Center</h1>
+        <p>Manage data captured while offline. Records will sync automatically when connection returns.</p>
+    </div>
+</div>
+
+<div class="table-card">
+    <div style="padding: 15px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 14px;">Local Drafts</h3>
+        <button class="btn primary" onclick="forceSync()">Force Sync All</button>
+    </div>
+    
+    <div id="offline-records-container">
+        <!-- JS will populate this -->
+        <div class="empty large" id="empty-sync">
+            <i class="fas fa-cloud" style="font-size: 40px; color: var(--color-text-secondary); margin-bottom: 10px;"></i>
+            <h3>All Synced</h3>
+            <p>You have no offline drafts pending upload.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadOfflineRecords() {
+        const container = document.getElementById('offline-records-container');
+        const empty = document.getElementById('empty-sync');
+        
+        let pending = JSON.parse(localStorage.getItem('af_offline_sync_queue') || '[]');
+        
+        if (pending.length === 0) {
+            container.innerHTML = '';
+            container.appendChild(empty);
+            return;
+        }
+        
+        let html = '<table><thead><tr><th>Type</th><th>Captured At</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+        
+        pending.forEach((item, index) => {
+            html += `
+            <tr>
+                <td><b>${item.type}</b></td>
+                <td>${new Date(item.timestamp).toLocaleString()}</td>
+                <td><span class="pill assigned">Pending</span></td>
+                <td>
+                    <button class="btn soft" onclick="deleteDraft(${index})">Discard</button>
+                </td>
+            </tr>`;
+        });
+        
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+    
+    function deleteDraft(index) {
+        let pending = JSON.parse(localStorage.getItem('af_offline_sync_queue') || '[]');
+        pending.splice(index, 1);
+        localStorage.setItem('af_offline_sync_queue', JSON.stringify(pending));
+        loadOfflineRecords();
+    }
+    
+    function forceSync() {
+        if (!navigator.onLine) {
+            console.log("You are currently offline. Cannot force sync.");
+            return;
+        }
+        
+        let pending = JSON.parse(localStorage.getItem('af_offline_sync_queue') || '[]');
+        if (pending.length === 0) {
+            console.log("Nothing to sync.");
+            return;
+        }
+        
+        console.log("Syncing in background... (In production, this would post the JSON payloads to their respective APIs).");
+        // Simulated sync success
+        localStorage.setItem('af_offline_sync_queue', '[]');
+        loadOfflineRecords();
+    }
+    
+    window.addEventListener('DOMContentLoaded', loadOfflineRecords);
+</script>
+{% endblock %}

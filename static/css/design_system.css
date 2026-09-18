@@ -38,6 +38,15 @@
     --radius-sm: 6px;
     --radius-md: 12px;
     --radius-lg: 18px;
+
+    /* AF Aliases for new templates */
+    --af-primary: var(--brand-primary);
+    --af-bg: var(--bg-primary);
+    --af-text-muted: var(--text-muted);
+    --af-border: var(--border);
+    --af-surface-2: var(--surface-hover);
+    --af-success: var(--success);
+    --af-warning: var(--warning);
 }
 
 html.dark-theme {

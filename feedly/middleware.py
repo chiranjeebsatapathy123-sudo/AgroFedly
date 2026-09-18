@@ -35,3 +35,44 @@ class OrganizationMiddleware(MiddlewareMixin):
                 request.org_membership = membership
                 # Ensure session matches
                 request.session['active_organization_id'] = membership.organization.id
+
+import traceback
+from django.shortcuts import render
+from .models import AppError
+
+class AppErrorMiddleware(MiddlewareMixin):
+    """
+    Catches 500 exceptions, logs them to AppError model, and displays a user-friendly error page.
+    """
+    def process_exception(self, request, exception):
+        # Ignore 404s and common handled errors if needed
+        
+        tb_str = traceback.format_exc()
+        
+        # Check if identical error exists recently
+        error_type = type(exception).__name__
+        path = request.path
+        
+        # Try to increment existing unresolved error
+        existing_error = AppError.objects.filter(
+            error_type=error_type,
+            path=path,
+            status='NEW'
+        ).first()
+        
+        if existing_error:
+            existing_error.occurrence_count += 1
+            existing_error.save(update_fields=['occurrence_count'])
+        else:
+            AppError.objects.create(
+                error_type=error_type,
+                message=str(exception),
+                traceback=tb_str,
+                path=path,
+                user=request.user if request.user.is_authenticated else None,
+                organization=getattr(request, 'organization', None),
+                severity='HIGH'
+            )
+            
+        # Return generic error page (500)
+        return render(request, 'errors/500_generic.html', status=500)

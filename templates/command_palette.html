@@ -130,11 +130,23 @@
                 </a>
                 <a href="{% url 'add_surplus' %}" class="cp-item">
                     <div class="cp-item-icon emerald"><i class="fas fa-leaf"></i></div>
-                    <span style="flex:1">Log Surplus Produce</span>
+                    <span style="flex:1">Declare Surplus Produce</span>
                 </a>
-                <a href="{% url 'data_quality_center' %}" class="cp-item">
-                    <div class="cp-item-icon amber"><i class="fas fa-shield-alt"></i></div>
-                    <span style="flex:1">Run Quality Audit</span>
+                <a href="{% url 'agri_farm_add' %}" class="cp-item">
+                    <div class="cp-item-icon amber"><i class="fas fa-tractor"></i></div>
+                    <span style="flex:1">Create Farm</span>
+                </a>
+                <a href="{% url 'agri_field_add' %}" class="cp-item">
+                    <div class="cp-item-icon emerald"><i class="fas fa-seedling"></i></div>
+                    <span style="flex:1">Add Field</span>
+                </a>
+                <a href="{% url 'agri_event_add' %}" class="cp-item">
+                    <div class="cp-item-icon amber"><i class="fas fa-clipboard-list"></i></div>
+                    <span style="flex:1">Record Harvest</span>
+                </a>
+                <a href="{% url 'recipient_recommendations' 0 %}" class="cp-item" onclick="event.preventDefault(); window.location.href='/surplus/'">
+                    <div class="cp-item-icon blue"><i class="fas fa-search"></i></div>
+                    <span style="flex:1">Find Eligible Recipients</span>
                 </a>
 
                 <div class="cp-section-title" style="margin-top:10px;">Navigation</div>

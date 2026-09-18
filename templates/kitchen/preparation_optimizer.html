@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Preparation Optimizer - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1><i class="fas fa-magic" style="color:var(--color-primary);"></i> Preparation Optimizer</h1>
+        <p>AI-driven workflow mapping forecasted demand to preparation schedules. Review and confirm production quantities.</p>
+    </div>
+</div>
+
+<div class="table-card" style="margin-bottom:30px;">
+    <div class="table-card-header">
+        <h2 style="font-size: 16px; margin: 0;">AI Preparation Recommendations</h2>
+    </div>
+    {% if recommendations %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Recommendation</th>
+                <th>Confidence</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rec in recommendations %}
+            <tr>
+                <td>{{ rec.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <div style="font-weight: bold;">{{ rec.title }}</div>
+                    <div style="font-size: 12px; color: var(--color-text-secondary);">{{ rec.explanation }}</div>
+                </td>
+                <td>
+                    {% if rec.confidence %}
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <progress value="{{ rec.confidence }}" max="100" style="width:50px; height:6px;"></progress>
+                        <span>{{ rec.confidence }}%</span>
+                    </div>
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </td>
+                <td>
+                    <span style="font-size: 11px; color: var(--color-success); border: 1px solid var(--color-success); padding: 2px 6px; border-radius: 4px;">CONFIRM (NOT CONFIGURED)</span>
+                    <span style="font-size: 11px; color: var(--color-danger); border: 1px solid var(--color-danger); padding: 2px 6px; border-radius: 4px;">REJECT (NOT CONFIGURED)</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state" style="padding: 30px; text-align: center;">
+        <p>No pending recommendations. Production is fully planned.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="table-card">
+    <div class="table-card-header">
+        <h2 style="font-size: 16px; margin: 0;">Forecasted Demand (Upcoming 5 Days)</h2>
+    </div>
+    {% if forecasts %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Meal</th>
+                <th>Predicted Demand</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fc in forecasts %}
+            <tr>
+                <td>{{ fc.target_date|date:"M d, Y" }}</td>
+                <td>{{ fc.meal.name|default:"Standard Meal" }}</td>
+                <td><strong>{{ fc.predicted_demand }}</strong> meals</td>
+                <td>
+                    <span class="pill assigned">Forecasted</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state" style="padding: 30px; text-align: center;">
+        <p>No forecast data available.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

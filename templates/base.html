@@ -131,7 +131,26 @@
         
         <div class="rd-top-actions">
            {% if user.is_authenticated %}
-           <button class="rd-icon-btn" onclick="alert('No new notifications');"><i class="far fa-bell"></i></button>
+           <!-- Phase 37 Voice Assistant -->
+           <button class="rd-icon-btn" onclick="toggleVoiceAssistant()" style="color:var(--color-primary);" title="{% trans 'Voice Assistant' %}"><i class="fas fa-microphone"></i></button>
+           
+           <div class="rd-dropdown-container" id="notif-dropdown">
+               <button class="rd-icon-btn" onclick="document.getElementById('notif-dropdown').classList.toggle('active'); fetchNotifications();"><i class="far fa-bell"></i></button>
+               <div class="rd-dropdown-menu" style="width: 300px; padding: 10px;" id="notif-content">
+                   <div style="text-align:center; padding:10px; color:var(--af-text-muted);">Loading notifications...</div>
+               </div>
+           </div>
+           
+           <!-- Phase 37 i18n Selector -->
+           <div class="rd-dropdown-container" id="lang-dropdown">
+               <button class="rd-icon-btn" onclick="document.getElementById('lang-dropdown').classList.toggle('active')"><i class="fas fa-language"></i></button>
+               <div class="rd-dropdown-menu" style="width: 150px; padding: 10px;">
+                   <a href="#" class="rd-dropdown-item">English (EN)</a>
+                   <a href="#" class="rd-dropdown-item">Hindi (HI)</a>
+                   <a href="#" class="rd-dropdown-item">Odia (OR)</a>
+               </div>
+           </div>
+           
            <button class="rd-icon-btn" onclick="document.body.classList.toggle('dark-theme')"><i class="far fa-sun"></i></button>
            
            
@@ -165,7 +184,7 @@
 
            <button class="rd-fab" onclick="document.querySelector('.cp-backdrop').style.visibility='visible'; document.querySelector('.cp-backdrop').style.opacity='1';"><i class="fas fa-plus"></i></button>
            {% else %}
-           <a href="{% url 'login' %}" style="font-weight:bold;color:var(--rd-primary);text-decoration:none;">Login</a>
+           <a href="{% url 'role_selection' %}" style="font-weight:bold;color:var(--rd-primary);text-decoration:none;">Login</a>
            {% endif %}
         </div>
      </header>
@@ -363,6 +382,109 @@
             });
         }
     });
+</script>
+
+   <script>
+       function fetchNotifications() {
+           const content = document.getElementById('notif-content');
+           fetch('{% url "api_notifications" %}')
+               .then(res => res.json())
+               .then(data => {
+                   if(data.notifications && data.notifications.length > 0) {
+                       content.innerHTML = data.notifications.map(n => `<div style="padding:10px; border-bottom:1px solid var(--af-border);">${n.message}</div>`).join('');
+                   } else {
+                       content.innerHTML = '<div style="text-align:center; padding:10px; color:var(--af-text-muted);">No new notifications</div>';
+                   }
+               })
+               .catch(err => {
+                   content.innerHTML = '<div style="text-align:center; padding:10px; color:var(--af-text-muted);">Failed to load</div>';
+               });
+       }
+   </script>
+<!-- Unified CTRL+K Command Palette & Copilot -->
+<div id="commandPaletteOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; backdrop-filter:blur(4px); justify-content:center; align-items:flex-start; padding-top:10vh;">
+    <div style="background:var(--color-surface); width:90%; max-width:600px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.5); overflow:hidden;">
+        <div style="padding:15px; border-bottom:1px solid var(--color-border); display:flex; align-items:center;">
+            <i class="fas fa-search" style="color:var(--color-text-secondary); margin-right:10px;"></i>
+            <input type="text" id="commandInput" placeholder="Search, ask Copilot, or run command... (e.g. 'Generate report')" style="flex:1; background:transparent; border:none; color:var(--color-text); font-size:16px; outline:none;" autocomplete="off">
+            <span style="font-size:10px; color:var(--color-text-secondary); background:var(--color-background); padding:2px 6px; border-radius:4px;">ESC</span>
+        </div>
+        <div id="commandResults" style="padding:15px; max-height:300px; overflow-y:auto; color:var(--color-text-secondary); font-size:14px;">
+            <p>Start typing to search or chat with AI Copilot.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            const overlay = document.getElementById('commandPaletteOverlay');
+            overlay.style.display = 'flex';
+            document.getElementById('commandInput').focus();
+        }
+        if (e.key === 'Escape') {
+            document.getElementById('commandPaletteOverlay').style.display = 'none';
+        }
+    });
+
+    document.getElementById('commandInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const val = this.value.trim();
+            if (val) {
+                const results = document.getElementById('commandResults');
+                results.innerHTML = `<p><i class="fas fa-spinner fa-spin"></i> Processing '${val}'...</p>`;
+                // Simulated Copilot API Call
+                setTimeout(() => {
+                    results.innerHTML = `
+                        <p style="color:var(--color-primary);"><strong>AI Copilot:</strong> I've processed your request for '${val}'. Since this is a test instance, no changes were made.</p>
+                        <button class="btn primary small" style="margin-top:10px;" onclick="document.getElementById('commandPaletteOverlay').style.display='none'">Close</button>
+                    `;
+                }, 800);
+            }
+        }
+    });
+</script>
+
+<!-- Voice Assistant Modal -->
+<div id="voiceAssistantModal" style="display:none; position:fixed; bottom:20px; right:20px; width:300px; background:var(--rd-surface); border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.2); z-index:9999; padding:20px; border:1px solid var(--rd-border);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <strong style="color:var(--color-primary);"><i class="fas fa-microphone"></i> Voice Assistant</strong>
+        <button onclick="toggleVoiceAssistant()" style="background:none; border:none; cursor:pointer; color:var(--af-text-muted);"><i class="fas fa-times"></i></button>
+    </div>
+    <div style="text-align:center; margin-bottom:15px;">
+        <div class="pulse-ring" style="width:60px; height:60px; background:var(--color-primary); border-radius:50%; margin:0 auto; display:flex; justify-content:center; align-items:center; color:white; font-size:24px; animation: pulse 1.5s infinite;">
+            <i class="fas fa-microphone"></i>
+        </div>
+        <p style="margin-top:15px; color:var(--af-text-muted); font-size:14px;" id="voice-status">Listening...</p>
+    </div>
+</div>
+
+<style>
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+}
+</style>
+
+<script>
+function toggleVoiceAssistant() {
+    const modal = document.getElementById('voiceAssistantModal');
+    if (modal.style.display === 'none') {
+        modal.style.display = 'block';
+        document.getElementById('voice-status').innerText = 'Listening... (Placeholder)';
+        setTimeout(() => {
+            document.getElementById('voice-status').innerText = 'Processing speech to text...';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                alert('Voice command captured. Sending to AI Copilot.');
+            }, 2000);
+        }, 3000);
+    } else {
+        modal.style.display = 'none';
+    }
+}
 </script>
 
 </body>

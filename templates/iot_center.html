@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}IoT Device Center | AgroFedly{% endblock %}
+
+{% block content %}
+<div class="row" style="margin-bottom:20px;">
+    <div class="col-8">
+        <h2><i class="fas fa-microchip" style="color:var(--color-primary);"></i> IoT Device Center</h2>
+        <p class="text-secondary">Manage connected hardware, view historical telemetry, and configure alert thresholds.</p>
+    </div>
+    <div class="col-4" style="text-align:right;">
+        <button class="btn primary"><i class="fas fa-plus"></i> Register Device</button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- DEVICE LIST -->
+    <div class="col-4">
+        <div class="card" style="min-height: 500px;">
+            <h3>Connected Devices</h3>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+                {% for d in devices %}
+                <div style="border: 1px solid var(--color-border); border-radius: 8px; padding: 12px; cursor: pointer; transition: 0.2s;" class="device-card" onclick="selectDevice('{{ d.device_id }}')">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>{{ d.device_id }}</strong>
+                        {% if d.status == 'ONLINE' %}
+                            <span style="color:var(--color-success);"><i class="fas fa-wifi"></i></span>
+                        {% elif d.status == 'OFFLINE' %}
+                            <span style="color:var(--color-text-secondary);"><i class="fas fa-wifi"></i></span>
+                        {% else %}
+                            <span style="color:var(--color-danger);"><i class="fas fa-exclamation-triangle"></i></span>
+                        {% endif %}
+                    </div>
+                    <div style="font-size:12px; color:var(--color-text-secondary); margin-top:5px;">
+                        Type: {{ d.device_type }}<br>
+                        Last seen: {{ d.last_seen|date:"M d, H:i"|default:"Never" }}
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align:center; padding:30px; color:var(--color-text-secondary);">
+                    No devices registered.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- DEVICE DETAILS & CHARTS -->
+    <div class="col-8">
+        <div class="card" style="min-height: 500px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--color-border); padding-bottom: 15px; margin-bottom: 15px;">
+                <h3>Telemetry History</h3>
+                <div class="btn-group">
+                    <button class="btn soft small">1H</button>
+                    <button class="btn soft small">6H</button>
+                    <button class="btn primary small">24H</button>
+                    <button class="btn soft small">7D</button>
+                </div>
+            </div>
+            
+            <!-- Sensor Chart -->
+            <div style="height: 300px; width: 100%; border-bottom: 1px dashed var(--color-border); margin-bottom: 20px; position: relative;">
+                {% if devices %}
+                <canvas id="sensorChart"></canvas>
+                {% else %}
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:var(--color-text-secondary);">No telemetry data available</div>
+                {% endif %}
+            </div>
+            
+            <!-- Alert Engine config -->
+            <h4>Threshold Configuration</h4>
+            <table class="table" style="font-size: 13px;">
+                <thead>
+                    <tr>
+                        <th>Sensor</th>
+                        <th>Min Range</th>
+                        <th>Max Range</th>
+                        <th>Trigger Action</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Soil Moisture</td>
+                        <td>30%</td>
+                        <td>--</td>
+                        <td><span class="badge warning">IRRIGATION REVIEW</span></td>
+                        <td><span style="color:var(--color-success);">ACTIVE</span></td>
+                    </tr>
+                    <tr>
+                        <td>Storage Temp</td>
+                        <td>-1°C</td>
+                        <td>5°C</td>
+                        <td><span class="badge danger">FOOD SAFETY REVIEW</span></td>
+                        <td><span style="color:var(--color-success);">ACTIVE</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function selectDevice(id) {
+        document.querySelectorAll('.device-card').forEach(el => {
+            el.style.borderColor = 'var(--color-border)';
+            el.style.background = 'transparent';
+        });
+        event.currentTarget.style.borderColor = 'var(--color-primary)';
+        event.currentTarget.style.background = 'rgba(46, 204, 113, 0.05)';
+    }
+
+    const rawData = JSON.parse('{{ chart_data_json|escapejs|default:"{}" }}');
+    
+    if (rawData.labels && rawData.labels.length > 0) {
+        const ctx = document.getElementById('sensorChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: rawData.labels,
+                datasets: [{
+                    label: 'Sensor Reading',
+                    data: rawData.values,
+                    borderColor: '#2ecc71',
+                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    y: { beginAtZero: false }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

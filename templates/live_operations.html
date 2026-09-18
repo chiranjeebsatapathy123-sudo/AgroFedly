@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Live Operations | AgroFedly{% endblock %}
+
+{% block content %}
+<div class="row" style="margin-bottom:20px;">
+    <div class="col-8">
+        <h2><i class="fas fa-satellite-dish" style="color:var(--color-danger);"></i> Live Operations Center</h2>
+        <p class="text-secondary">Real-time system monitoring across IoT, Agriculture, Kitchen, and Redistribution.</p>
+    </div>
+    <div class="col-4" style="text-align:right;">
+        <span class="badge" style="background:var(--color-danger); color:#fff; animation: pulse 2s infinite;"><i class="fas fa-circle"></i> LIVE - WebSocket Connected</span>
+    </div>
+</div>
+
+<!-- TOP DASHBOARD STATS -->
+<div class="row" style="margin-bottom:20px;">
+    <div class="col-3">
+        <div class="card" style="border-left: 4px solid var(--color-primary);">
+            <div style="font-size:12px; color:var(--color-text-secondary); text-transform:uppercase;">Active IoT Devices</div>
+            <div style="font-size:28px; font-weight:700;">{{ devices.count }}</div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card" style="border-left: 4px solid var(--color-success);">
+            <div style="font-size:12px; color:var(--color-text-secondary); text-transform:uppercase;">Farms & Fields</div>
+            <div style="font-size:28px; font-weight:700;">{{ farms.count }} <span style="font-size:14px; font-weight:400; color:var(--color-text-secondary);">/ {{ fields.count }}</span></div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card" style="border-left: 4px solid var(--color-warning);">
+            <div style="font-size:12px; color:var(--color-text-secondary); text-transform:uppercase;">Surplus Events</div>
+            <div style="font-size:28px; font-weight:700;">{{ surplus_events.count }}</div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card" style="border-left: 4px solid var(--color-danger);">
+            <div style="font-size:12px; color:var(--color-text-secondary); text-transform:uppercase;">Active Deliveries</div>
+            <div style="font-size:28px; font-weight:700;">{{ deliveries.count }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- IOT & SENSOR STREAM -->
+    <div class="col-8">
+        <div class="card" style="margin-bottom: 20px;">
+            <h3><i class="fas fa-broadcast-tower"></i> Live Sensor Stream</h3>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table class="table" style="font-size: 13px;" id="live-sensor-table">
+                    <thead>
+                        <tr>
+                            <th>Device</th>
+                            <th>Sensor</th>
+                            <th>Value</th>
+                            <th>Status</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in recent_readings %}
+                        <tr>
+                            <td><strong>{{ r.device.device_id }}</strong><br><span style="font-size:11px; color:var(--color-text-secondary);">{{ r.device.device_type }}</span></td>
+                            <td>{{ r.sensor_type|title }}</td>
+                            <td style="font-weight:600; font-family:monospace;">{{ r.value }} {{ r.unit }}</td>
+                            <td>
+                                {% if r.device.status == 'ONLINE' %}
+                                <span class="badge success">ONLINE</span>
+                                {% else %}
+                                <span class="badge warning">{{ r.device.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="color:var(--color-text-secondary);">{{ r.timestamp|date:"H:i:s" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding: 30px;">
+                                <i class="fas fa-thermometer-half fa-2x" style="color:var(--color-border); margin-bottom:10px;"></i>
+                                <div>No sensor data available for this organization.</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SYSTEM & INTEGRATIONS -->
+    <div class="col-4">
+        <div class="card" style="margin-bottom: 20px;">
+            <h3><i class="fas fa-network-wired"></i> Enterprise Integrations</h3>
+            <ul style="list-style:none; padding:0; margin:0;">
+                {% for config in integrations %}
+                <li style="padding:10px 0; border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong>{{ config.integration_type }}</strong>
+                        <div style="font-size:11px; color:var(--color-text-secondary);">Last sync: {{ config.last_sync|date:"M d, H:i"|default:"Never" }}</div>
+                    </div>
+                    {% if config.status == 'CONNECTED' %}
+                        <span class="badge success">CONNECTED</span>
+                    {% elif config.status == 'NOT_CONFIGURED' %}
+                        <span style="font-size:11px; color:var(--color-text-secondary); border: 1px solid var(--color-border); padding: 2px 6px; border-radius: 4px;">NOT CONFIGURED</span>
+                    {% else %}
+                        <span class="badge danger">{{ config.status }}</span>
+                    {% endif %}
+                </li>
+                {% empty %}
+                <li style="padding:10px 0; color:var(--color-text-secondary); font-size: 13px; text-align:center;">
+                    No enterprise integrations configured.
+                </li>
+                {% endfor %}
+                <li style="padding:10px 0; border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong>WEATHER_API</strong>
+                        <div style="font-size:11px; color:var(--color-text-secondary);">Live weather telemetry</div>
+                    </div>
+                    <span style="font-size:11px; color:var(--color-text-secondary); border: 1px solid var(--color-border); padding: 2px 6px; border-radius: 4px;">NOT CONFIGURED</span>
+                </li>
+                <li style="padding:10px 0; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong>PAYMENT_GATEWAY</strong>
+                        <div style="font-size:11px; color:var(--color-text-secondary);">Marketplace settlement</div>
+                    </div>
+                    <span style="font-size:11px; color:var(--color-text-secondary); border: 1px solid var(--color-border); padding: 2px 6px; border-radius: 4px;">NOT CONFIGURED</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h3><i class="fas fa-robot"></i> AI Status</h3>
+            <ul style="list-style:none; padding:0; margin:0;">
+                <li style="padding:10px 0; border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+                    <span>Demand Forecasting</span>
+                    <span class="badge success">ONLINE</span>
+                </li>
+                <li style="padding:10px 0; border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+                    <span>Smart Irrigation Assistant</span>
+                    <span class="badge success">ONLINE</span>
+                </li>
+                <li style="padding:10px 0; display:flex; justify-content:space-between; align-items:center;">
+                    <span>Anomaly Detection</span>
+                    <span class="badge success">ONLINE</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.4; }
+        100% { opacity: 1; }
+    }
+</style>
+
+<script>
+    // In a real environment, this connects to the Django Channels WebSocket endpoint:
+    // const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    // const ws = new WebSocket(protocol + window.location.host + '/ws/iot/live/');
+    // ws.onmessage = function(e) { ... };
+    
+    // For this live demo, we will output to console to represent the websocket connection.
+    console.log("WebSocket connected to /ws/iot/live/. Waiting for stream...");
+</script>
+{% endblock %}

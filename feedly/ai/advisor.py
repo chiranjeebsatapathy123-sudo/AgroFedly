@@ -1,4 +1,4 @@
-﻿from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 from django.utils import timezone
 from ..models import FarmField, FieldActivity, CropDiseaseScan, FarmEvent
 
@@ -19,10 +19,10 @@ def get_copilot_response(user, message):
         return "I am the AgroFedly AI Copilot. I can help you with yield predictions, disease scanning, market insights, and logging activities. How can I assist you today?"
 
 def calculate_farm_health_score(farm):
-    ""\"
+    """
     Deterministically calculates a Farm Health Score based only on available data.
     Does NOT invent a score if insufficient data exists.
-    ""\"
+    """
     fields = FarmField.objects.filter(farm=farm)
     if not fields.exists():
         return {"score": None, "status": "Insufficient data", "factors": ["No fields registered"]}

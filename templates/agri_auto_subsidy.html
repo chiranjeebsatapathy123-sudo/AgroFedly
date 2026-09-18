@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Subsidy Automation - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="rd-container" style="padding-top: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h2 style="margin: 0;">Automated Subsidy Management</h2>
+            <p style="color: var(--af-text-muted, #6b7280); margin-top: 0.5rem;">Auto-apply for eligible agricultural subsidies based on your farm profile.</p>
+        </div>
+        <a href="{% url 'agri_subsidy_finder' %}" class="rd-btn rd-btn-secondary">Back to Subsidy Finder</a>
+    </div>
+
+    <div class="rd-card">
+        <h3 style="border-bottom: 1px solid var(--af-border, #e5e7eb); padding-bottom: 1rem; margin-bottom: 1.5rem;">Auto-Application Configuration</h3>
+        
+        <form method="post" action="#">
+            {% csrf_token %}
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="checkbox" name="auto_apply" checked>
+                    <strong>Enable automatic application for eligible schemes</strong>
+                </label>
+                <p style="color: var(--af-text-muted, #6b7280); font-size: 0.9rem; margin-top: 0.25rem; margin-left: 2rem;">
+                    When enabled, the system will automatically submit your pre-filled details to new government schemes you qualify for.
+                </p>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem;">Preferred Subsidy Categories</label>
+                <select name="categories" class="rd-input" multiple style="width: 100%; height: 100px;">
+                    <option value="equipment" selected>Equipment & Machinery</option>
+                    <option value="seeds" selected>Seeds & Fertilizers</option>
+                    <option value="insurance">Crop Insurance</option>
+                    <option value="sustainability" selected>Sustainable Farming</option>
+                </select>
+                <p style="color: var(--af-text-muted, #6b7280); font-size: 0.85rem; margin-top: 0.25rem;">Hold Ctrl/Cmd to select multiple categories.</p>
+            </div>
+
+            <button type="submit" class="rd-btn rd-btn-primary">Save Preferences</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

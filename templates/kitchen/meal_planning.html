@@ -3,7 +3,7 @@
 {% block content %}
 <div class="page-head">
     <h1><i class="fas fa-calendar-alt"></i> Meal Planning</h1>
-    <a href="#" class="btn primary"><i class="fas fa-plus"></i> New Session</a>
+    <a href="{% url 'kitchen_meal_planning' %}?action=add" class="btn primary"><i class="fas fa-plus"></i> New Session</a>
 </div>
 <div class="panel">
     <table>

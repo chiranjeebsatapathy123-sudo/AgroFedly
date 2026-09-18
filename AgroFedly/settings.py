@@ -57,6 +57,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "feedly.middleware.OrganizationMiddleware",
+    "feedly.middleware.AppErrorMiddleware",
 ]
 
 ROOT_URLCONF = "AgroFedly.urls"

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Farm Command Center - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1><i class="fas fa-tractor" style="color:var(--color-primary);"></i> Farm Command Center</h1>
+        <p>End-to-End Farm Intelligence, Harvest Planning, and Crop Risks.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+    <!-- Active Fields & Harvest Planning -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <h2 style="font-size: 16px; margin: 0;">Active Fields & Harvest Planning</h2>
+        </div>
+        {% if fields %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Field / Crop</th>
+                    <th>Acres</th>
+                    <th>Expected Harvest</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for field in fields %}
+                <tr>
+                    <td>
+                        <strong>{{ field.name }}</strong><br>
+                        <small style="color:var(--color-text-secondary);">{{ field.crop_type }}</small>
+                    </td>
+                    <td>{{ field.area_acres }}</td>
+                    <td>{{ field.expected_harvest_date|date:"M d, Y"|default:"Not Set" }}</td>
+                    <td>
+                        <span class="pill {{ field.status|lower }}">{{ field.status }}</span>
+                    </td>
+                    <td>
+                        {% if field.status == 'APPROACHING' %}
+                        <span style="font-size: 11px; color: var(--color-text-secondary); border: 1px solid var(--color-border); padding: 2px 6px; border-radius: 4px;">NOT CONFIGURED</span>
+                        {% elif field.status == 'READY' %}
+                        <span style="font-size: 11px; color: var(--color-text-secondary); border: 1px solid var(--color-border); padding: 2px 6px; border-radius: 4px;">NOT CONFIGURED</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state" style="padding: 30px; text-align: center;">
+            <p>No fields found. Start by creating a farm and field.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <!-- Active Farm Events / Risks -->
+        <div class="card" style="background-color: var(--color-surface-elevated); padding: 20px; margin-bottom:20px;">
+            <h3 style="margin-top:0; border-bottom:1px solid var(--color-border); padding-bottom:10px;"><i class="fas fa-bolt" style="color:var(--color-warning);"></i> Farm Risks & Events</h3>
+            {% if active_events %}
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                {% for event in active_events %}
+                <li style="padding: 10px 0; border-bottom: 1px solid var(--color-border);">
+                    <div style="display:flex; justify-content:space-between;">
+                        <strong>{{ event.title }}</strong>
+                        <span style="font-size: 12px; color:var(--color-text-secondary);">{{ event.date|date:"M d" }}</span>
+                    </div>
+                    <div style="font-size: 13px; margin-top:5px;">{{ event.description }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="font-size: 13px; color:var(--color-text-secondary);">No upcoming risks or events recorded.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Aerial Imagery (Drone) -->
+        <div class="card" style="padding: 20px;">
+            <h3 style="margin-top:0; border-bottom:1px solid var(--color-border); padding-bottom:10px;"><i class="fas fa-drone"></i> Aerial Imagery</h3>
+            {% if images %}
+                {% for image in images|slice:":1" %}
+                <img src="{{ image.image_url }}" alt="Drone Scan" style="width:100%; border-radius: 8px; margin-top: 10px;">
+                <p style="font-size: 13px; text-align: center; margin-top: 10px;">Scanned: {{ image.scan_date|date:"M d, Y" }}</p>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state" style="text-align: center; padding: 20px;">
+                <p>No aerial imagery available.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

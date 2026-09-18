@@ -40,7 +40,17 @@
                 <h3 style="margin:0 0 10px 0; font-size:1.3rem;">{{ eq.name }}</h3>
                 <span class="pill" style="background:var(--soft);">{{ eq.get_equipment_type_display }}</span>
             </div>
-            <p style="color:var(--muted); font-size:0.9rem; margin-bottom:15px;">📍 {{ eq.location }} &bull; Owned by {{ eq.owner.username }}</p>
+            <p style="color:var(--muted); font-size:0.9rem; margin-bottom:10px;">📍 {{ eq.location }} &bull; Owned by {{ eq.owner.username }}</p>
+            <div style="font-size:0.8rem; margin-bottom:15px;">
+                {% if eq.maintenance_status == 'OK' %}
+                    <span style="color:var(--color-success);"><i class="fas fa-check-circle"></i> Maintenance OK</span>
+                {% elif eq.maintenance_status == 'MAINTENANCE_DUE' %}
+                    <span style="color:var(--color-warning);"><i class="fas fa-wrench"></i> Maintenance Due</span>
+                {% else %}
+                    <span style="color:var(--color-danger);"><i class="fas fa-exclamation-triangle"></i> {{ eq.get_maintenance_status_display }}</span>
+                {% endif %}
+                <span style="margin-left:10px; color:var(--muted);">{{ eq.operating_hours }} hrs logged</span>
+            </div>
             <p style="font-weight:bold; font-size:1.5rem; color:var(--primary); margin-bottom:20px;">₹{{ eq.hourly_rate }}<span style="font-size:0.9rem; font-weight:normal; color:var(--muted);">{% trans "/hr" %}</span></p>
         </div>
         

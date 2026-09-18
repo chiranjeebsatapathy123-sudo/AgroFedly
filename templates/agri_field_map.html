@@ -133,12 +133,12 @@
     // Phase 9: Drone NDVI Simulation Logic
     function runDroneSimulation() {
         if (drawnItems.getLayers().length === 0) {
-            alert("{% trans 'Please draw at least one field before running the drone simulation.' %}");
+            console.log("{% trans 'Please draw at least one field before running the drone simulation.' %}");
             return;
         }
         
         // Alert user
-        alert("{% trans 'Deploying Precision Ag Drone... scanning NDVI field health.' %}");
+        console.log("{% trans 'Deploying Precision Ag Drone... scanning NDVI field health.' %}");
         
         // Iterate through all drawn fields
         drawnItems.eachLayer(function(layer) {

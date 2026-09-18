@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}System Error - AgroFedly{% endblock %}
+
+{% block content %}
+<div style="min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 20px;">
+    <div style="max-width: 500px; text-align: center; background: var(--color-surface); padding: 40px; border-radius: 16px; box-shadow: var(--shadow-elevated); border: 1px solid var(--border-error);">
+        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: var(--color-danger); margin-bottom: 20px;"></i>
+        <h1 style="margin: 0 0 10px; font-size: 24px;">Something went wrong.</h1>
+        <p style="color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 24px;">
+            An unexpected application error occurred while processing your request. 
+            Our automated monitoring system has logged this incident, and our engineering team will review it.
+        </p>
+        <a href="{% url 'dashboard' %}" class="btn primary" style="width: 100%;">
+            <i class="fas fa-home" style="margin-right: 8px;"></i> Return to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

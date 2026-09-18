@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Real Error Center - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1><i class="fas fa-bug" style="color:var(--color-danger);"></i> Real Error Center</h1>
+        <p>Monitor and resolve application exceptions.</p>
+    </div>
+</div>
+
+<div class="table-card">
+    <div style="padding: 15px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 14px;">Recent System Errors</h3>
+        <div style="display: flex; gap: 10px;">
+            <select class="form-control" style="width: auto; padding: 6px 12px; font-size: 11px;" onchange="window.location.href='?status='+this.value">
+                <option value="">All Statuses</option>
+                <option value="NEW" {% if request.GET.status == 'NEW' %}selected{% endif %}>New</option>
+                <option value="IN_PROGRESS" {% if request.GET.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                <option value="RESOLVED" {% if request.GET.status == 'RESOLVED' %}selected{% endif %}>Resolved</option>
+            </select>
+        </div>
+    </div>
+    {% if errors %}
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Type / Message</th>
+                <th>Path</th>
+                <th>Count</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for err in errors %}
+            <tr>
+                <td><b>{{ err.timestamp|date:"M d, H:i" }}</b></td>
+                <td>
+                    <b>{{ err.error_type }}</b><br>
+                    <small style="color: var(--color-text-secondary); max-width: 250px; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ err.message }}</small>
+                </td>
+                <td><small>{{ err.path }}</small></td>
+                <td><span class="pill">{{ err.occurrence_count }}</span></td>
+                <td>
+                    <span class="pill {% if err.severity == 'HIGH' %}unsafe{% elif err.severity == 'MEDIUM' %}requested{% else %}safe{% endif %}">
+                        {{ err.get_severity_display }}
+                    </span>
+                </td>
+                <td>
+                    <span class="pill {% if err.status == 'NEW' %}unsafe{% elif err.status == 'RESOLVED' %}delivered{% else %}assigned{% endif %}">
+                        {{ err.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn soft" style="padding: 4px 8px; font-size: 10px;" onclick="console.log('Traceback: \n{{ err.traceback|escapejs }}')">View Trace</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty large">
+        <i class="fas fa-check-circle" style="font-size: 40px; color: var(--color-primary); margin-bottom: 10px;"></i>
+        <h3>System Healthy</h3>
+        <p>No logged errors matching the current filter.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

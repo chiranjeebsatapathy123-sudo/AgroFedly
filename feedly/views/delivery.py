@@ -277,12 +277,50 @@ def delivery_qr_code(request, delivery_id):
     return response
 
 @login_required
+@_organization_required
+def recipient_request_center(request):
+    """Recipient Center: View eligible surplus and request food."""
+    from feedly.models import SurplusFood, Recipient
+    
+    # Get all SAFE surplus with available quantity
+    available_surplus = SurplusFood.objects.filter(
+        status='SAFE', 
+        quantity__gt=0
+    ).order_by('-created_at')
+    
+    # Simple view mapping
+    recipient_profile = Recipient.objects.filter(organization=request.organization).first()
+    
+    context = {
+        'available_surplus': available_surplus,
+        'profile': recipient_profile
+    }
+    return render(request, 'delivery/recipient_request_center.html', context)
+
+@login_required
+@_organization_required
+def delivery_control(request):
+    """Central Delivery Control Board mapping Delivery statuses."""
+    from feedly.models import Delivery
+    
+    deliveries = Delivery.objects.filter(kitchen__organization=request.organization).order_by('-created_at')
+    
+    columns = {
+        'pending': deliveries.filter(status='PENDING'),
+        'assigned': deliveries.filter(status='ASSIGNED'),
+        'in_transit': deliveries.filter(status='IN_TRANSIT'),
+        'delivered': deliveries.filter(status='DELIVERED'),
+    }
+    
+    return render(request, 'delivery/delivery_control.html', {'columns': columns})
+
+@login_required
 def delivery_scan_qr(request, delivery_id):
     delivery = get_object_or_404(Delivery, id=delivery_id)
     if request.method == 'POST':
         if delivery.status == 'IN_TRANSIT':
-            delivery.status = 'DELIVERED'
             from django.utils import timezone
+            delivery.status = 'DELIVERED'
             delivery.delivered_at = timezone.now()
             delivery.save(update_fields=['status', 'delivered_at'])
             messages.success(request, f'Delivery {delivery.tracking_code} marked as DELIVERED.')

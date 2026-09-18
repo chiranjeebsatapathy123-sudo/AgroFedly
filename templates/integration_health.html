@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Health & Integrations - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="page-head" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <h1><i class="fas fa-heartbeat" style="color:var(--primary);"></i> System Health Dashboard</h1>
+        <p style="color:var(--text-secondary); margin-top:5px;">Real-time status of APIs, integrations, and core services.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+    <!-- Core Services -->
+    <div class="card" style="padding: 1.5rem;">
+        <h3 style="margin-top: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Core Infrastructure</h3>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div>
+                <i class="fas fa-database" style="color: var(--text-secondary); width: 24px;"></i> Database
+            </div>
+            <span class="badge" style="background: {% if db_status == 'Operational' %}var(--success){% else %}var(--danger){% endif %}; color: white; padding: 4px 8px; border-radius: 4px;">{{ db_status }}</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div>
+                <i class="fas fa-bolt" style="color: var(--text-secondary); width: 24px;"></i> Cache Layer
+            </div>
+            <span class="badge" style="background: {% if cache_status == 'Operational' %}var(--success){% else %}var(--warning){% endif %}; color: white; padding: 4px 8px; border-radius: 4px;">{{ cache_status }}</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div>
+                <i class="fas fa-brain" style="color: var(--text-secondary); width: 24px;"></i> AI Endpoints
+            </div>
+            <span class="badge" style="background: {% if ai_endpoint_status == 'Operational' %}var(--success){% else %}var(--danger){% endif %}; color: white; padding: 4px 8px; border-radius: 4px;">{{ ai_endpoint_status }}</span>
+        </div>
+    </div>
+    
+    <!-- External Integrations -->
+    <div class="card" style="padding: 1.5rem;">
+        <h3 style="margin-top: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">External Integrations</h3>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div>
+                <i class="fas fa-building" style="color: var(--text-secondary); width: 24px;"></i> ERP System Sync
+            </div>
+            <span class="badge" style="background: {% if erp_status == 'Operational' %}var(--success){% else %}var(--warning){% endif %}; color: white; padding: 4px 8px; border-radius: 4px;">{{ erp_status }}</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div>
+                <i class="fas fa-microchip" style="color: var(--text-secondary); width: 24px;"></i> IoT Sensors Network
+            </div>
+            <span class="badge" style="background: {% if iot_status == 'Operational' %}var(--success){% else %}var(--danger){% endif %}; color: white; padding: 4px 8px; border-radius: 4px;">{{ iot_status }}</span>
+        </div>
+        
+        {% if last_attendance_date %}
+        <div style="margin-top: 1.5rem; padding: 1rem; background: var(--surface-2); border-radius: 8px; font-size: 0.9rem;">
+            <strong>Last ERP Sync Date:</strong> {{ last_attendance_date }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div style="margin-top: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+    Last checked: {{ server_time|date:"M d, Y H:i:s" }}
+</div>
+{% endblock %}

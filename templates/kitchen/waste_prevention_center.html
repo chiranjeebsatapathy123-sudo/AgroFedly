@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Waste Prevention Center - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1><i class="fas fa-trash-slash" style="color:var(--color-primary);"></i> Waste Prevention Center</h1>
+        <p>Analyze overproduction, expiring inventory, and unconsumed meals to optimize kitchen operations.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- Expiring Inventory -->
+    <div class="table-card">
+        <div class="table-card-header" style="background-color: var(--color-warning); color: #fff;">
+            <h2 style="font-size: 16px; margin: 0;"><i class="fas fa-exclamation-triangle"></i> Expiring Inventory (Next 48h)</h2>
+        </div>
+        {% if expiring_inventory %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Quantity</th>
+                    <th>Expires At</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in expiring_inventory %}
+                <tr>
+                    <td><strong>{{ item.ingredient.name }}</strong></td>
+                    <td>{{ item.quantity }} {{ item.ingredient.unit }}</td>
+                    <td>{{ item.expiry_date|date:"M d, Y" }}</td>
+                    <td>
+                        <span style="font-size: 11px; color: var(--color-text-secondary); border: 1px solid var(--color-border); padding: 2px 6px; border-radius: 4px;">NOT CONFIGURED</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state" style="padding: 30px; text-align: center;">
+            <p>No inventory expiring soon. Great job!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Unsafe/Rejected Surplus -->
+    <div class="table-card">
+        <div class="table-card-header" style="background-color: var(--color-danger); color: #fff;">
+            <h2 style="font-size: 16px; margin: 0;"><i class="fas fa-ban"></i> Rejected / Unsafe Surplus</h2>
+        </div>
+        {% if unsafe_surplus %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Food Item</th>
+                    <th>Quantity</th>
+                    <th>Reason</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for surplus in unsafe_surplus %}
+                <tr>
+                    <td><strong>{{ surplus.food_name }}</strong></td>
+                    <td>{{ surplus.quantity }}</td>
+                    <td><span style="color:var(--color-danger); font-size:12px;">{{ surplus.safety_alert|default:"Safety check failed" }}</span></td>
+                    <td>{{ surplus.created_at|date:"M d, H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state" style="padding: 30px; text-align: center;">
+            <p>No rejected surplus recently.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

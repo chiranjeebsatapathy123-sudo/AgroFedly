@@ -13,7 +13,8 @@ urlpatterns = [
     path('kitchen/redistribution/', kitchen.redistribution_queue, name='kitchen_redistribution'),
     path('kitchen/inventory/', kitchen.inventory, name='kitchen_inventory'),
     path('kitchen/analytics/', kitchen.kitchen_analytics, name='kitchen_analytics'),
-
+    path('kitchen/waste-prevention/', kitchen.waste_prevention_center, name='kitchen_waste_prevention'),
+    path('kitchen/preparation-optimizer/', kitchen.preparation_optimizer, name='kitchen_preparation_optimizer'),
     # Static pages (Phase 21)
     path("ai/trust/", TemplateView.as_view(template_name="trust.html"), name="ai_trust"),
     path("resources/", TemplateView.as_view(template_name="resources.html"), name="resources"),
@@ -82,15 +83,20 @@ urlpatterns = [
     path("agriculture/equipment/<int:equipment_id>/rent/", views.agri_rent_equipment, name="agri_rent_equipment"),
     path("agriculture/advisor/", views.agri_ai_advisor, name="agri_ai_advisor"),
     path("agriculture/warehousing/", views.agri_warehousing, name="agri_warehousing"),
+    path("agriculture/market/", views.marketplace_analytics, name="marketplace_analytics"),
     path("agriculture/subsidies/", views.agri_subsidy_finder, name="agri_subsidy_finder"),
     path("api/iot/live/", views.api_iot_live_stream, name="api_iot_live_stream"),
     path("trace/<str:tracking_code>/", views.agri_traceability, name="agri_traceability"),
     path("trace/<str:tracking_code>/release/", views.agri_release_escrow, name="agri_release_escrow"),
     path("integrations/health/", views.integration_health, name="integration_health"),
+    path("integrations/settings/", views.integration_settings, name="integration_settings"),
+    path("integrations/sync/", views.sync_center, name="sync_center"),
     path("api/erp/attendance/", views.api_erp_attendance, name="api_erp_attendance"),
     path("api/iot/temperature/", views.api_iot_temperature, name="api_iot_temperature"),
 
     path("food-safety/", views.check_food_safety, name="food_safety"),
+    path("live-operations/", views.live_operations, name="live_operations"),
+    path("iot-center/", views.iot_center, name="iot_center"),
     path("surplus/", views.surplus_list, name="surplus_list"),
     path("surplus/add/", views.add_surplus_food, name="add_surplus"),
     path("surplus/<int:food_id>/redistribute/", views.redistribute_food, name="redistribute_food"),
@@ -115,6 +121,8 @@ urlpatterns = [
     path("organization/admin/members/", views.organization_admin_members, name="organization_admin_members"),
     path("organization/admin/audit/", views.organization_admin_audit, name="organization_admin_audit"),
     path("organization/admin/settings/", views.organization_admin_settings, name="organization_admin_settings"),
+    path("organization/admin/export/", views.export_report, name="export_report"),
+    path("organization/error-center/", views.error_center, name="error_center"),
     
     path("organization/members/add/", views.organization_add_member, name="organization_add_member"),
     path("organization/members/<int:member_id>/remove/", views.organization_remove_member, name="organization_remove_member"),
@@ -127,6 +135,8 @@ urlpatterns = [
     path("deliveries/<int:delivery_id>/status/", views.delivery_update_status, name="delivery_update_status"),
     path("deliveries/<int:delivery_id>/track/", views.delivery_live_tracking, name="delivery_live_tracking"),
     path("deliveries/<int:delivery_id>/proof/", views.delivery_proof, name="delivery_proof"),
+    path("deliveries/control/", views.delivery_control, name="delivery_control"),
+    path("recipient/request-center/", views.recipient_request_center, name="recipient_request_center"),
     
     path("volunteer/register/", views.volunteer_register, name="volunteer_register"),
     path("volunteer/dashboard/", views.volunteer_dashboard, name="volunteer_dashboard"),
@@ -137,7 +147,7 @@ urlpatterns = [
     path("api/weather/", views.api_weather, name="api_weather"),
     path("api/search/", views.api_global_search, name="api_global_search"),
     path("data-quality/", views.data_quality_center, name="data_quality_center"),
-    
+    path("ai-operations/", views.ai_operations_center, name="ai_operations_center"),
     # AI Endpoints (Phase 18)
     path("api/ai/scenario/", views.api_ai_scenario, name="api_ai_scenario"),
     path("api/ai/action_preview/", views.api_ai_action_preview, name="api_ai_action_preview"),
@@ -146,6 +156,7 @@ urlpatterns = [
     # Digital Twin (Phase 19)
     path("twin/", views.digital_twin, name="digital_twin"),
     path("passport/<str:batch_id>/", views.produce_passport, name="produce_passport"),
+    path("passport/<str:batch_id>/qr/", views.passport_qr_code, name="passport_qr_code"),
     path("import/", views.data_import, name="data_import"),
     
     # Community & Gamification
@@ -156,6 +167,8 @@ urlpatterns = [
     path("agriculture/skyview/", views.agri_skyview, name="agri_skyview"),
     path("agriculture/soil/", views.agri_soil, name="agri_soil"),
     path("agriculture/comms/", views.agri_comms, name="agri_comms"),
+    path("agriculture/greenhouse/", views.agri_greenhouse_controller, name="agri_greenhouse_controller"),
+    path("agriculture/auto-subsidy/", views.agri_auto_subsidy, name="agri_auto_subsidy"),
 
     # PHASE 4 ROUTES (AI & ADVANCED)
     path("agri/intelligence/", views.agri_intelligence, name="agri_intelligence"),

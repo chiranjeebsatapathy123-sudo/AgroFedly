@@ -131,7 +131,7 @@ def predict_demand(request):
                 attendance=attendance, temperature=temperature, rainfall=rainfall, 
                 holiday=holiday, humidity=humidity, exam_day=exam_day, event_flag=event_flag
             )
-            # Create a mock result dictionary for the template to render
+            # Create a result dictionary for the template to render
             result = {
                 'prediction': forecast_obj.predicted_demand,
                 'recommended': forecast_obj.recommended_preparation,
@@ -192,7 +192,7 @@ def forecast_7_days(request):
                     target_date=target
                 )
                 base_item = {
-                    'date': target, 'prediction': base_forecast.predicted_demand, 'recommended': base_forecast.recommended_preparation, 'risk': base_forecast.waste_risk
+                    'date': target, 'prediction': base_forecast.predicted_demand, 'recommended': base_forecast.recommended_preparation, 'risk': base_forecast.waste_risk, 'expected_surplus': base_forecast.expected_surplus
                 }
                 
                 # Custom Scenario
@@ -202,7 +202,7 @@ def forecast_7_days(request):
                     target_date=target
                 )
                 scenario_item = {
-                    'date': target, 'prediction': scenario_forecast.predicted_demand, 'recommended': scenario_forecast.recommended_preparation, 'risk': scenario_forecast.waste_risk
+                    'date': target, 'prediction': scenario_forecast.predicted_demand, 'recommended': scenario_forecast.recommended_preparation, 'risk': scenario_forecast.waste_risk, 'expected_surplus': scenario_forecast.expected_surplus
                 }
                 
                 forecasts.append(base_item)
@@ -447,6 +447,39 @@ def api_global_search(request):
                 'url': '/organization/',
                 'type': 'Team',
                 'icon': '👤'
+            })
+            
+    # 4. Search Farms, Fields, Crops
+    from ..models import Farm, Field, Crop
+    if org:
+        farms = Farm.objects.filter(organization=org, name__icontains=q)
+        for f in farms[:3]:
+            results.append({
+                'title': f.name,
+                'subtitle': f'{f.location}',
+                'url': '/agriculture/farms/',
+                'type': 'Farm',
+                'icon': '🚜'
+            })
+            
+        fields = Field.objects.filter(farm__organization=org, name__icontains=q)
+        for f in fields[:3]:
+            results.append({
+                'title': f.name,
+                'subtitle': f'Farm: {f.farm.name}',
+                'url': '/agriculture/fields/',
+                'type': 'Field',
+                'icon': '🌱'
+            })
+            
+        crops = Crop.objects.filter(field__farm__organization=org, name__icontains=q)
+        for c in crops[:3]:
+            results.append({
+                'title': c.name,
+                'subtitle': f'Variety: {c.variety}',
+                'url': '/agriculture/calendar/',
+                'type': 'Crop',
+                'icon': '🌾'
             })
             
     # 4. Pages (Static commands & NLP Navigation)

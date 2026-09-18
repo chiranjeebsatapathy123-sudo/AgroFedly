@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Marketplace Analytics | AgroFedly{% endblock %}
+
+{% block content %}
+<div class="row" style="margin-bottom:20px;">
+    <div class="col-8">
+        <h2><i class="fas fa-chart-pie" style="color:var(--color-primary);"></i> Marketplace Analytics</h2>
+        <p class="text-secondary">Track your listings, sales volume, and real-time market trends.</p>
+    </div>
+    <div class="col-4" style="text-align:right;">
+        <button class="btn primary"><i class="fas fa-file-export"></i> Export Report</button>
+    </div>
+</div>
+
+<div class="row" style="margin-bottom: 20px;">
+    <div class="col-4">
+        <div class="card" style="border-left: 4px solid var(--color-primary);">
+            <div style="font-size:12px; color:var(--color-text-secondary); text-transform:uppercase;">Active Listings</div>
+            <div style="font-size:28px; font-weight:700;">{{ listed_count|default:"0" }}</div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card" style="border-left: 4px solid var(--color-warning);">
+            <div style="font-size:12px; color:var(--color-text-secondary); text-transform:uppercase;">In Transit</div>
+            <div style="font-size:28px; font-weight:700;">{{ transit_count|default:"0" }}</div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card" style="border-left: 4px solid var(--color-success);">
+            <div style="font-size:12px; color:var(--color-text-secondary); text-transform:uppercase;">Total Delivered</div>
+            <div style="font-size:28px; font-weight:700;">{{ delivered_count|default:"0" }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-8">
+        <div class="card">
+            <h3>Recent Supply Requests</h3>
+            <table class="table" style="font-size:13px; margin-top:15px;">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Produce</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr>
+                        <td style="font-family:monospace; font-weight:bold;">#REQ-{{ req.id|stringformat:"04d" }}</td>
+                        <td>{{ req.produce.name }}</td>
+                        <td>{{ req.requested_quantity }} {{ req.produce.unit }}</td>
+                        <td>
+                            {% if req.status == 'DELIVERED' %}
+                                <span class="badge success">DELIVERED</span>
+                            {% elif req.status == 'IN_TRANSIT' %}
+                                <span class="badge warning">IN TRANSIT</span>
+                            {% elif req.status == 'REQUESTED' %}
+                                <span class="badge" style="background:var(--color-soft); color:var(--color-text);">REQUESTED</span>
+                            {% else %}
+                                <span class="badge" style="background:var(--color-primary); color:#fff;">{{ req.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="color:var(--color-text-secondary);">{{ req.produce.created_at|date:"M d" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding: 30px; color:var(--color-text-secondary);">
+                            No supply requests found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card">
+            <h3>Top Selling Crops</h3>
+            <div style="margin-top:15px; height: 300px; display:flex; justify-content:center; align-items:center;">
+                <canvas id="cropChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('cropChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Wheat', 'Rice', 'Soybeans', 'Corn'],
+            datasets: [{
+                data: [45, 25, 20, 10],
+                backgroundColor: ['#2ecc71', '#27ae60', '#f1c40f', '#e67e22'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            },
+            cutout: '70%'
+        }
+    });
+</script>
+{% endblock %}

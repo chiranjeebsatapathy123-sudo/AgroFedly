@@ -84,7 +84,7 @@
             
             <div style="display: flex; gap: 1rem; margin-top: auto;">
                 <a href="{% url 'agri_field_list' %}?farm_id={{ farm.id }}" class="btn secondary" style="flex: 1; text-align: center;">View Intelligence</a>
-                <a href="#" class="btn primary outline" style="flex: 1; text-align: center;">+ Add Field</a>
+                <a href="{% url 'agri_field_add' %}?farm_id={{ farm.id }}" class="btn primary outline" style="flex: 1; text-align: center;">+ Add Field</a>
             </div>
         </div>
         {% empty %}

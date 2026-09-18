@@ -79,7 +79,10 @@
         <div class="timeline-content status-{{ event.status }}">
             <h4 style="margin:0 0 10px 0;">{{ event.title }}</h4>
             <p style="color: var(--text-muted); font-size: 0.9rem;">{{ event.desc }}</p>
-            <small style="color: var(--primary); font-weight: 700;">{{ event.time }}</small>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <small style="color: var(--primary); font-weight: 700;">{{ event.time }}</small>
+                <small style="color: var(--text-muted);"><i class="fas fa-user-circle"></i> {{ event.actor }}</small>
+            </div>
         </div>
     </div>
     {% empty %}

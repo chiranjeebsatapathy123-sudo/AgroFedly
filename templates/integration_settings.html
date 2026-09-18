@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Enterprise Integrations | AgroFedly{% endblock %}
+
+{% block content %}
+<div class="row" style="margin-bottom:20px;">
+    <div class="col-8">
+        <h2><i class="fas fa-plug" style="color:var(--color-primary);"></i> Integration Settings</h2>
+        <p class="text-secondary">Manage third-party API keys, enterprise sync jobs, and webhooks.</p>
+    </div>
+    <div class="col-4" style="text-align:right;">
+        <button class="btn primary"><i class="fas fa-plus"></i> Add Integration</button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-8">
+        <div class="card">
+            <h3>Connected Services</h3>
+            <table class="table" style="font-size: 13px; margin-top: 15px;">
+                <thead>
+                    <tr>
+                        <th>Service Type</th>
+                        <th>Status</th>
+                        <th>Last Sync</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for config in integrations %}
+                    <tr>
+                        <td style="font-weight:bold;">{{ config.integration_type }}</td>
+                        <td>
+                            {% if config.status == 'CONNECTED' %}
+                            <span class="badge success">CONNECTED</span>
+                            {% else %}
+                            <span class="badge" style="background:var(--color-border); color:var(--color-text);">NOT CONFIGURED</span>
+                            {% endif %}
+                        </td>
+                        <td style="color:var(--color-text-secondary);">{{ config.last_sync|date:"M d, H:i"|default:"Never" }}</td>
+                        <td>
+                            <button class="btn soft small">Configure</button>
+                            <button class="btn danger small">Disconnect</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding: 30px; color:var(--color-text-secondary);">
+                            No integrations configured.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td style="font-weight:bold;">WEATHER_API</td>
+                        <td><span class="badge" style="background:var(--color-border); color:var(--color-text);">NOT CONFIGURED</span></td>
+                        <td style="color:var(--color-text-secondary);">Never</td>
+                        <td><button class="btn soft small">Configure</button></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold;">ERP_SAP_SYNC</td>
+                        <td><span class="badge" style="background:var(--color-border); color:var(--color-text);">NOT CONFIGURED</span></td>
+                        <td style="color:var(--color-text-secondary);">Never</td>
+                        <td><button class="btn soft small">Configure</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="card" style="margin-top: 20px;">
+            <h3>Bulk Import (CSV)</h3>
+            <p style="font-size: 13px; color:var(--color-text-secondary);">Import multiple products, recipients, or IoT device manifests at once.</p>
+            <form method="post" enctype="multipart/form-data" action="{% url 'integration_settings' %}" style="display:flex; gap:15px; margin-top: 15px;">
+                {% csrf_token %}
+                <select class="form-control" name="import_type" style="width: 200px;">
+                    <option value="produce">Agricultural Produce</option>
+                    <option value="recipients">Recipients</option>
+                    <option value="devices">IoT Devices</option>
+                </select>
+                <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+                <button type="submit" class="btn primary">Upload</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-4">
+        <div class="card">
+            <h3>API Keys</h3>
+            <p style="font-size: 13px; color:var(--color-text-secondary);">Generate keys for custom integration clients.</p>
+            <div style="margin-top: 15px;">
+                <div style="border: 1px dashed var(--color-border); padding: 15px; text-align: center; border-radius: 8px;">
+                    <i class="fas fa-key fa-2x" style="color:var(--color-text-secondary); margin-bottom: 10px;"></i>
+                    <div style="font-weight: bold; margin-bottom: 5px;">No active API Keys</div>
+                    <button class="btn soft small">Generate Key</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

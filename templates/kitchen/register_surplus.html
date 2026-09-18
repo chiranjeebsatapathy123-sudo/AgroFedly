@@ -13,7 +13,16 @@
         </div>
         <div class="form-group" style="margin-bottom: 20px;">
             <label>Quantity</label>
-            <input type="number" name="quantity" class="rd-input" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-surface);">
+            <input type="number" name="quantity" class="rd-input" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface);">
+        </div>
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>Current Storage Temperature (°C)</label>
+            <input type="number" step="0.1" name="storage_temp" class="rd-input" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface);" placeholder="e.g. 4.0">
+            <small style="color: var(--text-muted);">Must be below 5°C for safe redistribution.</small>
+        </div>
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>Time in Storage (Hours)</label>
+            <input type="number" step="0.5" name="storage_hours" class="rd-input" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface);" placeholder="e.g. 12">
         </div>
         <button type="submit" class="btn primary" style="width: 100%; padding: 15px; font-size: 1.1rem;"><i class="fas fa-check"></i> Register & Request Safety Check</button>
     </form>

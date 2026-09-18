@@ -174,7 +174,30 @@ def logistics_map(request):
 @login_required
 @_organization_required
 def impact_dashboard(request):
+    from django.db.models import Sum
+    from feedly.models import SurplusFood, Delivery, OrganizationImpact
+    import json
+    
     impact, _ = OrganizationImpact.objects.get_or_create(organization=request.organization)
+    
+    # Real computed metrics from SurplusFood marked REDISTRIBUTED
+    redistributed_surplus = SurplusFood.objects.filter(
+        organization=request.organization, 
+        status='REDISTRIBUTED'
+    ).aggregate(total=Sum('quantity'))['total'] or 0
+    
+    # Conversion metrics (Explicit configurable assumptions)
+    COST_PER_MEAL = 2.50  # USD estimated
+    CARBON_PER_MEAL_KG = 0.5 # KG CO2e per meal prevented
+    
+    real_cost_savings = redistributed_surplus * COST_PER_MEAL
+    real_carbon_offset = redistributed_surplus * CARBON_PER_MEAL_KG
+    
+    # Update impact model to reflect reality
+    impact.meals_rescued = redistributed_surplus
+    impact.carbon_offset_kg = real_carbon_offset
+    impact.save()
+    
     recent_redistributions = Redistribution.objects.filter(surplus__organization=request.organization).order_by('-distributed_at')[:10]
     chart_labels = []
     chart_data = []
@@ -188,8 +211,17 @@ def impact_dashboard(request):
             chart_data[idx] += r.quantity
     chart_labels.reverse()
     chart_data.reverse()
+    
     all_impacts = OrganizationImpact.objects.select_related('organization').order_by('-impact_points')[:10]
-    context = {'active_org': request.organization, 'my_impact': impact, 'all_impacts': all_impacts, 'chart_labels': json.dumps(chart_labels), 'chart_data': json.dumps(chart_data)}
+    context = {
+        'active_org': request.organization, 
+        'my_impact': impact, 
+        'real_cost_savings': real_cost_savings,
+        'real_carbon_offset': real_carbon_offset,
+        'all_impacts': all_impacts, 
+        'chart_labels': json.dumps(chart_labels), 
+        'chart_data': json.dumps(chart_data)
+    }
     return render(request, 'impact_dashboard.html', context)
 
 def leaderboard(request):
@@ -269,17 +301,69 @@ def data_quality_center(request):
             {'title': 'Stale Transit Deliveries', 'count': stale_deliveries, 'severity': 'critical', 'desc': 'Deliveries marked IN_TRANSIT for over 48 hours require manual verification.'}
         ]
     }
-    return render(request, 'data_quality.html', context)
+    return render(request, 'data_quality_center.html', context)
+
+@login_required
+@_organization_required
+def ai_operations_center(request):
+    """Unified AI Operations Center for Platform Health and Explainability."""
+    from feedly.models import AIRecommendation, AIAuditLog, AIModelRegistry
+    
+    # 1. AI Health / Models
+    models = AIModelRegistry.objects.filter(is_active=True).order_by('name')
+    
+    # 2. Activity / Recommendations
+    recent_recs = AIRecommendation.objects.filter(organization=request.organization).order_by('-created_at')[:5]
+    audit_logs = AIAuditLog.objects.filter(organization=request.organization).order_by('-timestamp')[:5]
+    
+    # 3. Overall Stats
+    total_recs = AIRecommendation.objects.filter(organization=request.organization).count()
+    accepted_recs = AIRecommendation.objects.filter(organization=request.organization, status='ACCEPTED').count()
+    
+    context = {
+        'ai_models': models,
+        'recent_recs': recent_recs,
+        'audit_logs': audit_logs,
+        'total_recs': total_recs,
+        'accepted_recs': accepted_recs,
+    }
+    return render(request, 'ai_operations_center.html', context)
 
 @require_role(['OWNER', 'ADMIN'])
+@_organization_required
 def organization_admin_dashboard(request):
-    members = request.organization.members.all().select_related('user')
-    audit_logs = getattr(request.organization, 'audit_logs', None)
-    logs = audit_logs.all()[:10] if audit_logs else []
-    return render(request, 'admin/org_admin_dashboard.html', {
-        'members': members,
-        'audit_logs': logs,
-    })
+    """Executive Dashboard with real DB-computed KPIs."""
+    from feedly.models import MealRecord, KitchenInventory, SurplusFood, Delivery, Kitchen
+    from django.db.models import Sum
+    
+    org = request.organization
+    
+    # 1. Total Production / Consumption (Meals)
+    total_consumption = MealRecord.objects.filter(organization=org).aggregate(t=Sum('quantity'))['t'] or 0
+    
+    # 2. Total Surplus
+    total_surplus = SurplusFood.objects.filter(organization=org).aggregate(t=Sum('quantity'))['t'] or 0
+    
+    # 3. Successful Redistributions
+    redistributed = SurplusFood.objects.filter(organization=org, status='REDISTRIBUTED').aggregate(t=Sum('quantity'))['t'] or 0
+    
+    # 4. Waste (Rejected/Spoiled Surplus + Expired Inventory)
+    unsafe_surplus = SurplusFood.objects.filter(organization=org, status='UNSAFE').aggregate(t=Sum('quantity'))['t'] or 0
+    expired_inv = KitchenInventory.objects.filter(kitchen__organization=org, status='EXPIRED').aggregate(t=Sum('quantity'))['t'] or 0
+    total_waste = unsafe_surplus + expired_inv
+    
+    # 5. Delivery Performance
+    completed_deliveries = Delivery.objects.filter(sender=org, status='DELIVERED').count()
+    
+    context = {
+        'total_consumption': total_consumption,
+        'total_surplus': total_surplus,
+        'redistributed': redistributed,
+        'total_waste': total_waste,
+        'completed_deliveries': completed_deliveries,
+        'members': request.organization.members.all().select_related('user')[:5]
+    }
+    return render(request, 'admin/org_admin_dashboard.html', context)
 
 @require_role(['OWNER', 'ADMIN'])
 def organization_admin_members(request):
@@ -345,3 +429,49 @@ def organization_admin_settings(request):
             return redirect('organization_admin_settings')
             
     return render(request, 'admin/org_admin_settings.html')
+
+@login_required
+@require_org_role(['ADMIN', 'OWNER'])
+def error_center(request):
+    """View logged application errors for system administrators."""
+    from ..models import AppError
+    errors = AppError.objects.all().order_by('-timestamp')
+    
+    # Simple filtering
+    status = request.GET.get('status')
+    if status:
+        errors = errors.filter(status=status)
+        
+    context = {
+        'errors': errors[:50],  # show latest 50
+    }
+    return render(request, 'admin/error_center.html', context)
+
+@require_role(['OWNER', 'ADMIN'])
+@_organization_required
+def export_report(request):
+    """Generates CSV/PDF exports for the organization."""
+    import csv
+    from django.http import HttpResponse
+    from django.utils import timezone
+    from feedly.models import SurplusFood, Delivery
+    
+    export_type = request.GET.get('type', 'csv')
+    
+    if export_type == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="AgroFedly_Export_{timezone.now().strftime("%Y%m%d")}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Date', 'Metric', 'Value'])
+        
+        surplus = SurplusFood.objects.filter(organization=request.organization).count()
+        deliveries = Delivery.objects.filter(sender=request.organization, status='DELIVERED').count()
+        
+        writer.writerow([timezone.now().strftime('%Y-%m-%d'), 'Total Surplus Handled', surplus])
+        writer.writerow([timezone.now().strftime('%Y-%m-%d'), 'Deliveries Completed', deliveries])
+        
+        return response
+    else:
+        # PDF fallback or other formats
+        return HttpResponse("PDF Export not configured. Please use CSV.", status=501)

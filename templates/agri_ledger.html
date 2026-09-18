@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Agriculture Ledger - AgroFedly{% endblock %}
+
+{% block content %}
+<div class="rd-container" style="padding-top: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h2 style="margin: 0;">Agricultural Traceability Ledger</h2>
+            <p style="color: var(--af-text-muted, #6b7280); margin-top: 0.5rem;">Transparent and immutable record of agricultural produce.</p>
+        </div>
+        <a href="{% url 'agri_dashboard' %}" class="rd-btn rd-btn-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="rd-card" style="margin-bottom: 2rem;">
+        <h3 style="border-bottom: 1px solid var(--af-border, #e5e7eb); padding-bottom: 1rem; margin-bottom: 1rem;">Ledger Records</h3>
+        
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--af-border, #e5e7eb); background-color: var(--af-surface-2, #f9fafb);">
+                        <th style="padding: 1rem;">Transaction ID</th>
+                        <th style="padding: 1rem;">Date</th>
+                        <th style="padding: 1rem;">Entity/Produce</th>
+                        <th style="padding: 1rem;">Action</th>
+                        <th style="padding: 1rem;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if ledger_entries %}
+                        {% for entry in ledger_entries %}
+                        <tr style="border-bottom: 1px solid var(--af-border, #e5e7eb);">
+                            <td style="padding: 1rem; font-family: monospace;">{{ entry.transaction_id|default:entry.hash|slice:":12" }}...</td>
+                            <td style="padding: 1rem;">{{ entry.timestamp|date:"M d, Y H:i" }}</td>
+                            <td style="padding: 1rem;">{{ entry.produce.crop.name|default:"General" }}</td>
+                            <td style="padding: 1rem;">{{ entry.action|default:entry.event_type }}</td>
+                            <td style="padding: 1rem;">
+                                <span style="background-color: var(--af-success, #10b981); color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Verified</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" style="padding: 2rem; text-align: center; color: var(--af-text-muted, #6b7280);">
+                                <i class="fas fa-link" style="font-size: 2rem; margin-bottom: 1rem; color: var(--af-border, #e5e7eb);"></i>
+                                <br>No ledger entries found.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

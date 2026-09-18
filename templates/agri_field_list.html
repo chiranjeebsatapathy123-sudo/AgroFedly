@@ -24,8 +24,8 @@
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;"><strong>Status:</strong> <span style="color: {% if field.health_status == 'Good' %}var(--success){% else %}var(--warning){% endif %}; font-weight: bold;">{{ field.health_status }}</span></p>
             
             <div style="display: flex; gap: 10px; margin-top: auto;">
-                <a href="#" class="btn glass btn-sm" style="flex: 1; text-align: center;">Timeline</a>
-                <a href="#" class="btn primary btn-sm" style="flex: 1; text-align: center;">Log Activity</a>
+                <a href="{% url 'agri_calendar' %}?field_id={{ field.id }}" class="btn glass btn-sm" style="flex: 1; text-align: center;">Timeline</a>
+                <a href="{% url 'agri_event_add' %}?field_id={{ field.id }}" class="btn primary btn-sm" style="flex: 1; text-align: center;">Log Activity</a>
             </div>
         </div>
         {% empty %}

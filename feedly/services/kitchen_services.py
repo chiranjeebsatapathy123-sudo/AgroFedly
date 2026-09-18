@@ -1,4 +1,4 @@
-﻿from django.utils import timezone
+from django.utils import timezone
 from datetime import timedelta
 import random
 

@@ -566,8 +566,29 @@ def agri_release_escrow(request, tracking_code):
             transaction.save()
             messages.success(request, f'Funds (â‚¹{transaction.amount}) released to {transaction.receiver_org.name} successfully.')
         else:
-            messages.info(request, 'No pending escrow transactions found for this shipment.')
+            messages.info(request, 'No pending escrow transactions found for this shipment.') # Ensure safe escrow releases
+            pass
     return redirect('agri_traceability', tracking_code=tracking_code)
+
+@login_required
+@_organization_required
+def marketplace_analytics(request):
+    """Phase 37 Marketplace Analytics."""
+    from feedly.models import AgriculturalProduce, AgriculturalSupplyRequest
+    
+    org = request.organization
+    
+    produces = AgriculturalProduce.objects.filter(supplier=org)
+    requests_qs = AgriculturalSupplyRequest.objects.filter(produce__in=produces).order_by('-id')
+    
+    context = {
+        'listed_count': produces.filter(marketplace_status='LISTED').count(),
+        'transit_count': requests_qs.filter(status='IN_TRANSIT').count(),
+        'delivered_count': requests_qs.filter(status='DELIVERED').count(),
+        'requests': requests_qs[:20]
+    }
+    
+    return render(request, 'marketplace_analytics.html', context)
 
 @login_required
 def agri_disease_scanner(request):
@@ -677,6 +698,16 @@ def agri_yield_predictor(request):
     return render(request, 'agri_yield_predictor.html', {'history': history})
 
 @login_required
+def agri_greenhouse_controller(request):
+    """Greenhouse automation and control interface."""
+    return render(request, 'agri_greenhouse_controller.html')
+
+@login_required
+def agri_auto_subsidy(request):
+    """Automated subsidy application interface."""
+    return render(request, 'agri_auto_subsidy.html')
+
+@login_required
 def agri_crop_recommendation(request):
     if request.method == 'POST':
         soil_type = request.POST.get('soil_type', 'Loamy')
@@ -719,40 +750,43 @@ def agri_crop_recommendation(request):
 
 @login_required
 def agri_weather_page(request):
-    """Renders a dedicated agriculture weather dashboard."""
+    """Renders a dedicated agriculture weather dashboard with Crop Risk logic."""
     from .api import _weather
+    from ..models import Farm
     
-    # Try to get the user's primary farm location
-    city = 'Delhi' # Default fallback
-    if hasattr(request.user, 'profile') and request.user.profile.role == 'FARMER':
-        farm = FarmField.objects.filter(owner=request.user).first()
-        if farm and farm.name:
-            city = farm.name # In a real app, this would be a city/lat-lng
+    city = 'Delhi' 
+    org_member = request.user.organization_memberships.filter(is_active=True).first()
+    if org_member:
+        farm = Farm.objects.filter(organization=org_member.organization).first()
+        if farm and farm.location:
+            city = farm.location
             
     weather_info = _weather(city)
-    
-    # If API fails or isn't configured, provide realistic mock data for UI demo
-    if not weather_info:
-        weather_info = {
-            'temperature': 28.5,
-            'humidity': 65.0,
-            'rainfall': 12.0,
-            'weather': 'Partly Cloudy',
-            'is_live': False
-        }
-        
-    # Generate an advisory based on the weather
+    crop_risk = None
     advisory = None
-    if weather_info['rainfall'] > 50:
-        advisory = "Heavy rainfall expected. Ensure proper drainage for crops."
-    elif weather_info['temperature'] > 35:
-        advisory = "High heat alert. Increase irrigation frequency."
-    elif weather_info['temperature'] < 5:
-        advisory = "Frost warning. Cover sensitive crops."
+    
+    if weather_info:
+        temp = weather_info.get('temperature', 25.0)
+        humidity = weather_info.get('humidity', 50.0)
         
-    return render(request, 'agri_weather.html', {
-        'weather': weather_info,
+        # Crop Risk AI Logic (Heuristic)
+        if temp > 38.0:
+            crop_risk = "HIGH: Extreme heat stress potential. Requires immediate irrigation verification."
+            advisory = "High heat alert. Increase irrigation frequency."
+        elif temp < 5.0:
+            crop_risk = "HIGH: Frost risk detected. Potential crop damage if unprotected."
+            advisory = "Frost warning. Cover sensitive crops."
+        elif humidity > 85.0 and temp > 25.0:
+            crop_risk = "MEDIUM: Fungal disease risk elevated due to high humidity and temperature."
+            advisory = "High humidity detected. Monitor for fungal diseases."
+        else:
+            crop_risk = "LOW: Weather conditions are optimal for general crops."
+            advisory = "Weather is optimal."
+        
+    return render(request, 'agri_weather_page.html', {
+        'weather_info': weather_info,
         'city': city,
+        'crop_risk': crop_risk,
         'advisory': advisory
     })
 
@@ -925,14 +959,7 @@ def agri_ai_advisor(request):
     from feedly.models import MarketPricePrediction, FieldActivity, FarmEvent
     predictions = MarketPricePrediction.objects.all().order_by('-updated_at')
     
-    # Initialize some mock predictions if none exist
-    if not predictions.exists():
-        MarketPricePrediction.objects.bulk_create([
-            MarketPricePrediction(crop_name='Wheat', current_price_per_kg=22.5, predicted_price_next_week=24.0, predicted_price_month=28.5, confidence_score=85, recommendation='HOLD'),
-            MarketPricePrediction(crop_name='Rice', current_price_per_kg=35.0, predicted_price_next_week=34.5, predicted_price_month=31.0, confidence_score=92, recommendation='SELL_NOW')
-        ])
-        predictions = MarketPricePrediction.objects.all().order_by('-updated_at')
-        
+
     # Bring in context for AI Advisor to make personalized suggestions
     context = {'predictions': predictions}
     if hasattr(request.user, 'profile'):
@@ -971,13 +998,33 @@ def agri_warehousing(request):
     return render(request, 'agri_warehousing.html', {'warehouses': warehouses, 'my_bookings': bookings})
 
 @login_required
+@_organization_required
 def agri_skyview(request):
-    from feedly.models import DroneImagery
+    """Farm Command Center - E2E Farm Operations"""
+    from feedly.models import Farm, FarmField, FarmEvent, CropYieldPrediction, DroneImagery
+    from django.utils import timezone
+    
+    # Retrieve organization's farms
+    farms = Farm.objects.filter(organization=request.organization)
+    fields = FarmField.objects.filter(farm__in=farms)
+    
+    # Harvest Planning (Planned, Approaching, Ready, Harvested)
+    upcoming_harvests = fields.filter(status__in=['PLANNED', 'APPROACHING', 'READY']).order_by('expected_harvest_date')[:10]
+    
+    # Active events / risks
+    active_events = FarmEvent.objects.filter(farm__in=farms, date__gte=timezone.now().date()).order_by('date')[:5]
+    
+    # Images (if any)
     images = DroneImagery.objects.filter(farmer=request.user).order_by('-scan_date')
-    if not images.exists():
-        DroneImagery.objects.create(farmer=request.user, image_url='/static/images/ndvi_sample.jpg', ndvi_score=0.75, issues_detected='Mild drought stress in Sector B')
-        images = DroneImagery.objects.filter(farmer=request.user).order_by('-scan_date')
-    return render(request, 'agri_skyview.html', {'images': images})
+    
+    context = {
+        'farms': farms,
+        'fields': fields,
+        'upcoming_harvests': upcoming_harvests,
+        'active_events': active_events,
+        'images': images,
+    }
+    return render(request, 'agri_skyview.html', context)
 
 
 
@@ -1036,26 +1083,8 @@ def agri_intelligence(request):
     """
     from feedly.models import AIInsight, SmartAlert, AIModelRegistry
     
-    # Generate mock insights on the fly for demonstration if none exist
-    if not AIInsight.objects.filter(user=request.user).exists():
-        AIInsight.objects.create(
-            user=request.user,
-            category='WEATHER',
-            title='Upcoming Precipitation Shift',
-            summary='Model forecasts a 40% higher chance of rain in the next 14 days.',
-            reason='Based on oceanic cooling trends and historical 5-year data.',
-            confidence='High',
-            recommended_action='Delay final harvesting by 3 days.'
-        )
-        AIInsight.objects.create(
-            user=request.user,
-            category='MARKET',
-            title='Wheat Price Volatility',
-            summary='Expected 15% price spike in the next month.',
-            reason='Regional supply shortages detected in neighboring states.',
-            confidence='Medium',
-            recommended_action='Hold inventory if storage conditions permit.'
-        )
+    # Real AIInsights are generated by background workers or AI analysis.
+    # We do not generate fake insights here.
 
     insights = AIInsight.objects.filter(user=request.user).order_by('-created_at')[:6]
     alerts = SmartAlert.objects.filter(user=request.user, is_resolved=False).order_by('-created_at')
