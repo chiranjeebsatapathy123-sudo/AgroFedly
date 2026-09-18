@@ -119,9 +119,9 @@
      <!-- Topbar -->
      <header class="rd-topbar">
         {% if user.is_authenticated %}
-        <div class="rd-search">
+        <div class="rd-search" onclick="document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'k', 'ctrlKey': true}))" style="cursor:pointer;">
            <i class="fas fa-search" style="color:#a0b0a6"></i>
-           <input type="text" placeholder="Search farms, produce, recipients, deliveries...">
+           <input type="text" placeholder="Search operational data, actions, or type '/' for commands..." readonly style="cursor:pointer;">
         </div>
         {% else %}
         <a class="rd-brand" href="{% url 'index' %}" style="padding:0;">
@@ -401,50 +401,6 @@
                });
        }
    </script>
-<!-- Unified CTRL+K Command Palette & Copilot -->
-<div id="commandPaletteOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; backdrop-filter:blur(4px); justify-content:center; align-items:flex-start; padding-top:10vh;">
-    <div style="background:var(--color-surface); width:90%; max-width:600px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.5); overflow:hidden;">
-        <div style="padding:15px; border-bottom:1px solid var(--color-border); display:flex; align-items:center;">
-            <i class="fas fa-search" style="color:var(--color-text-secondary); margin-right:10px;"></i>
-            <input type="text" id="commandInput" placeholder="Search, ask Copilot, or run command... (e.g. 'Generate report')" style="flex:1; background:transparent; border:none; color:var(--color-text); font-size:16px; outline:none;" autocomplete="off">
-            <span style="font-size:10px; color:var(--color-text-secondary); background:var(--color-background); padding:2px 6px; border-radius:4px;">ESC</span>
-        </div>
-        <div id="commandResults" style="padding:15px; max-height:300px; overflow-y:auto; color:var(--color-text-secondary); font-size:14px;">
-            <p>Start typing to search or chat with AI Copilot.</p>
-        </div>
-    </div>
-</div>
-
-<script>
-    document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-            e.preventDefault();
-            const overlay = document.getElementById('commandPaletteOverlay');
-            overlay.style.display = 'flex';
-            document.getElementById('commandInput').focus();
-        }
-        if (e.key === 'Escape') {
-            document.getElementById('commandPaletteOverlay').style.display = 'none';
-        }
-    });
-
-    document.getElementById('commandInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            const val = this.value.trim();
-            if (val) {
-                const results = document.getElementById('commandResults');
-                results.innerHTML = `<p><i class="fas fa-spinner fa-spin"></i> Processing '${val}'...</p>`;
-                // Simulated Copilot API Call
-                setTimeout(() => {
-                    results.innerHTML = `
-                        <p style="color:var(--color-primary);"><strong>AI Copilot:</strong> I've processed your request for '${val}'. Since this is a test instance, no changes were made.</p>
-                        <button class="btn primary small" style="margin-top:10px;" onclick="document.getElementById('commandPaletteOverlay').style.display='none'">Close</button>
-                    `;
-                }, 800);
-            }
-        }
-    });
-</script>
 
 <!-- Voice Assistant Modal -->
 <div id="voiceAssistantModal" style="display:none; position:fixed; bottom:20px; right:20px; width:300px; background:var(--rd-surface); border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.2); z-index:9999; padding:20px; border:1px solid var(--rd-border);">
@@ -487,5 +443,6 @@ function toggleVoiceAssistant() {
 }
 </script>
 
+{% include 'command_palette.html' %}
 </body>
 </html>

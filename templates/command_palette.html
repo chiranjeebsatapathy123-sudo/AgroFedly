@@ -117,7 +117,7 @@
         <div class="cp-header">
             <i class="fas fa-search" style="color: var(--color-text-secondary, #666);"></i>
             <input type="text" id="command-input" placeholder="Search operational data, actions, or type '/' for commands..." autocomplete="off" spellcheck="false">
-            <span style="font-size:0.7rem; background:rgba(0,0,0,0.1); padding:2px 6px; border-radius:4px;">ESC</span>
+            <span onclick="togglePalette(false)" style="font-size:0.7rem; background:rgba(0,0,0,0.1); padding:2px 6px; border-radius:4px; cursor:pointer;" title="Close (ESC)">ESC</span>
         </div>
         
         <div class="cp-results-area custom-scrollbar" id="command-results">
@@ -144,7 +144,7 @@
                     <div class="cp-item-icon amber"><i class="fas fa-clipboard-list"></i></div>
                     <span style="flex:1">Record Harvest</span>
                 </a>
-                <a href="{% url 'recipient_recommendations' 0 %}" class="cp-item" onclick="event.preventDefault(); window.location.href='/surplus/'">
+                <a href="{% url 'surplus_list' %}" class="cp-item">
                     <div class="cp-item-icon blue"><i class="fas fa-search"></i></div>
                     <span style="flex:1">Find Eligible Recipients</span>
                 </a>
@@ -190,7 +190,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const backdrop = document.getElementById('command-palette-backdrop');
-    const palette = document.getElementById('command-palette');
     const input = document.getElementById('command-input');
     const defaultCommands = document.getElementById('default-commands');
     const searchResults = document.getElementById('search-results');
@@ -201,128 +200,140 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPaletteOpen = false;
     let searchTimeout = null;
 
-    const togglePalette = (show) => {
+    window.togglePalette = (show) => {
         isPaletteOpen = show;
         if (show) {
+            backdrop.style.visibility = 'visible';
+            backdrop.style.opacity = '1';
             backdrop.classList.add('cp-show');
-            // Small delay to allow display:block to apply before animating opacity
             setTimeout(() => {
-                
-                
-                input.focus();
-            }, 10);
+                if(input) input.focus();
+            }, 50);
         } else {
+            backdrop.style.visibility = 'hidden';
+            backdrop.style.opacity = '0';
             backdrop.classList.remove('cp-show');
-            
-            setTimeout(() => {
-                
-            }, 200);
-            
-            // Reset state
-            input.value = '';
-            defaultCommands.classList.remove('cp-hidden');
-            searchResults.classList.add('cp-hidden');
-            searchEmpty.classList.add('cp-hidden');
+            if(input) input.value = '';
+            if(defaultCommands) defaultCommands.classList.remove('cp-hidden');
+            if(searchResults) searchResults.classList.add('cp-hidden');
+            if(searchEmpty) searchEmpty.classList.add('cp-hidden');
+            if(searchLoading) searchLoading.classList.add('cp-hidden');
         }
     };
 
     // Keyboard Shortcuts (Ctrl+K or Cmd+K)
     document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
             e.preventDefault();
             togglePalette(!isPaletteOpen);
         }
-        if (e.key === 'Escape' && isPaletteOpen) {
-            togglePalette(false);
+        if ((e.key === 'Escape' || e.keyCode === 27)) {
+            if (isPaletteOpen) {
+                togglePalette(false);
+            }
         }
     });
 
     // Close on backdrop click
-    backdrop.addEventListener('click', (e) => {
-        if (e.target === backdrop) togglePalette(false);
-    });
+    if(backdrop) {
+        backdrop.addEventListener('click', (e) => {
+            if (e.target === backdrop) {
+                togglePalette(false);
+            }
+        });
+    }
 
     // Handle Search Input
-    input.addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        
-        clearTimeout(searchTimeout);
-        
-        if (!query) {
-            defaultCommands.classList.remove('cp-hidden');
+    if(input) {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                e.preventDefault();
+                e.stopPropagation();
+                togglePalette(false);
+            }
+        });
+
+        input.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            
+            clearTimeout(searchTimeout);
+            
+            if (!query) {
+                defaultCommands.classList.remove('cp-hidden');
+                searchResults.classList.add('cp-hidden');
+                searchLoading.classList.add('cp-hidden');
+                searchEmpty.classList.add('cp-hidden');
+                return;
+            }
+
+            defaultCommands.classList.add('cp-hidden');
             searchResults.classList.add('cp-hidden');
-            searchLoading.classList.add('cp-hidden');
             searchEmpty.classList.add('cp-hidden');
-            return;
-        }
+            searchLoading.classList.remove('cp-hidden');
 
-        defaultCommands.classList.add('cp-hidden');
-        searchResults.classList.add('cp-hidden');
-        searchEmpty.classList.add('cp-hidden');
-        searchLoading.classList.remove('cp-hidden');
-
-        // Debounce search
-        searchTimeout = setTimeout(() => {
-            fetch(`/api/search/?q=${encodeURIComponent(query)}`)
-                .then(res => res.json())
-                .then(data => {
-                    searchLoading.classList.add('cp-hidden');
-                    
-                    if (!data.results || data.results.length === 0) {
-                        searchEmpty.classList.remove('cp-hidden');
-                        emptyQueryText.textContent = query;
-                        return;
-                    }
-                    
-                    // Render results
-                    searchResults.innerHTML = '<div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Search Results</div>';
-                    
-                    data.results.forEach(item => {
-                        let icon = 'fa-search';
-                        let url = '#';
-                        let colorClass = 'text-gray-400 bg-gray-500/20';
+            // Debounce search
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/search/?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        searchLoading.classList.add('cp-hidden');
                         
-                        if (item.type === 'Produce') {
-                            icon = 'fa-leaf';
-                            url = '/surplus/';
-                            colorClass = 'text-emerald-400 bg-emerald-500/20';
-                        } else if (item.type === 'Delivery') {
-                            icon = 'fa-truck';
-                            url = `/deliveries/${item.id}/`;
-                            colorClass = 'text-blue-400 bg-blue-500/20';
-                        } else if (item.type === 'Organization') {
-                            icon = 'fa-building';
-                            url = '#';
-                            colorClass = 'text-purple-400 bg-purple-500/20';
+                        if (!data.results || data.results.length === 0) {
+                            searchEmpty.classList.remove('cp-hidden');
+                            emptyQueryText.textContent = query;
+                            return;
                         }
+                        
+                        // Render results
+                        searchResults.innerHTML = '<div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Search Results</div>';
+                        
+                        data.results.forEach(item => {
+                            let icon = 'fa-search';
+                            let url = '#';
+                            let colorClass = 'text-gray-400 bg-gray-500/20';
+                            
+                            if (item.type === 'Produce') {
+                                icon = 'fa-leaf';
+                                url = '/surplus/';
+                                colorClass = 'text-emerald-400 bg-emerald-500/20';
+                            } else if (item.type === 'Delivery') {
+                                icon = 'fa-truck';
+                                url = `/deliveries/${item.id}/`;
+                                colorClass = 'text-blue-400 bg-blue-500/20';
+                            } else if (item.type === 'Organization') {
+                                icon = 'fa-building';
+                                url = '#';
+                                colorClass = 'text-purple-400 bg-purple-500/20';
+                            }
 
-                        const el = document.createElement('a');
-                        el.href = url;
-                        el.className = 'flex items-center px-4 py-3 hover:bg-white/5 rounded-xl text-gray-300 hover:text-white transition-colors group';
-                        el.innerHTML = `
-                            <div class="w-8 h-8 rounded-lg ${colorClass} flex items-center justify-center mr-3"><i class="fas ${icon}"></i></div>
-                            <div class="flex-1">
-                                <div class="font-medium text-white">${item.name}</div>
-                                <div class="text-xs text-gray-500">${item.type} &middot; ${item.details || ''}</div>
-                            </div>
-                            <i class="fas fa-arrow-right text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-                        `;
+                            const el = document.createElement('a');
+                            el.href = url;
+                            el.className = 'cp-item';
+                            el.innerHTML = `
+                                <div class="cp-item-icon ${item.type === 'Produce' ? 'emerald' : item.type === 'Delivery' ? 'blue' : 'gray'}"><i class="fas ${icon}"></i></div>
+                                <div style="flex:1">
+                                    <div style="font-weight:600;">${item.name}</div>
+                                    <div style="font-size:12px; color:var(--color-text-secondary);">${item.type} &middot; ${item.details || ''}</div>
+                                </div>
+                                <i class="fas fa-arrow-right" style="color:var(--color-text-secondary);"></i>
+                            `;
+                            
+                            // Click handler to close palette
+                            el.addEventListener('click', () => togglePalette(false));
+                            
+                            searchResults.appendChild(el);
+                        });
                         
-                        // Click handler to close palette
-                        el.addEventListener('click', () => togglePalette(false));
-                        
-                        searchResults.appendChild(el);
+                        searchResults.classList.remove('cp-hidden');
+                    })
+                    .catch(err => {
+                        console.error('Search error:', err);
+                        searchLoading.classList.add('cp-hidden');
+                        searchEmpty.classList.remove('cp-hidden');
+                        emptyQueryText.textContent = query + " (Error fetching)";
                     });
-                    
-                    searchResults.classList.remove('cp-hidden');
-                })
-                .catch(err => {
-                    console.error('Search error:', err);
-                    searchLoading.classList.add('cp-hidden');
-                    searchEmpty.classList.remove('cp-hidden');
-                    emptyQueryText.textContent = query + " (Error fetching)";
-                });
-        }, 300);
-    });
+            }, 300);
+        });
+    }
 });
 </script>

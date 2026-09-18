@@ -11,13 +11,13 @@ User = get_user_model()
 
 def role_selection_view(request):
     """Phase 2: Initial screen where users choose their role."""
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
         return redirect('dashboard')
     return render(request, 'role_selection.html')
 
 def role_login_view(request, role):
     """Phase 4: Role-specific login form."""
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
         return redirect('dashboard')
     
     role = role.upper()
