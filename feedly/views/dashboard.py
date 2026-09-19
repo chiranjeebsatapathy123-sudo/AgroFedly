@@ -56,9 +56,9 @@ def dashboard(request):
     """
     from feedly.services.permissions import get_default_workspace
     
-    if not hasattr(request.user, 'profile'):
-        messages.warning(request, "Please select your role and complete registration.")
-        return redirect('role_selection')
+    if not hasattr(request.user, 'profile') or not request.user.profile.onboarding_completed:
+        messages.warning(request, "Please complete your profile registration.")
+        return redirect('onboarding_start')
         
     workspace = request.session.get('active_workspace')
     

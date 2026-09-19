@@ -3,17 +3,17 @@
 {% block title %}Agriculture Command Center{% endblock %}
 {% block content %}
 
-<section class="page-head" style="position: relative; overflow: hidden; min-height: 250px; display: flex; align-items: center; border-radius: 12px; margin-bottom: 20px;">
+<section class="workspace-hero">
     <div id="dashboard-3d-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.8; pointer-events: none;"></div>
-    <div style="position: relative; z-index: 1; padding: 30px; background: linear-gradient(90deg, rgba(var(--background-rgb, 255, 255, 255), 0.9) 0%, rgba(var(--background-rgb, 255, 255, 255), 0.5) 50%, transparent 100%); width: 100%;">
-        <div style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
-            <a href="{% url 'index' %}" style="color: #666; text-decoration: none;">AgroFedly</a> / 
-            <a href="{% url 'workspace_agri_dashboard' %}" style="color: #666; text-decoration: none;">Agriculture</a> / 
-            <strong style="color: var(--primary);">Dashboard</strong>
+    <div style="position: relative; z-index: 1; width: 100%;">
+        <div style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.8;">
+            <a href="{% url 'index' %}" style="color: inherit; text-decoration: none;">AgroFedly</a> / 
+            <a href="{% url 'workspace_agri_dashboard' %}" style="color: inherit; text-decoration: none;">Agriculture</a> / 
+            <strong>Dashboard</strong>
         </div>
-        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px;">🌱 {% trans "AGRICULTURE WORKSPACE" %}</div>
-        <h1 style="font-size: 2.5rem; margin-top: 10px; margin-bottom: 5px;">{% trans "Farm Operations" %}</h1>
-        <p style="font-size: 1.1rem; max-width: 600px; font-weight: 500;">
+        <div class="eyebrow" style="font-weight:bold; letter-spacing:2px; opacity: 0.9;">🌱 {% trans "AGRICULTURE WORKSPACE" %}</div>
+        <h1 style="font-size: 3rem; margin-top: 10px; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">{% trans "Farm Operations" %}</h1>
+        <p style="font-size: 1.2rem; max-width: 600px; font-weight: 500; opacity: 0.9;">
             {{ total_farms|default:"0" }} Active Farms &nbsp;|&nbsp; 
             {{ active_advisories.count|default:"0" }} Alerts
         </p>
@@ -27,38 +27,43 @@
     });
 </script>
 
-<div class="result-cards" style="margin-bottom:20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+<div class="workspace-widget-grid" style="margin-bottom: 2rem;">
     <!-- Farm Health -->
     <a href="{% url 'agri_farm_list' %}" style="text-decoration: none; color: inherit;">
-        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon"><i class="fas fa-tractor"></i></div>
             <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Active Farms" %}</span>
-            <b style="font-size: 1.8rem; color: var(--text-primary);">{{ total_farms }}</b>
+            <b style="font-size: 2rem; color: var(--text);">{{ total_farms|default:"0" }}</b>
         </div>
     </a>
     <a href="{% url 'agri_field_list' %}" style="text-decoration: none; color: inherit;">
-        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon"><i class="fas fa-map"></i></div>
             <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Active Fields" %}</span>
-            <b style="font-size: 1.8rem; color: var(--text-primary);">{{ total_fields }}</b>
+            <b style="font-size: 2rem; color: var(--text);">{{ total_fields|default:"0" }}</b>
         </div>
     </a>
     <a href="{% url 'agri_field_list' %}" style="text-decoration: none; color: inherit;">
-        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon"><i class="fas fa-chart-area"></i></div>
             <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Total Area" %}</span>
-            <b style="font-size: 1.8rem; color: var(--text-primary);">{{ total_area }} ha</b>
+            <b style="font-size: 2rem; color: var(--text);">{{ total_area|default:"0" }} ha</b>
         </div>
     </a>
     
     <!-- Produce / Processing -->
     <a href="{% url 'agri_produce_list' %}" style="text-decoration: none; color: inherit;">
-        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon"><i class="fas fa-leaf"></i></div>
             <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Produce Ready" %}</span>
-            <b style="font-size: 1.8rem; color: var(--text-primary);">{{ total_produce }} kg</b>
+            <b style="font-size: 2rem; color: var(--text);">{{ total_produce|default:"0" }} kg</b>
         </div>
     </a>
     <a href="{% url 'agri_processing_list' %}" style="text-decoration: none; color: inherit;">
-        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon"><i class="fas fa-cogs"></i></div>
             <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Processed Output" %}</span>
-            <b style="font-size: 1.8rem; color: var(--primary);">{{ total_processed }} kg</b>
+            <b style="font-size: 2rem; color: var(--rd-primary);">{{ total_processed|default:"0" }} kg</b>
         </div>
     </a>
 </div>

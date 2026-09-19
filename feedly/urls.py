@@ -15,6 +15,8 @@ urlpatterns = [
     path('kitchen/analytics/', kitchen.kitchen_analytics, name='kitchen_analytics'),
     path('kitchen/waste-prevention/', kitchen.waste_prevention_center, name='kitchen_waste_prevention'),
     path('kitchen/preparation-optimizer/', kitchen.preparation_optimizer, name='kitchen_preparation_optimizer'),
+    path('kitchen/demand-forecast/', kitchen.kitchen_demand_forecast, name='kitchen_demand_forecast'),
+    path('kitchen/food-safety/', kitchen.kitchen_food_safety, name='kitchen_food_safety'),
     # Static pages (Phase 21)
     path("ai/trust/", TemplateView.as_view(template_name="trust.html"), name="ai_trust"),
     path("resources/", TemplateView.as_view(template_name="resources.html"), name="resources"),
@@ -67,6 +69,11 @@ urlpatterns = [
     
     # Redistribution Workspace Routes
     path("redistribution/", views.redistribution_dashboard, name="redistribution_dashboard"),
+    path("redistribution/surplus/", views.redistribution_surplus, name="redistribution_surplus"),
+    path("redistribution/matching/", views.redistribution_matching, name="redistribution_matching"),
+    path("redistribution/verification/", views.redistribution_verification, name="redistribution_verification"),
+    path("redistribution/transfers/", views.redistribution_transfers, name="redistribution_transfers"),
+    path("redistribution/delivery/", views.redistribution_delivery, name="redistribution_delivery"),
 
     # Agriculture Extension Routes
     path("agriculture/", views.agri_dashboard, name="agri_dashboard"),
@@ -78,6 +85,8 @@ urlpatterns = [
     path("agriculture/calendar/add/", views.agri_event_add, name="agri_event_add"),
     path("agriculture/produce/", views.agri_produce_list, name="agri_produce_list"),
     path("agriculture/produce/add/", views.agri_produce_add, name="agri_produce_add"),
+    path("agriculture/production/", views.agri_production, name="agri_production"),
+    path("agriculture/analytics/", views.agri_analytics, name="agri_analytics"),
     path("agriculture/processing/", views.agri_processing_list, name="agri_processing_list"),
     path("agriculture/processing/add/", views.agri_processing_add, name="agri_processing_add"),
     path("agriculture/supply-matching/", views.agri_supply_matching, name="agri_supply_matching"),
@@ -147,6 +156,10 @@ urlpatterns = [
     path("organization/admin/members/", views.organization_admin_members, name="organization_admin_members"),
     path("organization/admin/audit/", views.organization_admin_audit, name="organization_admin_audit"),
     path("organization/admin/settings/", views.organization_admin_settings, name="organization_admin_settings"),
+    path("organization/admin/users/", views.admin_users, name="admin_users"),
+    path("organization/admin/organizations/", views.admin_organizations, name="admin_organizations"),
+    path("organization/admin/roles/", views.admin_roles, name="admin_roles"),
+    path("organization/admin/workspace-access/", views.admin_workspace_access, name="admin_workspace_access"),
     path("organization/admin/export/", views.export_report, name="export_report"),
     path("organization/error-center/", views.error_center, name="error_center"),
     
@@ -162,6 +175,11 @@ urlpatterns = [
     path("deliveries/<int:delivery_id>/track/", views.delivery_live_tracking, name="delivery_live_tracking"),
     path("deliveries/<int:delivery_id>/proof/", views.delivery_proof, name="delivery_proof"),
     path("deliveries/control/", views.delivery_control, name="delivery_control"),
+    path("logistics/dispatch/", views.logistics_dispatch, name="logistics_dispatch"),
+    path("logistics/drivers/", views.logistics_drivers, name="logistics_drivers"),
+    path("logistics/vehicles/", views.logistics_vehicles, name="logistics_vehicles"),
+    path("logistics/routes/", views.logistics_routes, name="logistics_routes"),
+    path("logistics/analytics/", views.logistics_analytics, name="logistics_analytics"),
     path("recipient/request-center/", views.recipient_request_center, name="recipient_request_center"),
     
     path("volunteer/register/", views.volunteer_register, name="volunteer_register"),

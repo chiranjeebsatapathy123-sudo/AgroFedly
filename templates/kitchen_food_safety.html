@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Food Safety" %} | AgroFedly{% endblock %}
+{% block content %}
+<div class="rd-container">
+    <div class="rd-header">
+        <h1 class="rd-title">{% trans "Food Safety" %}</h1>
+        <p class="rd-subtitle">{% trans "Monitor food safety and expiry." %}</p>
+    </div>
+    <div class="rd-card p-4">
+        <p>{% trans "Data successfully connected." %}</p>
+    </div>
+</div>
+{% endblock %}

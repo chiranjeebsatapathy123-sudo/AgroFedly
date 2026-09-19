@@ -12,7 +12,7 @@ def kitchen_dashboard(request):
     from feedly.services.organizations import get_active_organization
     org = get_active_organization(request.user, request)
     kitchen = Kitchen.objects.filter(organization=org).first() if org else None
-    if not kitchen:
+    if not kitchen and not getattr(request.user, 'is_superuser', False) and request.user.profile.role != 'SUPER_ADMIN':
         return render(request, 'kitchen/no_kitchen.html')
         
     today = timezone.now().date()
@@ -304,3 +304,13 @@ def preparation_optimizer(request):
         'recommendations': recommendations
     }
     return render(request, 'kitchen/preparation_optimizer.html', context)
+
+@login_required
+def kitchen_demand_forecast(request):
+    """Phase 49: Kitchen Demand Forecast."""
+    return render(request, 'kitchen_demand_forecast.html', {})
+
+@login_required
+def kitchen_food_safety(request):
+    """Phase 49: Kitchen Food Safety."""
+    return render(request, 'kitchen_food_safety.html', {})

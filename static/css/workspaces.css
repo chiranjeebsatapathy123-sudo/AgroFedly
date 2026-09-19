@@ -1,0 +1,138 @@
+/* 
+   Workspace-Specific Themes for AgroFedly 
+   Overrides CSS variables from design_system.css 
+*/
+
+/* AGRICULTURE: Earthy Greens & Organic Feels */
+.workspace-agriculture {
+    --rd-primary: #10b981;
+    --rd-secondary: #059669;
+    --background: #f0fdf4;
+    --surface: #ffffff;
+    --text: #064e3b;
+    --border: #d1fae5;
+    
+    /* Specific overrides for sidebar */
+    --sidebar-bg: #ffffff;
+    --sidebar-active: #ecfdf5;
+}
+
+/* KITCHEN: Warm, Vibrant Oranges & Reds */
+.workspace-kitchen {
+    --rd-primary: #f59e0b;
+    --rd-secondary: #d97706;
+    --background: #fffbeb;
+    --surface: #ffffff;
+    --text: #78350f;
+    --border: #fef3c7;
+    
+    --sidebar-bg: #ffffff;
+    --sidebar-active: #fff7ed;
+}
+
+/* LOGISTICS: Industrial Blues & Tech Cyans */
+.workspace-logistics {
+    --rd-primary: #3b82f6;
+    --rd-secondary: #2563eb;
+    --background: #eff6ff;
+    --surface: #ffffff;
+    --text: #1e3a8a;
+    --border: #dbeafe;
+    
+    --sidebar-bg: #ffffff;
+    --sidebar-active: #eff6ff;
+}
+
+/* REDISTRIBUTION: Community Purples & Glassmorphism */
+.workspace-redistribution {
+    --rd-primary: #8b5cf6;
+    --rd-secondary: #7c3aed;
+    --background: #f5f3ff;
+    --surface: #ffffff;
+    --text: #4c1d95;
+    --border: #ede9fe;
+    
+    --sidebar-bg: #ffffff;
+    --sidebar-active: #f5f3ff;
+}
+
+/* ADMIN: System Red / Dark mode feel */
+.workspace-admin {
+    --rd-primary: #ef4444;
+    --rd-secondary: #dc2626;
+    --background: #fef2f2;
+    --surface: #ffffff;
+    --text: #7f1d1d;
+    --border: #fee2e2;
+    
+    --sidebar-bg: #ffffff;
+    --sidebar-active: #fef2f2;
+}
+
+/* Enhanced Dashboard Layout Helpers */
+.workspace-hero {
+    padding: 3rem;
+    border-radius: 24px;
+    margin-bottom: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.workspace-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+}
+
+.workspace-agriculture .workspace-hero {
+    background: linear-gradient(135deg, var(--rd-primary), #059669);
+}
+
+.workspace-kitchen .workspace-hero {
+    background: linear-gradient(135deg, var(--rd-primary), #d97706);
+}
+
+.workspace-logistics .workspace-hero {
+    background: linear-gradient(135deg, var(--rd-primary), #1e40af);
+}
+
+.workspace-redistribution .workspace-hero {
+    background: linear-gradient(135deg, var(--rd-primary), #6d28d9);
+}
+
+.workspace-widget-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.workspace-widget {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.02);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.workspace-widget:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+}
+
+.widget-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--background);
+    color: var(--rd-primary);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}

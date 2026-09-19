@@ -217,6 +217,31 @@ def delivery_proof(request, delivery_id):
         return render(request, 'delivery_proof.html', {'delivery': delivery})
 
 @login_required
+def logistics_dispatch(request):
+    """Phase 49: Logistics Dispatch."""
+    return render(request, 'logistics_dispatch.html', {})
+
+@login_required
+def logistics_drivers(request):
+    """Phase 49: Logistics Drivers."""
+    return render(request, 'logistics_drivers.html', {})
+
+@login_required
+def logistics_vehicles(request):
+    """Phase 49: Logistics Vehicles."""
+    return render(request, 'logistics_vehicles.html', {})
+
+@login_required
+def logistics_routes(request):
+    """Phase 49: Logistics Routes."""
+    return render(request, 'logistics_routes.html', {})
+
+@login_required
+def logistics_analytics(request):
+    """Phase 49: Logistics Analytics."""
+    return render(request, 'logistics_analytics.html', {})
+
+@login_required
 def generate_donation_receipt(request, delivery_id):
     delivery = get_object_or_404(Delivery, id=delivery_id)
     if not request.user.is_superuser:

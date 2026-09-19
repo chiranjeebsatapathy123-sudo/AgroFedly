@@ -1,94 +1,75 @@
 {% extends 'base.html' %}
+{% load static i18n %}
 {% block title %}Kitchen Operations Command Center - AgroFedly{% endblock %}
 {% block content %}
 
-<!-- Top Header -->
-<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
-    <div>
-        <div style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
-            <a href="{% url 'index' %}" style="color: #666; text-decoration: none;">AgroFedly</a> / 
-            <a href="{% url 'workspace_kitchen_dashboard' %}" style="color: #666; text-decoration: none;">Kitchen</a> / 
-            <strong style="color: var(--primary);">Dashboard</strong>
+<section class="workspace-hero">
+    <div id="dashboard-3d-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.8; pointer-events: none;"></div>
+    <div style="position: relative; z-index: 1; width: 100%;">
+        <div style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.8;">
+            <a href="{% url 'index' %}" style="color: inherit; text-decoration: none;">AgroFedly</a> / 
+            <a href="{% url 'workspace_kitchen_dashboard' %}" style="color: inherit; text-decoration: none;">Kitchen</a> / 
+            <strong>Dashboard</strong>
         </div>
-        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px; margin-bottom: 5px;">🍴 KITCHEN WORKSPACE</div>
-        
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <h1 style="margin: 0; font-size: 2.2rem; color: var(--color-text-primary, #000);">Food Operations</h1>
-            <span class="badge emerald">● Kitchen Online</span>
-        </div>
-        
-        <div style="color: var(--color-text-secondary, #666); font-size: 1.1rem; display: flex; align-items: center; gap: 16px; font-weight: 500;">
-            <span>{{ kpi_expected|default:"0" }} Meals Planned</span>
-            <span>|</span>
-            <span>{{ kpi_surplus|default:"0" }} Surplus Meals</span>
+        <div class="eyebrow" style="font-weight:bold; letter-spacing:2px; opacity: 0.9;">🍴 {% trans "KITCHEN WORKSPACE" %}</div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+            <div>
+                <h1 style="font-size: 3rem; margin-top: 10px; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Food Operations</h1>
+                <p style="font-size: 1.2rem; max-width: 600px; font-weight: 500; opacity: 0.9;">
+                    {{ kpi_expected|default:"0" }} Meals Planned &nbsp;|&nbsp; 
+                    {{ kpi_surplus|default:"0" }} Surplus Meals
+                </p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="{% url 'kitchen_meal_planning' %}" class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4);"><i class="fas fa-calendar-alt"></i> Create Meal Plan</a>
+                <a href="{% url 'kitchen_production' %}" class="btn" style="background: white; color: var(--rd-primary); font-weight: bold;"><i class="fas fa-play"></i> Start Production</a>
+            </div>
         </div>
     </div>
+</section>
 
-    <!-- Quick Actions Top Right -->
-    <div class="detail-actions" style="display: flex; gap: 12px; align-items: center;">
-        <a href="{% url 'kitchen_meal_planning' %}" class="btn secondary"><i class="fas fa-calendar-alt"></i> Create Meal Plan</a>
-        <a href="{% url 'kitchen_production' %}" class="btn primary"><i class="fas fa-play"></i> Start Production</a>
-    </div>
-</div>
+<script type="module">
+    import { initKitchen3D } from "{% static 'js/3d_kitchen.js' %}";
+    document.addEventListener("DOMContentLoaded", () => {
+        initKitchen3D('dashboard-3d-container');
+    });
+</script>
 
 <!-- Primary KPI Row -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
+<div class="workspace-widget-grid" style="margin-bottom: 2rem;">
     <a href="{% url 'predict_demand' %}" style="text-decoration: none; color: inherit;">
-        <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Expected Demand</div>
-            <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0;">{{ kpi_expected }}</div>
-            <div style="font-size: 0.8rem; color: var(--color-text-secondary);">AI Forecast / Attendance</div>
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon"><i class="fas fa-chart-line"></i></div>
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Expected Demand</span>
+            <b style="font-size: 2rem; color: var(--text);">{{ kpi_expected|default:"0" }}</b>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">AI Forecast</div>
         </div>
     </a>
 
     <a href="{% url 'kitchen_meal_planning' %}" style="text-decoration: none; color: inherit;">
-        <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Meals To Prepare</div>
-            <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0;">{{ kpi_to_prepare }}</div>
-            <div style="font-size: 0.8rem; color: var(--color-text-secondary);">{% if kpi_expected > 0 %}{% widthratio kpi_to_prepare kpi_expected 100 %}% of expected{% else %}0%{% endif %}</div>
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon"><i class="fas fa-calendar-check"></i></div>
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Meals To Prepare</span>
+            <b style="font-size: 2rem; color: var(--text);">{{ kpi_to_prepare|default:"0" }}</b>
         </div>
     </a>
 
     <a href="{% url 'kitchen_production' %}" style="text-decoration: none; color: inherit;">
-        <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Prepared</div>
-            <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0; color: var(--color-primary);">{{ kpi_prepared }}</div>
-            <div style="font-size: 0.8rem; color: var(--color-text-secondary);">
-                {% if kpi_to_prepare > 0 %}
-                    <div style="width: 100%; height: 4px; background: var(--color-border); border-radius: 2px; margin-top: 4px;">
-                        <div style="width: {% widthratio kpi_prepared kpi_to_prepare 100 %}%; height: 100%; background: var(--color-primary); border-radius: 2px;"></div>
-                    </div>
-                {% else %}
-                    No target set
-                {% endif %}
-            </div>
-        </div>
-    </a>
-
-    <a href="{% url 'kitchen_production' %}" style="text-decoration: none; color: inherit;">
-        <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Served</div>
-            <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0; color: var(--success);">{{ kpi_served }}</div>
-            <div style="font-size: 0.8rem; color: var(--color-text-secondary);">{% if kpi_prepared > 0 %}{% widthratio kpi_served kpi_prepared 100 %}% of prepared{% else %}0%{% endif %}</div>
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon" style="color: var(--success);"><i class="fas fa-fire"></i></div>
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Prepared</span>
+            <b style="font-size: 2rem; color: var(--success);">{{ kpi_prepared|default:"0" }}</b>
         </div>
     </a>
 
     <a href="{% url 'kitchen_redistribution' %}" style="text-decoration: none; color: inherit;">
-        <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Surplus</div>
-            <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0;">{{ kpi_surplus }} <span style="font-size: 1rem;">meals</span></div>
-            <div style="font-size: 0.8rem; display: flex; gap: 8px;">
-                <span style="color: var(--success);">{{ surplus_safe }} Safe</span>
-                <span style="color: var(--warning);">{{ surplus_pending }} Check</span>
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon" style="color: var(--rd-primary);"><i class="fas fa-gift"></i></div>
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Surplus</span>
+            <b style="font-size: 2rem; color: var(--rd-primary);">{{ kpi_surplus|default:"0" }}</b>
+            <div style="font-size: 0.8rem; display: flex; gap: 8px; justify-content: center; margin-top: 5px;">
+                <span style="color: var(--success);">{{ surplus_safe|default:"0" }} Safe</span>
             </div>
-        </div>
-    </a>
-
-    <a href="{% url 'kitchen_waste_prevention' %}" style="text-decoration: none; color: inherit;">
-        <div class="stat-card" style="background: var(--color-surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--color-border); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <div class="stat-title" style="color: var(--color-text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Food Waste</div>
-            <div class="stat-value" style="font-size: 2rem; font-weight: 700; margin: 8px 0; color: var(--danger);">{{ kpi_waste }} <span style="font-size: 1rem;">meals</span></div>
-            <div style="font-size: 0.8rem; color: var(--color-text-secondary);">Unsafe & discarded</div>
         </div>
     </a>
 </div>

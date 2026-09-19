@@ -4,26 +4,37 @@
 {% block title %}Delivery Control - AgroFedly{% endblock %}
 
 {% block content %}
-<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
-    <div>
-        <div style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
-            <a href="{% url 'index' %}" style="color: #666; text-decoration: none;">AgroFedly</a> / 
-            <a href="{% url 'workspace_logistics_dashboard' %}" style="color: #666; text-decoration: none;">Logistics</a> / 
-            <strong style="color: var(--primary);">Dashboard</strong>
+<section class="workspace-hero">
+    <div id="dashboard-3d-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.8; pointer-events: none;"></div>
+    <div style="position: relative; z-index: 1; width: 100%;">
+        <div style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.8;">
+            <a href="{% url 'index' %}" style="color: inherit; text-decoration: none;">AgroFedly</a> / 
+            <a href="{% url 'workspace_logistics_dashboard' %}" style="color: inherit; text-decoration: none;">Logistics</a> / 
+            <strong>Dashboard</strong>
         </div>
-        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px; margin-bottom: 5px;">🚚 LOGISTICS WORKSPACE</div>
-        
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <h1 style="margin: 0; font-size: 2.2rem; color: var(--color-text-primary, #000);">Delivery Operations</h1>
-            <span class="badge emerald">● Fleet Online</span>
-        </div>
-        <div style="color: var(--color-text-secondary, #666); font-size: 1.1rem; display: flex; align-items: center; gap: 16px; font-weight: 500;">
-            <span>{{ active_count|default:"0" }} Active Deliveries</span>
-            <span>|</span>
-            <span>{{ completed_count|default:"0" }} Completed Today</span>
+        <div class="eyebrow" style="font-weight:bold; letter-spacing:2px; opacity: 0.9;">🚚 {% trans "LOGISTICS WORKSPACE" %}</div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+            <div>
+                <h1 style="font-size: 3rem; margin-top: 10px; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Delivery Operations</h1>
+                <p style="font-size: 1.2rem; max-width: 600px; font-weight: 500; opacity: 0.9;">
+                    {{ active_count|default:"0" }} Active Deliveries &nbsp;|&nbsp; 
+                    {{ completed_count|default:"0" }} Completed Today
+                </p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="{% url 'delivery_list' %}" class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4);"><i class="fas fa-list"></i> All Deliveries</a>
+                <a href="{% url 'delivery_create' %}" class="btn" style="background: white; color: var(--rd-primary); font-weight: bold;"><i class="fas fa-plus"></i> New Delivery</a>
+            </div>
         </div>
     </div>
-</div>
+</section>
+
+<script type="module">
+    import { initLogistics3D } from "{% static 'js/3d_logistics.js' %}";
+    document.addEventListener("DOMContentLoaded", () => {
+        initLogistics3D('dashboard-3d-container');
+    });
+</script>
 
 <div class="quick-actions" style="margin-bottom: 24px; padding: 15px; background: var(--color-surface); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--color-border);">
     <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1rem; color: var(--color-text-secondary); text-transform: uppercase;">⚡ Quick Actions</h3>
@@ -34,23 +45,33 @@
     </div>
 </div>
 
-<div class="form-card" style="margin-bottom:20px; background: rgba(var(--primary-rgb), 0.05); border: 1px solid var(--primary);">
-    <strong style="color: var(--primary); font-size: 1.1rem; display:flex; align-items:center; gap:8px;">
-        <i class="fas fa-brain"></i> AI FLEET INSIGHTS
-    </strong>
-    <div style="display:flex; gap:20px; margin-top:10px; flex-wrap:wrap;">
-        <div style="flex:1; min-width:200px;">
-            <span class="badge" style="background:var(--success); color:white;">OBSERVED</span>
-            <p style="margin:8px 0; font-size:0.9rem;">Fleet average delivery time is 18 mins, outperforming standard SLA by 12%.</p>
+<div class="workspace-widget-grid" style="margin-bottom: 2rem;">
+    <div class="workspace-widget">
+        <strong style="color: var(--rd-primary); font-size: 1.1rem; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-brain"></i> AI FLEET INSIGHTS
+        </strong>
+        <div style="display:flex; flex-direction: column; gap:15px; margin-top:15px;">
+            <div>
+                <span class="badge" style="background:var(--success); color:white;">OBSERVED</span>
+                <p style="margin:8px 0; font-size:0.95rem; color: var(--text);">Fleet average delivery time is 18 mins, outperforming SLA.</p>
+            </div>
+            <div style="border-top: 1px solid var(--border); padding-top: 10px;">
+                <span class="badge" style="background:var(--warning); color:white;">PREDICTED</span>
+                <p style="margin:8px 0; font-size:0.95rem; color: var(--text);">Traffic delays likely on Route 2. Re-routing suggested.</p>
+            </div>
         </div>
-        <div style="flex:1; min-width:200px;">
-            <span class="badge" style="background:var(--warning); color:white;">PREDICTED</span>
-            <p style="margin:8px 0; font-size:0.9rem;">Traffic delays likely on Route 2 in the next hour. Re-routing suggested.</p>
-        </div>
-        <div style="flex:1; min-width:200px;">
-            <span class="badge" style="background:var(--info); color:white;">RECOMMENDED</span>
-            <p style="margin:8px 0; font-size:0.9rem;">Assign next 3 pending pickups to Driver A (currently closest to source).</p>
-        </div>
+    </div>
+    
+    <div class="workspace-widget" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
+        <div class="widget-icon" style="margin: 0 auto 15px auto;"><i class="fas fa-truck"></i></div>
+        <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Pending Pickup</span>
+        <b style="font-size: 2.5rem; color: var(--text);">{{ columns.pending.count }}</b>
+    </div>
+
+    <div class="workspace-widget" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
+        <div class="widget-icon" style="margin: 0 auto 15px auto; color: var(--rd-primary);"><i class="fas fa-route"></i></div>
+        <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">In Transit</span>
+        <b style="font-size: 2.5rem; color: var(--rd-primary);">{{ columns.in_transit.count }}</b>
     </div>
 </div>
 

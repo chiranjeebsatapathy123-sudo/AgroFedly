@@ -50,7 +50,7 @@ def agri_dashboard(request):
     org_member = request.user.organization_memberships.first()
     org = org_member.organization if org_member else None
     
-    if not org:
+    if not org and not getattr(request.user, 'is_superuser', False) and request.user.profile.role != 'SUPER_ADMIN':
         messages.error(request, 'You must belong to an organization to view the Agriculture Command Center.')
         return redirect('index')
         
@@ -818,6 +818,18 @@ def agri_iot_dashboard(request):
         'sensor_count': sensor_count,
     }
     return render(request, 'agri_iot_dashboard.html', context)
+
+@login_required
+def agri_production(request):
+    """Phase 49: Agriculture Production View."""
+    context = {}
+    return render(request, 'agri_production.html', context)
+
+@login_required
+def agri_analytics(request):
+    """Phase 49: Agriculture Analytics View."""
+    context = {}
+    return render(request, 'agri_analytics.html', context)
 
 @login_required
 def api_agri_iot_stream(request):

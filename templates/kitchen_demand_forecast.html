@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Demand Forecast" %} | AgroFedly{% endblock %}
+{% block content %}
+<div class="rd-container">
+    <div class="rd-header">
+        <h1 class="rd-title">{% trans "Demand Forecast" %}</h1>
+        <p class="rd-subtitle">{% trans "Predict upcoming meal demand." %}</p>
+    </div>
+    <div class="rd-card p-4">
+        <p>{% trans "Data successfully connected." %}</p>
+    </div>
+</div>
+{% endblock %}

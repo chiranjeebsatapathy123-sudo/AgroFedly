@@ -1,49 +1,59 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load static i18n %}
 {% block title %}Redistribution Workspace - AgroFedly{% endblock %}
 {% block content %}
 
-<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
-    <div>
-        <div style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
-            <a href="{% url 'index' %}" style="color: #666; text-decoration: none;">AgroFedly</a> / 
-            <a href="{% url 'workspace_redistribution_dashboard' %}" style="color: #666; text-decoration: none;">Redistribution</a> / 
-            <strong style="color: var(--primary);">Dashboard</strong>
+<section class="workspace-hero">
+    <div id="dashboard-3d-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.8; pointer-events: none;"></div>
+    <div style="position: relative; z-index: 1; width: 100%;">
+        <div style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.8;">
+            <a href="{% url 'index' %}" style="color: inherit; text-decoration: none;">AgroFedly</a> / 
+            <a href="{% url 'workspace_redistribution_dashboard' %}" style="color: inherit; text-decoration: none;">Redistribution</a> / 
+            <strong>Dashboard</strong>
         </div>
-        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px; margin-bottom: 5px;">🔄 {% trans "REDISTRIBUTION WORKSPACE" %}</div>
-        
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <h1 style="margin: 0; font-size: 2.2rem; color: var(--color-text-primary, #000);">Food Recovery Network</h1>
-            <span class="badge emerald">● System Active</span>
-        </div>
-        <div style="color: var(--color-text-secondary, #666); font-size: 1.1rem; display: flex; align-items: center; gap: 16px; font-weight: 500;">
-            <span>{{ total_surplus|default:"0" }} Meals Available</span>
-            <span>|</span>
-            <span>{{ pending_requests|default:"0" }} Pending Requests</span>
+        <div class="eyebrow" style="font-weight:bold; letter-spacing:2px; opacity: 0.9;">🔄 {% trans "REDISTRIBUTION WORKSPACE" %}</div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+            <div>
+                <h1 style="font-size: 3rem; margin-top: 10px; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Food Recovery Network</h1>
+                <p style="font-size: 1.2rem; max-width: 600px; font-weight: 500; opacity: 0.9;">
+                    {{ total_surplus|default:"0" }} Meals Available &nbsp;|&nbsp; 
+                    {{ pending_requests|default:"0" }} Pending Requests
+                </p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="{% url 'surplus_list' %}" class="btn" style="background: white; color: var(--rd-primary); font-weight: bold;"><i class="fas fa-box-open"></i> Match Surplus</a>
+            </div>
         </div>
     </div>
-    <div class="detail-actions" style="display: flex; gap: 12px; align-items: center;">
-        <a href="{% url 'surplus_list' %}" class="btn primary"><i class="fas fa-box-open"></i> Match Surplus</a>
-    </div>
-</div>
+</section>
 
-<div class="result-cards" style="margin-bottom:20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+<script type="module">
+    import { initRedistribution3D } from "{% static 'js/3d_redistribution.js' %}";
+    document.addEventListener("DOMContentLoaded", () => {
+        initRedistribution3D('dashboard-3d-container');
+    });
+</script>
+
+<div class="workspace-widget-grid" style="margin-bottom: 2rem;">
     <a href="{% url 'surplus_list' %}" style="text-decoration: none; color: inherit;">
-        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
-            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Available Surplus" %}</span>
-            <b style="font-size: 1.8rem; color: var(--text-primary);">{{ total_surplus }} kg</b>
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon"><i class="fas fa-box-open"></i></div>
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">{% trans "Available Surplus" %}</span>
+            <b style="font-size: 2rem; color: var(--text);">{{ total_surplus|default:"0" }} kg</b>
         </div>
     </a>
     <a href="{% url 'recipient_list' %}" style="text-decoration: none; color: inherit;">
-        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
-            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Pending Requests" %}</span>
-            <b style="font-size: 1.8rem; color: var(--text-primary);">{{ pending_requests }}</b>
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon" style="color: var(--rd-primary);"><i class="fas fa-hand-holding-heart"></i></div>
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">{% trans "Pending Requests" %}</span>
+            <b style="font-size: 2rem; color: var(--rd-primary);">{{ pending_requests|default:"0" }}</b>
         </div>
     </a>
     <a href="{% url 'delivery_list' %}" style="text-decoration: none; color: inherit;">
-        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
-            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Active Deliveries" %}</span>
-            <b style="font-size: 1.8rem; color: var(--text-primary);">{{ active_deliveries }}</b>
+        <div class="workspace-widget" style="text-align: center;">
+            <div class="widget-icon" style="color: var(--success);"><i class="fas fa-truck-fast"></i></div>
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">{% trans "Active Deliveries" %}</span>
+            <b style="font-size: 2rem; color: var(--success);">{{ active_deliveries|default:"0" }}</b>
         </div>
     </a>
 </div>

@@ -202,3 +202,28 @@ def redistribution_dashboard(request):
         'organization': org
     }
     return render(request, 'redistribution/dashboard.html', context)
+
+@login_required
+def redistribution_surplus(request):
+    """Phase 49: Redistribution Available Surplus."""
+    return render(request, 'redistribution_surplus.html', {})
+
+@login_required
+def redistribution_matching(request):
+    """Phase 49: Redistribution AI Matching."""
+    return render(request, 'redistribution_matching.html', {})
+
+@login_required
+def redistribution_verification(request):
+    """Phase 49: Redistribution Verification."""
+    return render(request, 'redistribution_verification.html', {})
+
+@login_required
+def redistribution_transfers(request):
+    """Phase 49: Redistribution Transfers."""
+    return render(request, 'redistribution_transfers.html', {})
+
+@login_required
+def redistribution_delivery(request):
+    """Phase 49: Redistribution Delivery."""
+    return render(request, 'redistribution_delivery.html', {})

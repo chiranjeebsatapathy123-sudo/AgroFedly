@@ -495,3 +495,23 @@ def export_report(request):
     else:
         # PDF fallback or other formats
         return HttpResponse("PDF Export not configured. Please use CSV.", status=501)
+
+@login_required
+def admin_users(request):
+    """Phase 49: Admin Users."""
+    return render(request, 'admin_users.html', {})
+
+@login_required
+def admin_organizations(request):
+    """Phase 49: Admin Organizations."""
+    return render(request, 'admin_organizations.html', {})
+
+@login_required
+def admin_roles(request):
+    """Phase 49: Admin Roles."""
+    return render(request, 'admin_roles.html', {})
+
+@login_required
+def admin_workspace_access(request):
+    """Phase 49: Admin Workspace Access."""
+    return render(request, 'admin_workspace_access.html', {})
