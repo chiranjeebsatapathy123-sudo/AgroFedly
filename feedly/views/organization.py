@@ -345,37 +345,45 @@ def ai_operations_center(request):
 def organization_admin_dashboard(request):
     """Executive Dashboard with real DB-computed KPIs."""
     request.session['active_workspace'] = 'ADMIN'
-    from feedly.models import MealRecord, KitchenInventory, SurplusFood, Delivery, Kitchen
-    from django.db.models import Sum
+    request.session['active_workspace'] = 'ADMIN'
+    import traceback
+    try:
+        from feedly.models import MealRecord, KitchenInventory, SurplusFood, Delivery, Kitchen
+        from django.db.models import Sum
+        
+        org = request.organization
+        
+        # 1. Total Production / Consumption (Meals)
+        total_consumption = MealRecord.objects.filter(kitchen__organization=org).aggregate(t=Sum('meals_consumed'))['t'] or 0
+        
+        # 2. Total Surplus
+        total_surplus = SurplusFood.objects.filter(organization=org).aggregate(t=Sum('quantity'))['t'] or 0
+        
+        # 3. Successful Redistributions
+        redistributed = SurplusFood.objects.filter(organization=org, status='REDISTRIBUTED').aggregate(t=Sum('quantity'))['t'] or 0
+        
+        # 4. Waste (Rejected/Spoiled Surplus + Expired Inventory)
+        unsafe_surplus = SurplusFood.objects.filter(organization=org, status='UNSAFE').aggregate(t=Sum('quantity'))['t'] or 0
+        expired_inv = KitchenInventory.objects.filter(kitchen__organization=org, status='EXPIRED').aggregate(t=Sum('quantity'))['t'] or 0
+        total_waste = unsafe_surplus + expired_inv
+        
+        # 5. Delivery Performance
+        completed_deliveries = Delivery.objects.filter(sender=org, status='DELIVERED').count()
+        
+        context = {
+            'total_consumption': total_consumption,
+            'total_surplus': total_surplus,
+            'redistributed': redistributed,
+            'total_waste': total_waste,
+            'completed_deliveries': completed_deliveries,
+            'members': request.organization.members.all().select_related('user')[:5]
+        }
+        return render(request, 'admin/org_admin_dashboard.html', context)
+    except Exception as e:
+        traceback.print_exc()
+        raise e
     
-    org = request.organization
-    
-    # 1. Total Production / Consumption (Meals)
-    total_consumption = MealRecord.objects.filter(organization=org).aggregate(t=Sum('quantity'))['t'] or 0
-    
-    # 2. Total Surplus
-    total_surplus = SurplusFood.objects.filter(organization=org).aggregate(t=Sum('quantity'))['t'] or 0
-    
-    # 3. Successful Redistributions
-    redistributed = SurplusFood.objects.filter(organization=org, status='REDISTRIBUTED').aggregate(t=Sum('quantity'))['t'] or 0
-    
-    # 4. Waste (Rejected/Spoiled Surplus + Expired Inventory)
-    unsafe_surplus = SurplusFood.objects.filter(organization=org, status='UNSAFE').aggregate(t=Sum('quantity'))['t'] or 0
-    expired_inv = KitchenInventory.objects.filter(kitchen__organization=org, status='EXPIRED').aggregate(t=Sum('quantity'))['t'] or 0
-    total_waste = unsafe_surplus + expired_inv
-    
-    # 5. Delivery Performance
-    completed_deliveries = Delivery.objects.filter(sender=org, status='DELIVERED').count()
-    
-    context = {
-        'total_consumption': total_consumption,
-        'total_surplus': total_surplus,
-        'redistributed': redistributed,
-        'total_waste': total_waste,
-        'completed_deliveries': completed_deliveries,
-        'members': request.organization.members.all().select_related('user')[:5]
-    }
-    return render(request, 'admin/org_admin_dashboard.html', context)
+
 
 @require_role(['OWNER', 'ADMIN'])
 def organization_admin_members(request):

@@ -147,15 +147,20 @@ def register_view(request, role=None):
 
 @login_required
 def logout_view(request):
-    username = request.user.username
+    user = request.user
+    username = user.username if user.is_authenticated else "Unknown"
+    
+    # Check org memberships before logout
+    if user.is_authenticated and hasattr(user, 'organization_memberships'):
+        org_member = user.organization_memberships.filter(is_active=True).first()
+        if org_member:
+            SystemEvent.objects.create(
+                organization=org_member.organization,
+                event_type="INFO",
+                description=f"User {username} logged out."
+            )
+            
     logout(request)
-    org_member = request.user.organization_memberships.filter(is_active=True).first()
-    if org_member:
-        SystemEvent.objects.create(
-            organization=org_member.organization,
-            event_type="INFO",
-            description=f"User {username} logged out."
-        )
     messages.success(request, 'You have been securely logged out.')
     return redirect('login')
 

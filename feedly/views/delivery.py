@@ -1,4 +1,4 @@
-from ..decorators import _organization_required, _manager_required, require_org_role
+from ..decorators import _organization_required, _manager_required, require_org_role, require_sector
 import json
 import os
 from datetime import date, timedelta, datetime
@@ -299,6 +299,7 @@ def recipient_request_center(request):
 
 @login_required
 @_organization_required
+@require_sector('LOGISTICS')
 def delivery_control(request):
     """Central Delivery Control Board mapping Delivery statuses."""
     request.session['active_workspace'] = 'LOGISTICS'

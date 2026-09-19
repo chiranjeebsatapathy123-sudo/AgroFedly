@@ -86,6 +86,8 @@ def get_default_workspace(user):
             return 'AGRICULTURE'
         if role == 'NGO' and 'REDISTRIBUTION' in permitted:
             return 'REDISTRIBUTION'
+        if role == 'ADMIN' and 'ADMIN' in permitted:
+            return 'ADMIN'
             
     # Fallback priority
     if 'AGRICULTURE' in permitted: return 'AGRICULTURE'

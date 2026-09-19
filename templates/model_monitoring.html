@@ -17,7 +17,7 @@
         {% for model in models %}
         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                <h3 style="margin: 0; font-size: 1.3rem;">{{ model.model_name|title|replace:"_"," " }}</h3>
+                <h3 style="margin: 0; font-size: 1.3rem;">{{ model.model_name|title }}</h3>
                 <span style="font-size: 0.8rem; background: {% if model.status == 'ACTIVE' %}rgba(46, 204, 113, 0.1){% else %}rgba(241, 196, 15, 0.1){% endif %}; color: {% if model.status == 'ACTIVE' %}var(--success){% else %}var(--warning){% endif %}; padding: 0.2rem 0.6rem; border-radius: 10px; font-weight: bold;">
                     {{ model.status }}
                 </span>

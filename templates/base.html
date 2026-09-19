@@ -63,30 +63,30 @@
      <nav class="rd-nav">
         <!-- Universal Application Shell Navigation based on Active Workspace -->
         {% if active_workspace_config %}
-        <div class="rd-nav-group" style="color: {{ active_workspace_config.color|default:'var(--rd-primary)' }}">{{ active_workspace_config.name }} Workspace</div>
+        <div class="rd-nav-group" style="color: {{ active_workspace_config.color|default:'var(--rd-primary)' }}">{{ active_workspace_config.name }} {% trans "Workspace" %}</div>
         {% for item in active_workspace_config.sidebar %}
-        <a href="{% if not item.disabled %}{% url item.url_name %}{% else %}#{% endif %}" class="rd-nav-item {% if request.resolver_match.url_name == item.url_name %}active{% endif %} {% if item.disabled %}disabled{% endif %}" {% if item.disabled %}onclick="alert('This feature is coming soon!'); return false;"{% endif %}>
+        <a href="{% if not item.disabled %}{% url item.url_name %}{% else %}#{% endif %}" class="rd-nav-item {% if request.resolver_match.url_name == item.url_name %}active{% endif %} {% if item.disabled %}disabled{% endif %}" {% if item.disabled %}onclick="alert('{% trans "This feature is coming soon!" %}'); return false;"{% endif %}>
             <i class="{{ item.icon }}"></i> {{ item.label }}
         </a>
         {% endfor %}
         {% else %}
         <!-- Fallback Navigation -->
-        <a href="{% url 'dashboard' %}" class="rd-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="{% url 'dashboard' %}" class="rd-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><i class="fas fa-home"></i> {% trans "Dashboard" %}</a>
         {% endif %}
         
-        <div class="rd-nav-group">Intelligence</div>
+        <div class="rd-nav-group">{% trans "Intelligence" %}</div>
         <button type="button" class="rd-nav-item rd-nav-expand" onclick="this.classList.toggle('active'); this.nextElementSibling.classList.toggle('active')" style="width:100%; border:none; background:transparent; cursor:pointer; text-align:left;">
-            <i class="fas fa-brain"></i> AI & Analytics <i class="fas fa-chevron-down" style="margin-left:auto;font-size:10px; transition: transform 0.2s;"></i>
+            <i class="fas fa-brain"></i> {% trans "AI & Analytics" %} <i class="fas fa-chevron-down" style="margin-left:auto;font-size:10px; transition: transform 0.2s;"></i>
         </button>
         <div class="rd-sub-nav">
-           <a href="{% url 'intelligence_center' %}">AI Insights</a>
-           <a href="{% url 'ai_operations_center' %}">AI Monitoring</a>
-           <a href="{% url 'impact_dashboard' %}">Operations Analytics</a>
+           <a href="{% url 'intelligence_center' %}">{% trans "AI Insights" %}</a>
+           <a href="{% url 'ai_operations_center' %}">{% trans "AI Monitoring" %}</a>
+           <a href="{% url 'impact_dashboard' %}">{% trans "Operations Analytics" %}</a>
         </div>
         
         <div style="margin-top:auto; padding:24px;">
             <button id="copilot-sidebar-btn" type="button" class="rd-nav-item" style="width:100%; border:none; background:var(--rd-primary); color:white; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(18,122,74,0.3);">
-                <i class="fas fa-robot"></i> AI Copilot
+                <i class="fas fa-robot"></i> {% trans "AI Copilot" %}
             </button>
         </div>
      </nav>
@@ -122,11 +122,16 @@
            
            <!-- Phase 37 i18n Selector -->
            <div class="rd-dropdown-container" id="lang-dropdown">
+               <form action="{% url 'set_language' %}" method="post" id="lang-form" style="display: none;">
+                   {% csrf_token %}
+                   <input name="next" type="hidden" value="{{ request.get_full_path|default:'/' }}">
+                   <input name="language" type="hidden" id="lang-input">
+               </form>
                <button class="rd-icon-btn" onclick="document.getElementById('lang-dropdown').classList.toggle('active')"><i class="fas fa-language"></i></button>
                <div class="rd-dropdown-menu" style="width: 150px; padding: 10px;">
-                   <a href="javascript:void(0)" onclick="alert('Language switching is coming in the next release!')" class="rd-dropdown-item">English (EN)</a>
-                   <a href="javascript:void(0)" onclick="alert('Language switching is coming in the next release!')" class="rd-dropdown-item">Hindi (HI)</a>
-                   <a href="javascript:void(0)" onclick="alert('Language switching is coming in the next release!')" class="rd-dropdown-item">Odia (OR)</a>
+                   <a href="javascript:void(0)" onclick="document.getElementById('lang-input').value='en'; document.getElementById('lang-form').submit();" class="rd-dropdown-item">English (EN)</a>
+                   <a href="javascript:void(0)" onclick="document.getElementById('lang-input').value='hi'; document.getElementById('lang-form').submit();" class="rd-dropdown-item">Hindi (HI)</a>
+                   <a href="javascript:void(0)" onclick="document.getElementById('lang-input').value='or'; document.getElementById('lang-form').submit();" class="rd-dropdown-item">Odia (OR)</a>
                </div>
            </div>
            
