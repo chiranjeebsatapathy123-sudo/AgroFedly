@@ -107,4 +107,12 @@
     <a href="{% url 'organization_admin_members' %}" class="btn soft small">Manage Members</a>
     <a href="{% url 'organization_admin_audit' %}" class="btn soft small">View Audit Logs</a>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if(window.agrofedly3D && window.AdminScene) {
+            window.agrofedly3D.loadScene(window.AdminScene);
+        }
+    });
+</script>
 {% endblock %}

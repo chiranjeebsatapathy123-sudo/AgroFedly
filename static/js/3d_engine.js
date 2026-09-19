@@ -458,3 +458,132 @@ export class LoginSceneController {
 
 window.LandingSceneController = LandingSceneController;
 window.LoginSceneController = LoginSceneController;
+
+// Workspace Scene Controllers
+export class WorkspaceSceneController {
+    constructor(engine, config={}) {
+        this.engine = engine;
+        this.group = new THREE.Group();
+        this.accent = config.accent || 0x1ba45e;
+    }
+    init() {
+        this.engine.scene.add(this.group);
+    }
+    update(delta, time) {}
+    onThemeChange(isDark) {}
+    dispose() {}
+}
+
+export class AgricultureScene extends WorkspaceSceneController {
+    init() {
+        super.init();
+        const gridHelper = new THREE.GridHelper(40, 40, this.accent, 0x444444);
+        gridHelper.material.opacity = 0.2;
+        gridHelper.material.transparent = true;
+        this.group.add(gridHelper);
+        
+        const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+        const mat = new THREE.MeshPhysicalMaterial({ color: this.accent, wireframe: true });
+        this.nodes = [];
+        for(let i=0; i<10; i++) {
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set((Math.random()-0.5)*20, Math.random()*5, (Math.random()-0.5)*20);
+            this.group.add(mesh);
+            this.nodes.push(mesh);
+        }
+        this.engine.setCameraTarget(new THREE.Vector3(0, 5, 10), new THREE.Vector3(0, 0, 0));
+    }
+    update(delta, time) {
+        this.group.rotation.y += delta * 0.05;
+        this.nodes.forEach((node, i) => {
+            node.position.y += Math.sin(time * 2 + i) * 0.01;
+            node.rotation.x += delta * 0.5;
+        });
+    }
+}
+
+export class KitchenScene extends WorkspaceSceneController {
+    init() {
+        super.init();
+        this.accent = 0xf59e0b;
+        const geo = new THREE.CylinderGeometry(1, 1, 0.2, 32);
+        const mat = new THREE.MeshPhysicalMaterial({ color: this.accent, transparent: true, opacity: 0.6 });
+        this.stations = [];
+        for(let i=0; i<4; i++) {
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(Math.cos(i * Math.PI/2) * 5, -2, Math.sin(i * Math.PI/2) * 5);
+            this.group.add(mesh);
+            this.stations.push(mesh);
+        }
+        this.engine.setCameraTarget(new THREE.Vector3(0, 5, 10), new THREE.Vector3(0, 0, 0));
+    }
+    update(delta, time) {
+        this.group.rotation.y += delta * 0.1;
+    }
+}
+
+export class RedistributionScene extends WorkspaceSceneController {
+    init() {
+        super.init();
+        this.accent = 0x8b5cf6;
+        const mat = new THREE.LineBasicMaterial({ color: this.accent, transparent: true, opacity: 0.5 });
+        this.lines = new THREE.Group();
+        for(let i=0; i<20; i++) {
+            const points = [];
+            points.push(new THREE.Vector3(0, 0, 0));
+            points.push(new THREE.Vector3((Math.random()-0.5)*20, (Math.random()-0.5)*10, (Math.random()-0.5)*20));
+            const geo = new THREE.BufferGeometry().setFromPoints(points);
+            const line = new THREE.Line(geo, mat);
+            this.lines.add(line);
+        }
+        this.group.add(this.lines);
+        this.engine.setCameraTarget(new THREE.Vector3(0, 5, 10), new THREE.Vector3(0, 0, 0));
+    }
+    update(delta, time) {
+        this.lines.rotation.y += delta * 0.1;
+    }
+}
+
+export class LogisticsScene extends WorkspaceSceneController {
+    init() {
+        super.init();
+        this.accent = 0x3b82f6;
+        const geo = new THREE.SphereGeometry(0.2, 8, 8);
+        const mat = new THREE.MeshBasicMaterial({ color: this.accent });
+        this.vehicles = [];
+        for(let i=0; i<5; i++) {
+            const mesh = new THREE.Mesh(geo, mat);
+            this.group.add(mesh);
+            this.vehicles.push({ mesh, angle: i });
+        }
+        this.engine.setCameraTarget(new THREE.Vector3(0, 5, 10), new THREE.Vector3(0, 0, 0));
+    }
+    update(delta, time) {
+        this.vehicles.forEach(v => {
+            v.angle += delta * 0.5;
+            v.mesh.position.set(Math.cos(v.angle)*10, 0, Math.sin(v.angle)*10);
+        });
+    }
+}
+
+export class AdminScene extends WorkspaceSceneController {
+    init() {
+        super.init();
+        this.accent = 0xef4444;
+        const geo = new THREE.IcosahedronGeometry(2, 1);
+        const mat = new THREE.MeshPhysicalMaterial({ color: this.accent, wireframe: true });
+        this.core = new THREE.Mesh(geo, mat);
+        this.group.add(this.core);
+        this.engine.setCameraTarget(new THREE.Vector3(0, 0, 10), new THREE.Vector3(0, 0, 0));
+    }
+    update(delta, time) {
+        this.core.rotation.x += delta * 0.2;
+        this.core.rotation.y += delta * 0.3;
+    }
+}
+
+window.AgricultureScene = AgricultureScene;
+window.KitchenScene = KitchenScene;
+window.RedistributionScene = RedistributionScene;
+window.LogisticsScene = LogisticsScene;
+window.AdminScene = AdminScene;

@@ -9,7 +9,9 @@ from ..decorators import require_role, require_org_role, _organization_required,
 @require_sector('KITCHEN')
 def kitchen_dashboard(request):
     request.session['active_workspace'] = 'KITCHEN'
-    kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
+    from feedly.services.organizations import get_active_organization
+    org = get_active_organization(request.user, request)
+    kitchen = Kitchen.objects.filter(organization=org).first() if org else None
     if not kitchen:
         return render(request, 'kitchen/no_kitchen.html')
         
@@ -74,7 +76,9 @@ def kitchen_dashboard(request):
 
 @login_required
 def meal_planning(request):
-    kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
+    from feedly.services.organizations import get_active_organization
+    org = get_active_organization(request.user, request)
+    kitchen = Kitchen.objects.filter(organization=org).first() if org else None
     
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -93,7 +97,9 @@ def meal_planning(request):
 
 @login_required
 def production_tracking(request):
-    kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
+    from feedly.services.organizations import get_active_organization
+    org = get_active_organization(request.user, request)
+    kitchen = Kitchen.objects.filter(organization=org).first() if org else None
     
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -133,7 +139,9 @@ def production_tracking(request):
 
 @login_required
 def register_surplus(request):
-    kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
+    from feedly.services.organizations import get_active_organization
+    org = get_active_organization(request.user, request)
+    kitchen = Kitchen.objects.filter(organization=org).first() if org else None
     if request.method == 'POST':
         food_name = request.POST.get('food_name')
         quantity = request.POST.get('quantity')
@@ -165,7 +173,9 @@ def register_surplus(request):
 
 @login_required
 def redistribution_queue(request):
-    kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
+    from feedly.services.organizations import get_active_organization
+    org = get_active_organization(request.user, request)
+    kitchen = Kitchen.objects.filter(organization=org).first() if org else None
     surplus = SurplusFood.objects.filter(kitchen=kitchen).order_by('-created_at')
     
     # Kanban columns aligned with food_safety and matching AI modules
@@ -179,7 +189,9 @@ def redistribution_queue(request):
 
 @login_required
 def inventory(request):
-    kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
+    from feedly.services.organizations import get_active_organization
+    org = get_active_organization(request.user, request)
+    kitchen = Kitchen.objects.filter(organization=org).first() if org else None
     
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -215,9 +227,10 @@ def kitchen_analytics(request):
     from ..models import DemandForecast, MealRecord, Kitchen
     from django.db.models import Sum
     from django.utils import timezone
+    from feedly.services.organizations import get_active_organization
     
-    kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
-    org = kitchen.organization if kitchen else None
+    org = get_active_organization(request.user, request)
+    kitchen = Kitchen.objects.filter(organization=org).first() if org else None
     
     historical = MealRecord.objects.filter(kitchen=kitchen).aggregate(total=Sum('meals_consumed'))['total'] or 0
     expected = DemandForecast.objects.filter(organization=org, date__gte=timezone.now().date()).aggregate(total=Sum('predicted_demand'))['total'] or 0

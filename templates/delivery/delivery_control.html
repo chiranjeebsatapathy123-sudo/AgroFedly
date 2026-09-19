@@ -116,4 +116,12 @@
     </div>
 
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if(window.agrofedly3D && window.LogisticsScene) {
+            window.agrofedly3D.loadScene(window.LogisticsScene);
+        }
+    });
+</script>
 {% endblock %}

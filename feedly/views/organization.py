@@ -312,7 +312,7 @@ def data_quality_center(request):
             {'title': 'Stale Transit Deliveries', 'count': stale_deliveries, 'severity': 'critical', 'desc': 'Deliveries marked IN_TRANSIT for over 48 hours require manual verification.'}
         ]
     }
-    return render(request, 'data_quality_center.html', context)
+    return render(request, 'enterprise/data_quality.html', context)
 
 @login_required
 @_organization_required

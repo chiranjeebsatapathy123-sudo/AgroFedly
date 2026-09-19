@@ -67,8 +67,6 @@ urlpatterns = [
     
     # Redistribution Workspace Routes
     path("redistribution/", views.redistribution_dashboard, name="redistribution_dashboard"),
-    path("redistribution/recipients/", views.recipient_list, name="recipient_list"),
-    path("redistribution/surplus/", views.surplus_list, name="surplus_list"),
 
     # Agriculture Extension Routes
     path("agriculture/", views.agri_dashboard, name="agri_dashboard"),

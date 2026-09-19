@@ -180,6 +180,8 @@ def switch_workspace(request, workspace):
         elif workspace == 'ADMIN':
             return redirect('workspace_admin_dashboard')
     else:
-        messages.error(request, f"You are not authorized to access the {workspace} workspace.")
-        
-    return redirect('dashboard')
+        from django.shortcuts import render
+        return render(request, 'errors/403.html', {
+            'required_workspace': workspace,
+            'message': f"Permission denied to access the {workspace} workspace."
+        }, status=403)

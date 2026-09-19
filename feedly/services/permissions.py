@@ -24,6 +24,8 @@ def get_permitted_workspaces(user):
     # Check Profile
     if hasattr(user, 'profile'):
         role = user.profile.role
+        if role == 'SUPER_ADMIN':
+            return {'AGRICULTURE', 'KITCHEN', 'REDISTRIBUTION', 'LOGISTICS', 'ADMIN'}
         if role == 'ADMIN':
             return {'AGRICULTURE', 'KITCHEN', 'REDISTRIBUTION', 'LOGISTICS', 'ADMIN'}
         if role == 'FARMER':

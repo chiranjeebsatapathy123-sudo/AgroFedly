@@ -114,4 +114,11 @@
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if(window.agrofedly3D && window.RedistributionScene) {
+            window.agrofedly3D.loadScene(window.RedistributionScene);
+        }
+    });
+</script>
 {% endblock %}

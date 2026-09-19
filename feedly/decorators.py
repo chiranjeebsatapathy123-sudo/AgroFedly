@@ -5,17 +5,19 @@ from django.contrib.auth.decorators import login_required
 
 def require_organization(view_func):
     """
-    Ensures the user has an active organization in their context via OrganizationMiddleware.
+    Ensures the user has an active organization in their context via OrganizationMiddleware
+    or the canonical organization resolver.
     """
     @wraps(view_func)
     @login_required
     def wrapped(request, *args, **kwargs):
-        if not hasattr(request, 'organization') or not request.organization:
+        from feedly.services.organizations import get_active_organization
+        org = get_active_organization(request.user, request)
+        if not org:
             messages.info(request, 'Register or join an organization to use this workspace.')
             return redirect('organization_onboarding')
             
-        # Backward compatibility for old views relying on request.membership
-        request.membership = request.org_membership
+        request.organization = org
         return view_func(request, *args, **kwargs)
     return wrapped
 
@@ -27,7 +29,7 @@ def require_role(roles):
         @wraps(view_func)
         @require_organization
         def _wrapped_view(request, *args, **kwargs):
-            if request.org_membership.role not in roles:
+            if not hasattr(request, 'org_membership') or not request.org_membership or request.org_membership.role not in roles:
                 messages.error(request, f"Permission denied. Required role: {', '.join(roles)}")
                 return redirect("dashboard")
             return view_func(request, *args, **kwargs)

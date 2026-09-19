@@ -330,4 +330,11 @@ document.addEventListener("DOMContentLoaded", function() {
     </ul>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if(window.agrofedly3D && window.AgricultureScene) {
+            window.agrofedly3D.loadScene(window.AgricultureScene);
+        }
+    });
+</script>
 {% endblock %}

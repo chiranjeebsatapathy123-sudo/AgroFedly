@@ -274,4 +274,11 @@
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if(window.agrofedly3D && window.KitchenScene) {
+            window.agrofedly3D.loadScene(window.KitchenScene);
+        }
+    });
+</script>
 {% endblock %}

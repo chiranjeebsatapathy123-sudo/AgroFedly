@@ -111,4 +111,12 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if(window.agrofedly3D && window.AdminScene) {
+            window.agrofedly3D.loadScene(window.AdminScene);
+        }
+    });
+</script>
 {% endblock %}
