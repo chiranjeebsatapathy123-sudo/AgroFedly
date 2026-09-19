@@ -1,8 +1,8 @@
-from .views import kitchen
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 from . import views
+from .views import api, kitchen, superadmin
 
 urlpatterns = [
     # Phase 8: Kitchen Module
@@ -35,12 +35,24 @@ urlpatterns = [
     path("readiness/", views.health_readiness, name="readiness"),
     path("liveness/", views.health_liveness, name="liveness"),
     # Phase 42: Smart Login & Identity Resolution
-    path("login/", views.smart_login_view, name="smart_login"),
+    path("login/", views.smart_login_view, name="login"),
     path("role-selection/", views.role_selection_view, name="role_selection"), # Legacy redirect
     path("login/<str:role>/", views.role_login_view, name="role_login"), # Legacy redirect
     path("register/<str:role>/", views.register_view, name="register_role"),
     path("logout/", views.logout_view, name="logout"),
     path("workspace/switch/<str:workspace>/", views.switch_workspace, name="switch_workspace"),
+    
+    # Phase 44: Onboarding
+    path("onboarding/", views.onboarding_start, name="onboarding_start"),
+    path("onboarding/organization/", views.onboarding_org, name="onboarding_org"),
+    path("onboarding/role-setup/", views.onboarding_role_setup, name="onboarding_role_setup"),
+    
+    # Canonical Workspace Routes
+    path("workspace/agriculture/dashboard/", views.agri_dashboard, name="workspace_agri_dashboard"),
+    path("workspace/kitchen/dashboard/", kitchen.kitchen_dashboard, name="workspace_kitchen_dashboard"),
+    path("workspace/redistribution/dashboard/", views.redistribution_dashboard, name="workspace_redistribution_dashboard"),
+    path("workspace/logistics/dashboard/", views.delivery_control, name="workspace_logistics_dashboard"),
+    path("workspace/administration/dashboard/", superadmin.workspace_admin_router, name="workspace_admin_dashboard"),
 
     path("dashboard/", views.dashboard, name="dashboard"),
     path("predict/", views.predict_demand, name="predict_demand"),
@@ -52,8 +64,6 @@ urlpatterns = [
     path("logging/", views.post_meal_logging, name="post_meal_logging"),
     
     # Logistics Workspace Routes
-    path("delivery/", views.delivery_control, name="delivery_control"),
-    path("delivery/queue/", views.delivery_list, name="delivery_list"),
     
     # Redistribution Workspace Routes
     path("redistribution/", views.redistribution_dashboard, name="redistribution_dashboard"),
@@ -89,6 +99,7 @@ urlpatterns = [
     path("api/notifications/", views.api_notifications, name="api_notifications"),
     path("api/notifications/read/", views.api_notifications_read, name="api_notifications_read"),
     path("api/search/", views.api_global_search, name="api_global_search"),
+    path("api/auth/me/", views.api_auth_me, name="api_auth_me"),
     path("api/ai/scenario/", views.api_ai_scenario, name="api_ai_scenario"),
     path("api/ai/action-preview/", views.api_ai_action_preview, name="api_ai_action_preview"),
     path("agriculture/map/", views.agri_field_map, name="agri_field_map"),
@@ -99,6 +110,9 @@ urlpatterns = [
     path("agriculture/warehousing/", views.agri_warehousing, name="agri_warehousing"),
     path("agriculture/market/", views.marketplace_analytics, name="marketplace_analytics"),
     path("agriculture/subsidies/", views.agri_subsidy_finder, name="agri_subsidy_finder"),
+    path("agriculture/forum/", views.agri_forum, name="agri_forum"),
+    path("agriculture/forum/<int:post_id>/", views.agri_forum_detail, name="agri_forum_detail"),
+    path("agriculture/carbon/", views.agri_carbon_dashboard, name="agri_carbon_dashboard"),
     path("api/iot/live/", views.api_iot_live_stream, name="api_iot_live_stream"),
     path("trace/<str:tracking_code>/", views.agri_traceability, name="agri_traceability"),
     path("trace/<str:tracking_code>/release/", views.agri_release_escrow, name="agri_release_escrow"),
@@ -159,7 +173,6 @@ urlpatterns = [
     path("deliveries/<int:delivery_id>/receipt/", views.generate_donation_receipt, name="generate_donation_receipt"),
     path("api/copilot/", views.copilot_chat, name="copilot_chat"),
     path("api/weather/", views.api_weather, name="api_weather"),
-    path("api/search/", views.api_global_search, name="api_global_search"),
     path("data-quality/", views.data_quality_center, name="data_quality_center"),
     path("ai-operations/", views.ai_operations_center, name="ai_operations_center"),
     
@@ -171,8 +184,6 @@ urlpatterns = [
     path("enterprise/data-quality/", views.enterprise.data_quality, name="data_quality"),
 
     # AI Endpoints (Phase 18)
-    path("api/ai/scenario/", views.api_ai_scenario, name="api_ai_scenario"),
-    path("api/ai/action_preview/", views.api_ai_action_preview, name="api_ai_action_preview"),
 
 
     # Digital Twin (Phase 19)
@@ -211,5 +222,5 @@ urlpatterns = [
     
     # Profile & Security (Phase 4)
     path("profile/", views.user_profile, name="user_profile"),
-    path("security/", views.security_center, name="security_center"),
+    path("account/security/", views.security_center, name="security_center"),
 ]

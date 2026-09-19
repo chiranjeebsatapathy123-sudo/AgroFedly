@@ -4,10 +4,33 @@
 {% block title %}Delivery Control - AgroFedly{% endblock %}
 
 {% block content %}
-<div class="page-head">
+<div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 24px; background: var(--rd-surface, #ffffff); border-radius: 12px; border: 1px solid var(--color-border, #eee); margin-bottom: 24px;">
     <div>
-        <h1><i class="fas fa-truck" style="color:var(--color-primary);"></i> Delivery Control Center</h1>
-        <p>Monitor end-to-end logistics with mandatory QR timestamp verifications.</p>
+        <div style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
+            <a href="{% url 'index' %}" style="color: #666; text-decoration: none;">AgroFedly</a> / 
+            <a href="{% url 'workspace_logistics_dashboard' %}" style="color: #666; text-decoration: none;">Logistics</a> / 
+            <strong style="color: var(--primary);">Dashboard</strong>
+        </div>
+        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px; margin-bottom: 5px;">🚚 LOGISTICS WORKSPACE</div>
+        
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h1 style="margin: 0; font-size: 2.2rem; color: var(--color-text-primary, #000);">Delivery Operations</h1>
+            <span class="badge emerald">● Fleet Online</span>
+        </div>
+        <div style="color: var(--color-text-secondary, #666); font-size: 1.1rem; display: flex; align-items: center; gap: 16px; font-weight: 500;">
+            <span>{{ active_count|default:"0" }} Active Deliveries</span>
+            <span>|</span>
+            <span>{{ completed_count|default:"0" }} Completed Today</span>
+        </div>
+    </div>
+</div>
+
+<div class="quick-actions" style="margin-bottom: 24px; padding: 15px; background: var(--color-surface); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--color-border);">
+    <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1rem; color: var(--color-text-secondary); text-transform: uppercase;">⚡ Quick Actions</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{% url 'delivery_create' %}" class="btn primary outline"><i class="fas fa-plus"></i> New Delivery</a>
+        <a href="{% url 'delivery_list' %}" class="btn primary outline"><i class="fas fa-list"></i> View All Deliveries</a>
+        <a href="#" onclick="let code=prompt('Enter Tracking Code:'); if(code) window.location.href='/trace/'+code+'/'; return false;" class="btn primary outline"><i class="fas fa-search"></i> Track Package</a>
     </div>
 </div>
 

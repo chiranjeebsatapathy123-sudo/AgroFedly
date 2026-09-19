@@ -1,0 +1,52 @@
+{% extends 'onboarding/base.html' %}
+
+{% block onboarding_title %}Complete Your Profile{% endblock %}
+{% block onboarding_subtitle %}Tell us a little about yourself to personalize your experience.{% endblock %}
+
+{% block onboarding_content %}
+<form method="POST">
+    {% csrf_token %}
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">First Name</label>
+            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Last Name</label>
+            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}" required>
+        </div>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" name="phone" class="form-control" value="{{ profile.phone }}">
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Location</label>
+        <input type="text" name="location" class="form-control" value="{{ profile.location }}">
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label class="form-label">Timezone</label>
+            <select name="timezone" class="form-select">
+                <option value="UTC" {% if profile.timezone == 'UTC' %}selected{% endif %}>UTC</option>
+                <option value="Asia/Kolkata" {% if profile.timezone == 'Asia/Kolkata' %}selected{% endif %}>Asia/Kolkata (IST)</option>
+                <option value="America/New_York" {% if profile.timezone == 'America/New_York' %}selected{% endif %}>America/New_York</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Preferred Language</label>
+            <select name="preferred_language" class="form-select">
+                <option value="en" {% if profile.preferred_language == 'en' %}selected{% endif %}>English</option>
+                <option value="hi" {% if profile.preferred_language == 'hi' %}selected{% endif %}>Hindi</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary px-4 py-2">Continue <i class="fas fa-arrow-right ms-2"></i></button>
+    </div>
+</form>
+{% endblock %}

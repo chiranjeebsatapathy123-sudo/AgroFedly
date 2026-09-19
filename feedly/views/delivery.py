@@ -109,7 +109,7 @@ def delivery_detail(request, delivery_id):
     if delivery.sender_id != request.organization.id and delivery.receiver_id != request.organization.id:
         messages.error(request, 'You do not have access to this delivery.')
         return redirect('delivery_list')
-    from .utils import geocode_address, get_osrm_route
+    from ..utils import geocode_address, get_osrm_route
     route_data = None
     start_lat, start_lng = geocode_address(f'{delivery.pickup_address}, {delivery.sender.city}')
     end_lat, end_lng = geocode_address(f'{delivery.delivery_address}, {delivery.receiver.city}')
@@ -162,7 +162,7 @@ def delivery_update_status(request, delivery_id):
         delivery.save()
         messages.success(request, f'Delivery status updated to {valid.get(new_status, new_status)}.')
     try:
-        from .utils import notify_delivery_update
+        from ..utils import notify_delivery_update
         notify_delivery_update(delivery)
     except Exception as e:
         pass
@@ -301,9 +301,10 @@ def recipient_request_center(request):
 @_organization_required
 def delivery_control(request):
     """Central Delivery Control Board mapping Delivery statuses."""
+    request.session['active_workspace'] = 'LOGISTICS'
     from feedly.models import Delivery
     
-    deliveries = Delivery.objects.filter(kitchen__organization=request.organization).order_by('-created_at')
+    deliveries = Delivery.objects.filter(sender=request.organization).order_by('-created_at')
     
     columns = {
         'pending': deliveries.filter(status='PENDING'),
@@ -325,7 +326,7 @@ def delivery_scan_qr(request, delivery_id):
             delivery.save(update_fields=['status', 'delivered_at'])
             messages.success(request, f'Delivery {delivery.tracking_code} marked as DELIVERED.')
             try:
-                from .utils import notify_delivery_update
+                from ..utils import notify_delivery_update
                 notify_delivery_update(delivery)
             except Exception as e:
                 pass
@@ -334,7 +335,7 @@ def delivery_scan_qr(request, delivery_id):
             delivery.save(update_fields=['status'])
             messages.success(request, f'Delivery {delivery.tracking_code} marked as IN TRANSIT.')
             try:
-                from .utils import notify_delivery_update
+                from ..utils import notify_delivery_update
                 notify_delivery_update(delivery)
             except Exception as e:
                 pass

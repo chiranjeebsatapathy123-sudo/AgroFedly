@@ -53,6 +53,17 @@ def require_profile_role(roles):
         @wraps(view_func)
         @login_required
         def _wrapped_view(request, *args, **kwargs):
+            if hasattr(request.user, 'profile'):
+                status = request.user.profile.account_status
+                if status in ['SUSPENDED', 'DISABLED']:
+                    messages.error(request, "Your account has been suspended or disabled.")
+                    from django.contrib.auth import logout
+                    logout(request)
+                    return redirect('login')
+                if status == 'INVITED':
+                    messages.warning(request, "Please complete your registration first.")
+                    return redirect('onboarding_start')
+            
             if not hasattr(request.user, 'profile'):
                 messages.error(request, "Please complete your profile registration first.")
                 return redirect("role_selection")
@@ -90,22 +101,32 @@ def get_organization_sector(organization):
 
 def require_sector(sector):
     """
-    Decorator to ensure the user's active organization belongs to the specified sector.
+    Decorator to ensure the user's evaluated permissions allow access to this workspace/sector.
     Sectors: AGRICULTURE, KITCHEN, REDISTRIBUTION, LOGISTICS, ADMIN
     """
     def decorator(view_func):
         @wraps(view_func)
-        @require_organization
+        @login_required
         def _wrapped_view(request, *args, **kwargs):
-            user_sector = get_organization_sector(request.organization)
+            if hasattr(request.user, 'profile'):
+                status = request.user.profile.account_status
+                if status in ['SUSPENDED', 'DISABLED']:
+                    from django.shortcuts import render
+                    return render(request, 'errors/403.html', {
+                        'required_workspace': sector,
+                        'message': "Permission denied. Your account is suspended or disabled."
+                    }, status=403)
+                    
+            from feedly.services.permissions import get_permitted_workspaces
+            permitted_workspaces = get_permitted_workspaces(request.user)
             
-            # Special case for Admin overriding everything
-            if hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN':
-                return view_func(request, *args, **kwargs)
+            if sector not in permitted_workspaces:
+                from django.shortcuts import render
+                return render(request, 'errors/403.html', {
+                    'required_workspace': sector,
+                    'message': f"Permission denied. This view requires {sector} sector authorization."
+                }, status=403)
                 
-            if user_sector != sector:
-                messages.error(request, f"Permission denied. This view requires {sector} sector authorization. You are authorized for {user_sector}.")
-                return redirect("dashboard")
             return view_func(request, *args, **kwargs)
         return _wrapped_view
     return decorator
@@ -113,19 +134,31 @@ def require_sector(sector):
 def require_workspace(workspace):
     """
     Decorator to ensure the user's active session workspace matches the required workspace.
+    AND they are actually allowed to access it.
     """
     def decorator(view_func):
         @wraps(view_func)
         @login_required
         def _wrapped_view(request, *args, **kwargs):
-            active_workspace = request.session.get('active_workspace')
+            if hasattr(request.user, 'profile'):
+                status = request.user.profile.account_status
+                if status in ['SUSPENDED', 'DISABLED']:
+                    from django.shortcuts import render
+                    return render(request, 'errors/403.html', {
+                        'required_workspace': workspace,
+                        'message': "Permission denied. Your account is suspended or disabled."
+                    }, status=403)
+                    
+            from feedly.services.permissions import get_permitted_workspaces
+            permitted_workspaces = get_permitted_workspaces(request.user)
             
-            if hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN':
-                return view_func(request, *args, **kwargs)
+            if workspace not in permitted_workspaces:
+                from django.shortcuts import render
+                return render(request, 'errors/403.html', {
+                    'required_workspace': workspace,
+                    'message': f"Permission denied. Switch to the {workspace} workspace first."
+                }, status=403)
                 
-            if not active_workspace or active_workspace != workspace:
-                messages.error(request, f"Permission denied. Switch to the {workspace} workspace first.")
-                return redirect("dashboard")
             return view_func(request, *args, **kwargs)
         return _wrapped_view
     return decorator

@@ -1,0 +1,63 @@
+{% extends 'onboarding/base.html' %}
+
+{% block onboarding_title %}Join an Organization{% endblock %}
+{% block onboarding_subtitle %}Connect with your team or start a new operation.{% endblock %}
+
+{% block onboarding_content %}
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4 text-center">
+                <div class="icon-circle mb-3 mx-auto" style="width:64px;height:64px;border-radius:50%;background:var(--primary-color-light);color:var(--primary-color);display:flex;align-items:center;justify-content:center;font-size:24px;">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h5>Create Organization</h5>
+                <p class="text-muted small mb-4">Start a new operation and invite your team members.</p>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="org_action" value="CREATE">
+                    <div class="mb-3 text-start">
+                        <label class="form-label">Organization Name</label>
+                        <input type="text" name="org_name" class="form-control" required placeholder="e.g. Green Valley Farm">
+                    </div>
+                    {% if profile.role not in 'FARMER,FPO,NGO,AGRIBUSINESS' %}
+                    <div class="mb-3 text-start">
+                        <label class="form-label">Type</label>
+                        <select name="org_type" class="form-select">
+                            <option value="COMPANY">Company</option>
+                            <option value="HOSPITAL">Hospital</option>
+                            <option value="SCHOOL">School</option>
+                            <option value="RESTAURANT">Restaurant</option>
+                        </select>
+                    </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary w-100">Create</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4 text-center">
+                <div class="icon-circle mb-3 mx-auto" style="width:64px;height:64px;border-radius:50%;background:var(--surface-color-alt);color:var(--text-color);display:flex;align-items:center;justify-content:center;font-size:24px;">
+                    <i class="fas fa-link"></i>
+                </div>
+                <h5>Join Existing</h5>
+                <p class="text-muted small mb-4">Enter an invite code from your organization admin.</p>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="org_action" value="JOIN">
+                    <div class="mb-3 text-start">
+                        <label class="form-label">Invite Code</label>
+                        <input type="text" name="invite_code" class="form-control" placeholder="e.g. AGR-1234-ABCD">
+                    </div>
+                    <button type="submit" class="btn btn-outline-secondary w-100">Join</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

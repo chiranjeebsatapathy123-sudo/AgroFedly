@@ -75,6 +75,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "feedly.context_processors.organization_context",
+                "feedly.context_processors.workspace_permissions",
             ],
         },
     },

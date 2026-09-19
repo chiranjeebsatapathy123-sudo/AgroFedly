@@ -186,10 +186,11 @@ def recipient_recommendations(request, food_id):
 @login_required
 @require_sector('REDISTRIBUTION')
 def redistribution_dashboard(request):
+    request.session['active_workspace'] = 'REDISTRIBUTION'
     org_member = request.user.organization_memberships.first()
     org = org_member.organization if org_member else None
     
-    surplus_available = SurplusFood.objects.filter(status='SAFE', quantity__gt=0).order_by('expiry_date')
+    surplus_available = SurplusFood.objects.filter(status='SAFE', quantity__gt=0).order_by('created_at')
     pending_requests = Recipient.objects.filter(organization=org)
     active_deliveries = Delivery.objects.filter(status='IN_TRANSIT')
     

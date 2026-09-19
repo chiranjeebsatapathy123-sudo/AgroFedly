@@ -1,14 +1,22 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% block title %}Agriculture Command Center{% endblock %}
 {% block content %}
 
 <section class="page-head" style="position: relative; overflow: hidden; min-height: 250px; display: flex; align-items: center; border-radius: 12px; margin-bottom: 20px;">
     <div id="dashboard-3d-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.8; pointer-events: none;"></div>
     <div style="position: relative; z-index: 1; padding: 30px; background: linear-gradient(90deg, rgba(var(--background-rgb, 255, 255, 255), 0.9) 0%, rgba(var(--background-rgb, 255, 255, 255), 0.5) 50%, transparent 100%); width: 100%;">
-        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px;">{% trans "SMART AGRICULTURE" %}</div>
-        <h1 style="font-size: 2.5rem; margin-top: 10px; margin-bottom: 5px;">{% trans "Command Center" %}</h1>
-        <p style="font-size: 1.1rem; max-width: 600px;">{% trans "Organization-wide overview of Farms, Produce, Storage, and Processing." %}</p>
+        <div style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
+            <a href="{% url 'index' %}" style="color: #666; text-decoration: none;">AgroFedly</a> / 
+            <a href="{% url 'workspace_agri_dashboard' %}" style="color: #666; text-decoration: none;">Agriculture</a> / 
+            <strong style="color: var(--primary);">Dashboard</strong>
+        </div>
+        <div class="eyebrow" style="color:var(--primary); font-weight:bold; letter-spacing:2px;">🌱 {% trans "AGRICULTURE WORKSPACE" %}</div>
+        <h1 style="font-size: 2.5rem; margin-top: 10px; margin-bottom: 5px;">{% trans "Farm Operations" %}</h1>
+        <p style="font-size: 1.1rem; max-width: 600px; font-weight: 500;">
+            {{ total_farms|default:"0" }} Active Farms &nbsp;|&nbsp; 
+            {{ active_advisories.count|default:"0" }} Alerts
+        </p>
     </div>
 </section>
 
@@ -19,41 +27,143 @@
     });
 </script>
 
-<div class="result-cards" style="margin-bottom:20px;">
+<div class="result-cards" style="margin-bottom:20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
     <!-- Farm Health -->
-    <div>
-        <span>{% trans "Active Farms" %}</span>
-        <b>{{ total_farms }}</b>
-    </div>
-    <div>
-        <span>{% trans "Active Fields" %}</span>
-        <b>{{ total_fields }}</b>
-    </div>
-    <div>
-        <span>{% trans "Total Area" %}</span>
-        <b>{{ total_area }} ha</b>
-    </div>
-    
-    <!-- Crop Health -->
-    <div>
-        <span>{% trans "Healthy Crops" %}</span>
-        <b style="color:var(--success);">{{ healthy_crops }}</b>
-    </div>
-    <div>
-        <span>{% trans "Attention Required" %}</span>
-        <b style="color:var(--danger);">{{ attention_crops }}</b>
-    </div>
+    <a href="{% url 'agri_farm_list' %}" style="text-decoration: none; color: inherit;">
+        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Active Farms" %}</span>
+            <b style="font-size: 1.8rem; color: var(--text-primary);">{{ total_farms }}</b>
+        </div>
+    </a>
+    <a href="{% url 'agri_field_list' %}" style="text-decoration: none; color: inherit;">
+        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Active Fields" %}</span>
+            <b style="font-size: 1.8rem; color: var(--text-primary);">{{ total_fields }}</b>
+        </div>
+    </a>
+    <a href="{% url 'agri_field_list' %}" style="text-decoration: none; color: inherit;">
+        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Total Area" %}</span>
+            <b style="font-size: 1.8rem; color: var(--text-primary);">{{ total_area }} ha</b>
+        </div>
+    </a>
     
     <!-- Produce / Processing -->
-    <div>
-        <span>{% trans "Produce Ready" %}</span>
-        <b>{{ total_produce }} kg</b>
-    </div>
-    <div>
-        <span>{% trans "Processed Output" %}</span>
-        <b style="color:var(--primary);">{{ total_processed }} kg</b>
+    <a href="{% url 'agri_produce_list' %}" style="text-decoration: none; color: inherit;">
+        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Produce Ready" %}</span>
+            <b style="font-size: 1.8rem; color: var(--text-primary);">{{ total_produce }} kg</b>
+        </div>
+    </a>
+    <a href="{% url 'agri_processing_list' %}" style="text-decoration: none; color: inherit;">
+        <div style="background: var(--color-surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+            <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Processed Output" %}</span>
+            <b style="font-size: 1.8rem; color: var(--primary);">{{ total_processed }} kg</b>
+        </div>
+    </a>
+</div>
+
+<div class="quick-actions" style="margin-bottom: 20px; padding: 15px; background: var(--color-surface); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1rem; color: var(--text-muted); text-transform: uppercase;">⚡ Quick Actions</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{% url 'agri_farm_add' %}" class="btn primary outline"><i class="fas fa-plus"></i> Add Farm</a>
+        <a href="{% url 'agri_field_add' %}" class="btn primary outline"><i class="fas fa-plus"></i> Add Field</a>
+        <a href="{% url 'agri_produce_add' %}" class="btn primary outline"><i class="fas fa-leaf"></i> Add Produce</a>
+        <a href="{% url 'agri_processing_add' %}" class="btn primary outline"><i class="fas fa-cogs"></i> Record Processing</a>
     </div>
 </div>
+
+<!-- Visual Insights Row -->
+<div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
+    <!-- Crop Health Doughnut -->
+    <div class="form-card" style="flex:1; min-width:300px; display:flex; flex-direction:column; align-items:center;">
+        <h2 style="font-size:1.2rem; margin-bottom:10px; width:100%; text-align:left;">🌿 Crop Health Distribution</h2>
+        <div style="position: relative; width: 100%; max-width: 250px; aspect-ratio: 1/1;">
+            <canvas id="cropHealthChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Supply Chain Bar Chart -->
+    <div class="form-card" style="flex:2; min-width:300px; display:flex; flex-direction:column; align-items:center;">
+        <h2 style="font-size:1.2rem; margin-bottom:10px; width:100%; text-align:left;">📊 Supply Chain Volumes (kg)</h2>
+        <div style="position: relative; width: 100%; height: 250px;">
+            <canvas id="supplyChainChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js and Logic -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Crop Health Chart
+    const cropCtx = document.getElementById('cropHealthChart').getContext('2d');
+    new Chart(cropCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Healthy', 'Needs Attention'],
+            datasets: [{
+                data: [{{ healthy_crops|default:0 }}, {{ attention_crops|default:0 }}],
+                backgroundColor: [
+                    'rgba(21, 150, 83, 0.8)', // Primary/Success Green
+                    'rgba(220, 53, 69, 0.8)'  // Danger Red
+                ],
+                borderColor: [
+                    'rgba(21, 150, 83, 1)',
+                    'rgba(220, 53, 69, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Supply Chain Chart
+    const supplyCtx = document.getElementById('supplyChainChart').getContext('2d');
+    new Chart(supplyCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Produce Ready', 'Processed Output', 'Storage Holding'],
+            datasets: [{
+                label: 'Volume (kg)',
+                data: [
+                    {{ total_produce|default:0 }}, 
+                    {{ total_processed|default:0 }}, 
+                    {{ total_stored|default:0 }}
+                ],
+                backgroundColor: [
+                    'rgba(21, 150, 83, 0.6)',
+                    'rgba(13, 110, 253, 0.6)',
+                    'rgba(13, 202, 240, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(21, 150, 83, 1)',
+                    'rgba(13, 110, 253, 1)',
+                    'rgba(13, 202, 240, 1)'
+                ],
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+});
+</script>
 
 <div class="form-card" style="margin-bottom:20px; background: rgba(var(--primary-rgb), 0.05); border: 1px solid var(--primary);">
     <strong style="color: var(--primary); font-size: 1.1rem; display:flex; align-items:center; gap:8px;">
@@ -186,5 +296,38 @@
     </ul>
 </div>
 {% endif %}
+
+<div class="recent-activity" style="margin-top: 20px; padding: 20px; background: var(--color-surface); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; color: var(--text-primary);"><i class="fas fa-history"></i> Recent Activity</h3>
+    <ul style="list-style: none; padding: 0; margin: 0;">
+        {% for produce in recent_produce|slice:":3" %}
+        <li style="padding: 10px 0; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px;">
+            <div style="background: rgba(var(--primary-rgb), 0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <div>
+                <strong style="display: block;">New Produce Added</strong>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">{{ produce.name }} ({{ produce.available_quantity }} {{ produce.unit }}) was added to inventory.</span>
+            </div>
+            <span style="margin-left: auto; color: var(--text-muted); font-size: 0.8rem;">{{ produce.created_at|timesince }} ago</span>
+        </li>
+        {% endfor %}
+        {% for process in recent_processing|slice:":2" %}
+        <li style="padding: 10px 0; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px;">
+            <div style="background: rgba(13, 110, 253, 0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #0d6efd;">
+                <i class="fas fa-cogs"></i>
+            </div>
+            <div>
+                <strong style="display: block;">Processing Recorded</strong>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">Processed {{ process.input_produce.name }} into {{ process.output_product }}.</span>
+            </div>
+            <span style="margin-left: auto; color: var(--text-muted); font-size: 0.8rem;">{{ process.processing_date|timesince }} ago</span>
+        </li>
+        {% endfor %}
+        {% if not recent_produce and not recent_processing %}
+        <li style="padding: 20px; text-align: center; color: var(--text-muted);">No recent activity found.</li>
+        {% endif %}
+    </ul>
+</div>
 
 {% endblock %}

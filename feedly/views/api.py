@@ -579,3 +579,35 @@ def api_ai_action_preview(request):
         return JsonResponse({'error': str(e)}, status=400)
 
 
+@login_required
+def api_auth_me(request):
+    """Phase 44: Returns the user's authenticated context."""
+    user = request.user
+    profile = getattr(user, 'profile', None)
+    
+    from feedly.services.permissions import get_permitted_workspaces, get_default_workspace
+    permitted = list(get_permitted_workspaces(user))
+    
+    membership = OrganizationMember.objects.filter(user=user, is_active=True).first()
+    org = membership.organization if membership else None
+    
+    data = {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'account_status': profile.account_status if profile else 'UNKNOWN',
+        'role': profile.role if profile else 'UNKNOWN',
+        'onboarding_completed': profile.onboarding_completed if profile else False,
+        'active_workspace': request.session.get('active_workspace'),
+        'default_workspace': get_default_workspace(user),
+        'permitted_workspaces': permitted,
+        'organization': {
+            'id': org.id,
+            'name': org.name,
+            'type': org.organization_type
+        } if org else None
+    }
+    
+    return JsonResponse(data)

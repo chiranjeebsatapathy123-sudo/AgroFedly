@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="onboarding-container">
+    <div class="onboarding-header">
+        <h2>{% block onboarding_title %}Welcome to AgroFedly{% endblock %}</h2>
+        <p class="text-muted">{% block onboarding_subtitle %}Let's get your account set up.{% endblock %}</p>
+        
+        <div class="progress-steps mt-4">
+            <div class="step {% if profile.onboarding_step >= 1 %}active{% endif %}">1. Profile</div>
+            <div class="step {% if profile.onboarding_step >= 2 %}active{% endif %}">2. Organization</div>
+            <div class="step {% if profile.onboarding_step >= 3 %}active{% endif %}">3. Setup</div>
+        </div>
+    </div>
+    
+    <div class="onboarding-content mt-5">
+        {% block onboarding_content %}{% endblock %}
+    </div>
+</div>
+
+<style>
+.onboarding-container {
+    max-width: 600px;
+    margin: 4rem auto;
+    background: var(--surface-color);
+    padding: 3rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border-color);
+    z-index: 1;
+}
+
+.step {
+    background: var(--surface-color);
+    padding: 0 1rem;
+    z-index: 2;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.step.active {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+</style>
+{% endblock %}

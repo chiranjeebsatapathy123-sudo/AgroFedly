@@ -1,0 +1,114 @@
+{% extends "dashboard_master.html" %}
+
+{% block title %}Platform Administration - AgroFedly{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-header" style="margin-bottom: 2rem;">
+    <h1 style="font-size: 2rem; color: var(--color-text-primary); margin-bottom: 0.5rem;">Platform Administration</h1>
+    <p style="color: var(--color-text-secondary);">Super Admin global overview and platform metrics.</p>
+</div>
+
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+    <!-- Stat 1: Total Users -->
+    <div class="card" style="padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--color-primary); background: var(--color-surface);">
+        <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 0.5rem;">Total Users</div>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-text-primary);">{{ total_users }}</div>
+        <div style="font-size: 0.8rem; color: var(--color-text-secondary); margin-top: 0.5rem;">
+            <i class="fas fa-users"></i> {{ active_users }} active in last 30d
+        </div>
+    </div>
+    
+    <!-- Stat 2: Total Organizations -->
+    <div class="card" style="padding: 1.5rem; border-radius: 12px; border-left: 4px solid #3b82f6; background: var(--color-surface);">
+        <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 0.5rem;">Organizations</div>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-text-primary);">{{ total_orgs }}</div>
+        <div style="font-size: 0.8rem; color: var(--color-text-secondary); margin-top: 0.5rem;">
+            <i class="fas fa-building"></i> Registered and active
+        </div>
+    </div>
+    
+    <!-- Stat 3: Total Deliveries -->
+    <div class="card" style="padding: 1.5rem; border-radius: 12px; border-left: 4px solid #8b5cf6; background: var(--color-surface);">
+        <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 0.5rem;">Deliveries Processed</div>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-text-primary);">{{ total_deliveries }}</div>
+        <div style="font-size: 0.8rem; color: var(--color-text-secondary); margin-top: 0.5rem;">
+            <i class="fas fa-truck"></i> Platform lifetime
+        </div>
+    </div>
+    
+    <!-- Stat 4: System Health -->
+    <div class="card" style="padding: 1.5rem; border-radius: 12px; border-left: 4px solid #10b981; background: var(--color-surface);">
+        <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 0.5rem;">System Health</div>
+        <div style="font-size: 2rem; font-weight: 700; color: #10b981;">{{ system_health }}</div>
+        <div style="font-size: 0.8rem; color: var(--color-text-secondary); margin-top: 0.5rem;">
+            <i class="fas fa-check-circle"></i> {{ active_models }} AI Models Active
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+    <!-- Recent Audit Logs -->
+    <div class="card" style="padding: 1.5rem; border-radius: 12px; background: var(--color-surface);">
+        <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--color-text-primary); border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">Recent Platform Events (Audit Log)</h3>
+        
+        {% if recent_events %}
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--color-border); color: var(--color-text-muted); font-size: 0.9rem;">
+                    <th style="padding: 0.75rem 0;">Timestamp</th>
+                    <th style="padding: 0.75rem 0;">Type</th>
+                    <th style="padding: 0.75rem 0;">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in recent_events %}
+                <tr style="border-bottom: 1px solid var(--color-border); font-size: 0.9rem;">
+                    <td style="padding: 0.75rem 0; color: var(--color-text-secondary);">{{ event.timestamp|date:"M d, H:i" }}</td>
+                    <td style="padding: 0.75rem 0;">
+                        <span style="padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; 
+                        {% if event.event_type == 'ERROR' %}background: #fee2e2; color: #dc2626;
+                        {% elif event.event_type == 'WARNING' %}background: #fef3c7; color: #d97706;
+                        {% else %}background: #e0e7ff; color: #4f46e5;{% endif %}">
+                            {{ event.event_type }}
+                        </span>
+                    </td>
+                    <td style="padding: 0.75rem 0; color: var(--color-text-primary);">{{ event.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+            <i class="fas fa-list-ul" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+            <p>No recent system events found.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Organizations Breakdown -->
+    <div class="card" style="padding: 1.5rem; border-radius: 12px; background: var(--color-surface);">
+        <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--color-text-primary); border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">Organizations by Type</h3>
+        
+        {% if orgs_breakdown %}
+        <ul style="list-style: none; padding: 0; margin: 0;">
+            {% for org_stat in orgs_breakdown %}
+            <li style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--color-border);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-building" style="color: var(--color-primary);"></i>
+                    <span style="color: var(--color-text-primary); font-weight: 500;">{{ org_stat.organization_type }}</span>
+                </div>
+                <span style="background: var(--color-background); padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; border: 1px solid var(--color-border);">
+                    {{ org_stat.count }}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+            <i class="fas fa-building" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+            <p>No organizations registered yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

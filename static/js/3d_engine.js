@@ -127,12 +127,18 @@ export class AgroFedly3D {
         this.currentLookAt = new THREE.Vector3(0, 0, 0);
         this.camera.position.copy(this.targetCameraPosition);
 
-        this.renderer = new THREE.WebGLRenderer({
-            canvas: this.canvas,
-            alpha: true,
-            antialias: !this.reducedMotion,
-            powerPreference: "high-performance"
-        });
+        try {
+            this.renderer = new THREE.WebGLRenderer({
+                canvas: this.canvas,
+                alpha: true,
+                antialias: !this.reducedMotion,
+                powerPreference: "high-performance"
+            });
+        } catch (e) {
+            console.warn("[AgroFedly3D] WebGLRenderer failed to initialize.", e);
+            this.enabled = false;
+            return;
+        }
         
         // Adaptive Performance Engine
         this.setAdaptiveQuality();

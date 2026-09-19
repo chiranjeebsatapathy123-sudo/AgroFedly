@@ -1183,11 +1183,28 @@ class UserProfile(models.Model):
         ('NGO', 'NGO / Redistribution'),
         ('RESEARCHER', 'Researcher'),
         ('ADMIN', 'Administrator'),
+        ('SUPER_ADMIN', 'Super Admin'),
     ]
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='FARMER')
     phone = models.CharField(max_length=20, blank=True)
     location = models.CharField(max_length=255, blank=True)
+    
+    # Phase 44: Identity & Onboarding
+    ACCOUNT_STATUS_CHOICES = [
+        ('ACTIVE', 'Active'),
+        ('INVITED', 'Invited'),
+        ('PENDING', 'Pending Setup'),
+        ('SUSPENDED', 'Suspended'),
+        ('DISABLED', 'Disabled'),
+    ]
+    account_status = models.CharField(max_length=20, choices=ACCOUNT_STATUS_CHOICES, default='ACTIVE')
+    preferred_workspace = models.CharField(max_length=50, blank=True)
+    preferred_language = models.CharField(max_length=10, default='en')
+    timezone = models.CharField(max_length=50, default='UTC')
+    onboarding_completed = models.BooleanField(default=False)
+    onboarding_step = models.IntegerField(default=1)
+    profile_photo = models.ImageField(upload_to='profiles/', null=True, blank=True)
     
     # Role-specific IDs or metadata
     organization_id = models.CharField(max_length=100, blank=True, help_text="For FPO, Agribusiness, NGO")

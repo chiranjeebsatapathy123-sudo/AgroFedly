@@ -251,7 +251,7 @@ export class ExperienceManager {
                             const query = e.target.value.trim();
                             const resultsContainer = modal.querySelector('.search-results');
                             if (!query) {
-                                resultsContainer.innerHTML = '<div class="search-category">Quick Links</div><a href="/surplus/">▣ Food Surplus</a><a href="/deliveries/">📦 Deliveries</a><a href="/intelligence/">⌁ AI Operations Center</a><a href="/agriculture/">🌾 Agri Command</a><a href="/impact/">🌍 Impact Dashboard</a><a href="/predict/">📈 ML Forecast</a>';
+                                resultsContainer.innerHTML = '<div class="search-category">Quick Links</div><a href="/surplus/">▣ Food Surplus</a><a href="/deliveries/">📦 Deliveries</a><a href="/intelligence/">⌁ AI Operations Center</a><a href="/agriculture/">🌾 Agri Command</a><a href="/organization/impact/">🌍 Impact Dashboard</a><a href="/predict/">📈 ML Forecast</a>';
                                 return;
                             }
                             

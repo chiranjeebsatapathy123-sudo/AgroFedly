@@ -101,8 +101,19 @@ def organization_switch(request, organization_id):
     """Switch the active organization for users who belong to multiple organizations."""
     membership = get_object_or_404(OrganizationMember, organization_id=organization_id, user=request.user, is_active=True, organization__is_active=True)
     request.session['active_organization_id'] = membership.organization_id
+    
+    # Phase 44: Re-evaluate workspace validity
+    from feedly.decorators import get_organization_sector
+    new_org_sector = get_organization_sector(membership.organization)
+    
+    active_ws = request.session.get('active_workspace')
+    if active_ws and active_ws != new_org_sector and active_ws != 'ADMIN':
+        request.session['active_workspace'] = new_org_sector
+        messages.success(request, f'Switched to {membership.organization.name}. Workspace changed to {new_org_sector}.')
+        return redirect('dashboard')
+        
     messages.success(request, f'Active organization changed to {membership.organization.name}.')
-    return redirect(request.GET.get('next') or 'organization_dashboard')
+    return redirect(request.GET.get('next') or 'dashboard')
 
 @login_required
 def organization_details_json(request, organization_id):
@@ -333,6 +344,7 @@ def ai_operations_center(request):
 @_organization_required
 def organization_admin_dashboard(request):
     """Executive Dashboard with real DB-computed KPIs."""
+    request.session['active_workspace'] = 'ADMIN'
     from feedly.models import MealRecord, KitchenInventory, SurplusFood, Delivery, Kitchen
     from django.db.models import Sum
     

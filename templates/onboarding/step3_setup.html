@@ -1,0 +1,33 @@
+{% extends 'onboarding/base.html' %}
+
+{% block onboarding_title %}Finalizing Setup{% endblock %}
+{% block onboarding_subtitle %}Just one more step for your {{ profile.role|title }} account.{% endblock %}
+
+{% block onboarding_content %}
+<form method="POST">
+    {% csrf_token %}
+    
+    {% if profile.role in 'FARMER,FPO' %}
+        <div class="mb-4">
+            <h5>Register your first Farm</h5>
+            <p class="text-muted small">You can add more farms later from your dashboard.</p>
+            <div class="mb-3">
+                <label class="form-label">Farm Name</label>
+                <input type="text" name="farm_name" class="form-control" required placeholder="e.g. North Field">
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="icon-circle mx-auto mb-3" style="width:80px;height:80px;border-radius:50%;background:var(--success-color-light);color:var(--success-color);display:flex;align-items:center;justify-content:center;font-size:32px;">
+                <i class="fas fa-check"></i>
+            </div>
+            <h5>You're all set!</h5>
+            <p class="text-muted">Your account and organization are ready to go.</p>
+        </div>
+    {% endif %}
+    
+    <div class="d-flex justify-content-end mt-4">
+        <button type="submit" class="btn btn-primary px-4 py-2">Go to Dashboard <i class="fas fa-arrow-right ms-2"></i></button>
+    </div>
+</form>
+{% endblock %}

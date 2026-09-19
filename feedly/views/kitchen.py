@@ -8,6 +8,7 @@ from ..decorators import require_role, require_org_role, _organization_required,
 @login_required
 @require_sector('KITCHEN')
 def kitchen_dashboard(request):
+    request.session['active_workspace'] = 'KITCHEN'
     kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
     if not kitchen:
         return render(request, 'kitchen/no_kitchen.html')
@@ -218,8 +219,8 @@ def kitchen_analytics(request):
     kitchen = Kitchen.objects.filter(organization__members__user=request.user).first()
     org = kitchen.organization if kitchen else None
     
-    historical = MealRecord.objects.filter(organization=org).aggregate(total=Sum('quantity'))['total'] or 0
-    expected = DemandForecast.objects.filter(organization=org, target_date__gte=timezone.now().date()).aggregate(total=Sum('predicted_demand'))['total'] or 0
+    historical = MealRecord.objects.filter(kitchen=kitchen).aggregate(total=Sum('meals_consumed'))['total'] or 0
+    expected = DemandForecast.objects.filter(organization=org, date__gte=timezone.now().date()).aggregate(total=Sum('predicted_demand'))['total'] or 0
     
     context = {
         'kitchen': kitchen,
@@ -275,8 +276,8 @@ def preparation_optimizer(request):
     # Simple forecast pull
     forecasts = DemandForecast.objects.filter(
         organization=request.organization,
-        target_date__gte=timezone.now().date()
-    ).order_by('target_date')[:5]
+        date__gte=timezone.now().date()
+    ).order_by('date')[:5]
     
     # Mock some recommendations for UI mapping
     recommendations = AIRecommendation.objects.filter(

@@ -46,12 +46,13 @@ from .api import _weather
 @login_required
 @require_sector('AGRICULTURE')
 def agri_dashboard(request):
+    request.session['active_workspace'] = 'AGRICULTURE'
     org_member = request.user.organization_memberships.first()
     org = org_member.organization if org_member else None
     
     if not org:
         messages.error(request, 'You must belong to an organization to view the Agriculture Command Center.')
-        return redirect('home')
+        return redirect('index')
         
     farms = Farm.objects.filter(organization=org)
     produce = AgriculturalProduce.objects.filter(farm__farm__organization=org)
@@ -60,21 +61,20 @@ def agri_dashboard(request):
     
     # Phase 43: Enhanced Agriculture Dashboard Context
     total_farms = farms.count()
-    fields = Field.objects.filter(farm__organization=org)
+    fields = FarmField.objects.filter(farm__organization=org)
     total_fields = fields.count()
-    total_area = fields.aggregate(total=Sum('area'))['total'] or 0
+    total_area = fields.aggregate(total=Sum('area_acres'))['total'] or 0
     
     # Crop Health (Mocking slightly if not fully modelled, but using real data where possible)
-    crops = Crop.objects.filter(field__farm__organization=org)
-    healthy_crops = crops.filter(health_status='EXCELLENT').count() + crops.filter(health_status='GOOD').count()
-    attention_crops = crops.filter(health_status='POOR').count() + crops.filter(health_status='FAIR').count()
+    healthy_crops = fields.filter(health_status__in=['EXCELLENT', 'GOOD', 'Good', 'Excellent']).count()
+    attention_crops = fields.filter(health_status__in=['POOR', 'FAIR', 'Poor', 'Fair']).count()
     
     total_produce = produce.aggregate(total=Sum('available_quantity'))['total'] or 0
     total_processed = processing.aggregate(total=Sum('output_quantity'))['total'] or 0
     total_stored = storage.aggregate(total=Sum('quantity'))['total'] or 0
     
     active_advisories = WeatherAdvisory.objects.filter(expires_at__gt=timezone.now()).order_by('-issued_at')
-    recent_alerts = QualityInspection.objects.filter(farm__organization=org, passed=False).order_by('-inspection_date')[:5]
+    recent_alerts = QualityInspection.objects.filter(organization=org, passed=False).order_by('-inspection_date')[:5]
     
     context = {
         'total_farms': total_farms,
@@ -331,7 +331,7 @@ def agri_produce_add(request):
 def agri_processing_list(request):
     org_member = request.user.organization_memberships.first()
     if not org_member:
-        return redirect('home')
+        return redirect('index')
     processing_records = ProcessingRecord.objects.filter(input_produce__supplier=org_member.organization).order_by('-processing_date')
     return render(request, 'agri_processing.html', {'records': processing_records})
 
@@ -568,7 +568,9 @@ def agri_ledger(request):
 def agri_traceability(request, tracking_code):
     """Public view for tracing a shipment from farm to fork."""
     shipment = get_object_or_404(AgriculturalShipment, tracking_code=tracking_code)
-    inspections = shipment.supply_match.produce.inspections.all().order_by('-inspection_date')
+    inspections = []
+    if getattr(shipment, 'supply_match', None) and getattr(shipment.supply_match, 'produce', None):
+        inspections = shipment.supply_match.produce.inspections.all().order_by('-inspection_date')
     return render(request, 'agri_traceability.html', {'shipment': shipment, 'inspections': inspections})
 
 @login_required
@@ -714,15 +716,6 @@ def agri_yield_predictor(request):
     history = CropYieldPrediction.objects.filter(farmer=request.user).order_by('-created_at')[:5]
     return render(request, 'agri_yield_predictor.html', {'history': history})
 
-@login_required
-def agri_greenhouse_controller(request):
-    """Greenhouse automation and control interface."""
-    return render(request, 'agri_greenhouse_controller.html')
-
-@login_required
-def agri_auto_subsidy(request):
-    """Automated subsidy application interface."""
-    return render(request, 'agri_auto_subsidy.html')
 
 @login_required
 def agri_crop_recommendation(request):
@@ -800,7 +793,7 @@ def agri_weather_page(request):
             crop_risk = "LOW: Weather conditions are optimal for general crops."
             advisory = "Weather is optimal."
         
-    return render(request, 'agri_weather_page.html', {
+    return render(request, 'agri_weather.html', {
         'weather_info': weather_info,
         'city': city,
         'crop_risk': crop_risk,

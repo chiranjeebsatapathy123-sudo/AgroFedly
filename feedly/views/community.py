@@ -101,7 +101,7 @@ def ecosystem_coordination(request):
     try:
         org = request.user.organization
     except:
-        return redirect('home')
+        return redirect('index')
     alliances = org.alliances.all().select_related('alliance')
     active_alliance = None
     tasks = []
@@ -142,7 +142,7 @@ def create_alliance(request):
     try:
         org = request.user.organization
     except:
-        return redirect('home')
+        return redirect('index')
     if request.method == 'POST':
         name = request.POST.get('name')
         description = request.POST.get('description')
@@ -156,7 +156,7 @@ def join_alliance(request):
     try:
         org = request.user.organization
     except:
-        return redirect('home')
+        return redirect('index')
     if request.method == 'POST':
         alliance_id = request.POST.get('alliance_id')
         alliance = get_object_or_404(EcosystemAlliance, id=alliance_id)

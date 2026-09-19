@@ -51,27 +51,37 @@ from django.http import HttpResponse
 @login_required
 def dashboard(request):
     """
-    Phase 42: Personalized Home.
+    Phase 43: Role -> Workspace Access Control Routing.
     Routes users to their active sector workspace.
     """
+    from feedly.services.permissions import get_default_workspace
+    
     if not hasattr(request.user, 'profile'):
         messages.warning(request, "Please select your role and complete registration.")
         return redirect('role_selection')
         
     workspace = request.session.get('active_workspace')
+    
+    # If no workspace in session, determine their default
     if not workspace:
-        # Fallback if somehow not set during login
-        return redirect('smart_login')
-        
-    # Redirect to sector-specific command centers
+        workspace = get_default_workspace(request.user)
+        if workspace:
+            request.session['active_workspace'] = workspace
+        else:
+            messages.warning(request, "You do not have access to any workspaces.")
+            return redirect('login') # Or some holding page
+            
+    # Redirect to canonical workspace command centers
     if workspace == 'KITCHEN':
-        return redirect('kitchen_dashboard')
+        return redirect('workspace_kitchen_dashboard')
     elif workspace == 'AGRICULTURE':
-        return redirect('agri_dashboard')
+        return redirect('workspace_agri_dashboard')
     elif workspace == 'REDISTRIBUTION':
-        return redirect('kitchen_redistribution') # Adjust this to a real redistribution route if available
+        return redirect('workspace_redistribution_dashboard')
     elif workspace == 'LOGISTICS':
-        return redirect('delivery_control') # Assuming route exists for delivery
+        return redirect('workspace_logistics_dashboard')
+    elif workspace == 'ADMIN':
+        return redirect('workspace_admin_dashboard')
         
     # ADMIN or unknown workspace falls through to render the Master Dashboard
     role = request.user.profile.role
@@ -322,7 +332,7 @@ def intelligence_center(request):
     org_member = request.user.organization_memberships.first()
     if not org_member:
         messages.warning(request, "You need to join an organization to view intelligence.")
-        return redirect('home')
+        return redirect('index')
         
     org = org_member.organization
     today = timezone.localdate()
@@ -517,7 +527,7 @@ def intelligence_center(request):
     org_member = request.user.organization_memberships.first()
     if not org_member:
         messages.warning(request, "You need to join an organization to view intelligence.")
-        return redirect('home')
+        return redirect('index')
         
     org = org_member.organization
     today = timezone.localdate()

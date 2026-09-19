@@ -67,17 +67,17 @@
     
     function forceSync() {
         if (!navigator.onLine) {
-            console.log("You are currently offline. Cannot force sync.");
+            alert("You are currently offline. Cannot force sync.");
             return;
         }
         
         let pending = JSON.parse(localStorage.getItem('af_offline_sync_queue') || '[]');
         if (pending.length === 0) {
-            console.log("Nothing to sync.");
+            alert("Nothing to sync.");
             return;
         }
         
-        console.log("Syncing in background... (In production, this would post the JSON payloads to their respective APIs).");
+        alert("Syncing in background... (In production, this would post the JSON payloads to their respective APIs).");
         // Simulated sync success
         localStorage.setItem('af_offline_sync_queue', '[]');
         loadOfflineRecords();

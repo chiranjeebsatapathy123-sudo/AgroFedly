@@ -11,7 +11,7 @@ from ..decorators import get_organization_sector
 User = get_user_model()
 
 def smart_login_view(request):
-    """Phase 42: Unified Smart Login Experience."""
+    """Phase 44: Unified Smart Login Experience with Onboarding & Priority Routing."""
     if request.user.is_authenticated:
         return redirect('dashboard')
         
@@ -28,8 +28,6 @@ def smart_login_view(request):
         if not username or not password:
             messages.error(request, 'Please enter your email/username and password.')
         else:
-            # Allow login by email or username (custom authenticate backend or simple check)
-            # Default authenticate usually takes username. Let's try username.
             user = authenticate(request, username=username, password=password)
             
             # If not found, try by email if standard backend doesn't support it
@@ -41,39 +39,66 @@ def smart_login_view(request):
                     pass
 
             if user:
+                # Phase 44: Account Status Check
+                if hasattr(user, 'profile'):
+                    if user.profile.account_status in ['SUSPENDED', 'DISABLED']:
+                        messages.error(request, "Your account has been suspended or disabled. Please contact support.")
+                        return redirect('login')
+                
                 login(request, user)
                 request.session['login_attempts'] = 0
                 
-                # Resolve workspace
+                # Set active org id
                 active_org_id = request.session.get('active_organization_id')
+                membership = None
                 if not active_org_id:
-                    # Find highest priority active membership
-                    membership = OrganizationMember.objects.filter(
-                        user=user, 
-                        is_active=True
-                    ).select_related('organization').first()
-                    
+                    membership = OrganizationMember.objects.filter(user=user, is_active=True).select_related('organization').first()
                     if membership:
                         request.session['active_organization_id'] = membership.organization.id
-                        request.session['active_workspace'] = get_organization_sector(membership.organization)
-                    elif hasattr(user, 'profile'):
-                        # Fallback to legacy profile role
-                        role = user.profile.role
-                        if role == 'FARMER' or role == 'FPO':
-                            request.session['active_workspace'] = 'AGRICULTURE'
-                        elif role == 'NGO':
-                            request.session['active_workspace'] = 'REDISTRIBUTION'
-                        elif role == 'ADMIN':
-                            request.session['active_workspace'] = 'ADMIN'
-                        else:
-                            request.session['active_workspace'] = 'KITCHEN'
-
-                # Audit Log
-                SystemEvent.objects.create(
-                    event_type="INFO",
-                    message=f"User {user.username} logged in securely.",
-                    source="Auth"
-                )
+                        SystemEvent.objects.create(organization=membership.organization, event_type="INFO", description=f"User {user.username} logged in.")
+                
+                # Phase 45: Super Admin Auto-Provisioning & Onboarding Bypass
+                if getattr(user, 'is_superuser', False):
+                    # Ensure they have a SUPER_ADMIN profile
+                    if not hasattr(user, 'profile'):
+                        from feedly.models import UserProfile
+                        UserProfile.objects.create(
+                            user=user, 
+                            role='SUPER_ADMIN',
+                            account_status='ACTIVE',
+                            onboarding_completed=True,
+                            onboarding_step=3
+                        )
+                    elif not user.profile.onboarding_completed or user.profile.role != 'SUPER_ADMIN':
+                        user.profile.role = 'SUPER_ADMIN'
+                        user.profile.onboarding_completed = True
+                        user.profile.account_status = 'ACTIVE'
+                        user.profile.save()
+                else:
+                    # Phase 44: Onboarding Check for normal users
+                    if hasattr(user, 'profile') and not user.profile.onboarding_completed:
+                        return redirect('onboarding_start')
+                
+                # Phase 44: Resolve Workspace Priority
+                from feedly.services.permissions import get_permitted_workspaces, get_default_workspace
+                permitted = get_permitted_workspaces(user)
+                
+                last_workspace = request.session.get('active_workspace')
+                preferred_workspace = user.profile.preferred_workspace if hasattr(user, 'profile') else None
+                default_workspace = get_default_workspace(user)
+                
+                target_workspace = None
+                if last_workspace and last_workspace in permitted:
+                    target_workspace = last_workspace
+                elif preferred_workspace and preferred_workspace in permitted:
+                    target_workspace = preferred_workspace
+                elif default_workspace and default_workspace in permitted:
+                    target_workspace = default_workspace
+                elif permitted:
+                    target_workspace = list(permitted)[0]
+                
+                if target_workspace:
+                    request.session['active_workspace'] = target_workspace
                 
                 next_url = request.GET.get('next')
                 if next_url:
@@ -82,25 +107,19 @@ def smart_login_view(request):
             else:
                 request.session['login_attempts'] = attempts + 1
                 messages.error(request, "We couldn't sign you in. Check your credentials and try again.")
-                # Audit Log for failure
-                SystemEvent.objects.create(
-                    event_type="WARNING",
-                    message=f"Failed login attempt for {username}",
-                    source="Auth"
-                )
                 
     return render(request, 'auth/login.html')
 
 def role_selection_view(request):
     """Phase 42: Redirect old role selection to new smart login."""
-    return redirect('smart_login')
+    return redirect('login')
 
 def role_login_view(request, role):
     """Phase 42: Redirect old role login to new smart login."""
-    return redirect('smart_login')
+    return redirect('login')
 
 def login_view(request, persona=None):
-    return redirect('smart_login')
+    return redirect('login')
 
 def register_view(request, role=None):
     """Phase 42: Unified progressive registration."""
@@ -121,11 +140,7 @@ def register_view(request, role=None):
                 UserProfile.objects.create(user=user, role=selected_role)
                 login(request, user)
                 
-                SystemEvent.objects.create(
-                    event_type="INFO",
-                    message=f"New user registered: {user.username}",
-                    source="Auth"
-                )
+                # No org assigned yet upon register, so we can't create SystemEvent
                 return redirect('dashboard')
                 
     return render(request, 'auth/register.html', {'role': role})
@@ -134,46 +149,36 @@ def register_view(request, role=None):
 def logout_view(request):
     username = request.user.username
     logout(request)
-    SystemEvent.objects.create(
-        event_type="INFO",
-        message=f"User {username} logged out.",
-        source="Auth"
-    )
+    org_member = request.user.organization_memberships.filter(is_active=True).first()
+    if org_member:
+        SystemEvent.objects.create(
+            organization=org_member.organization,
+            event_type="INFO",
+            description=f"User {username} logged out."
+        )
     messages.success(request, 'You have been securely logged out.')
-    return redirect('smart_login')
+    return redirect('login')
 
 @login_required
 def switch_workspace(request, workspace):
-    """Phase 42: Allow users to switch their active workspace if authorized."""
-    # Here we would normally validate if they actually have permissions for this workspace.
-    # For now, if they are an admin or have a membership in that sector, allow it.
+    """Phase 44: Allow users to switch their active workspace if authorized."""
+    from feedly.services.permissions import get_permitted_workspaces
     
-    # In a full implementation, we'd query OrganizationMember to see if they have an org in this sector
-    user = request.user
-    is_admin = hasattr(user, 'profile') and user.profile.role == 'ADMIN'
+    permitted = get_permitted_workspaces(request.user)
     
-    authorized = is_admin
-    
-    if not authorized:
-        for membership in OrganizationMember.objects.filter(user=user, is_active=True).select_related('organization'):
-            if get_organization_sector(membership.organization) == workspace:
-                authorized = True
-                request.session['active_organization_id'] = membership.organization.id
-                break
-                
-    # Fallback to Profile role
-    if not authorized and hasattr(user, 'profile'):
-        profile_workspace = 'KITCHEN'
-        role = user.profile.role
-        if role in ['FARMER', 'FPO']: profile_workspace = 'AGRICULTURE'
-        elif role == 'NGO': profile_workspace = 'REDISTRIBUTION'
-        
-        if profile_workspace == workspace:
-            authorized = True
-            
-    if authorized:
+    if workspace in permitted:
         request.session['active_workspace'] = workspace
         messages.success(request, f"Switched to {workspace} workspace.")
+        if workspace == 'AGRICULTURE':
+            return redirect('workspace_agri_dashboard')
+        elif workspace == 'KITCHEN':
+            return redirect('workspace_kitchen_dashboard')
+        elif workspace == 'REDISTRIBUTION':
+            return redirect('workspace_redistribution_dashboard')
+        elif workspace == 'LOGISTICS':
+            return redirect('workspace_logistics_dashboard')
+        elif workspace == 'ADMIN':
+            return redirect('workspace_admin_dashboard')
     else:
         messages.error(request, f"You are not authorized to access the {workspace} workspace.")
         
