@@ -11,11 +11,16 @@ def require_organization(view_func):
     @wraps(view_func)
     @login_required
     def wrapped(request, *args, **kwargs):
+        if getattr(request.user, 'is_superuser', False) or (hasattr(request.user, 'profile') and request.user.profile.role in ['SUPER_ADMIN', 'ADMIN']):
+            from feedly.services.organizations import get_active_organization
+            request.organization = get_active_organization(request.user, request)
+            return view_func(request, *args, **kwargs)
+            
         from feedly.services.organizations import get_active_organization
         org = get_active_organization(request.user, request)
         if not org:
             messages.info(request, 'Register or join an organization to use this workspace.')
-            return redirect('organization_onboarding')
+            return redirect('organization_register')
             
         request.organization = org
         return view_func(request, *args, **kwargs)
