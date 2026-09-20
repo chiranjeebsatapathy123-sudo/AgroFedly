@@ -1,0 +1,187 @@
+/* 
+  AgroFedly Phase 8: Premium UI/UX & Cinematic Animation System 
+  motion.css
+*/
+
+:root {
+    /* Motion Variables */
+    --motion-fast: 150ms;
+    --motion-normal: 250ms;
+    --motion-slow: 450ms;
+    --motion-slow-reveal: 800ms;
+    
+    --ease-standard: cubic-bezier(0.25, 0.8, 0.25, 1);
+    --ease-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-enter: cubic-bezier(0.0, 0.0, 0.2, 1);
+    --ease-exit: cubic-bezier(0.4, 0.0, 1, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --motion-fast: 0.01ms !important;
+        --motion-normal: 0.01ms !important;
+        --motion-slow: 0.01ms !important;
+        --motion-slow-reveal: 0.01ms !important;
+    }
+}
+
+/* Base Primitives */
+.anim-fade-in {
+    opacity: 0;
+    animation: fadeIn var(--motion-slow) var(--ease-enter) forwards;
+}
+
+.anim-fade-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp var(--motion-slow) var(--ease-emphasis) forwards;
+}
+
+.anim-scale-in {
+    opacity: 0;
+    transform: scale(0.95);
+    animation: scaleIn var(--motion-slow) var(--ease-emphasis) forwards;
+}
+
+.anim-slide-in {
+    opacity: 0;
+    transform: translateX(30px);
+    animation: slideIn var(--motion-slow) var(--ease-emphasis) forwards;
+}
+
+/* Stagger Utilities */
+.stagger-1 { animation-delay: calc(var(--motion-fast) * 1) !important; }
+.stagger-2 { animation-delay: calc(var(--motion-fast) * 2) !important; }
+.stagger-3 { animation-delay: calc(var(--motion-fast) * 3) !important; }
+.stagger-4 { animation-delay: calc(var(--motion-fast) * 4) !important; }
+.stagger-5 { animation-delay: calc(var(--motion-fast) * 5) !important; }
+.stagger-6 { animation-delay: calc(var(--motion-fast) * 6) !important; }
+.stagger-7 { animation-delay: calc(var(--motion-fast) * 7) !important; }
+.stagger-8 { animation-delay: calc(var(--motion-fast) * 8) !important; }
+
+/* Observers Re-map */
+.reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity var(--motion-slow-reveal) var(--ease-emphasis), transform var(--motion-slow-reveal) var(--ease-emphasis);
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+
+@keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideIn {
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Global Micro-interactions */
+
+/* Buttons */
+.btn {
+    transition: background-color var(--motion-fast) var(--ease-standard), 
+                color var(--motion-fast) var(--ease-standard),
+                transform var(--motion-fast) var(--ease-standard),
+                box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+/* Table rows */
+.table-card tbody tr {
+    transition: background-color var(--motion-fast) var(--ease-standard),
+                transform var(--motion-fast) var(--ease-standard);
+}
+
+.table-card tbody tr:hover {
+    background-color: var(--surface-soft);
+}
+
+/* Form Inputs */
+input, select, textarea {
+    transition: border-color var(--motion-fast) var(--ease-standard),
+                box-shadow var(--motion-fast) var(--ease-standard),
+                background-color var(--motion-fast) var(--ease-standard);
+}
+
+/* Cards Hover */
+.feature-card, .stat-card, .delivery-card, .panel {
+    transition: transform var(--motion-normal) var(--ease-standard),
+                box-shadow var(--motion-normal) var(--ease-standard),
+                border-color var(--motion-normal) var(--ease-standard);
+}
+
+.feature-card:hover, .delivery-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    border-color: var(--color-primary);
+}
+
+.dark-theme .feature-card:hover, .dark-theme .delivery-card:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Custom Modals (Search, Confirm) Entrance */
+.search-modal {
+    transition: opacity var(--motion-normal) var(--ease-enter),
+                visibility var(--motion-normal) var(--ease-enter);
+}
+
+.search-modal-content {
+    transition: transform var(--motion-normal) var(--ease-emphasis);
+    transform: scale(0.95) translateY(-20px);
+}
+
+.search-modal.active .search-modal-content {
+    transform: scale(1) translateY(0);
+}
+
+/* App Shell (Drawer/Header) */
+.drawer {
+    transition: transform var(--motion-slow) var(--ease-emphasis);
+}
+
+.backdrop {
+    transition: opacity var(--motion-normal) var(--ease-standard),
+                visibility var(--motion-normal) var(--ease-standard);
+}
+
+/* Skeleton Loading Refinement */
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton {
+    background-image: linear-gradient(90deg, var(--color-border) 25%, var(--surface-soft) 50%, var(--color-border) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite linear;
+    border-radius: 4px;
+    color: transparent !important;
+}
+
+/* Smooth Error Shake */
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.anim-error {
+    animation: errorShake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}

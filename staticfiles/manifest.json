@@ -1,0 +1,22 @@
+{
+    "name": "AgroFedly",
+    "short_name": "AgroFedly",
+    "description": "Smart Food Operations, Surplus Redistribution, and Agriculture Management",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0e1e17",
+    "theme_color": "#159653",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/static/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
