@@ -180,8 +180,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
-
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 API_KEY = os.getenv("API_KEY")
