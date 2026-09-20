@@ -1,0 +1,20 @@
+{
+  "builds": [
+    {
+      "src": "AgroFedly/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": [
+          "templates/**",
+          "db.sqlite3"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "AgroFedly/wsgi.py"
+    }
+  ]
+}
