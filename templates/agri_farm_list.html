@@ -126,13 +126,32 @@
             let bounds = [];
             
             {% for farm in farms %}
-                {% if farm.location %}
-                    // Note: Would geocode or use geojson here
+                {% if farm.geojson_boundary %}
+                    try {
+                        const geoData = {{ farm.geojson_boundary|safe }};
+                        const geoLayer = L.geoJSON(geoData, {
+                            style: {
+                                color: "var(--brand-primary, #127a4a)",
+                                weight: 2,
+                                opacity: 0.8,
+                                fillOpacity: 0.2
+                            }
+                        }).bindPopup("<b>{{ farm.name }}</b><br>{{ farm.location|default:'' }}");
+                        geoLayer.addTo(map);
+                        bounds.push(geoLayer.getBounds());
+                    } catch(e) {
+                        console.error("Invalid GeoJSON for farm {{ farm.name }}");
+                    }
                 {% endif %}
             {% endfor %}
             
             if (bounds.length > 0) {
-                map.fitBounds(bounds);
+                // Merge all bounds to fit all farms
+                let allBounds = bounds[0];
+                for(let i=1; i<bounds.length; i++) {
+                    allBounds.extend(bounds[i]);
+                }
+                map.fitBounds(allBounds, {padding: [20, 20]});
             }
             
             mapInitialized = true;

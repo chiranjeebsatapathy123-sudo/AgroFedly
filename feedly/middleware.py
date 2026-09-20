@@ -15,6 +15,21 @@ class OrganizationMiddleware(MiddlewareMixin):
             return
             
         if request.user.is_authenticated:
+            # Phase 45: Vercel Ephemeral DB Hotfix
+            # If the user exists in session but the profile was wiped (due to Vercel SQLite resetting),
+            # auto-provision it here to prevent 'role_selection' redirect loops.
+            if not hasattr(request.user, 'profile'):
+                from feedly.models import UserProfile
+                # Grant super admins the SUPER_ADMIN role so they can access all features
+                role = 'SUPER_ADMIN' if getattr(request.user, 'is_superuser', False) else 'FARMER'
+                UserProfile.objects.create(
+                    user=request.user, 
+                    role=role,
+                    account_status='ACTIVE',
+                    onboarding_completed=True,
+                    onboarding_step=3
+                )
+                
             # Check session for selected org, otherwise use first active membership
             org_id = request.session.get('active_organization_id')
             
