@@ -99,7 +99,7 @@ def agri_farm_list(request):
     if not hasattr(request.user, 'profile'):
         return redirect('role_selection')
     
-    if getattr(request.user, 'is_superuser', False) or request.user.profile.role in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['SUPER_ADMIN', 'ADMIN']:
+    if getattr(request.user, 'is_superuser', False) or request.user.profile.role in ['SUPER_ADMIN', 'ADMIN']:
         farms = Farm.objects.all()
     elif request.user.profile.role == 'FARMER':
         farms = Farm.objects.filter(owner=request.user)
@@ -120,7 +120,7 @@ def agri_farm_add(request):
         return redirect('role_selection')
         
     role = request.user.profile.role
-    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['SUPER_ADMIN', 'ADMIN']) and role not in ['FARMER', 'FPO']:
+    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and role not in ['FARMER', 'FPO']:
         messages.error(request, 'Only Farmers or FPOs can add farms.')
         return redirect('dashboard')
         
@@ -153,7 +153,7 @@ def agri_field_list(request):
         return redirect('role_selection')
     
     farm_id = request.GET.get('farm_id')
-    if getattr(request.user, 'is_superuser', False) or request.user.profile.role in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['SUPER_ADMIN', 'ADMIN']:
+    if getattr(request.user, 'is_superuser', False) or request.user.profile.role in ['SUPER_ADMIN', 'ADMIN']:
         fields = FarmField.objects.all()
     elif request.user.profile.role == 'FARMER':
         fields = FarmField.objects.filter(farm__owner=request.user)
@@ -177,7 +177,7 @@ def agri_field_add(request):
         return redirect('role_selection')
         
     role = request.user.profile.role
-    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['SUPER_ADMIN', 'ADMIN']) and role not in ['FARMER', 'FPO']:
+    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and role not in ['FARMER', 'FPO']:
         messages.error(request, 'Only Farmers or FPOs can add fields.')
         return redirect('dashboard')
         
@@ -222,7 +222,7 @@ def agri_calendar(request):
     role = request.user.profile.role
     farm_id = request.GET.get('farm_id')
     
-    if getattr(request.user, 'is_superuser', False) or role in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['SUPER_ADMIN', 'ADMIN']:
+    if getattr(request.user, 'is_superuser', False) or role in ['SUPER_ADMIN', 'ADMIN']:
         events = FarmEvent.objects.all()
         activities = FieldActivity.objects.all()
         farms = Farm.objects.all()
@@ -252,7 +252,7 @@ def agri_calendar(request):
 
 @login_required
 def agri_event_add(request):
-    if not hasattr(request.user, 'profile') or request.user.profile.role not in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['FARMER', 'FPO']:
+    if not hasattr(request.user, 'profile') or request.user.profile.role not in ['FARMER', 'FPO']:
         return redirect('dashboard')
         
     if request.method == 'POST':
@@ -283,7 +283,7 @@ def agri_produce_list(request):
     if not hasattr(request.user, 'profile'):
         return redirect('role_selection')
     
-    if getattr(request.user, 'is_superuser', False) or request.user.profile.role in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['SUPER_ADMIN', 'ADMIN']:
+    if getattr(request.user, 'is_superuser', False) or request.user.profile.role in ['SUPER_ADMIN', 'ADMIN']:
         produce_list = AgriculturalProduce.objects.all().order_by('-harvest_date')
     elif request.user.profile.role == 'FARMER':
         produce_list = AgriculturalProduce.objects.filter(owner=request.user).order_by('-harvest_date')
@@ -304,7 +304,7 @@ def agri_produce_add(request):
         return redirect('role_selection')
         
     role = request.user.profile.role
-    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['SUPER_ADMIN', 'ADMIN']) and role not in ['FARMER', 'FPO']:
+    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and role not in ['FARMER', 'FPO']:
         messages.error(request, 'Only Farmers or FPOs can add produce.')
         return redirect('dashboard')
         
@@ -371,7 +371,7 @@ def agri_supply_matching(request):
         return redirect('role_selection')
         
     role = request.user.profile.role
-    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['SUPER_ADMIN', 'ADMIN']) and role not in ['AGRIBUSINESS', 'FPO', 'FARMER']:
+    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and role not in ['AGRIBUSINESS', 'FPO', 'FARMER']:
         messages.error(request, 'Permission denied.')
         return redirect('dashboard')
         
@@ -650,7 +650,7 @@ def agri_disease_scanner(request):
                 input_data=input_data
             )
             
-            if resultif not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['success']:
+            if result['success']:
                 data = result['data']
                 disease = data.get('detection', 'Unknown')
                 treatment = data.get('suggested_action', 'Unknown')
@@ -700,7 +700,7 @@ def agri_yield_predictor(request):
             input_data=input_data
         )
         
-        if resultif not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['success']:
+        if result['success']:
             data = result['data']
             predicted_yield = data.get('estimated_yield_tons', 0.0)
             
@@ -753,7 +753,7 @@ def agri_crop_recommendation(request):
         )
         
         recommended_crops = []
-        if resultif not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['success']:
+        if result['success']:
             for crop in result['data'].get('recommended_crops', []):
                 recommended_crops.append({
                     'name': crop, 
@@ -819,8 +819,8 @@ def agri_iot_dashboard(request):
     Renders the IoT Sensor Fleet dashboard for the agriculture module.
     Only displays actual telemetry (Phase 5).
     """
-    recent_alerts = SmartAlert.objects.filter(is_resolved=False).order_by('-created_at')[:5]
-    sensors = IoTTemperatureReading.objects.values('sensor_name').distinct()
+    recent_alerts = SmartAlert.objects.filter(resolved=False).order_by('-created_at')[:5]
+    sensors = IoTTemperatureReading.objects.values('device_id').distinct()
     sensor_count = sensors.count()
     
     context = {
@@ -1140,7 +1140,7 @@ def model_monitoring(request):
     from django.db.models import Count
     
     # Only allow Admin or Researcher
-    if hasattr(request.user, 'profile') and request.user.profile.role not in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['ADMIN', 'RESEARCHER']:
+    if hasattr(request.user, 'profile') and request.user.profile.role not in ['ADMIN', 'RESEARCHER']:
         messages.error(request, "Access denied. Only Researchers and Admins can view Model Performance.")
         return redirect('agri_intelligence')
         

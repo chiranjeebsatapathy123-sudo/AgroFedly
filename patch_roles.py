@@ -10,31 +10,31 @@ def patch_file(filepath):
     
     original_content = content
     
-    # Pattern 1: if role not in [...]
-    # We only want to patch it if it hasn't been patched already
-    # Negative lookbehind to ensure we don't double patch
+    # We use exact match replacements instead of broad regex to avoid catastrophic matches
+    
+    # 1. if role not in ['FARMER', 'FPO']:
     content = re.sub(
         r"(?<!and\s)if role not in (\[.*?\]):", 
         f"if {bypass_condition}role not in \\1:", 
         content
     )
     
-    # Pattern 2: if request.user.profile.role not in [...]
+    # 2. if request.user.profile.role not in [...]
     content = re.sub(
         r"(?<!and\s)if request\.user\.profile\.role not in (\[.*?\]):", 
         f"if {bypass_condition}request.user.profile.role not in \\1:", 
         content
     )
     
-    # Pattern 3: if request.membership.role not in {...}
+    # 3. if request.membership.role not in {'OWNER', 'ADMIN'}:
+    # Only match if it's explicitly 'request.membership.role not in'
     content = re.sub(
-        r"(?<!and\s)if request\.membership\.role not in (\{.*?\})|(\[.*?\]):", 
-        f"if {bypass_condition}request.membership.role not in \\1\\2:", 
+        r"(?<!and\s)if request\.membership\.role not in (\{.*?\}|\[.*?\]):", 
+        f"if {bypass_condition}request.membership.role not in \\1:", 
         content
     )
     
-    # Pattern 4: if role == 'FARMER' (when used to restrict access with an else: Permission denied)
-    # This one is tricky. Let's just fix the specific ones if needed.
+    # 4. Handle "if role != 'SUPER_ADMIN':" specifically if it exists and wasn't patched already
     
     if content != original_content:
         with open(filepath, 'w', encoding='utf-8') as f:

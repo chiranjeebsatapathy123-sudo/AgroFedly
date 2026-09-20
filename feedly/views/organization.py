@@ -123,7 +123,7 @@ def organization_details_json(request, organization_id):
 
 @_organization_required
 def organization_edit(request):
-    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in {'OWNER', 'ADMIN'}::
+    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in {'OWNER', 'ADMIN'}:
         messages.error(request, 'Only the owner or administrator can edit organization details.')
         return redirect('organization_dashboard')
     if request.method == 'POST':
@@ -138,7 +138,7 @@ def organization_edit(request):
 
 @_organization_required
 def organization_add_member(request):
-    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in {'OWNER', 'ADMIN'}::
+    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in {'OWNER', 'ADMIN'}:
         messages.error(request, 'Only the owner or administrator can manage members.')
         return redirect('organization_dashboard')
     form = MemberForm(request.POST or None)
@@ -160,7 +160,7 @@ def organization_add_member(request):
 
 @_organization_required
 def organization_remove_member(request, member_id):
-    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in {'OWNER', 'ADMIN'}::
+    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in {'OWNER', 'ADMIN'}:
         messages.error(request, 'Permission denied.')
         return redirect('organization_dashboard')
     member = get_object_or_404(OrganizationMember, id=member_id, organization=request.organization)
@@ -321,7 +321,7 @@ def ai_operations_center(request):
     from feedly.models import AIRecommendation, AIAuditLog, AIModelRegistry
     
     # 1. AI Health / Models
-    models = AIModelRegistry.objects.filter(status='ACTIVE').order_by('model_name')
+    models = AIModelRegistry.objects.filter(is_active=True).order_by('name')
     
     # 2. Activity / Recommendations
     recent_recs = AIRecommendation.objects.filter(organization=request.organization).order_by('-created_at')[:5]

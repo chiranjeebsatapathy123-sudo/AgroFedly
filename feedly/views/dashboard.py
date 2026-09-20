@@ -277,9 +277,9 @@ def produce_passport(request, batch_id):
     timeline = []
     for entry in ledger_entries:
         status_color = 'info'
-        if entry.transaction_type in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['CREATED', 'HARVESTED', 'DELIVERED']:
+        if entry.transaction_type in ['CREATED', 'HARVESTED', 'DELIVERED']:
             status_color = 'success'
-        elif entry.transaction_type in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['SURPLUS', 'WARNING']:
+        elif entry.transaction_type in ['SURPLUS', 'WARNING']:
             status_color = 'warning'
         elif entry.transaction_type == 'SPOILED':
             status_color = 'danger'
@@ -373,7 +373,7 @@ def intelligence_center(request):
             emergency_items.append({'food': item.food_name, 'quantity': item.quantity, 'age_hours': round(max(age, item.storage_time_hours), 1), 'reason': 'Temperature/time threshold' if item.storage_temperature > 5 or item.storage_time_hours > 24 else 'Rapid redistribution required'})
             
     routes = []
-    for recipient in verified.order_by('distance_km', '-urgency_score')if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in [:10]:
+    for recipient in verified.order_by('distance_km', '-urgency_score')[:10]:
         score = min(recipient.capacity, max(surplus_qty, 1)) / max(max(surplus_qty, 1), 1) * 0.45 + 1 / (1 + max(recipient.distance_km, 0)) * 0.3 + recipient.urgency_score / 100 * 0.25
         routes.append({'name': recipient.name, 'distance': round(recipient.distance_km, 1), 'urgency': recipient.urgency_score, 'capacity': recipient.capacity, 'score': round(score * 100, 1)})
     if request.method == 'POST':
@@ -413,7 +413,7 @@ def intelligence_center(request):
                 pipeline = DemandForecastingPipeline(org)
                 result = pipeline.predict_demand(attendance, target_date=today)
                 messages.success(request, f"Preparation recommendation: {result.recommended_preparation} meals.")
-            elif action in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['accept_recommendation', 'reject_recommendation', 'dismiss_recommendation']:
+            elif action in ['accept_recommendation', 'reject_recommendation', 'dismiss_recommendation']:
                 from feedly.models import AIRecommendation
                 rec_id = request.POST.get('recommendation_id')
                 if rec_id:
@@ -568,7 +568,7 @@ def intelligence_center(request):
             emergency_items.append({'food': item.food_name, 'quantity': item.quantity, 'age_hours': round(max(age, item.storage_time_hours), 1), 'reason': 'Temperature/time threshold' if item.storage_temperature > 5 or item.storage_time_hours > 24 else 'Rapid redistribution required'})
             
     routes = []
-    for recipient in verified.order_by('distance_km', '-urgency_score')if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in [:10]:
+    for recipient in verified.order_by('distance_km', '-urgency_score')[:10]:
         score = min(recipient.capacity, max(surplus_qty, 1)) / max(max(surplus_qty, 1), 1) * 0.45 + 1 / (1 + max(recipient.distance_km, 0)) * 0.3 + recipient.urgency_score / 100 * 0.25
         routes.append({'name': recipient.name, 'distance': round(recipient.distance_km, 1), 'urgency': recipient.urgency_score, 'capacity': recipient.capacity, 'score': round(score * 100, 1)})
     if request.method == 'POST':
@@ -608,7 +608,7 @@ def intelligence_center(request):
                 pipeline = DemandForecastingPipeline(org)
                 result = pipeline.predict_demand(attendance, target_date=today)
                 messages.success(request, f"Preparation recommendation: {result.recommended_preparation} meals.")
-            elif action in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['accept_recommendation', 'reject_recommendation', 'dismiss_recommendation']:
+            elif action in ['accept_recommendation', 'reject_recommendation', 'dismiss_recommendation']:
                 from feedly.models import AIRecommendation
                 rec_id = request.POST.get('recommendation_id')
                 if rec_id:
