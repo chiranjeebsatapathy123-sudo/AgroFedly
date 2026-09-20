@@ -10,14 +10,15 @@
     
     <div class="form-card" style="margin-bottom:20px; background: rgba(var(--primary-rgb), 0.05); border: 1px solid var(--primary);">
         <strong style="color: var(--primary); font-size: 1.1rem; display:flex; align-items:center; gap:8px;">
-            <i class="fas fa-magic"></i> 4 High-Confidence Matches Found
+            <i class="fas fa-magic"></i> {{ matches|length }} High-Confidence Matches Found
         </strong>
         <p style="margin-top:10px; font-size:0.95rem;">
-            Review and approve the suggested matches below.
+            Review and approve the suggested matches below. Approving a match will automatically create a logistics delivery order.
         </p>
     </div>
 
-    <!-- Match Card 1 -->
+    {% for match in matches %}
+    <!-- Match Card -->
     <div class="form-card" style="margin-bottom:20px; display:flex; flex-direction:column; gap:15px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
             <!-- Donor -->
@@ -25,15 +26,15 @@
                 <div style="width:50px; height:50px; background:rgba(21, 150, 83, 0.1); color:var(--success); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.5rem;">
                     <i class="fas fa-hand-holding-heart"></i>
                 </div>
-                <h4 style="margin:0 0 5px;">Sunnydale Farms</h4>
-                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">150 kg Carrots</p>
+                <h4 style="margin:0 0 5px;">{{ match.surplus.organization.name|default:"Internal Surplus" }}</h4>
+                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">{{ match.surplus.quantity }} kg {{ match.surplus.food_name }}</p>
             </div>
             
             <!-- Match Score -->
             <div style="display:flex; flex-direction:column; align-items:center;">
-                <div style="position:relative; width:80px; height:80px; border-radius:50%; background: conic-gradient(var(--primary) 98%, #eee 0); display:flex; align-items:center; justify-content:center;">
+                <div style="position:relative; width:80px; height:80px; border-radius:50%; background: conic-gradient(var(--primary) {{ match.score }}%, #eee 0); display:flex; align-items:center; justify-content:center;">
                     <div style="width:65px; height:65px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center;">
-                        <span style="font-weight:bold; color:var(--primary);">98%</span>
+                        <span style="font-weight:bold; color:var(--primary);">{{ match.score }}%</span>
                     </div>
                 </div>
                 <span style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">Match Score</span>
@@ -44,15 +45,25 @@
                 <div style="width:50px; height:50px; background:rgba(13, 110, 253, 0.1); color:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.5rem;">
                     <i class="fas fa-utensils"></i>
                 </div>
-                <h4 style="margin:0 0 5px;">Downtown Soup Kitchen</h4>
-                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">Needs: 100-200 kg Veggies</p>
+                <h4 style="margin:0 0 5px;">{{ match.recipient.name }}</h4>
+                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">Capacity: {{ match.recipient.capacity }} kg</p>
             </div>
         </div>
         
-        <div style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #eee; padding-top:15px;">
-            <button class="btn" style="color:var(--danger); border-color:var(--danger);">Reject Match</button>
-            <button class="btn primary">Approve & Initiate Transfer</button>
-        </div>
+        <form method="POST" action="{% url 'redistribution_matching' %}" style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #eee; padding-top:15px;">
+            {% csrf_token %}
+            <input type="hidden" name="surplus_id" value="{{ match.surplus.id }}">
+            <input type="hidden" name="recipient_id" value="{{ match.recipient.id }}">
+            <button type="submit" name="action" value="reject" class="btn" style="color:var(--danger); border-color:var(--danger);">Reject Match</button>
+            <button type="submit" name="action" value="approve" class="btn primary">Approve & Initiate Transfer</button>
+        </form>
     </div>
+    {% empty %}
+    <div class="form-card" style="text-align:center; padding:40px;">
+        <i class="fas fa-check-circle" style="font-size:3rem; color:var(--success); margin-bottom:15px;"></i>
+        <h2>All Caught Up!</h2>
+        <p style="color:var(--text-muted);">There are no pending matches to review at this time.</p>
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

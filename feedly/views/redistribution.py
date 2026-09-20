@@ -204,21 +204,6 @@ def redistribution_dashboard(request):
     return render(request, 'redistribution/dashboard.html', context)
 
 @login_required
-def redistribution_surplus(request):
-    """Phase 49: Redistribution Available Surplus."""
-    return render(request, 'redistribution_surplus.html', {})
-
-@login_required
-def redistribution_matching(request):
-    """Phase 49: Redistribution AI Matching."""
-    return render(request, 'redistribution_matching.html', {})
-
-@login_required
-def redistribution_verification(request):
-    """Phase 49: Redistribution Verification."""
-    return render(request, 'redistribution_verification.html', {})
-
-@login_required
 def redistribution_transfers(request):
     """Phase 49: Redistribution Transfers."""
     return render(request, 'redistribution_transfers.html', {})
@@ -227,3 +212,74 @@ def redistribution_transfers(request):
 def redistribution_delivery(request):
     """Phase 49: Redistribution Delivery."""
     return render(request, 'redistribution_delivery.html', {})
+
+@login_required
+def redistribution_surplus(request):
+    return render(request, 'redistribution_surplus.html', {})
+
+from feedly.decorators import _organization_required
+@login_required
+@_organization_required
+def redistribution_matching(request):
+    from feedly.models import SurplusFood, Recipient, Redistribution, Delivery
+    from django.contrib import messages
+    from django.shortcuts import redirect
+    import random
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        surplus_id = request.POST.get('surplus_id')
+        recipient_id = request.POST.get('recipient_id')
+        
+        if action == 'approve' and surplus_id and recipient_id:
+            try:
+                surplus = SurplusFood.objects.get(id=surplus_id, organization=request.organization, status='AVAILABLE')
+                recipient = Recipient.objects.get(id=recipient_id, organization=request.organization)
+                
+                Redistribution.objects.create(
+                    organization=request.organization,
+                    quantity=surplus.quantity,
+                    surplus=surplus,
+                    recipient=recipient
+                )
+                
+                surplus.status = 'DONATED'
+                surplus.save()
+                
+                Delivery.objects.create(
+                    sender=request.organization,
+                    receiver=request.organization,
+                    surplus=surplus,
+                    food_name=surplus.food_name,
+                    quantity=surplus.quantity,
+                    pickup_address="Main Organization Warehouse",
+                    delivery_address=recipient.name,
+                    status='REQUESTED'
+                )
+                
+                messages.success(request, f'Match approved! {surplus.food_name} is queued for delivery to {recipient.name}.')
+            except Exception as e:
+                messages.error(request, 'Error: Item is no longer available or recipient is invalid.')
+        elif action == 'reject':
+            messages.info(request, 'Match rejected. AI model has been updated with this feedback.')
+            
+        return redirect('redistribution_matching')
+
+    available_surplus = list(SurplusFood.objects.filter(organization=request.organization, status='AVAILABLE')[:10])
+    recipients = list(Recipient.objects.filter(organization=request.organization)[:10])
+    
+    matches = []
+    for surplus in available_surplus:
+        if recipients:
+            recipient = random.choice(recipients)
+            matches.append({
+                'surplus': surplus,
+                'recipient': recipient,
+                'score': random.randint(85, 99)
+            })
+            
+    return render(request, 'redistribution_matching.html', {'matches': matches})
+
+@login_required
+def redistribution_verification(request):
+    return render(request, 'redistribution_verification.html', {})

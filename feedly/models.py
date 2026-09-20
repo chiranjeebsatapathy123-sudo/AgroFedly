@@ -283,6 +283,7 @@ class Delivery(models.Model):
     recipient_contact = models.CharField(max_length=50, blank=True)
     driver_name = models.CharField(max_length=100, blank=True)
     volunteer_driver = models.ForeignKey('VolunteerProfile', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_deliveries')
+    logistics_driver = models.ForeignKey('LogisticsDriver', on_delete=models.SET_NULL, null=True, blank=True, related_name='deliveries')
     vehicle_number = models.CharField(max_length=50, blank=True)
     current_lat = models.FloatField(null=True, blank=True)
     current_lng = models.FloatField(null=True, blank=True)
@@ -1507,3 +1508,24 @@ class DocumentAttachment(models.Model):
 
     def __str__(self):
         return self.title
+
+# -----------------------------------------------------------------------------
+# PHASE 49: LOGISTICS DRIVERS
+# -----------------------------------------------------------------------------
+class LogisticsDriver(models.Model):
+    """Represents a driver managed by an organization in the Logistics Workspace."""
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='logistics_drivers')
+    name = models.CharField(max_length=150)
+    license_type = models.CharField(max_length=50)
+    status_choices = [
+        ('Available', 'Available'),
+        ('On Route', 'On Route'),
+        ('Resting', 'Resting')
+    ]
+    status = models.CharField(max_length=50, choices=status_choices, default='Available')
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=5.0)
+    phone = models.CharField(max_length=20, blank=True)
+    joined_date = models.DateField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.name

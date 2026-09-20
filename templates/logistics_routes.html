@@ -18,35 +18,138 @@
         </p>
     </div>
 
-    <!-- Active Routes Timeline -->
-    <div class="form-card">
-        <h2 style="font-size:1.2rem; margin-bottom:20px;">📍 Active Route Progress (Route R-992)</h2>
+    <!-- Active Routes Layout -->
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
         
-        <div style="position:relative; padding-left:30px; border-left:2px solid var(--primary);">
-            <div style="position:relative; margin-bottom:25px;">
-                <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:var(--success); border:3px solid white; box-shadow:0 0 0 1px var(--success);"></div>
-                <h4 style="margin:0 0 5px;">08:30 AM - Pickup Started</h4>
-                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">Central Farm Warehouse</p>
-            </div>
+        <!-- Left: Live Map -->
+        <div style="flex: 2; min-width: 300px;" class="form-card">
+            <h2 style="font-size:1.2rem; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                <span>Live GPS Tracking</span>
+                <span class="badge" style="background:var(--danger); color:white; font-size:0.8rem; animation: pulse 2s infinite;"><i class="fas fa-circle" style="font-size:0.6rem;"></i> LIVE</span>
+            </h2>
+            <!-- Leaflet CSS -->
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+            <div id="route-map" style="height: 450px; border-radius: 8px; z-index: 1;"></div>
+        </div>
+
+        <!-- Right: Timeline -->
+        <div style="flex: 1; min-width: 300px;" class="form-card">
+            <h2 style="font-size:1.2rem; margin-bottom:20px;">📍 Active Route Progress (Route R-992)</h2>
             
-            <div style="position:relative; margin-bottom:25px;">
-                <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:var(--success); border:3px solid white; box-shadow:0 0 0 1px var(--success);"></div>
-                <h4 style="margin:0 0 5px;">10:15 AM - First Drop-off Completed</h4>
-                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">North Distribution Hub</p>
-            </div>
-            
-            <div style="position:relative; margin-bottom:25px;">
-                <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:white; border:3px solid var(--primary); box-shadow:0 0 0 1px var(--primary);"></div>
-                <h4 style="margin:0 0 5px;">Current Status - In Transit</h4>
-                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">ETA to next stop: 15 minutes (Traffic delay: +4m)</p>
-            </div>
-            
-            <div style="position:relative;">
-                <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:white; border:3px solid #ccc; box-shadow:0 0 0 1px #ccc;"></div>
-                <h4 style="margin:0 0 5px; color:#ccc;">Final Drop-off</h4>
-                <p style="margin:0; font-size:0.85rem; color:#ccc;">Downtown Supermarket</p>
+            <div style="position:relative; padding-left:30px; border-left:2px solid var(--primary);">
+                <div style="position:relative; margin-bottom:25px;">
+                    <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:var(--success); border:3px solid white; box-shadow:0 0 0 1px var(--success);"></div>
+                    <h4 style="margin:0 0 5px;">08:30 AM - Pickup Started</h4>
+                    <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">Central Farm Warehouse</p>
+                </div>
+                
+                <div style="position:relative; margin-bottom:25px;">
+                    <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:var(--success); border:3px solid white; box-shadow:0 0 0 1px var(--success);"></div>
+                    <h4 style="margin:0 0 5px;">10:15 AM - First Drop-off Completed</h4>
+                    <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">North Distribution Hub</p>
+                </div>
+                
+                <div style="position:relative; margin-bottom:25px;">
+                    <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:white; border:3px solid var(--primary); box-shadow:0 0 0 1px var(--primary);"></div>
+                    <h4 style="margin:0 0 5px;">Current Status - In Transit</h4>
+                    <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">ETA to next stop: 15 minutes (Traffic delay: +4m)</p>
+                </div>
+                
+                <div style="position:relative;">
+                    <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:white; border:3px solid #ccc; box-shadow:0 0 0 1px #ccc;"></div>
+                    <h4 style="margin:0 0 5px; color:#ccc;">Final Drop-off</h4>
+                    <p style="margin:0; font-size:0.85rem; color:#ccc;">Downtown Supermarket</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize Map
+        const map = L.map('route-map').setView([40.7128, -74.0060], 12); // Default to NYC for simulation
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Define route coordinates (Simulation)
+        const routePoints = [
+            [40.7589, -73.9851], // Warehouse (Times Square area)
+            [40.7306, -73.9902], // First Drop-off (Washington Sq)
+            [40.7061, -74.0092], // Current Position (Financial District)
+            [40.6892, -74.0445]  // Final Drop-off (Liberty Island area)
+        ];
+
+        // Draw Polyline for the entire route (grey dashed for pending)
+        const pendingPath = L.polyline(routePoints, {color: '#bdc3c7', weight: 4, dashArray: '5, 10'}).addTo(map);
+        
+        // Draw Polyline for completed route (green)
+        const completedPath = L.polyline([routePoints[0], routePoints[1], routePoints[2]], {color: '#2ecc71', weight: 5}).addTo(map);
+
+        // Add Markers
+        const warehouseIcon = L.divIcon({className: 'fas fa-warehouse', html: '<div style="background:var(--primary); color:white; padding:8px; border-radius:50%; display:flex; align-items:center; justify-content:center; width:30px; height:30px; box-shadow:0 2px 5px rgba(0,0,0,0.3);"><i class="fas fa-warehouse"></i></div>', iconSize: [30, 30]});
+        const dropoffIcon = L.divIcon({className: 'fas fa-map-marker-alt', html: '<div style="background:#e74c3c; color:white; padding:8px; border-radius:50%; display:flex; align-items:center; justify-content:center; width:30px; height:30px; box-shadow:0 2px 5px rgba(0,0,0,0.3);"><i class="fas fa-map-marker-alt"></i></div>', iconSize: [30, 30]});
+        
+        L.marker(routePoints[0], {icon: warehouseIcon}).addTo(map).bindPopup('<b>Central Farm Warehouse</b><br>Pickup: 08:30 AM');
+        L.marker(routePoints[1], {icon: dropoffIcon}).addTo(map).bindPopup('<b>North Distribution Hub</b><br>Drop-off: 10:15 AM');
+        L.marker(routePoints[3], {icon: dropoffIcon}).addTo(map).bindPopup('<b>Downtown Supermarket</b><br>ETA: 11:30 AM');
+
+        // Create Animated Truck Marker
+        const truckIcon = L.divIcon({
+            className: 'custom-truck-icon',
+            html: '<div style="background:white; color:var(--primary); padding:6px; border:2px solid var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; width:36px; height:36px; box-shadow:0 4px 10px rgba(0,0,0,0.4); z-index:1000;"><i class="fas fa-truck-moving" style="font-size:1.1rem;"></i></div>',
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
+        });
+
+        const truckMarker = L.marker(routePoints[2], {icon: truckIcon}).addTo(map);
+        truckMarker.bindPopup('<b>Route R-992 (Alex Mercer)</b><br>Status: In Transit<br>Speed: 45 mph');
+        truckMarker.openPopup();
+
+        // Fit map bounds to the route
+        map.fitBounds(pendingPath.getBounds(), {padding: [50, 50]});
+
+        // Simple animation loop simulating live GPS updates
+        let currentPos = [...routePoints[2]];
+        const targetPos = [...routePoints[3]];
+        
+        // Calculate steps for animation
+        const steps = 200;
+        let step = 0;
+        const latStep = (targetPos[0] - currentPos[0]) / steps;
+        const lngStep = (targetPos[1] - currentPos[1]) / steps;
+
+        setInterval(() => {
+            if (step < steps) {
+                currentPos[0] += latStep;
+                currentPos[1] += lngStep;
+                truckMarker.setLatLng(currentPos);
+                
+                // Optional: Slightly update completed path
+                const currentCompleted = completedPath.getLatLngs();
+                currentCompleted.push(L.latLng(currentPos[0], currentPos[1]));
+                // We keep it simple by just updating the marker in this demo to avoid path clutter
+                step++;
+            } else {
+                // Reset for loop demo
+                step = 0;
+                currentPos = [...routePoints[2]];
+            }
+        }, 100); // 100ms interval for smooth movement
+    });
+</script>
+
+<style>
+    @keyframes pulse {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.05); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+</style>
 {% endblock %}

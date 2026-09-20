@@ -8,7 +8,7 @@
             <h1 class="rd-title">Drivers Roster</h1>
             <p class="rd-subtitle">{% trans "Manage your logistics personnel." %}</p>
         </div>
-        <button class="btn primary"><i class="fas fa-plus"></i> Add New Driver</button>
+        <a href="{% url 'logistics_driver_create' %}" class="btn primary"><i class="fas fa-plus"></i> Add New Driver</a>
     </div>
     
     <div class="form-card">
@@ -19,46 +19,37 @@
                     <th style="padding:15px 10px;">License Type</th>
                     <th style="padding:15px 10px;">Current Status</th>
                     <th style="padding:15px 10px;">Safety Rating</th>
-                    <th style="padding:15px 10px;">Actions</th>
+                    <th style="padding:15px 10px; text-align:right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
+                {% for driver in drivers %}
                 <tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
                     <td style="padding:15px 10px; display:flex; align-items:center; gap:10px;">
-                        <img src="https://ui-avatars.com/api/?name=Alex+Mercer&background=random" style="width:30px; height:30px; border-radius:50%;">
-                        <strong>Alex Mercer</strong>
+                        <img src="https://ui-avatars.com/api/?name={{ driver.name|urlencode }}&background=random" style="width:30px; height:30px; border-radius:50%;">
+                        <strong>{{ driver.name }}</strong>
                     </td>
-                    <td style="padding:15px 10px;">CDL Class A</td>
-                    <td style="padding:15px 10px;"><span class="badge" style="background:var(--success); color:white;">On Route</span></td>
-                    <td style="padding:15px 10px; color:#f39c12;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> 4.8</td>
+                    <td style="padding:15px 10px;">{{ driver.license_type }}</td>
                     <td style="padding:15px 10px;">
-                        <button class="btn" style="padding:5px 10px; font-size:0.8rem;">Profile</button>
+                        <span class="badge" style="background:{% if driver.status == 'Available' %}var(--primary){% elif driver.status == 'On Route' %}var(--success){% else %}var(--warning){% endif %}; color:white;">{{ driver.status }}</span>
+                    </td>
+                    <td style="padding:15px 10px; color:#f39c12;"><i class="fas fa-star"></i> {{ driver.rating }}</td>
+                    <td style="padding:15px 10px; text-align:right;">
+                        <a href="{% url 'logistics_driver_profile' driver.id %}" class="btn" style="padding:5px 10px; font-size:0.8rem; text-decoration:none;">Profile</a>
+                        <a href="{% url 'logistics_driver_edit' driver.id %}" class="btn" style="padding:5px 10px; font-size:0.8rem; text-decoration:none; margin-left:5px;"><i class="fas fa-edit"></i></a>
+                        <form action="{% url 'logistics_driver_delete' driver.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn" style="padding:5px 10px; font-size:0.8rem; background:transparent; border:1px solid #e74c3c; color:#e74c3c; margin-left:5px;" onclick="return confirm('Are you sure you want to delete this driver?');"><i class="fas fa-trash"></i></button>
+                        </form>
                     </td>
                 </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding:15px 10px; display:flex; align-items:center; gap:10px;">
-                        <img src="https://ui-avatars.com/api/?name=Sarah+Connor&background=random" style="width:30px; height:30px; border-radius:50%;">
-                        <strong>Sarah Connor</strong>
-                    </td>
-                    <td style="padding:15px 10px;">Standard</td>
-                    <td style="padding:15px 10px;"><span class="badge" style="background:var(--primary); color:white;">Available</span></td>
-                    <td style="padding:15px 10px; color:#f39c12;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> 5.0</td>
-                    <td style="padding:15px 10px;">
-                        <button class="btn" style="padding:5px 10px; font-size:0.8rem;">Profile</button>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding:30px; text-align:center; color:var(--text-muted);">
+                        No drivers added yet. <a href="{% url 'logistics_driver_create' %}">Add your first driver</a>.
                     </td>
                 </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding:15px 10px; display:flex; align-items:center; gap:10px;">
-                        <img src="https://ui-avatars.com/api/?name=John+Smith&background=random" style="width:30px; height:30px; border-radius:50%;">
-                        <strong>John Smith</strong>
-                    </td>
-                    <td style="padding:15px 10px;">CDL Class B</td>
-                    <td style="padding:15px 10px;"><span class="badge" style="background:var(--warning); color:white;">Resting</span></td>
-                    <td style="padding:15px 10px; color:#f39c12;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i> 4.2</td>
-                    <td style="padding:15px 10px;">
-                        <button class="btn" style="padding:5px 10px; font-size:0.8rem;">Profile</button>
-                    </td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>

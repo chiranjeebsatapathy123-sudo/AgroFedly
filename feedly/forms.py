@@ -294,3 +294,18 @@ class FarmInputForm(forms.ModelForm):
             'expiry_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
+from .models import LogisticsDriver
+
+class LogisticsDriverForm(forms.ModelForm):
+    class Meta:
+        model = LogisticsDriver
+        fields = ['name', 'license_type', 'status', 'rating', 'phone']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Driver Name'}),
+            'license_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. CDL Class A'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'rating': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '5'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
+        }
+
+

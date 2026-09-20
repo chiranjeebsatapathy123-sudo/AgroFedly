@@ -13,7 +13,11 @@ def require_organization(view_func):
     def wrapped(request, *args, **kwargs):
         if getattr(request.user, 'is_superuser', False) or (hasattr(request.user, 'profile') and request.user.profile.role in ['SUPER_ADMIN', 'ADMIN']):
             from feedly.services.organizations import get_active_organization
-            request.organization = get_active_organization(request.user, request)
+            org = get_active_organization(request.user, request)
+            if not org:
+                from feedly.models import Organization
+                org = Organization.objects.first()
+            request.organization = org
             return view_func(request, *args, **kwargs)
             
         from feedly.services.organizations import get_active_organization

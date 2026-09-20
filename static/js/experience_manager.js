@@ -111,6 +111,19 @@ export class ExperienceManager {
             // 5. Replace Content
             this.mainElement.innerHTML = newMain.innerHTML;
             
+            // Sync sidebar active states from the new document (for Back/Forward)
+            const oldNavItems = document.querySelectorAll('.rd-sidebar .rd-nav-item');
+            const newNavItems = doc.querySelectorAll('.rd-sidebar .rd-nav-item');
+            if (oldNavItems.length === newNavItems.length && oldNavItems.length > 0) {
+                for (let i = 0; i < oldNavItems.length; i++) {
+                    if (newNavItems[i].classList.contains('active')) {
+                        oldNavItems[i].classList.add('active');
+                    } else {
+                        oldNavItems[i].classList.remove('active');
+                    }
+                }
+            }
+            
             // 6. Execute Scripts
             this.executeScripts(this.mainElement);
             

@@ -217,14 +217,106 @@ def delivery_proof(request, delivery_id):
         return render(request, 'delivery_proof.html', {'delivery': delivery})
 
 @login_required
+@_organization_required
 def logistics_dispatch(request):
     """Phase 49: Logistics Dispatch."""
-    return render(request, 'logistics_dispatch.html', {})
+    from ..models import Delivery, LogisticsDriver
+    
+    if request.method == 'POST':
+        delivery_id = request.POST.get('delivery_id')
+        driver_id = request.POST.get('driver_id')
+        
+        if delivery_id and driver_id:
+            try:
+                delivery = Delivery.objects.get(id=delivery_id, sender=request.organization)
+                driver = LogisticsDriver.objects.get(id=driver_id, organization=request.organization)
+                
+                delivery.logistics_driver = driver
+                delivery.status = 'ASSIGNED'
+                delivery.save()
+                
+                driver.status = 'On Route'
+                driver.save()
+                
+                messages.success(request, f'Driver {driver.name} assigned to delivery {delivery.tracking_code}.')
+            except (Delivery.DoesNotExist, LogisticsDriver.DoesNotExist):
+                messages.error(request, 'Invalid delivery or driver selection.')
+        else:
+            messages.error(request, 'Please select both a delivery and a driver.')
+        
+        return redirect('logistics_dispatch')
+
+    # GET request
+    pending_orders = Delivery.objects.filter(
+        sender=request.organization,
+        status='REQUESTED'
+    ).order_by('-created_at')
+    
+    available_drivers = LogisticsDriver.objects.filter(
+        organization=request.organization,
+        status='Available'
+    ).order_by('-rating')
+    
+    return render(request, 'logistics_dispatch.html', {
+        'pending_orders': pending_orders,
+        'available_drivers': available_drivers
+    })
+
+from ..models import LogisticsDriver
+from ..forms import LogisticsDriverForm
+from ..decorators import _organization_required
 
 @login_required
+@_organization_required
 def logistics_drivers(request):
     """Phase 49: Logistics Drivers."""
-    return render(request, 'logistics_drivers.html', {})
+    drivers = LogisticsDriver.objects.filter(organization=request.organization).order_by('-joined_date')
+    return render(request, 'logistics_drivers.html', {'drivers': drivers})
+
+@login_required
+@_organization_required
+def logistics_driver_create(request):
+    if request.method == 'POST':
+        form = LogisticsDriverForm(request.POST)
+        if form.is_valid():
+            driver = form.save(commit=False)
+            driver.organization = request.organization
+            driver.save()
+            messages.success(request, 'Driver created successfully.')
+            return redirect('logistics_drivers')
+    else:
+        form = LogisticsDriverForm()
+    return render(request, 'logistics_driver_form.html', {'form': form, 'title': 'Add New Driver'})
+
+@login_required
+@_organization_required
+def logistics_driver_edit(request, driver_id):
+    driver = get_object_or_404(LogisticsDriver, id=driver_id, organization=request.organization)
+    if request.method == 'POST':
+        form = LogisticsDriverForm(request.POST, instance=driver)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Driver updated successfully.')
+            return redirect('logistics_drivers')
+    else:
+        form = LogisticsDriverForm(instance=driver)
+    return render(request, 'logistics_driver_form.html', {'form': form, 'title': 'Edit Driver'})
+
+@login_required
+@_organization_required
+def logistics_driver_delete(request, driver_id):
+    driver = get_object_or_404(LogisticsDriver, id=driver_id, organization=request.organization)
+    if request.method == 'POST':
+        driver.delete()
+        messages.success(request, 'Driver deleted successfully.')
+        return redirect('logistics_drivers')
+    return redirect('logistics_drivers')
+
+@login_required
+@_organization_required
+def logistics_driver_profile(request, driver_id):
+    driver = get_object_or_404(LogisticsDriver, id=driver_id, organization=request.organization)
+    return render(request, 'logistics_driver_profile.html', {'driver': driver})
 
 @login_required
 def logistics_vehicles(request):

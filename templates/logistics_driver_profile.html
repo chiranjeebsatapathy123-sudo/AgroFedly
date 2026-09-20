@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{{ driver.name }} - Profile | AgroFedly{% endblock %}
+
+{% block content %}
+<div class="rd-container" style="max-width: 800px; margin: 0 auto;">
+    <div class="rd-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h1 class="rd-title">Driver Profile</h1>
+            <p class="rd-subtitle">{% trans "Detailed information and performance metrics." %}</p>
+        </div>
+        <div>
+            <a href="{% url 'logistics_driver_edit' driver.id %}" class="btn primary"><i class="fas fa-edit"></i> Edit Profile</a>
+            <a href="{% url 'logistics_drivers' %}" class="btn" style="margin-left: 10px; background:transparent; border:1px solid var(--color-border); color:var(--text-color);">Back to Roster</a>
+        </div>
+    </div>
+
+    <div class="form-card" style="padding: 40px; display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap;">
+        <!-- Left Column: Avatar & Basic Info -->
+        <div style="flex: 1; min-width: 250px; text-align: center;">
+            <img src="https://ui-avatars.com/api/?name={{ driver.name|urlencode }}&background=random&size=150" style="width:150px; height:150px; border-radius:50%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin-bottom: 20px;">
+            <h2 style="margin:0 0 5px 0; font-size: 1.8rem;">{{ driver.name }}</h2>
+            <div style="color: var(--text-muted); margin-bottom: 15px;">{{ driver.license_type }}</div>
+            
+            <span class="badge" style="padding: 8px 15px; font-size: 1rem; background:{% if driver.status == 'Available' %}var(--primary){% elif driver.status == 'On Route' %}var(--success){% else %}var(--warning){% endif %}; color:white;">
+                {{ driver.status }}
+            </span>
+            
+            <div style="margin-top: 30px; padding: 20px; background: var(--surface-soft); border-radius: 12px; border: 1px solid var(--color-border);">
+                <div style="font-size: 2.5rem; color: #f39c12; font-weight: 800; line-height: 1;">
+                    {{ driver.rating }}
+                </div>
+                <div style="color: #f39c12; margin: 10px 0;">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                </div>
+                <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Safety Rating</div>
+            </div>
+        </div>
+
+        <!-- Right Column: Details & Stats -->
+        <div style="flex: 2; min-width: 300px;">
+            <h3 style="border-bottom: 2px solid var(--color-border); padding-bottom: 10px; margin-bottom: 20px;">Contact Information</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px;">
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Phone Number</div>
+                    <div style="font-size: 1.1rem; margin-top: 5px;">{{ driver.phone|default:"Not provided" }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Organization</div>
+                    <div style="font-size: 1.1rem; margin-top: 5px;">{{ driver.organization.name }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Joined Date</div>
+                    <div style="font-size: 1.1rem; margin-top: 5px;">{{ driver.joined_date }}</div>
+                </div>
+            </div>
+
+            <h3 style="border-bottom: 2px solid var(--color-border); padding-bottom: 10px; margin-bottom: 20px;">Performance Metrics</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                <div style="background: var(--surface-soft); padding: 15px; border-radius: 8px; text-align: center; border: 1px solid var(--color-border);">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">42</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Total Deliveries</div>
+                </div>
+                <div style="background: var(--surface-soft); padding: 15px; border-radius: 8px; text-align: center; border: 1px solid var(--color-border);">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">100%</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">On-Time Rate</div>
+                </div>
+                <div style="background: var(--surface-soft); padding: 15px; border-radius: 8px; text-align: center; border: 1px solid var(--color-border);">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #3498db;">2,450</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Miles Driven</div>
+                </div>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 15px;">* Metrics are simulated for this demonstration.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
