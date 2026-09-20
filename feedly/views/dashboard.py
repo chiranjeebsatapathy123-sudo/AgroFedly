@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from ..forms import DeliveryForm, MemberForm, OrganizationForm, RedistributionForm, SurplusFoodForm
-from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact, SystemEvent, Warehouse, UserTask, DataImport
+from ..models import DemandForecast, Delivery, MealRecord, Organization, OrganizationMember, Recipient, Redistribution, SurplusFood, IoTTemperatureReading, Ingredient, OrganizationImpact, SystemEvent, Warehouse, UserTask, DataImport, Farm, FarmField
 from ..services.surplus import SurplusCalculator
 User = get_user_model()
 from ..forms import PostMealRecordForm
@@ -491,11 +491,16 @@ def live_operations(request):
     deliveries = Delivery.objects.filter(
         sender=request.organization
     ).order_by('-pickup_time')[:10]
-    return render(request, 'produce_passport.html', {
-        'batch_id': batch_id,
-        'timeline': timeline,
-        'org': org
+    
+    return render(request, 'live_operations.html', {
+        'recent_readings': recent_readings,
+        'surplus_events': surplus_events,
+        'deliveries': deliveries,
+        'farms': farms,
+        'fields': fields,
     })
+
+
 
 def passport_qr_code(request, batch_id):
     import qrcode
