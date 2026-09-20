@@ -94,6 +94,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (toggleBtn) toggleBtn.addEventListener("click", toggleWidget);
     
+    const floatingBtn = document.getElementById("copilot-floating-btn");
+    if (floatingBtn) floatingBtn.addEventListener("click", toggleWidget);
+    
     // Close on Escape
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && !widget.classList.contains("collapsed")) {

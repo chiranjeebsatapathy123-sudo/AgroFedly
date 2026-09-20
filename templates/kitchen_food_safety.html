@@ -1,14 +1,79 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}{% trans "Food Safety" %} | AgroFedly{% endblock %}
+{% block title %}{% trans "Food Safety & Compliance" %} | AgroFedly{% endblock %}
 {% block content %}
 <div class="rd-container">
     <div class="rd-header">
         <h1 class="rd-title">{% trans "Food Safety" %}</h1>
-        <p class="rd-subtitle">{% trans "Monitor food safety and expiry." %}</p>
+        <p class="rd-subtitle">{% trans "Monitor compliance and safety logs." %}</p>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
+        <!-- Safety Score -->
+        <div class="form-card" style="flex:1; min-width:300px; text-align:center;">
+            <h2 style="font-size:1.2rem; margin-bottom:15px;">🛡️ Overall Safety Score</h2>
+            <div style="position:relative; display:inline-block; width:150px; height:150px; border-radius:50%; background: conic-gradient(var(--success) 94%, #eee 0); display:flex; align-items:center; justify-content:center;">
+                <div style="width:120px; height:120px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                    <span style="font-size:2rem; font-weight:bold; color:var(--text);">94%</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Excellent</span>
+                </div>
+            </div>
+            <p style="margin-top:15px; font-size:0.9rem; color:var(--text-muted);">Last updated 2 hours ago.</p>
+        </div>
+        
+        <!-- Action Checklists -->
+        <div class="form-card" style="flex:2; min-width:300px;">
+            <h2 style="font-size:1.2rem; margin-bottom:15px;">📋 Daily Compliance Checks</h2>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                    <input type="checkbox" checked disabled> Morning Temperature Log
+                </label>
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                    <input type="checkbox" checked disabled> Equipment Sterilization
+                </label>
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                    <input type="checkbox"> Evening Temperature Log
+                </label>
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                    <input type="checkbox"> Produce Quality Inspection
+                </label>
+            </div>
+            <button class="btn primary" style="margin-top:15px;"><i class="fas fa-plus"></i> Add Custom Check</button>
+        </div>
+    </div>
+    
+    <div class="form-card">
+        <h2 style="font-size:1.2rem; margin-bottom:15px;">🕒 Recent Inspection Logs</h2>
+        <table style="width:100%; text-align:left; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--color-border);">
+                    <th style="padding:10px 0;">Date/Time</th>
+                    <th style="padding:10px 0;">Inspector</th>
+                    <th style="padding:10px 0;">Area</th>
+                    <th style="padding:10px 0;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:10px 0;">Today, 08:00 AM</td>
+                    <td style="padding:10px 0;">John Doe</td>
+                    <td style="padding:10px 0;">Cold Storage A</td>
+                    <td style="padding:10px 0;"><span style="color:var(--success);"><i class="fas fa-check-circle"></i> Passed</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:10px 0;">Yesterday, 06:00 PM</td>
+                    <td style="padding:10px 0;">Jane Smith</td>
+                    <td style="padding:10px 0;">Prep Station 2</td>
+                    <td style="padding:10px 0;"><span style="color:var(--success);"><i class="fas fa-check-circle"></i> Passed</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:10px 0;">Oct 12, 02:30 PM</td>
+                    <td style="padding:10px 0;">Auto-Sensor</td>
+                    <td style="padding:10px 0;">Cold Storage B</td>
+                    <td style="padding:10px 0;"><span style="color:var(--warning);"><i class="fas fa-exclamation-triangle"></i> Temp Warning</span></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

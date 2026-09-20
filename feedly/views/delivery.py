@@ -356,7 +356,7 @@ def delivery_scan_qr(request, delivery_id):
                 notify_delivery_update(delivery)
             except Exception as e:
                 pass
-        elif delivery.status in ['ASSIGNED', 'REQUESTED']:
+        elif delivery.status in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['ASSIGNED', 'REQUESTED']:
             delivery.status = 'IN_TRANSIT'
             delivery.save(update_fields=['status'])
             messages.success(request, f'Delivery {delivery.tracking_code} marked as IN TRANSIT.')

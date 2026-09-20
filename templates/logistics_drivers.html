@@ -3,12 +3,64 @@
 {% block title %}Drivers | AgroFedly{% endblock %}
 {% block content %}
 <div class="rd-container">
-    <div class="rd-header">
-        <h1 class="rd-title">Drivers</h1>
-        <p class="rd-subtitle">{% trans "This Logistics Feature is active." %}</p>
+    <div class="rd-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+        <div>
+            <h1 class="rd-title">Drivers Roster</h1>
+            <p class="rd-subtitle">{% trans "Manage your logistics personnel." %}</p>
+        </div>
+        <button class="btn primary"><i class="fas fa-plus"></i> Add New Driver</button>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div class="form-card">
+        <table style="width:100%; text-align:left; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--color-border);">
+                    <th style="padding:15px 10px;">Driver Name</th>
+                    <th style="padding:15px 10px;">License Type</th>
+                    <th style="padding:15px 10px;">Current Status</th>
+                    <th style="padding:15px 10px;">Safety Rating</th>
+                    <th style="padding:15px 10px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
+                    <td style="padding:15px 10px; display:flex; align-items:center; gap:10px;">
+                        <img src="https://ui-avatars.com/api/?name=Alex+Mercer&background=random" style="width:30px; height:30px; border-radius:50%;">
+                        <strong>Alex Mercer</strong>
+                    </td>
+                    <td style="padding:15px 10px;">CDL Class A</td>
+                    <td style="padding:15px 10px;"><span class="badge" style="background:var(--success); color:white;">On Route</span></td>
+                    <td style="padding:15px 10px; color:#f39c12;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> 4.8</td>
+                    <td style="padding:15px 10px;">
+                        <button class="btn" style="padding:5px 10px; font-size:0.8rem;">Profile</button>
+                    </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:15px 10px; display:flex; align-items:center; gap:10px;">
+                        <img src="https://ui-avatars.com/api/?name=Sarah+Connor&background=random" style="width:30px; height:30px; border-radius:50%;">
+                        <strong>Sarah Connor</strong>
+                    </td>
+                    <td style="padding:15px 10px;">Standard</td>
+                    <td style="padding:15px 10px;"><span class="badge" style="background:var(--primary); color:white;">Available</span></td>
+                    <td style="padding:15px 10px; color:#f39c12;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> 5.0</td>
+                    <td style="padding:15px 10px;">
+                        <button class="btn" style="padding:5px 10px; font-size:0.8rem;">Profile</button>
+                    </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:15px 10px; display:flex; align-items:center; gap:10px;">
+                        <img src="https://ui-avatars.com/api/?name=John+Smith&background=random" style="width:30px; height:30px; border-radius:50%;">
+                        <strong>John Smith</strong>
+                    </td>
+                    <td style="padding:15px 10px;">CDL Class B</td>
+                    <td style="padding:15px 10px;"><span class="badge" style="background:var(--warning); color:white;">Resting</span></td>
+                    <td style="padding:15px 10px; color:#f39c12;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i> 4.2</td>
+                    <td style="padding:15px 10px;">
+                        <button class="btn" style="padding:5px 10px; font-size:0.8rem;">Profile</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

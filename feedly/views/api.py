@@ -411,7 +411,7 @@ def api_global_search(request):
     if org:
         deliveries = deliveries.filter(Q(sender=org) | Q(receiver=org))
         
-    for d in deliveries[:5]:
+    for d in deliveriesif not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in [:5]:
         results.append({
             'title': f'Delivery #{d.tracking_code}',
             'subtitle': f'{d.food_name} - {d.get_status_display()}',
@@ -425,7 +425,7 @@ def api_global_search(request):
     if org:
         surplus = surplus.filter(organization=org)
         
-    for s in surplus[:5]:
+    for s in surplusif not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in [:5]:
         results.append({
             'title': s.food_name,
             'subtitle': f'{s.quantity} units - {s.get_status_display()}',
@@ -440,7 +440,7 @@ def api_global_search(request):
             organization=org,
             user__username__icontains=q
         ).select_related('user')
-        for m in members[:3]:
+        for m in membersif not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in [:3]:
             results.append({
                 'title': m.user.username,
                 'subtitle': m.get_role_display(),
@@ -453,7 +453,7 @@ def api_global_search(request):
     from ..models import Farm, Field, Crop
     if org:
         farms = Farm.objects.filter(organization=org, name__icontains=q)
-        for f in farms[:3]:
+        for f in farmsif not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in [:3]:
             results.append({
                 'title': f.name,
                 'subtitle': f'{f.location}',
@@ -463,7 +463,7 @@ def api_global_search(request):
             })
             
         fields = Field.objects.filter(farm__organization=org, name__icontains=q).select_related('farm')
-        for f in fields[:3]:
+        for f in fieldsif not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in [:3]:
             results.append({
                 'title': f.name,
                 'subtitle': f'Farm: {f.farm.name}',
@@ -473,7 +473,7 @@ def api_global_search(request):
             })
             
         crops = Crop.objects.filter(field__farm__organization=org, name__icontains=q)
-        for c in crops[:3]:
+        for c in cropsif not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in [:3]:
             results.append({
                 'title': c.name,
                 'subtitle': f'Variety: {c.variety}',

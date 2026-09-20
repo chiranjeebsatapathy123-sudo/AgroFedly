@@ -99,41 +99,50 @@
 </section>
 
 <script>
-    let mapInitialized = false;
-    
-    function initMap() {
-        if (mapInitialized) return;
+    (function() {
+        let mapInitialized = false;
         
-        // Default to a central location if no farms have geodata (e.g. Center of India)
-        const map = L.map('farm-gis-map').setView([20.5937, 78.9629], 5);
-        
-        // Standard OpenStreetMap tiles (free, reliable)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors | AgroFedly GIS'
-        }).addTo(map);
+        window.initMap = function() {
+            if (mapInitialized) return;
+            
+            // Check if L is loaded
+            if (typeof L === 'undefined') {
+                setTimeout(window.initMap, 100);
+                return;
+            }
+            
+            const container = document.getElementById('farm-gis-map');
+            if (!container) return; // Prevent errors if user navigated away
+            
+            // Default to a central location if no farms have geodata (e.g. Center of India)
+            const map = L.map('farm-gis-map').setView([20.5937, 78.9629], 5);
+            
+            // Standard OpenStreetMap tiles (free, reliable)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors | AgroFedly GIS'
+            }).addTo(map);
 
-        // We would normally parse {{ farm.geojson_boundary }} here.
-        // For now, we will just add a bounds array if any exist.
-        let bounds = [];
-        
-        {% for farm in farms %}
-            {% if farm.location %}
-                // In a production system, this would geocode the location string or use the geojson_boundary.
-                // We are preventing fake data generation as per Phase 5 instructions.
-            {% endif %}
-        {% endfor %}
-        
-        if (bounds.length > 0) {
-            map.fitBounds(bounds);
+            let bounds = [];
+            
+            {% for farm in farms %}
+                {% if farm.location %}
+                    // Note: Would geocode or use geojson here
+                {% endif %}
+            {% endfor %}
+            
+            if (bounds.length > 0) {
+                map.fitBounds(bounds);
+            }
+            
+            mapInitialized = true;
+        };
+
+        // Auto-init on desktop
+        if (window.innerWidth > 768) {
+            // Slight delay to ensure PJAX finishes rendering the container
+            setTimeout(window.initMap, 50);
         }
-        
-        mapInitialized = true;
-    }
-
-    // Auto-init on desktop
-    if (window.innerWidth > 768) {
-        initMap();
-    }
+    })();
 </script>
 {% endblock %}

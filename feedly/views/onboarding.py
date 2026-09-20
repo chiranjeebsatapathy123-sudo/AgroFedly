@@ -59,7 +59,7 @@ def onboarding_org(request):
             
             # Map role to org type if not provided
             if not org_type:
-                if profile.role in ['FARMER', 'FPO', 'AGRIBUSINESS']:
+                if profile.role in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['FARMER', 'FPO', 'AGRIBUSINESS']:
                     org_type = 'SUPPLIER'
                 elif profile.role == 'NGO':
                     org_type = 'NGO'

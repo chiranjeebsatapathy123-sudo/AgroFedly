@@ -4,11 +4,88 @@
 {% block content %}
 <div class="rd-container">
     <div class="rd-header">
-        <h1 class="rd-title">Workspace Access</h1>
-        <p class="rd-subtitle">{% trans "This Administration Feature is active." %}</p>
+        <h1 class="rd-title">Workspace Configuration</h1>
+        <p class="rd-subtitle">{% trans "Toggle available workspaces across the network." %}</p>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div class="form-card" style="margin-bottom:20px;">
+        <p style="margin-top:0;">Enable or disable entire functional modules globally. <strong>Note:</strong> Disabling a workspace hides it from the sidebar for all users immediately.</p>
+        
+        <table style="width:100%; text-align:left; border-collapse: collapse; margin-top:20px;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--color-border);">
+                    <th style="padding:15px 10px;">Workspace Module</th>
+                    <th style="padding:15px 10px;">Description</th>
+                    <th style="padding:15px 10px; text-align:center;">Global Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Kitchen -->
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:15px 10px;"><strong><i class="fas fa-utensils"></i> Kitchen</strong></td>
+                    <td style="padding:15px 10px; font-size:0.9rem; color:var(--text-muted);">Meal planning, food safety logging, and demand forecasting.</td>
+                    <td style="padding:15px 10px; text-align:center;">
+                        <label class="switch" style="position:relative; display:inline-block; width:40px; height:24px;">
+                            <input type="checkbox" checked style="opacity:0; width:0; height:0;">
+                            <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--success); border-radius:24px; transition:.4s;"></span>
+                            <span style="position:absolute; content:''; height:16px; width:16px; left:20px; bottom:4px; background-color:white; border-radius:50%; transition:.4s;"></span>
+                        </label>
+                    </td>
+                </tr>
+                
+                <!-- Logistics -->
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:15px 10px;"><strong><i class="fas fa-truck"></i> Logistics</strong></td>
+                    <td style="padding:15px 10px; font-size:0.9rem; color:var(--text-muted);">Fleet management, dispatch, driver roster, and active routes.</td>
+                    <td style="padding:15px 10px; text-align:center;">
+                        <label class="switch" style="position:relative; display:inline-block; width:40px; height:24px;">
+                            <input type="checkbox" checked style="opacity:0; width:0; height:0;">
+                            <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--success); border-radius:24px; transition:.4s;"></span>
+                            <span style="position:absolute; content:''; height:16px; width:16px; left:20px; bottom:4px; background-color:white; border-radius:50%; transition:.4s;"></span>
+                        </label>
+                    </td>
+                </tr>
+                
+                <!-- Redistribution -->
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:15px 10px;"><strong><i class="fas fa-hand-holding-heart"></i> Redistribution</strong></td>
+                    <td style="padding:15px 10px; font-size:0.9rem; color:var(--text-muted);">Surplus posting, AI matching, transfers, and verifications.</td>
+                    <td style="padding:15px 10px; text-align:center;">
+                        <label class="switch" style="position:relative; display:inline-block; width:40px; height:24px;">
+                            <input type="checkbox" checked style="opacity:0; width:0; height:0;">
+                            <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--success); border-radius:24px; transition:.4s;"></span>
+                            <span style="position:absolute; content:''; height:16px; width:16px; left:20px; bottom:4px; background-color:white; border-radius:50%; transition:.4s;"></span>
+                        </label>
+                    </td>
+                </tr>
+                
+                <!-- Agriculture -->
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:15px 10px;"><strong><i class="fas fa-leaf"></i> Agriculture</strong></td>
+                    <td style="padding:15px 10px; font-size:0.9rem; color:var(--text-muted);">Crop production tracking, yield forecasting, and resource analytics.</td>
+                    <td style="padding:15px 10px; text-align:center;">
+                        <label class="switch" style="position:relative; display:inline-block; width:40px; height:24px;">
+                            <input type="checkbox" checked style="opacity:0; width:0; height:0;">
+                            <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--success); border-radius:24px; transition:.4s;"></span>
+                            <span style="position:absolute; content:''; height:16px; width:16px; left:20px; bottom:4px; background-color:white; border-radius:50%; transition:.4s;"></span>
+                        </label>
+                    </td>
+                </tr>
+                
+                <!-- Finance (Beta) -->
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:15px 10px;"><strong><i class="fas fa-chart-pie"></i> Finance Module (Beta)</strong></td>
+                    <td style="padding:15px 10px; font-size:0.9rem; color:var(--text-muted);">Internal billing and transaction ledger tracking.</td>
+                    <td style="padding:15px 10px; text-align:center;">
+                        <label class="switch" style="position:relative; display:inline-block; width:40px; height:24px;">
+                            <input type="checkbox" style="opacity:0; width:0; height:0;">
+                            <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; border-radius:24px; transition:.4s;"></span>
+                            <span style="position:absolute; content:''; height:16px; width:16px; left:4px; bottom:4px; background-color:white; border-radius:50%; transition:.4s;"></span>
+                        </label>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

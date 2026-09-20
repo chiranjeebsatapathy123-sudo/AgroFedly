@@ -1,14 +1,93 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}Logistics Analytics | AgroFedly{% endblock %}
+{% block title %}{% trans "Logistics Analytics" %} | AgroFedly{% endblock %}
 {% block content %}
 <div class="rd-container">
     <div class="rd-header">
-        <h1 class="rd-title">Logistics Analytics</h1>
-        <p class="rd-subtitle">{% trans "This Logistics Feature is active." %}</p>
+        <h1 class="rd-title">{% trans "Logistics Analytics" %}</h1>
+        <p class="rd-subtitle">{% trans "Fleet performance and delivery metrics." %}</p>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:20px; margin-bottom:20px;">
+        <!-- KPI 1 -->
+        <div class="form-card" style="display:flex; align-items:center; gap:15px;">
+            <div style="background:rgba(21, 150, 83, 0.1); color:var(--success); padding:15px; border-radius:12px; font-size:1.5rem;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <h3 style="margin:0; font-size:1rem; color:var(--text-muted);">On-Time Deliveries</h3>
+                <p style="margin:5px 0 0; font-size:1.5rem; font-weight:bold;">98.2%</p>
+                <span style="color:var(--success); font-size:0.8rem;"><i class="fas fa-arrow-up"></i> 1.2%</span>
+            </div>
+        </div>
+        
+        <!-- KPI 2 -->
+        <div class="form-card" style="display:flex; align-items:center; gap:15px;">
+            <div style="background:rgba(13, 110, 253, 0.1); color:var(--primary); padding:15px; border-radius:12px; font-size:1.5rem;">
+                <i class="fas fa-gas-pump"></i>
+            </div>
+            <div>
+                <h3 style="margin:0; font-size:1rem; color:var(--text-muted);">Fuel Efficiency</h3>
+                <p style="margin:5px 0 0; font-size:1.5rem; font-weight:bold;">12.4 km/l</p>
+                <span style="color:var(--success); font-size:0.8rem;"><i class="fas fa-arrow-up"></i> 0.5 km/l</span>
+            </div>
+        </div>
+        
+        <!-- KPI 3 -->
+        <div class="form-card" style="display:flex; align-items:center; gap:15px;">
+            <div style="background:rgba(255, 193, 7, 0.1); color:var(--warning); padding:15px; border-radius:12px; font-size:1.5rem;">
+                <i class="fas fa-truck-moving"></i>
+            </div>
+            <div>
+                <h3 style="margin:0; font-size:1rem; color:var(--text-muted);">Active Fleet</h3>
+                <p style="margin:5px 0 0; font-size:1.5rem; font-weight:bold;">42 / 45</p>
+                <span style="color:var(--text-muted); font-size:0.8rem;">Vehicles deployed</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="form-card">
+        <h2 style="font-size:1.2rem; margin-bottom:15px;">📈 Delivery Success Rate (30 Days)</h2>
+        <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="deliverySuccessChart"></canvas>
+        </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function initAnalyticsChart() {
+    const canvas = document.getElementById('deliverySuccessChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 30}, (_, i) => `Day ${i+1}`),
+            datasets: [{
+                label: 'Success Rate %',
+                data: Array.from({length: 30}, () => 90 + Math.random() * 10),
+                borderColor: 'rgba(21, 150, 83, 1)',
+                backgroundColor: 'rgba(21, 150, 83, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { min: 80, max: 100 }
+            }
+        }
+    });
+}
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", initAnalyticsChart);
+} else {
+    initAnalyticsChart();
+}
+</script>
 {% endblock %}

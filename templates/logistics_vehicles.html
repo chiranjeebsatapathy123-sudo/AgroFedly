@@ -3,12 +3,108 @@
 {% block title %}Vehicles | AgroFedly{% endblock %}
 {% block content %}
 <div class="rd-container">
-    <div class="rd-header">
-        <h1 class="rd-title">Vehicles</h1>
-        <p class="rd-subtitle">{% trans "This Logistics Feature is active." %}</p>
+    <div class="rd-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+        <div>
+            <h1 class="rd-title">Vehicle Fleet</h1>
+            <p class="rd-subtitle">{% trans "Fleet telemetry and maintenance." %}</p>
+        </div>
+        <button class="btn primary"><i class="fas fa-truck"></i> Register Vehicle</button>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
+        <!-- Chart -->
+        <div class="form-card" style="flex:1; min-width:300px; display:flex; flex-direction:column; align-items:center;">
+            <h2 style="font-size:1.2rem; margin-bottom:15px; width:100%; text-align:left;">Fleet Status</h2>
+            <div style="position: relative; height: 200px; width: 200px;">
+                <canvas id="fleetStatusChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Alerts -->
+        <div class="form-card" style="flex:2; min-width:300px;">
+            <h2 style="font-size:1.2rem; margin-bottom:15px;">⚠️ Maintenance Alerts</h2>
+            <div style="border-left: 4px solid var(--danger); padding:10px 15px; background:rgba(220, 53, 69, 0.05); margin-bottom:10px; border-radius:0 8px 8px 0;">
+                <strong style="display:block; color:var(--danger);">T-104 (Refrigeration Unit)</strong>
+                <span style="font-size:0.85rem;">Temperature fluctuation detected. Requires immediate inspection.</span>
+            </div>
+            <div style="border-left: 4px solid var(--warning); padding:10px 15px; background:rgba(255, 193, 7, 0.05); margin-bottom:10px; border-radius:0 8px 8px 0;">
+                <strong style="display:block; color:var(--warning);">V-02 (Engine Check)</strong>
+                <span style="font-size:0.85rem;">Scheduled oil change due in 200 miles.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Roster -->
+    <div class="form-card">
+        <h2 style="font-size:1.2rem; margin-bottom:15px;">Vehicle Roster</h2>
+        <table style="width:100%; text-align:left; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--color-border);">
+                    <th style="padding:10px 0;">Vehicle ID</th>
+                    <th style="padding:10px 0;">Type</th>
+                    <th style="padding:10px 0;">Capacity</th>
+                    <th style="padding:10px 0;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:10px 0;"><strong>T-104</strong></td>
+                    <td style="padding:10px 0;">Refrigerated Truck</td>
+                    <td style="padding:10px 0;">5,000 kg</td>
+                    <td style="padding:10px 0;"><span class="badge" style="background:var(--success); color:white;">Active</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:10px 0;"><strong>V-02</strong></td>
+                    <td style="padding:10px 0;">Standard Van</td>
+                    <td style="padding:10px 0;">1,500 kg</td>
+                    <td style="padding:10px 0;"><span class="badge" style="background:var(--success); color:white;">Active</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:10px 0;"><strong>T-108</strong></td>
+                    <td style="padding:10px 0;">Heavy Freight</td>
+                    <td style="padding:10px 0;">12,000 kg</td>
+                    <td style="padding:10px 0;"><span class="badge" style="background:#6c757d; color:white;">Idle</span></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function initFleetChart() {
+    const canvas = document.getElementById('fleetStatusChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Idle', 'Maintenance'],
+            datasets: [{
+                data: [42, 2, 1],
+                backgroundColor: [
+                    'rgba(21, 150, 83, 0.8)',
+                    'rgba(108, 117, 125, 0.8)',
+                    'rgba(220, 53, 69, 0.8)'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+}
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", initFleetChart);
+} else {
+    initFleetChart();
+}
+</script>
 {% endblock %}

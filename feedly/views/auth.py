@@ -41,7 +41,7 @@ def smart_login_view(request):
             if user:
                 # Phase 44: Account Status Check
                 if hasattr(user, 'profile'):
-                    if user.profile.account_status in ['SUSPENDED', 'DISABLED']:
+                    if user.profile.account_status in if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in ['SUSPENDED', 'DISABLED']:
                         messages.error(request, "Your account has been suspended or disabled. Please contact support.")
                         return redirect('login')
                 

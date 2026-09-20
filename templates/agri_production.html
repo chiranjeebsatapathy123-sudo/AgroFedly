@@ -1,14 +1,101 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}{% trans "Production & Analytics" %} | AgroFedly{% endblock %}
+{% block title %}Production | AgroFedly{% endblock %}
 {% block content %}
 <div class="rd-container">
     <div class="rd-header">
-        <h1 class="rd-title">{% trans "Agriculture Feature" %}</h1>
-        <p class="rd-subtitle">{% trans "This operational module is active." %}</p>
+        <h1 class="rd-title">Crop Production</h1>
+        <p class="rd-subtitle">{% trans "Track crop lifecycles and yields." %}</p>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div class="form-card" style="margin-bottom:20px;">
+        <h2 style="font-size:1.2rem; margin-bottom:15px;">🌱 Current Crop Lifecycles</h2>
+        
+        <div style="margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <strong>Wheat (Field A)</strong>
+                <span style="color:var(--text-muted); font-size:0.9rem;">Harvest in 12 days</span>
+            </div>
+            <div style="width:100%; height:8px; background:#eee; border-radius:4px; overflow:hidden;">
+                <div style="width:85%; height:100%; background:var(--primary);"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-top:5px;">
+                <span>Sown</span>
+                <span>Germination</span>
+                <span>Vegetative</span>
+                <span style="color:var(--primary); font-weight:bold;">Maturation</span>
+                <span>Harvest</span>
+            </div>
+        </div>
+        
+        <div style="margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <strong>Corn (Field B)</strong>
+                <span style="color:var(--text-muted); font-size:0.9rem;">Harvest in 45 days</span>
+            </div>
+            <div style="width:100%; height:8px; background:#eee; border-radius:4px; overflow:hidden;">
+                <div style="width:40%; height:100%; background:var(--success);"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-top:5px;">
+                <span>Sown</span>
+                <span>Germination</span>
+                <span style="color:var(--success); font-weight:bold;">Vegetative</span>
+                <span>Maturation</span>
+                <span>Harvest</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="form-card">
+        <h2 style="font-size:1.2rem; margin-bottom:15px;">📊 Estimated vs. Actual Yields (tons)</h2>
+        <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="yieldChart"></canvas>
+        </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function initProductionChart() {
+    const canvas = document.getElementById('yieldChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Wheat', 'Corn', 'Soybeans', 'Rice', 'Barley'],
+            datasets: [
+                {
+                    label: 'Estimated Yield',
+                    data: [120, 150, 90, 200, 110],
+                    backgroundColor: 'rgba(200, 200, 200, 0.5)',
+                    borderColor: '#999',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Actual Yield',
+                    data: [125, 142, 95, 190, 115],
+                    backgroundColor: 'rgba(21, 150, 83, 0.8)',
+                    borderColor: 'rgba(21, 150, 83, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", initProductionChart);
+} else {
+    initProductionChart();
+}
+</script>
 {% endblock %}

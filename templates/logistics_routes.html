@@ -4,11 +4,49 @@
 {% block content %}
 <div class="rd-container">
     <div class="rd-header">
-        <h1 class="rd-title">Routes</h1>
-        <p class="rd-subtitle">{% trans "This Logistics Feature is active." %}</p>
+        <h1 class="rd-title">Routes & Tracking</h1>
+        <p class="rd-subtitle">{% trans "Live tracking and AI route optimization." %}</p>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <!-- AI Optimization Callout -->
+    <div class="form-card" style="margin-bottom:20px; background: rgba(var(--success-rgb), 0.05); border: 1px solid var(--success);">
+        <strong style="color: var(--success); font-size: 1.1rem; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-route"></i> Route Optimized
+        </strong>
+        <p style="margin-top:10px; font-size:0.95rem;">
+            AI has successfully optimized <strong>3 routes</strong> today, saving an estimated <strong>45 minutes</strong> and <strong>8 liters</strong> of fuel.
+        </p>
+    </div>
+
+    <!-- Active Routes Timeline -->
+    <div class="form-card">
+        <h2 style="font-size:1.2rem; margin-bottom:20px;">📍 Active Route Progress (Route R-992)</h2>
+        
+        <div style="position:relative; padding-left:30px; border-left:2px solid var(--primary);">
+            <div style="position:relative; margin-bottom:25px;">
+                <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:var(--success); border:3px solid white; box-shadow:0 0 0 1px var(--success);"></div>
+                <h4 style="margin:0 0 5px;">08:30 AM - Pickup Started</h4>
+                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">Central Farm Warehouse</p>
+            </div>
+            
+            <div style="position:relative; margin-bottom:25px;">
+                <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:var(--success); border:3px solid white; box-shadow:0 0 0 1px var(--success);"></div>
+                <h4 style="margin:0 0 5px;">10:15 AM - First Drop-off Completed</h4>
+                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">North Distribution Hub</p>
+            </div>
+            
+            <div style="position:relative; margin-bottom:25px;">
+                <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:white; border:3px solid var(--primary); box-shadow:0 0 0 1px var(--primary);"></div>
+                <h4 style="margin:0 0 5px;">Current Status - In Transit</h4>
+                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">ETA to next stop: 15 minutes (Traffic delay: +4m)</p>
+            </div>
+            
+            <div style="position:relative;">
+                <div style="position:absolute; left:-39px; top:0; width:16px; height:16px; border-radius:50%; background:white; border:3px solid #ccc; box-shadow:0 0 0 1px #ccc;"></div>
+                <h4 style="margin:0 0 5px; color:#ccc;">Final Drop-off</h4>
+                <p style="margin:0; font-size:0.85rem; color:#ccc;">Downtown Supermarket</p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

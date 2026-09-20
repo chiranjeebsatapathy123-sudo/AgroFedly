@@ -29,6 +29,8 @@ def require_role(roles):
         @wraps(view_func)
         @require_organization
         def _wrapped_view(request, *args, **kwargs):
+            if getattr(request.user, 'is_superuser', False):
+                return view_func(request, *args, **kwargs)
             if not hasattr(request, 'org_membership') or not request.org_membership or request.org_membership.role not in roles:
                 messages.error(request, f"Permission denied. Required role: {', '.join(roles)}")
                 return redirect("dashboard")
@@ -55,6 +57,9 @@ def require_profile_role(roles):
         @wraps(view_func)
         @login_required
         def _wrapped_view(request, *args, **kwargs):
+            if getattr(request.user, 'is_superuser', False):
+                return view_func(request, *args, **kwargs)
+                
             if hasattr(request.user, 'profile'):
                 status = request.user.profile.account_status
                 if status in ['SUSPENDED', 'DISABLED']:
@@ -110,6 +115,9 @@ def require_sector(sector):
         @wraps(view_func)
         @login_required
         def _wrapped_view(request, *args, **kwargs):
+            if getattr(request.user, 'is_superuser', False):
+                return view_func(request, *args, **kwargs)
+                
             if hasattr(request.user, 'profile'):
                 status = request.user.profile.account_status
                 if status in ['SUSPENDED', 'DISABLED']:
@@ -142,6 +150,9 @@ def require_workspace(workspace):
         @wraps(view_func)
         @login_required
         def _wrapped_view(request, *args, **kwargs):
+            if getattr(request.user, 'is_superuser', False):
+                return view_func(request, *args, **kwargs)
+                
             if hasattr(request.user, 'profile'):
                 status = request.user.profile.account_status
                 if status in ['SUSPENDED', 'DISABLED']:

@@ -1,14 +1,118 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}{% trans "Production & Analytics" %} | AgroFedly{% endblock %}
+{% block title %}Agri Analytics | AgroFedly{% endblock %}
 {% block content %}
 <div class="rd-container">
     <div class="rd-header">
-        <h1 class="rd-title">{% trans "Agriculture Feature" %}</h1>
-        <p class="rd-subtitle">{% trans "This operational module is active." %}</p>
+        <h1 class="rd-title">Analytics & Insights</h1>
+        <p class="rd-subtitle">{% trans "Resource efficiency and historical trends." %}</p>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
+        <!-- Radar Chart -->
+        <div class="form-card" style="flex:1; min-width:300px;">
+            <h2 style="font-size:1.2rem; margin-bottom:15px;">🎯 Resource Efficiency</h2>
+            <div style="position: relative; height: 250px; width: 100%;">
+                <canvas id="resourceChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Summary Stats -->
+        <div class="form-card" style="flex:1; min-width:300px; display:flex; flex-direction:column; justify-content:space-around;">
+            <div style="display:flex; justify-content:space-between; padding:15px 0; border-bottom:1px solid #eee;">
+                <div>
+                    <h3 style="margin:0; font-size:1rem; color:var(--text-muted);">Water Usage</h3>
+                    <p style="margin:5px 0 0; font-size:1.2rem; font-weight:bold;">12,500 L</p>
+                </div>
+                <span style="color:var(--success);"><i class="fas fa-arrow-down"></i> 5% vs last month</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:15px 0; border-bottom:1px solid #eee;">
+                <div>
+                    <h3 style="margin:0; font-size:1rem; color:var(--text-muted);">Fertilizer</h3>
+                    <p style="margin:5px 0 0; font-size:1.2rem; font-weight:bold;">450 kg</p>
+                </div>
+                <span style="color:var(--danger);"><i class="fas fa-arrow-up"></i> 2% vs last month</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:15px 0;">
+                <div>
+                    <h3 style="margin:0; font-size:1rem; color:var(--text-muted);">Energy (Solar)</h3>
+                    <p style="margin:5px 0 0; font-size:1.2rem; font-weight:bold;">840 kWh</p>
+                </div>
+                <span style="color:var(--success);"><i class="fas fa-arrow-up"></i> 12% generated</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Line Chart -->
+    <div class="form-card">
+        <h2 style="font-size:1.2rem; margin-bottom:15px;">📈 Historical Yield Trends (5 Years)</h2>
+        <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="historicalChart"></canvas>
+        </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function initAgriAnalyticsCharts() {
+    // Radar Chart
+    const resCanvas = document.getElementById('resourceChart');
+    if (resCanvas) {
+        new Chart(resCanvas.getContext('2d'), {
+            type: 'radar',
+            data: {
+                labels: ['Water', 'Fertilizer', 'Energy', 'Labor', 'Pesticides'],
+                datasets: [{
+                    label: 'Current Season Efficiency',
+                    data: [85, 70, 90, 75, 60],
+                    backgroundColor: 'rgba(21, 150, 83, 0.2)',
+                    borderColor: 'rgba(21, 150, 83, 1)',
+                    pointBackgroundColor: 'rgba(21, 150, 83, 1)',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: { min: 0, max: 100 }
+                }
+            }
+        });
+    }
+
+    // Line Chart
+    const histCanvas = document.getElementById('historicalChart');
+    if (histCanvas) {
+        new Chart(histCanvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: ['2022', '2023', '2024', '2025', '2026'],
+                datasets: [
+                    {
+                        label: 'Wheat (tons)',
+                        data: [100, 110, 105, 120, 125],
+                        borderColor: '#f39c12',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Corn (tons)',
+                        data: [130, 125, 140, 135, 142],
+                        borderColor: '#0d6efd',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+}
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", initAgriAnalyticsCharts);
+} else {
+    initAgriAnalyticsCharts();
+}
+</script>
 {% endblock %}

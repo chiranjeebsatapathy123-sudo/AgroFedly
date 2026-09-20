@@ -22,9 +22,18 @@
 
 <script type="module">
     import { initDashboard3D } from "{% static 'js/3d_dashboard.js' %}";
-    document.addEventListener("DOMContentLoaded", () => {
-        initDashboard3D('dashboard-3d-container');
-    });
+    
+    function init() {
+        if (document.getElementById('dashboard-3d-container')) {
+            initDashboard3D('dashboard-3d-container');
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
 </script>
 
 <div class="workspace-widget-grid" style="margin-bottom: 2rem;">
@@ -100,9 +109,12 @@
 <!-- Chart.js and Logic -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+function initAgriCharts() {
     // Crop Health Chart
-    const cropCtx = document.getElementById('cropHealthChart').getContext('2d');
+    const cropCanvas = document.getElementById('cropHealthChart');
+    if (!cropCanvas) return;
+    
+    const cropCtx = cropCanvas.getContext('2d');
     new Chart(cropCtx, {
         type: 'doughnut',
         data: {
@@ -130,7 +142,10 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // Supply Chain Chart
-    const supplyCtx = document.getElementById('supplyChainChart').getContext('2d');
+    const supplyCanvas = document.getElementById('supplyChainChart');
+    if (!supplyCanvas) return;
+    
+    const supplyCtx = supplyCanvas.getContext('2d');
     new Chart(supplyCtx, {
         type: 'bar',
         data: {
@@ -167,7 +182,13 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", initAgriCharts);
+} else {
+    initAgriCharts();
+}
 </script>
 
 <div class="form-card" style="margin-bottom:20px; background: rgba(var(--primary-rgb), 0.05); border: 1px solid var(--primary);">

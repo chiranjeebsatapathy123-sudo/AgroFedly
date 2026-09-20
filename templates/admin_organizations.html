@@ -1,14 +1,57 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}Admin Organizations | AgroFedly{% endblock %}
+{% block title %}Organizations | AgroFedly{% endblock %}
 {% block content %}
 <div class="rd-container">
-    <div class="rd-header">
-        <h1 class="rd-title">Admin Organizations</h1>
-        <p class="rd-subtitle">{% trans "This Administration Feature is active." %}</p>
+    <div class="rd-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+        <div>
+            <h1 class="rd-title">Registered Organizations</h1>
+            <p class="rd-subtitle">{% trans "Manage all entities in the network." %}</p>
+        </div>
+        <button class="btn primary"><i class="fas fa-plus"></i> Invite Organization</button>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div class="form-card">
+        <table style="width:100%; text-align:left; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--color-border);">
+                    <th style="padding:15px 10px;">Organization Name</th>
+                    <th style="padding:15px 10px;">Type</th>
+                    <th style="padding:15px 10px;">Join Date</th>
+                    <th style="padding:15px 10px;">Status</th>
+                    <th style="padding:15px 10px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:15px 10px; font-weight:bold;">Sunnydale Farms</td>
+                    <td style="padding:15px 10px;">Farmer</td>
+                    <td style="padding:15px 10px;">Jan 10, 2024</td>
+                    <td style="padding:15px 10px;"><span class="badge" style="background:var(--success); color:white;">Active</span></td>
+                    <td style="padding:15px 10px;">
+                        <button class="btn" style="padding:5px 10px; font-size:0.8rem;">Edit</button>
+                    </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:15px 10px; font-weight:bold;">Downtown Soup Kitchen</td>
+                    <td style="padding:15px 10px;">Recipient (Kitchen)</td>
+                    <td style="padding:15px 10px;">Feb 02, 2024</td>
+                    <td style="padding:15px 10px;"><span class="badge" style="background:var(--success); color:white;">Active</span></td>
+                    <td style="padding:15px 10px;">
+                        <button class="btn" style="padding:5px 10px; font-size:0.8rem;">Edit</button>
+                    </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding:15px 10px; font-weight:bold;">Local Dairy Co-op</td>
+                    <td style="padding:15px 10px;">Farmer</td>
+                    <td style="padding:15px 10px;">Mar 15, 2024</td>
+                    <td style="padding:15px 10px;"><span class="badge" style="background:var(--warning); color:white;">Pending Verification</span></td>
+                    <td style="padding:15px 10px;">
+                        <button class="btn primary" style="padding:5px 10px; font-size:0.8rem;">Review</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

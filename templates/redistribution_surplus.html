@@ -1,14 +1,85 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}Available Surplus | AgroFedly{% endblock %}
+{% block title %}Surplus Inventory | AgroFedly{% endblock %}
 {% block content %}
 <div class="rd-container">
-    <div class="rd-header">
-        <h1 class="rd-title">Available Surplus</h1>
-        <p class="rd-subtitle">{% trans "This Redistribution Feature is active." %}</p>
+    <div class="rd-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+        <div>
+            <h1 class="rd-title">Available Surplus</h1>
+            <p class="rd-subtitle">{% trans "Claim surplus produce before it expires." %}</p>
+        </div>
+        <button class="btn primary"><i class="fas fa-plus"></i> Post Surplus</button>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;">
+        <!-- Card 1 -->
+        <div class="form-card" style="display:flex; flex-direction:column; justify-content:space-between; padding:20px;">
+            <div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span class="badge" style="background:var(--success); color:white;">Fresh Produce</span>
+                    <span style="color:var(--danger); font-size:0.85rem; font-weight:bold;"><i class="fas fa-clock"></i> 14h left</span>
+                </div>
+                <h3 style="margin:0 0 5px; font-size:1.2rem;">Organic Carrots</h3>
+                <p style="margin:0 0 15px; color:var(--text-muted); font-size:0.9rem;">From: Sunnydale Farms (2.4 miles away)</p>
+                <div style="background:var(--color-surface); padding:10px; border-radius:8px; margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="color:var(--text-muted);">Quantity:</span>
+                        <strong>150 kg</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Quality:</span>
+                        <strong style="color:var(--success);">Grade A</strong>
+                    </div>
+                </div>
+            </div>
+            <button class="btn primary" style="width:100%;">Claim Now</button>
+        </div>
+        
+        <!-- Card 2 -->
+        <div class="form-card" style="display:flex; flex-direction:column; justify-content:space-between; padding:20px;">
+            <div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span class="badge" style="background:var(--primary); color:white;">Dairy</span>
+                    <span style="color:var(--danger); font-size:0.85rem; font-weight:bold;"><i class="fas fa-clock"></i> 8h left</span>
+                </div>
+                <h3 style="margin:0 0 5px; font-size:1.2rem;">Whole Milk</h3>
+                <p style="margin:0 0 15px; color:var(--text-muted); font-size:0.9rem;">From: Local Dairy Co-op (5.1 miles away)</p>
+                <div style="background:var(--color-surface); padding:10px; border-radius:8px; margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="color:var(--text-muted);">Quantity:</span>
+                        <strong>50 Liters</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Quality:</span>
+                        <strong style="color:var(--success);">Pasteurized</strong>
+                    </div>
+                </div>
+            </div>
+            <button class="btn primary" style="width:100%;">Claim Now</button>
+        </div>
+        
+        <!-- Card 3 -->
+        <div class="form-card" style="display:flex; flex-direction:column; justify-content:space-between; padding:20px;">
+            <div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span class="badge" style="background:#6c757d; color:white;">Grains</span>
+                    <span style="color:var(--warning); font-size:0.85rem; font-weight:bold;"><i class="fas fa-clock"></i> 5 Days left</span>
+                </div>
+                <h3 style="margin:0 0 5px; font-size:1.2rem;">Wheat Flour</h3>
+                <p style="margin:0 0 15px; color:var(--text-muted); font-size:0.9rem;">From: Millers Inc. (12 miles away)</p>
+                <div style="background:var(--color-surface); padding:10px; border-radius:8px; margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="color:var(--text-muted);">Quantity:</span>
+                        <strong>500 kg</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Quality:</span>
+                        <strong style="color:var(--success);">Standard</strong>
+                    </div>
+                </div>
+            </div>
+            <button class="btn primary" style="width:100%;">Claim Now</button>
+        </div>
     </div>
 </div>
 {% endblock %}

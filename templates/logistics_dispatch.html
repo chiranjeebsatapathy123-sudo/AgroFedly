@@ -1,14 +1,74 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}Dispatch | AgroFedly{% endblock %}
+{% block title %}Dispatch Board | AgroFedly{% endblock %}
 {% block content %}
 <div class="rd-container">
     <div class="rd-header">
-        <h1 class="rd-title">Dispatch</h1>
-        <p class="rd-subtitle">{% trans "This Logistics Feature is active." %}</p>
+        <h1 class="rd-title">Dispatch Board</h1>
+        <p class="rd-subtitle">{% trans "Manage pending orders and assign drivers." %}</p>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+        <!-- Pending Orders -->
+        <div class="form-card" style="flex:2; min-width:300px;">
+            <h2 style="font-size:1.2rem; margin-bottom:15px;">📦 Pending Orders Queue</h2>
+            
+            <div style="border: 1px solid var(--color-border); border-radius: 8px; padding: 15px; margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center; background: var(--color-surface);">
+                <div>
+                    <h4 style="margin:0;">Order #8902 - Fresh Produce</h4>
+                    <p style="margin:5px 0 0; font-size:0.85rem; color:var(--text-muted);">From: Central Farm | To: North Warehouse</p>
+                    <span class="badge" style="background:var(--warning); color:white; margin-top:5px; display:inline-block;">Priority: High</span>
+                </div>
+                <button class="btn primary" style="padding:8px 15px;">Assign <i class="fas fa-chevron-right"></i></button>
+            </div>
+            
+            <div style="border: 1px solid var(--color-border); border-radius: 8px; padding: 15px; margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center; background: var(--color-surface);">
+                <div>
+                    <h4 style="margin:0;">Order #8903 - Dairy Supply</h4>
+                    <p style="margin:5px 0 0; font-size:0.85rem; color:var(--text-muted);">From: Dairy Co-op | To: South Market</p>
+                    <span class="badge" style="background:var(--primary); color:white; margin-top:5px; display:inline-block;">Priority: Normal</span>
+                </div>
+                <button class="btn primary" style="padding:8px 15px;">Assign <i class="fas fa-chevron-right"></i></button>
+            </div>
+            
+            <div style="border: 1px solid var(--color-border); border-radius: 8px; padding: 15px; margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center; background: var(--color-surface);">
+                <div>
+                    <h4 style="margin:0;">Order #8904 - Processed Goods</h4>
+                    <p style="margin:5px 0 0; font-size:0.85rem; color:var(--text-muted);">From: East Factory | To: Main Kitchen</p>
+                    <span class="badge" style="background:var(--primary); color:white; margin-top:5px; display:inline-block;">Priority: Normal</span>
+                </div>
+                <button class="btn primary" style="padding:8px 15px;">Assign <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        
+        <!-- Available Drivers -->
+        <div class="form-card" style="flex:1; min-width:250px;">
+            <h2 style="font-size:1.2rem; margin-bottom:15px;">🚚 Available Drivers</h2>
+            
+            <ul style="list-style:none; padding:0; margin:0;">
+                <li style="padding:10px 0; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <strong>Alex Mercer</strong><br>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">Truck T-104 (Refrigerated)</span>
+                    </div>
+                    <span style="color:var(--success);"><i class="fas fa-circle"></i> Ready</span>
+                </li>
+                <li style="padding:10px 0; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <strong>Sarah Connor</strong><br>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">Van V-02 (Standard)</span>
+                    </div>
+                    <span style="color:var(--success);"><i class="fas fa-circle"></i> Ready</span>
+                </li>
+                <li style="padding:10px 0; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <strong>John Smith</strong><br>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">Truck T-108 (Refrigerated)</span>
+                    </div>
+                    <span style="color:var(--warning);"><i class="fas fa-clock"></i> In 15m</span>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
 {% endblock %}

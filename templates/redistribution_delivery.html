@@ -1,14 +1,45 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}Delivery | AgroFedly{% endblock %}
+{% block title %}Deliveries | AgroFedly{% endblock %}
 {% block content %}
 <div class="rd-container">
     <div class="rd-header">
-        <h1 class="rd-title">Delivery</h1>
-        <p class="rd-subtitle">{% trans "This Redistribution Feature is active." %}</p>
+        <h1 class="rd-title">Volunteer Deliveries</h1>
+        <p class="rd-subtitle">{% trans "Assignments for community drivers." %}</p>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div class="form-card" style="margin-bottom:20px; border-left:4px solid var(--primary);">
+        <h2 style="font-size:1.2rem; margin-bottom:5px;">My Active Assignment</h2>
+        <p style="color:var(--text-muted); margin-bottom:15px;">You have 1 pending delivery to complete today.</p>
+        
+        <div style="display:flex; flex-wrap:wrap; gap:20px;">
+            <div style="flex:1; min-width:250px; background:var(--color-surface); padding:15px; border-radius:8px; border:1px solid var(--color-border);">
+                <h4 style="margin:0 0 10px; color:var(--primary);"><i class="fas fa-map-marker-alt"></i> Pickup Location</h4>
+                <strong>Sunnydale Farms</strong>
+                <p style="margin:5px 0 0; font-size:0.9rem; color:var(--text-muted);">123 Country Road, Sector 4<br>Contact: John (555-0192)</p>
+                <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ccc;">
+                    <strong>Item:</strong> 150 kg Organic Carrots
+                </div>
+            </div>
+            
+            <div style="display:flex; align-items:center; justify-content:center; padding:10px;">
+                <i class="fas fa-arrow-right" style="font-size:2rem; color:#ccc;"></i>
+            </div>
+            
+            <div style="flex:1; min-width:250px; background:var(--color-surface); padding:15px; border-radius:8px; border:1px solid var(--color-border);">
+                <h4 style="margin:0 0 10px; color:var(--success);"><i class="fas fa-flag-checkered"></i> Drop-off Location</h4>
+                <strong>Downtown Soup Kitchen</strong>
+                <p style="margin:5px 0 0; font-size:0.9rem; color:var(--text-muted);">45 Main St, City Center<br>Contact: Sarah (555-0188)</p>
+                <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ccc;">
+                    <strong>Deadline:</strong> Today, 5:00 PM
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top:20px; display:flex; gap:10px;">
+            <button class="btn"><i class="fas fa-directions"></i> Get Directions</button>
+            <button class="btn primary"><i class="fas fa-box"></i> Mark Picked Up</button>
+        </div>
     </div>
 </div>
 {% endblock %}

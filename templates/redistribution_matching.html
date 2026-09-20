@@ -4,11 +4,55 @@
 {% block content %}
 <div class="rd-container">
     <div class="rd-header">
-        <h1 class="rd-title">AI Matching</h1>
-        <p class="rd-subtitle">{% trans "This Redistribution Feature is active." %}</p>
+        <h1 class="rd-title">AI Matching Engine</h1>
+        <p class="rd-subtitle">{% trans "Automatically pair surplus with urgent needs." %}</p>
     </div>
-    <div class="rd-card p-4">
-        <p>{% trans "Data successfully connected." %}</p>
+    
+    <div class="form-card" style="margin-bottom:20px; background: rgba(var(--primary-rgb), 0.05); border: 1px solid var(--primary);">
+        <strong style="color: var(--primary); font-size: 1.1rem; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-magic"></i> 4 High-Confidence Matches Found
+        </strong>
+        <p style="margin-top:10px; font-size:0.95rem;">
+            Review and approve the suggested matches below.
+        </p>
+    </div>
+
+    <!-- Match Card 1 -->
+    <div class="form-card" style="margin-bottom:20px; display:flex; flex-direction:column; gap:15px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+            <!-- Donor -->
+            <div style="flex:1; min-width:200px; text-align:center; padding:15px; background:var(--color-surface); border-radius:8px; border:1px solid var(--color-border);">
+                <div style="width:50px; height:50px; background:rgba(21, 150, 83, 0.1); color:var(--success); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.5rem;">
+                    <i class="fas fa-hand-holding-heart"></i>
+                </div>
+                <h4 style="margin:0 0 5px;">Sunnydale Farms</h4>
+                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">150 kg Carrots</p>
+            </div>
+            
+            <!-- Match Score -->
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <div style="position:relative; width:80px; height:80px; border-radius:50%; background: conic-gradient(var(--primary) 98%, #eee 0); display:flex; align-items:center; justify-content:center;">
+                    <div style="width:65px; height:65px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                        <span style="font-weight:bold; color:var(--primary);">98%</span>
+                    </div>
+                </div>
+                <span style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">Match Score</span>
+            </div>
+            
+            <!-- Recipient -->
+            <div style="flex:1; min-width:200px; text-align:center; padding:15px; background:var(--color-surface); border-radius:8px; border:1px solid var(--color-border);">
+                <div style="width:50px; height:50px; background:rgba(13, 110, 253, 0.1); color:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.5rem;">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h4 style="margin:0 0 5px;">Downtown Soup Kitchen</h4>
+                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">Needs: 100-200 kg Veggies</p>
+            </div>
+        </div>
+        
+        <div style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #eee; padding-top:15px;">
+            <button class="btn" style="color:var(--danger); border-color:var(--danger);">Reject Match</button>
+            <button class="btn primary">Approve & Initiate Transfer</button>
+        </div>
     </div>
 </div>
 {% endblock %}

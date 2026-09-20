@@ -107,6 +107,9 @@ export class ExperienceManager {
             
             // 6. Execute Scripts
             this.executeScripts(this.mainElement);
+            
+            // Trigger DOMContentLoaded for new scripts that bind to it
+            document.dispatchEvent(new Event("DOMContentLoaded"));
 
             // 7. Start in-transition
             window.scrollTo({ top: 0, behavior: this.state.reducedMotion ? 'auto' : 'smooth' });

@@ -185,7 +185,7 @@
                      <a href="{% url 'dashboard' %}" class="rd-dropdown-item"><i class="fas fa-home" style="width:20px;text-align:center;"></i> My Home</a>
                      <a href="{% url 'organization_dashboard' %}" class="rd-dropdown-item"><i class="fas fa-cog" style="width:20px;text-align:center;"></i> Settings</a>
                      <div class="rd-dropdown-divider"></div>
-                     <a href="{% url 'logout' %}" class="rd-dropdown-item" style="color:var(--color-danger);"><i class="fas fa-sign-out-alt" style="width:20px;text-align:center;"></i> Logout</a>
+                     <a href="{% url 'logout' %}" data-no-pjax="true" class="rd-dropdown-item" style="color:var(--color-danger);"><i class="fas fa-sign-out-alt" style="width:20px;text-align:center;"></i> Logout</a>
                  </div>
              </div>
 
@@ -211,7 +211,11 @@
 
   <!-- Copilot -->
   {% if user.is_authenticated %}
-  <aside class="rd-copilot" id="copilot-widget">
+  <button id="copilot-floating-btn" style="position:fixed; bottom:24px; right:24px; width:60px; height:60px; border-radius:50%; background:var(--color-primary); color:white; border:none; box-shadow:0 4px 12px rgba(18,122,74,0.4); cursor:pointer; font-size:24px; z-index:1049; display:flex; align-items:center; justify-content:center; transition:transform 0.3s;">
+      <i class="fas fa-robot"></i>
+  </button>
+  
+  <aside class="rd-copilot collapsed" id="copilot-widget">
       <div class="rd-copilot-header">
          <div>
             <div class="rd-copilot-title">
