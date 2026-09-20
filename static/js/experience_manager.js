@@ -64,6 +64,12 @@ export class ExperienceManager {
 
                 e.preventDefault();
                 
+                // Instantly update active state for sidebar links for snappy feedback
+                if (a.classList.contains('rd-nav-item')) {
+                    document.querySelectorAll('.rd-nav-item.active').forEach(el => el.classList.remove('active'));
+                    a.classList.add('active');
+                }
+                
                 this.navigateTo(url.pathname + url.search);
             }
         });
