@@ -84,24 +84,36 @@
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
     pointer-events: none;
 }
 
 .workspace-agriculture .workspace-hero {
-    background: linear-gradient(135deg, var(--rd-primary), #059669);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.7), rgba(5, 150, 105, 0.4));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .workspace-kitchen .workspace-hero {
-    background: linear-gradient(135deg, var(--rd-primary), #d97706);
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.7), rgba(217, 119, 6, 0.4));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .workspace-logistics .workspace-hero {
-    background: linear-gradient(135deg, var(--rd-primary), #1e40af);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.7), rgba(30, 64, 175, 0.4));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .workspace-redistribution .workspace-hero {
-    background: linear-gradient(135deg, var(--rd-primary), #6d28d9);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.7), rgba(109, 40, 217, 0.4));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .workspace-widget-grid {
