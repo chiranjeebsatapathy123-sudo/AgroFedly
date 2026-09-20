@@ -265,9 +265,9 @@
 <script src="{% static 'js/app.js' %}?v=1.2"></script>
 <script src="{% static 'js/copilot.js' %}"></script>
 <script type="module">
-  import { AgroFedly3D } from "{% static 'js/3d_engine.js' %}";
-  import { VoiceAssistant } from "{% static 'js/voice_assistant.js' %}";
-  import { ExperienceManager } from "{% static 'js/experience_manager.js' %}";
+  import { AgroFedly3D } from "{% static 'js/3d_engine.js' %}?v=1.1";
+  import { VoiceAssistant } from "{% static 'js/voice_assistant.js' %}?v=1.1";
+  import { ExperienceManager } from "{% static 'js/experience_manager.js' %}?v=1.1";
   
   document.addEventListener('DOMContentLoaded', () => {
       window.experienceManager = new ExperienceManager();
