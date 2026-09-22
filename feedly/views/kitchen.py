@@ -257,7 +257,7 @@ def waste_prevention_center(request):
         if item_id:
             item = get_object_or_404(KitchenInventory, id=item_id, kitchen__organization=request.organization)
             messages.success(request, f"Ingredient '{item.ingredient}' has been flagged for priority use in today's production plan.")
-        return redirect('waste_prevention_center')
+        return redirect('kitchen_waste_prevention')
     
     # 1. Expiring / Expired Inventory
     now = timezone.now()

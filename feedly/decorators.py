@@ -24,7 +24,7 @@ def require_organization(view_func):
         org = get_active_organization(request.user, request)
         if not org:
             messages.info(request, 'Register or join an organization to use this workspace.')
-            return redirect('organization_register')
+            return redirect('onboarding_org')
             
         request.organization = org
         return view_func(request, *args, **kwargs)

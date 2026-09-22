@@ -89,7 +89,7 @@ def dashboard(request):
     org = org_member.organization if org_member else None
     
     if org and hasattr(org, 'onboarding_completed') and not org.onboarding_completed:
-        return redirect('organization_onboarding')
+        return redirect('onboarding_org')
 
     today = timezone.localdate()
     start_date = today - timedelta(days=7)
@@ -174,7 +174,7 @@ def dashboard_legacy_ngo(request):
     org = org_member.organization
     
     if hasattr(org, 'onboarding_completed') and not org.onboarding_completed:
-        return redirect('organization_onboarding')
+        return redirect('onboarding_org')
         
     # Apply date filters
     filter_val = request.GET.get('filter', '7days')

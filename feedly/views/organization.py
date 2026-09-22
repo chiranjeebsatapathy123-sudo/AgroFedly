@@ -77,7 +77,7 @@ def register_organization(request):
                     membership.save(update_fields=['role', 'status'])
                 request.session['active_organization_id'] = organization.id
                 messages.success(request, f'{organization.name} is registered and is now your active organization.')
-                return redirect('organization_onboarding')
+                return redirect('onboarding_org')
         elif not username or not password:
             form.add_error(None, 'Login username and password are required.')
         elif password != password2:
@@ -92,7 +92,7 @@ def register_organization(request):
             login(request, user)
             request.session['active_organization_id'] = organization.id
             messages.success(request, f'{organization.name} is registered. Welcome to Fedly.')
-            return redirect('organization_onboarding')
+            return redirect('onboarding_org')
     else:
         form = OrganizationForm()
     return render(request, 'organization_register.html', {'form': form, 'registering_as_authenticated_user': request.user.is_authenticated})
