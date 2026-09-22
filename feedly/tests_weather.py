@@ -11,7 +11,7 @@ class WeatherTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='test_farmer', password='password')
-        self.org = Organization.objects.create(name='Test Farm Org', org_type='FARM')
+        self.org = Organization.objects.create(name='Test Farm Org', organization_type='SUPPLIER')
         OrganizationMember.objects.create(user=self.user, organization=self.org, role='FARMER', status='ACTIVE')
         self.farm = Farm.objects.create(
             organization=self.org,

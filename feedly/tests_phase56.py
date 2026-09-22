@@ -78,8 +78,8 @@ class Phase56AuditTests(TestCase):
         self.client.login(username='farmer', password='password')
         surplus = SurplusFood.objects.create(
             organization=self.org_kitchen, 
-            food_type="Rice", 
-            quantity_kg=50, 
+            food_name="Rice", 
+            quantity=50, 
             safety_status="SAFE"
         )
         # We don't have delete URLs listed clearly, but checking access to surplus list
@@ -90,8 +90,8 @@ class Phase56AuditTests(TestCase):
     def test_unsafe_food_no_redistribution(self):
         unsafe_surplus = SurplusFood.objects.create(
             organization=self.org_kitchen, 
-            food_type="Milk", 
-            quantity_kg=10, 
+            food_name="Milk", 
+            quantity=10, 
             safety_status="EXPIRED"
         )
         # Usually matching engine filters this.
