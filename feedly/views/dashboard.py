@@ -140,7 +140,7 @@ def dashboard(request):
             pass
 
         # System Events
-        recent_activity = SystemEvent.objects.filter(organization=org).order_by('-timestamp')[:8]
+        recent_activity = SystemEvent.objects.filter(organization=org).select_related('user').order_by('-timestamp')[:8]
 
     # AI Insights
     ai_insights = []

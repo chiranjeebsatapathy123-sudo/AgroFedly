@@ -190,7 +190,7 @@ def redistribution_dashboard(request):
     org_member = request.user.organization_memberships.first()
     org = org_member.organization if org_member else None
     
-    surplus_available = SurplusFood.objects.filter(status='SAFE', quantity__gt=0).order_by('created_at')
+    surplus_available = SurplusFood.objects.filter(status='SAFE', quantity__gt=0).exclude(safety_status__in=['EXPIRED', 'NOT_ELIGIBLE']).order_by('created_at')
     pending_requests = Recipient.objects.filter(organization=org)
     active_deliveries = Delivery.objects.filter(status='IN_TRANSIT')
     
@@ -234,6 +234,8 @@ def redistribution_matching(request):
         if action == 'approve' and surplus_id and recipient_id:
             try:
                 surplus = SurplusFood.objects.get(id=surplus_id, organization=request.organization, status='AVAILABLE')
+                if surplus.safety_status in ['EXPIRED', 'NOT_ELIGIBLE']:
+                    raise PermissionDenied('Cannot transfer unsafe or expired surplus.')
                 recipient = Recipient.objects.get(id=recipient_id, organization=request.organization)
                 
                 Redistribution.objects.create(
@@ -265,7 +267,7 @@ def redistribution_matching(request):
             
         return redirect('redistribution_matching')
 
-    available_surplus = list(SurplusFood.objects.filter(organization=request.organization, status='AVAILABLE')[:10])
+    available_surplus = list(SurplusFood.objects.filter(organization=request.organization, status='AVAILABLE').exclude(safety_status__in=['EXPIRED', 'NOT_ELIGIBLE'])[:10])
     recipients = list(Recipient.objects.filter(organization=request.organization)[:10])
     
     matches = []

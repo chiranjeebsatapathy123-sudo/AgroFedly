@@ -261,6 +261,7 @@
 
 
 
+<script src="{% static 'js/live_data.js' %}?v=1.0"></script>
 <script src="{% static 'js/ui_core.js' %}?v=1.0"></script>
 <script src="{% static 'js/app.js' %}?v=1.2"></script>
 <script src="{% static 'js/copilot.js' %}"></script>
@@ -359,19 +360,16 @@
 
 {% if user.is_authenticated %}
 <script>
-  const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-  const notificationSocket = new WebSocket(wsProtocol + window.location.host + '/ws/notifications/');
-
-  notificationSocket.onmessage = function(e) {
-      const data = JSON.parse(e.data);
+  window.agrofedlyLive.connectWebSocket('notifications', '/ws/notifications/', (data) => {
       if(data.message) {
           // Create a toast notification
-          const messagesContainer = document.querySelector('.messages') || (() => {
-              const div = document.createElement('div');
-              div.className = 'messages';
-              document.body.insertBefore(div, document.querySelector('main'));
-              return div;
-          })();
+          let messagesContainer = document.querySelector('.messages');
+          if (!messagesContainer) {
+              messagesContainer = document.createElement('div');
+              messagesContainer.className = 'messages';
+              messagesContainer.style.padding = '24px 32px 0';
+              document.body.insertBefore(messagesContainer, document.querySelector('.rd-main'));
+          }
           
           const msgDiv = document.createElement('div');
           msgDiv.className = 'message success';
@@ -382,12 +380,13 @@
               msgDiv.style.opacity = '0';
               setTimeout(() => msgDiv.remove(), 500);
           }, 5000);
+          
+          // Also automatically refresh the notification dropdown if it's open
+          if (document.getElementById('notif-dropdown').classList.contains('active')) {
+              fetchNotifications();
+          }
       }
-  };
-
-  notificationSocket.onclose = function(e) {
-      console.error('Notification socket closed unexpectedly');
-  };
+  });
 </script>
 {% endif %}
 

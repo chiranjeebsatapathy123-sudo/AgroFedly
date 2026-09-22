@@ -38,6 +38,41 @@ AgroFedly is designed to be a highly responsive, real-time platform using the AS
                     └──────────────────┘
 ```
 
+## Business Architecture Flow (Ecosystem)
+
+AgroFedly operates on a unified flow spanning from farm-level agriculture down to community redistribution and analytics:
+
+```text
+                    AGROFEDLY
+                        │
+          ┌─────────────┴─────────────┐
+          │                           │
+     AGRICULTURE                 PRODUCE LIFECYCLE
+          │                           │
+     Farm Management             Harvest
+     Field Management                ↓
+     Crop Intelligence          Quality Check
+     Weather                         ↓
+     Disease                    Processing
+     Yield AI                         ↓
+     IoT                         Storage
+          │                           ↓
+          └──────────────→ Marketplace
+                                  │
+                                  ↓
+                             Distribution
+                                  │
+                  ┌───────────────┼───────────────┐
+                  ↓               ↓               ↓
+               Kitchen       Redistribution    Logistics
+                  │               │               │
+                  └───────────────┴───────────────┘
+                                  ↓
+                            TRACEABILITY
+                                  ↓
+                              ANALYTICS
+```
+
 ## Components
 
 ### 1. The Browser (Experience Manager)

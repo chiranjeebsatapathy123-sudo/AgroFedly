@@ -138,7 +138,6 @@ class OrganizationMember(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="STAFF")
     custom_role = models.ForeignKey(CustomRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="ACTIVE")
-    is_active = models.BooleanField(default=True) # DEPRECATED: Use statusus
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -370,13 +369,23 @@ class AgriculturalProduce(models.Model):
     ])
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     # Phase 38: Soft Delete
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='deleted_produce')
+
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.quantity < 0:
+            raise ValidationError("Quantity cannot be negative.")
+        if self.available_quantity < 0:
+            raise ValidationError("Available quantity cannot be negative.")
+        if self.available_quantity > self.quantity:
+            raise ValidationError("Available quantity cannot exceed total quantity.")
 
     def __str__(self):
         return f"{self.name} ({self.available_quantity} {self.unit})"
@@ -545,6 +554,8 @@ class Farm(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='individual_farms_list', null=True, blank=True)
     name = models.CharField(max_length=150)
     location = models.CharField(max_length=255, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     area_acres = models.FloatField(default=0.0)
     soil_type = models.CharField(max_length=100, blank=True, null=True)
     irrigation_type = models.CharField(max_length=100, blank=True, null=True)
@@ -560,6 +571,8 @@ class FarmField(models.Model):
     organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='farms', null=True, blank=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='individual_farms', null=True, blank=True)
     name = models.CharField(max_length=150)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     crop_type = models.CharField(max_length=100)
     area_acres = models.FloatField()
     soil_type = models.CharField(max_length=100, blank=True, null=True)
@@ -1177,6 +1190,7 @@ class Webhook(models.Model):
 
 class UserProfile(models.Model):
     ROLE_CHOICES = [
+        ('PENDING', 'Pending Assignment'),
         ('FARMER', 'Farmer'),
         ('FPO', 'Farmer Organization / FPO'),
         ('OFFICER', 'Agriculture Officer'),
@@ -1187,7 +1201,7 @@ class UserProfile(models.Model):
         ('SUPER_ADMIN', 'Super Admin'),
     ]
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='FARMER')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='PENDING')
     phone = models.CharField(max_length=20, blank=True)
     location = models.CharField(max_length=255, blank=True)
     
@@ -1388,67 +1402,6 @@ class AppError(models.Model):
 # -----------------------------------------------------------------------------
 # PHASE 37: LIVE IOT ARCHITECTURE & SENSOR ENGINE
 # -----------------------------------------------------------------------------
-class IoTDevice(models.Model):
-    """Generic IoT device representing a hardware node on farm, kitchen or storage."""
-    device_id = models.CharField(max_length=100, unique=True)
-    device_type = models.CharField(max_length=50) # e.g. "SOIL_SENSOR", "STORAGE_THERMOSTAT", "WEATHER_STATION"
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='iot_devices')
-    
-    # Optional physical associations
-    farm = models.ForeignKey('Farm', on_delete=models.SET_NULL, null=True, blank=True, related_name='iot_devices')
-    field = models.ForeignKey('FarmField', on_delete=models.SET_NULL, null=True, blank=True, related_name='iot_devices')
-    kitchen = models.ForeignKey('Kitchen', on_delete=models.SET_NULL, null=True, blank=True, related_name='iot_devices')
-    
-    status = models.CharField(max_length=20, default='OFFLINE', choices=[
-        ('ONLINE', 'Online'), ('OFFLINE', 'Offline'), ('WARNING', 'Warning'), ('ERROR', 'Error'), ('NOT_CONFIGURED', 'Not Configured')
-    ])
-    last_seen = models.DateTimeField(null=True, blank=True)
-    firmware_version = models.CharField(max_length=50, blank=True)
-    installation_date = models.DateField(auto_now_add=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"{self.device_id} ({self.device_type})"
-
-class IoTSensorReading(models.Model):
-    """Extensible sensor readings for any device."""
-    device = models.ForeignKey(IoTDevice, on_delete=models.CASCADE, related_name='readings')
-    sensor_type = models.CharField(max_length=50) # e.g. "temperature", "humidity", "soil_moisture"
-    value = models.FloatField()
-    unit = models.CharField(max_length=20) # e.g. "C", "%", "lux"
-    timestamp = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['-timestamp']
-        
-    def __str__(self):
-        return f"{self.device.device_id} - {self.sensor_type}: {self.value}{self.unit}"
-
-class IoTAlertThreshold(models.Model):
-    """Configurable thresholds to trigger SmartAlerts."""
-    device = models.ForeignKey(IoTDevice, on_delete=models.CASCADE, related_name='thresholds')
-    sensor_type = models.CharField(max_length=50)
-    min_value = models.FloatField(null=True, blank=True)
-    max_value = models.FloatField(null=True, blank=True)
-    action = models.CharField(max_length=50) # e.g. "WARNING", "CRITICAL", "IRRIGATION_REVIEW", "FOOD_SAFETY_REVIEW"
-    is_active = models.BooleanField(default=True)
-    
-    def __str__(self):
-        return f"Threshold for {self.device.device_id} {self.sensor_type}"
-
-class IntegrationConfig(models.Model):
-    """Enterprise Integration settings."""
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='integrations')
-    integration_type = models.CharField(max_length=50) # e.g. "WEATHER_API", "PAYMENT_GATEWAY", "ERP"
-    status = models.CharField(max_length=20, default='NOT_CONFIGURED')
-    last_sync = models.DateTimeField(null=True, blank=True)
-    last_error = models.TextField(blank=True)
-    is_enabled = models.BooleanField(default=False)
-    
-    def __str__(self):
-        return f"{self.organization.name} - {self.integration_type}"
-
-# -----------------------------------------------------------------------------
 # PHASE 38: ENTERPRISE INTELLIGENCE & GOVERNANCE
 # -----------------------------------------------------------------------------
 class ApprovalWorkflow(models.Model):
@@ -1529,3 +1482,56 @@ class LogisticsDriver(models.Model):
     
     def __str__(self):
         return self.name
+
+
+# ------------------------------------------------------------------------
+# Phase 58: Weather Intelligence System
+# ------------------------------------------------------------------------
+
+class WeatherObservation(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='weather_observations', null=True, blank=True)
+    farm = models.ForeignKey(Farm, on_delete=models.CASCADE, related_name='weather_observations', null=True, blank=True)
+    field = models.ForeignKey(FarmField, on_delete=models.CASCADE, related_name='weather_observations', null=True, blank=True)
+    
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    observed_at = models.DateTimeField(auto_now_add=True)
+    
+    temperature = models.FloatField()
+    feels_like = models.FloatField(null=True, blank=True)
+    humidity = models.FloatField()
+    pressure = models.FloatField(null=True, blank=True)
+    wind_speed = models.FloatField(null=True, blank=True)
+    wind_direction = models.FloatField(null=True, blank=True)
+    cloud_cover = models.FloatField(null=True, blank=True)
+    precipitation = models.FloatField(default=0.0)
+    rain_probability = models.FloatField(null=True, blank=True)
+    uv_index = models.FloatField(null=True, blank=True)
+    visibility = models.FloatField(null=True, blank=True)
+    condition = models.CharField(max_length=100)
+    
+    source = models.CharField(max_length=100, default="OpenWeather")
+
+    def __str__(self):
+        return f"Weather at {self.latitude},{self.longitude} - {self.temperature}°C"
+
+class WeatherForecast(models.Model):
+    farm = models.ForeignKey(Farm, on_delete=models.CASCADE, related_name='weather_forecasts', null=True, blank=True)
+    field = models.ForeignKey(FarmField, on_delete=models.CASCADE, related_name='weather_forecasts', null=True, blank=True)
+    
+    forecast_date = models.DateField()
+    forecast_time = models.TimeField(null=True, blank=True)
+    
+    temperature_min = models.FloatField()
+    temperature_max = models.FloatField()
+    rain_probability = models.FloatField(null=True, blank=True)
+    precipitation = models.FloatField(default=0.0)
+    humidity = models.FloatField(null=True, blank=True)
+    wind_speed = models.FloatField(null=True, blank=True)
+    condition = models.CharField(max_length=100)
+    
+    source = models.CharField(max_length=100, default="OpenWeather")
+    retrieved_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Forecast for {self.forecast_date} - {self.condition}"

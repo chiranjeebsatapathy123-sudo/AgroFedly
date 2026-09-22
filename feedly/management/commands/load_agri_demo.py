@@ -27,7 +27,7 @@ class Command(BaseCommand):
                 "is_active": True
             }
         )
-        OrganizationMember.objects.get_or_create(user=user, organization=supplier, role="OWNER", is_active=True)
+        OrganizationMember.objects.get_or_create(user=user, organization=supplier, role="OWNER", status="ACTIVE")
 
         # Create NGO/Buyer Organization
         buyer_user, _ = User.objects.get_or_create(username="demo_ngo", defaults={"email": "ngo@example.com"})
@@ -43,7 +43,7 @@ class Command(BaseCommand):
                 "is_active": True
             }
         )
-        OrganizationMember.objects.get_or_create(user=buyer_user, organization=ngo, role="OWNER", is_active=True)
+        OrganizationMember.objects.get_or_create(user=buyer_user, organization=ngo, role="OWNER", status="ACTIVE")
 
         self.stdout.write(self.style.SUCCESS('Organizations verified/created.'))
 

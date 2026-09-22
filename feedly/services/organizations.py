@@ -21,8 +21,8 @@ def get_active_organization(user, request=None):
         active_membership = OrganizationMember.objects.filter(
             user=user, 
             organization_id=org_id, 
-            is_active=True
-        ).exclude(status__in=['REMOVED', 'SUSPENDED']).first()
+            status='ACTIVE'
+        ).first()
         
         if active_membership:
             if request:
@@ -32,8 +32,8 @@ def get_active_organization(user, request=None):
     # Fallback to the first active organization membership
     active_membership = OrganizationMember.objects.filter(
         user=user, 
-        is_active=True
-    ).exclude(status__in=['REMOVED', 'SUSPENDED']).select_related('organization').first()
+        status='ACTIVE'
+    ).select_related('organization').first()
 
     if active_membership:
         if request:

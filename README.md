@@ -4,16 +4,26 @@ AgroFedly is a modern, enterprise-grade Django platform designed for intelligent
 
 We provide a real-time operational digital twin of the agriculture and food supply chain ecosystem. 
 
+## Ecosystem Architecture Flow
+
+AgroFedly powers the entire agricultural lifecycle and food supply chain via five interconnected phases:
+
+1. **Agriculture**: Farm & Field Management, IoT telemetry, Weather alerts, Disease scanning, and Yield AI.
+2. **Produce Lifecycle**: Harvesting, Quality Checking, Processing, and Storage, moving directly into the Marketplace.
+3. **Distribution**: Orchestrating supply to **Kitchens**, **Redistribution (NGOs)**, and **Logistics (Fleet routing)**.
+4. **Traceability**: An unbreakable digital ledger tracking food safety and custody from soil to consumption.
+5. **Analytics**: Deep AI insights, reporting, and predictive orchestration across the whole ecosystem.
+
 ## Features
 
 - **Enterprise Organization Management**: Complete Multi-tenant architecture for Farms, Distributors, NGOs, and Food Service Organizations.
-- **Predictive AI Demand Forecasting**: Advanced machine-learning integration to accurately forecast food demand and yield, dynamically adapting to local climate and consumption patterns.
-- **Intelligent Operations Center**: A real-time digital twin generating actionable AI-driven operational insights, alerts, and orchestration directives.
-- **Food Safety & Compliance**: End-to-end traceability of produce batches, including IoT temperature telemetry integrations and automated safety audits.
-
-Please see [DEPLOYMENT.md](DEPLOYMENT.md) for full deployment instructions and [PRODUCTION_READINESS.md](PRODUCTION_READINESS.md) for a checklist of production requirements, architecture, and operational procedures.
+- **Predictive AI Demand Forecasting**: Advanced machine-learning integration to accurately forecast food demand and yield.
+- **Intelligent Operations Center**: A real-time digital twin generating actionable AI-driven operational insights.
+- **Food Safety & Compliance**: End-to-end traceability of produce batches with IoT telemetry integrations.
 - **Logistics & Fleet Management**: Complete routing, transit tracking, status workflows, and visual delivery dashboards.
 - **Automated Subsidy Matching**: Deterministic capability matching against agricultural schemes for certified farmers.
+
+Please see [DEPLOYMENT.md](DEPLOYMENT.md) for full deployment instructions and [PRODUCTION_READINESS.md](PRODUCTION_READINESS.md) for production requirements.
 
 ## Technology Stack
 

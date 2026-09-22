@@ -42,21 +42,21 @@
         <div class="workspace-widget" style="text-align: center;">
             <div class="widget-icon"><i class="fas fa-tractor"></i></div>
             <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Active Farms" %}</span>
-            <b style="font-size: 2rem; color: var(--text);">{{ total_farms|default:"0" }}</b>
+            <b id="kpi-total-farms" style="font-size: 2rem; color: var(--text);">{{ total_farms|default:"0" }}</b>
         </div>
     </a>
     <a href="{% url 'agri_field_list' %}" style="text-decoration: none; color: inherit;">
         <div class="workspace-widget" style="text-align: center;">
             <div class="widget-icon"><i class="fas fa-map"></i></div>
             <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Active Fields" %}</span>
-            <b style="font-size: 2rem; color: var(--text);">{{ total_fields|default:"0" }}</b>
+            <b id="kpi-total-fields" style="font-size: 2rem; color: var(--text);">{{ total_fields|default:"0" }}</b>
         </div>
     </a>
     <a href="{% url 'agri_field_list' %}" style="text-decoration: none; color: inherit;">
         <div class="workspace-widget" style="text-align: center;">
             <div class="widget-icon"><i class="fas fa-chart-area"></i></div>
             <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">{% trans "Total Area" %}</span>
-            <b style="font-size: 2rem; color: var(--text);">{{ total_area|default:"0" }} ha</b>
+            <b id="kpi-total-area" style="font-size: 2rem; color: var(--text);">{{ total_area|default:"0" }} ha</b>
         </div>
     </a>
     
@@ -360,6 +360,17 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         if(window.agrofedly3D && window.AgricultureScene) {
             window.agrofedly3D.loadScene(window.AgricultureScene);
+        }
+        
+        // Listen for live agriculture updates (like farm counts, total areas, alerts)
+        if (window.agrofedlyLive) {
+            window.agrofedlyLive.connectWebSocket('agriculture', '/ws/agriculture/', (data) => {
+                if (data.type === 'dashboard_update') {
+                    if(data.total_farms !== undefined) document.getElementById('kpi-total-farms').innerText = data.total_farms;
+                    if(data.total_fields !== undefined) document.getElementById('kpi-total-fields').innerText = data.total_fields;
+                    if(data.total_area !== undefined) document.getElementById('kpi-total-area').innerText = data.total_area + ' ha';
+                }
+            });
         }
     });
 </script>

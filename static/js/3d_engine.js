@@ -326,6 +326,12 @@ export class AgroFedly3D {
     animate() {
         if (!this.enabled) return;
         
+        if (document.visibilityState === 'hidden') {
+            // Keep clock ticking to avoid massive delta jumps upon return
+            this.clock.getDelta();
+            return;
+        }
+        
         this.checkPerformance();
         
         const delta = this.clock.getDelta();

@@ -73,7 +73,7 @@
         const map = L.map('route-map').setView([40.7128, -74.0060], 12); // Default to NYC for simulation
 
         // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap'
         }).addTo(map);
@@ -115,33 +115,12 @@
         // Fit map bounds to the route
         map.fitBounds(pendingPath.getBounds(), {padding: [50, 50]});
 
-        // Simple animation loop simulating live GPS updates
-        let currentPos = [...routePoints[2]];
-        const targetPos = [...routePoints[3]];
-        
-        // Calculate steps for animation
-        const steps = 200;
-        let step = 0;
-        const latStep = (targetPos[0] - currentPos[0]) / steps;
-        const lngStep = (targetPos[1] - currentPos[1]) / steps;
-
-        setInterval(() => {
-            if (step < steps) {
-                currentPos[0] += latStep;
-                currentPos[1] += lngStep;
-                truckMarker.setLatLng(currentPos);
-                
-                // Optional: Slightly update completed path
-                const currentCompleted = completedPath.getLatLngs();
-                currentCompleted.push(L.latLng(currentPos[0], currentPos[1]));
-                // We keep it simple by just updating the marker in this demo to avoid path clutter
-                step++;
-            } else {
-                // Reset for loop demo
-                step = 0;
-                currentPos = [...routePoints[2]];
+        // Wait for liveDataManager WebSocket events to move the truck.
+        window.agrofedlyLive.connectWebSocket('logistics', '/ws/logistics/', (data) => {
+            if (data.type === 'location_update' && data.route === 'R-992') {
+                truckMarker.setLatLng([data.lat, data.lng]);
             }
-        }, 100); // 100ms interval for smooth movement
+        });
     });
 </script>
 

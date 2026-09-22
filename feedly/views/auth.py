@@ -52,7 +52,7 @@ def smart_login_view(request):
                 active_org_id = request.session.get('active_organization_id')
                 membership = None
                 if not active_org_id:
-                    membership = OrganizationMember.objects.filter(user=user, is_active=True).select_related('organization').first()
+                    membership = OrganizationMember.objects.filter(user=user, status='ACTIVE').select_related('organization').first()
                     if membership:
                         request.session['active_organization_id'] = membership.organization.id
                         SystemEvent.objects.create(organization=membership.organization, event_type="INFO", description=f"User {user.username} logged in.")
@@ -152,7 +152,7 @@ def logout_view(request):
     
     # Check org memberships before logout
     if user.is_authenticated and hasattr(user, 'organization_memberships'):
-        org_member = user.organization_memberships.filter(is_active=True).first()
+        org_member = user.organization_memberships.filter(status='ACTIVE').first()
         if org_member:
             SystemEvent.objects.create(
                 organization=org_member.organization,

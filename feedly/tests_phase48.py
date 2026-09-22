@@ -23,7 +23,7 @@ class Phase48JourneyTests(TestCase):
         user = User.objects.create_user(username=username, password="password123")
         UserProfile.objects.create(user=user, role=role, onboarding_completed=True)
         from feedly.models import OrganizationMember
-        OrganizationMember.objects.create(user=user, organization=org, role=org_role, status="ACTIVE", is_active=True)
+        OrganizationMember.objects.create(user=user, organization=org, role=org_role, status="ACTIVE")
         return user
 
     def test_login_success(self):

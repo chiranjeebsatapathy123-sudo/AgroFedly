@@ -44,7 +44,7 @@ def get_permitted_workspaces(user):
             permitted.add('AGRICULTURE')
 
     # Check Organization Membership
-    org_memberships = OrganizationMember.objects.filter(user=user, is_active=True).exclude(status__in=['REMOVED', 'SUSPENDED']).select_related('organization', 'custom_role')
+    org_memberships = OrganizationMember.objects.filter(user=user, status='ACTIVE').select_related('organization', 'custom_role')
     for membership in org_memberships:
         org_type = membership.organization.organization_type
         org_role = membership.role

@@ -50,30 +50,18 @@ def predict_crop_yield(crop_type, area_hectares, lat, lng):
     Calls OpenWeatherMap or similar for weather aggregates to predict yield.
     Falls back to heuristics.
     """
-    api_key = getattr(settings, 'WEATHER_API_KEY', None)
-    weather_factor = 1.0
+    from .weather.cache import WeatherCacheManager
     
-    if api_key:
-        try:
-            # Simplified mock of weather call
-            response = requests.get(
-                f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lng}&appid={api_key}",
-                timeout=5
-            )
-            data = response.json()
-            if "main" in data:
-                temp = data["main"]["temp"] - 273.15 # Celsius
-                # Simple logic: ideal temp 20-30C
-                if 20 <= temp <= 30:
-                    weather_factor = 1.15
-                elif temp > 35 or temp < 10:
-                    weather_factor = 0.85
-        except Exception as e:
-            print(f"Weather API error: {e}")
-            
-    # If API failed or wasn't provided, generate heuristic factor
-    if weather_factor == 1.0:
-        weather_factor = 1.05
+    weather_factor = 1.0
+    weather = WeatherCacheManager.get_current_weather(organization=None, lat=lat, lon=lng)
+    
+    if weather:
+        temp = weather.get('temperature', 25)
+        # Simple logic: ideal temp 20-30C
+        if 20 <= temp <= 30:
+            weather_factor = 1.15
+        elif temp > 35 or temp < 10:
+            weather_factor = 0.85
         
     base_yield = area_hectares * 3.5  # tons per hectare
     expected = base_yield * weather_factor

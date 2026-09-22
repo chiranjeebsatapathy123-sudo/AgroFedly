@@ -37,7 +37,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var map = L.map('map').setView([{{ lat }}, {{ lng }}], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
         }).addTo(map);
 
@@ -51,15 +51,13 @@
             .bindPopup('Delivery Truck {{ delivery.vehicle_number }}')
             .openPopup();
             
-        // Simulate live movement
-        var lat = {{ lat }};
-        var lng = {{ lng }};
-        setInterval(function(){
-            lat += 0.0005;
-            lng += 0.0005;
-            marker.setLatLng([lat, lng]);
-            map.panTo([lat, lng]);
-        }, 3000);
+        // Wait for real-time location updates
+        window.agrofedlyLive.connectWebSocket('logistics', '/ws/logistics/', (data) => {
+            if (data.type === 'location_update' && data.delivery_id === {{ delivery.id }}) {
+                marker.setLatLng([data.lat, data.lng]);
+                map.panTo([data.lat, data.lng]);
+            }
+        });
     });
 </script>
 {% endblock %}

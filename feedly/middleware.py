@@ -37,12 +37,12 @@ class OrganizationMiddleware(MiddlewareMixin):
                 membership = OrganizationMember.objects.filter(
                     user=request.user, 
                     organization_id=org_id, 
-                    is_active=True
+                    status='ACTIVE'
                 ).select_related('organization').first()
             else:
                 membership = OrganizationMember.objects.filter(
                     user=request.user, 
-                    is_active=True
+                    status='ACTIVE'
                 ).select_related('organization').first()
                 
             if membership:
@@ -50,6 +50,10 @@ class OrganizationMiddleware(MiddlewareMixin):
                 request.org_membership = membership
                 # Ensure session matches
                 request.session['active_organization_id'] = membership.organization.id
+                
+                # Update thread locals for JSON logging
+                from feedly.logging import _thread_locals
+                _thread_locals.org_id = membership.organization.id
 
 import traceback
 from django.shortcuts import render
@@ -60,9 +64,17 @@ class AppErrorMiddleware(MiddlewareMixin):
     Catches 500 exceptions, logs them to AppError model, and displays a user-friendly error page.
     """
     def process_exception(self, request, exception):
-        # Ignore 404s and common handled errors if needed
+        # Ignore standard HTTP exceptions so Django can route them to 404/403 handlers
+        from django.http import Http404
+        from django.core.exceptions import PermissionDenied, SuspiciousOperation
+        
+        if isinstance(exception, (Http404, PermissionDenied, SuspiciousOperation)):
+            return None
+        
         
         tb_str = traceback.format_exc()
+        print(f"APP ERROR CAUGHT: {exception}")
+        print(tb_str)
         
         # Check if identical error exists recently
         error_type = type(exception).__name__
@@ -90,4 +102,4 @@ class AppErrorMiddleware(MiddlewareMixin):
             )
             
         # Return generic error page (500)
-        return render(request, 'errors/500_generic.html', status=500)
+        return render(request, '500.html', status=500)

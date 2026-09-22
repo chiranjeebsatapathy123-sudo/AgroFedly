@@ -6,7 +6,7 @@ def organization_context(request):
         memberships = getattr(request.user, 'organization_memberships', None)
         available_memberships = []
         if memberships:
-            available_memberships = memberships.filter(is_active=True).select_related('organization')
+            available_memberships = memberships.filter(status='ACTIVE').select_related('organization')
         
         return {
             'active_org': request.organization,

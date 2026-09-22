@@ -51,7 +51,7 @@ def organization_dashboard(request):
     deliveries = Delivery.objects.filter(Q(sender=org) | Q(receiver=org)).select_related('sender', 'receiver')[:8]
     outgoing = Delivery.objects.filter(sender=org).aggregate(v=Sum('quantity'))['v'] or 0
     incoming = Delivery.objects.filter(receiver=org).aggregate(v=Sum('quantity'))['v'] or 0
-    others = OrganizationMember.objects.select_related('organization').filter(user=request.user, is_active=True, organization__is_active=True).exclude(organization=org).order_by('organization__name')
+    others = OrganizationMember.objects.select_related('organization').filter(user=request.user, status='ACTIVE', organization__is_active=True).exclude(organization=org).order_by('organization__name')
     return render(request, 'organization_dashboard.html', {'organization': org, 'membership': request.membership, 'members': members, 'member_count': members.count(), 'deliveries': deliveries, 'outgoing_quantity': outgoing, 'incoming_quantity': incoming, 'others': others})
 
 def register_organization(request):
@@ -71,10 +71,10 @@ def register_organization(request):
             if form.is_valid():
                 with transaction.atomic():
                     organization = form.save()
-                    membership, _ = OrganizationMember.objects.get_or_create(organization=organization, user=request.user, defaults={'role': 'OWNER', 'is_active': True})
+                    membership, _ = OrganizationMember.objects.get_or_create(organization=organization, user=request.user, defaults={'role': 'OWNER', 'status': 'ACTIVE'})
                     membership.role = 'OWNER'
-                    membership.is_active = True
-                    membership.save(update_fields=['role', 'is_active'])
+                    membership.status = 'ACTIVE'
+                    membership.save(update_fields=['role', 'status'])
                 request.session['active_organization_id'] = organization.id
                 messages.success(request, f'{organization.name} is registered and is now your active organization.')
                 return redirect('organization_onboarding')
@@ -88,7 +88,7 @@ def register_organization(request):
             with transaction.atomic():
                 user = User.objects.create_user(username=username, email=email, password=password)
                 organization = form.save()
-                OrganizationMember.objects.create(organization=organization, user=user, role='OWNER', is_active=True)
+                OrganizationMember.objects.create(organization=organization, user=user, role='OWNER', status='ACTIVE')
             login(request, user)
             request.session['active_organization_id'] = organization.id
             messages.success(request, f'{organization.name} is registered. Welcome to Fedly.')
@@ -99,7 +99,7 @@ def register_organization(request):
 
 def organization_switch(request, organization_id):
     """Switch the active organization for users who belong to multiple organizations."""
-    membership = get_object_or_404(OrganizationMember, organization_id=organization_id, user=request.user, is_active=True, organization__is_active=True)
+    membership = get_object_or_404(OrganizationMember, organization_id=organization_id, user=request.user, status='ACTIVE', organization__is_active=True)
     request.session['active_organization_id'] = membership.organization_id
     
     # Phase 44: Re-evaluate workspace validity
@@ -147,11 +147,11 @@ def organization_add_member(request):
         if not user:
             form.add_error('username', 'No user with that username exists.')
         else:
-            member, created = OrganizationMember.objects.get_or_create(organization=request.organization, user=user, defaults={'role': form.cleaned_data['role'], 'is_active': True})
+            member, created = OrganizationMember.objects.get_or_create(organization=request.organization, user=user, defaults={'role': form.cleaned_data['role'], 'status': 'ACTIVE'})
             if not created:
                 member.role = form.cleaned_data['role']
-                member.is_active = True
-                member.save(update_fields=['role', 'is_active'])
+                member.status = 'ACTIVE'
+                member.save(update_fields=['role', 'status'])
                 messages.success(request, 'Member role updated.')
             else:
                 messages.success(request, 'Member added.')

@@ -99,7 +99,7 @@ def onboarding_role_setup(request):
     if profile.onboarding_step < 3:
         return redirect('onboarding_org')
         
-    membership = OrganizationMember.objects.filter(user=user, is_active=True).first()
+    membership = OrganizationMember.objects.filter(user=user, status='ACTIVE').first()
     org = membership.organization if membership else None
     
     if request.method == 'POST':

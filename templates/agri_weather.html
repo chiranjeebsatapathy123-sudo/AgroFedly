@@ -27,15 +27,15 @@
         <div class="stat-card" style="background:var(--surface); padding:30px; border-radius:12px; border:1px solid var(--border); text-align:center;">
             <div style="font-size:3rem; margin-bottom:10px;">🌡️</div>
             <h3 style="margin:0; font-size:1.2rem; color:var(--text-muted);">{% trans "Temperature" %}</h3>
-            <div style="font-size:2.5rem; font-weight:bold; margin-top:10px; color:var(--ink);">{{ weather.temperature }}<span style="font-size:1.5rem;">°C</span></div>
-            <p style="margin:5px 0 0; color:var(--text-muted);">{{ weather.weather|title }}</p>
+            <div style="font-size:2.5rem; font-weight:bold; margin-top:10px; color:var(--ink);"><span id="weather-temp">{{ weather_info.temperature|default:'--' }}</span><span style="font-size:1.5rem;">°C</span></div>
+            <p id="weather-condition" style="margin:5px 0 0; color:var(--text-muted);">{{ weather_info.condition|default:'Unknown'|title }}</p>
         </div>
         
         <!-- Humidity Card -->
         <div class="stat-card" style="background:var(--surface); padding:30px; border-radius:12px; border:1px solid var(--border); text-align:center;">
             <div style="font-size:3rem; margin-bottom:10px;">💧</div>
             <h3 style="margin:0; font-size:1.2rem; color:var(--text-muted);">{% trans "Humidity" %}</h3>
-            <div style="font-size:2.5rem; font-weight:bold; margin-top:10px; color:var(--ink);">{{ weather.humidity }}<span style="font-size:1.5rem;">%</span></div>
+            <div style="font-size:2.5rem; font-weight:bold; margin-top:10px; color:var(--ink);"><span id="weather-humidity">{{ weather_info.humidity|default:'--' }}</span><span style="font-size:1.5rem;">%</span></div>
             <p style="margin:5px 0 0; color:var(--text-muted);">{% trans "Relative Air Moisture" %}</p>
         </div>
         
@@ -43,17 +43,40 @@
         <div class="stat-card" style="background:var(--surface); padding:30px; border-radius:12px; border:1px solid var(--border); text-align:center;">
             <div style="font-size:3rem; margin-bottom:10px;">🌧️</div>
             <h3 style="margin:0; font-size:1.2rem; color:var(--text-muted);">{% trans "Rainfall" %}</h3>
-            <div style="font-size:2.5rem; font-weight:bold; margin-top:10px; color:var(--ink);">{{ weather.rainfall }}<span style="font-size:1.5rem;">mm</span></div>
+            <div style="font-size:2.5rem; font-weight:bold; margin-top:10px; color:var(--ink);"><span id="weather-rain">{{ weather_info.precipitation|default:'0' }}</span><span style="font-size:1.5rem;">mm</span></div>
             <p style="margin:5px 0 0; color:var(--text-muted);">{% trans "Last 1 hour" %}</p>
         </div>
     </div>
     
-    <div style="text-align:right; margin-top:20px; font-size:0.9rem; color:var(--text-muted);">
-        {% if weather.is_live %}
-            <span style="color:var(--success);">● {% trans "Live Data via OpenWeather" %}</span>
+    <div style="text-align:right; margin-top:20px; font-size:0.9rem; color:var(--text-muted);" id="weather-source">
+        {% if weather_info.is_live %}
+            <span style="color:var(--success);">● {% trans "Live Data via Cache" %}</span>
         {% else %}
-            <span style="color:var(--warning);">● {% trans "Simulated Data (API Offline)" %}</span>
+            <span style="color:var(--warning);">● {% trans "Simulated Data / Offline" %}</span>
         {% endif %}
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Register API polling for weather data (every 5 minutes / 300,000ms)
+        if (window.agrofedlyLive) {
+            window.agrofedlyLive.registerPoll('agri_weather', 300000, async () => {
+                const response = await fetch('/api/agriculture/weather/current/');
+                if (!response.ok) throw new Error('Weather fetch failed');
+                return await response.json();
+            }, (data) => {
+                document.getElementById('weather-temp').innerText = data.temperature;
+                document.getElementById('weather-condition').innerText = data.condition;
+                document.getElementById('weather-humidity').innerText = data.humidity;
+                document.getElementById('weather-rain').innerText = data.precipitation;
+                
+                const sourceEl = document.getElementById('weather-source');
+                if (data.is_live) {
+                    sourceEl.innerHTML = '<span style="color:var(--success);">● Live Data via Cache</span>';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

@@ -146,16 +146,39 @@ document.addEventListener("DOMContentLoaded", function() {
                     liveChart.update();
                 }
             })
-            .catch(err => {
-                console.warn("IoT stream inactive or no real data:", err);
-                document.getElementById('no-data-msg').style.display = 'block';
-                document.getElementById('liveChart').style.display = 'none';
-            });
-    }
+    // Use central LiveDataManager for IoT data polling every 5 seconds (fast tier)
+    if (window.agrofedlyLive) {
+        window.agrofedlyLive.registerPoll('iot_telemetry', 5000, async () => {
+            const response = await fetch('/api/iot/live/');
+            if (!response.ok) throw new Error('IoT API failed');
+            return await response.json();
+        }, (data) => {
+            document.getElementById('no-data-msg').style.display = 'none';
+            document.getElementById('liveChart').style.display = 'block';
+            
+            const temp = data.temperature;
+            const moisture = data.moisture;
+            const label = new Date(data.timestamp).toLocaleTimeString();
+            
+            // Only update if new timestamp
+            const labels = liveChart.data.labels;
+            if (labels.length === 0 || labels[labels.length - 1] !== label) {
+                liveChart.data.labels.push(label);
+                if (labels.length > 7) labels.shift();
+                
+                liveChart.data.datasets[0].data.push(moisture);
+                if (liveChart.data.datasets[0].data.length > 7) liveChart.data.datasets[0].data.shift();
+                
+                liveChart.data.datasets[1].data.push(temp);
+                if (liveChart.data.datasets[1].data.length > 7) liveChart.data.datasets[1].data.shift();
 
-    // Initial fetch and set interval for real data
-    fetchTelemetry();
-    setInterval(fetchTelemetry, 10000); // Check every 10 seconds to save DB load
+                liveChart.update('none'); // efficient update
+            }
+        });
+    } else {
+        // Fallback if not loaded
+        fetchTelemetry();
+    }
 });
 </script>
 {% endblock %}

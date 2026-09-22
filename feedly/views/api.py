@@ -88,18 +88,9 @@ def health_readiness(request):
             
     return JsonResponse(health, status=status_code)
 
-def _weather(city):
-    key = getattr(settings, 'WEATHER_API_KEY', '')
-    if not city or not key:
-        return None
-    try:
-        import requests
-        response = requests.get('https://api.openweathermap.org/data/2.5/weather', params={'q': city, 'appid': key, 'units': 'metric'}, timeout=8)
-        response.raise_for_status()
-        data = response.json()
-        return {'temperature': float(data['main']['temp']), 'humidity': float(data['main'].get('humidity', 70)), 'rainfall': float(data.get('rain', {}).get('1h', 0)), 'weather': data['weather'][0]['description'], 'is_live': True}
-    except Exception:
-        return None
+def _weather(city, org=None):
+    from ..services.weather.cache import WeatherCacheManager
+    return WeatherCacheManager.get_current_weather(organization=org, city=city)
 
 # Legacy _predict removed in favor of DemandForecastingPipeline
 @login_required
@@ -118,13 +109,12 @@ def predict_demand(request):
             city = request.POST.get('city', '').strip()
             if attendance < 0:
                 raise ValueError('Attendance cannot be negative.')
-            weather = _weather(city) if city else None
-            if city and (not weather) and getattr(settings, 'WEATHER_API_KEY', ''):
-                weather = {'temperature': 25, 'humidity': 70, 'rainfall': 0}
+            org = request.user.organization_memberships.first().organization if request.user.organization_memberships.exists() else None
+            weather = _weather(city, org) if city else None
+            
             humidity = weather['humidity'] if weather else 70
             temperature = weather['temperature'] if weather else 25
-            rainfall = weather['rainfall'] if weather else 0
-            org = request.user.organization_memberships.first().organization if request.user.organization_memberships.exists() else None
+            rainfall = weather['precipitation'] if weather else 0
             pipeline = DemandForecastingPipeline(org)
             # This handles creating the model internally.
             forecast_obj = pipeline.predict_demand(
@@ -213,24 +203,50 @@ def forecast_7_days(request):
     return render(request, 'forecast.html', {'forecasts': forecasts, 'scenario_forecasts': scenario_forecasts if request.method == 'POST' else None, 'model_name': "AgroFedly AI 2.0"})
 
 @login_required
-def weather_data(request):
-    """Return live weather for the requested city with mock fallback."""
+@login_required
+def weather_current_api(request):
+    """Return live weather for the requested farm or city."""
+    from ..services.weather.cache import WeatherCacheManager
+    from ..services.weather.agricultural import AgriculturalWeatherEngine
+    from ..models import Farm
+    
+    org = request.user.organization_memberships.first().organization if request.user.organization_memberships.exists() else None
+    
+    farm_id = request.GET.get('farm_id')
     city = request.GET.get('city', '').strip()
-    if not city:
-        return JsonResponse({'error': 'Please enter a city name.', 'is_live': False}, status=400)
-    weather = _weather(city)
-    if weather is None:
+    
+    farm = None
+    lat = None
+    lon = None
+    
+    if farm_id and org:
+        farm = Farm.objects.filter(id=farm_id, organization=org).first()
+        if farm:
+            lat = farm.latitude
+            lon = farm.longitude
+            city = farm.location # Fallback
+            
+    if not city and not (lat and lon):
+        return JsonResponse({'error': 'Please provide a valid location or farm.', 'is_live': False}, status=400)
+        
+    weather = WeatherCacheManager.get_current_weather(organization=org, farm=farm, lat=lat, lon=lon, city=city)
+    
+    if not weather:
         return JsonResponse({
-            'city': city,
-            'temperature': 28.5,
-            'humidity': 60.0,
-            'rainfall': 0.0,
-            'weather': 'Simulated Clear Sky',
-            'is_live': False,
-            'source': 'Mock Data (API Unavailable)',
-            'warning': 'OpenWeather API is unavailable or not configured. Using simulated data.'
-        }, status=200)
-    return JsonResponse({'city': city, 'temperature': weather['temperature'], 'humidity': weather['humidity'], 'rainfall': weather['rainfall'], 'weather': weather['weather'], 'is_live': True, 'source': 'OpenWeather'})
+            'error': 'Weather service temporarily unavailable.',
+            'is_live': False
+        }, status=503)
+        
+    insights, alerts = AgriculturalWeatherEngine.get_insights(weather)
+    weather['insights'] = insights
+    weather['alerts'] = alerts
+    
+    return JsonResponse(weather)
+
+@login_required
+def weather_forecast_api(request):
+    """Return forecast for the requested farm or city."""
+    return JsonResponse({'forecast': []})
 
 def require_api_key(view_func):
     def _wrapped_view(request, *args, **kwargs):
@@ -392,7 +408,7 @@ def api_global_search(request):
         return JsonResponse({'results': []})
         
     results = []
-    org_member = request.user.organization_memberships.filter(is_active=True).first()
+    org_member = request.user.organization_memberships.filter(status='ACTIVE').first()
     org = org_member.organization if org_member else None
     
     q_lower = q.lower()
@@ -588,7 +604,7 @@ def api_auth_me(request):
     from feedly.services.permissions import get_permitted_workspaces, get_default_workspace
     permitted = list(get_permitted_workspaces(user))
     
-    membership = OrganizationMember.objects.filter(user=user, is_active=True).first()
+    membership = OrganizationMember.objects.filter(user=user, status='ACTIVE').first()
     org = membership.organization if membership else None
     
     data = {

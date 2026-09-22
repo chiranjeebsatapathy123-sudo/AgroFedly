@@ -40,3 +40,37 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "message": message
         }))
+
+class BaseOrgConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        if self.scope["user"].is_anonymous:
+            await self.close()
+            return
+            
+        # Simplest approach for secure broadcast without DB query in async context:
+        # We broadcast to the user's ID group. The backend signal publisher queries
+        # all users in the organization and sends messages to their individual user groups.
+        self.user_group_name = f"{self.topic_prefix}_{self.scope['user'].id}"
+        await self.channel_layer.group_add(
+            self.user_group_name,
+            self.channel_name
+        )
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        if hasattr(self, 'user_group_name'):
+            await self.channel_layer.group_discard(
+                self.user_group_name,
+                self.channel_name
+            )
+
+    async def broadcast(self, event):
+        await self.send(text_data=json.dumps(event["data"]))
+
+
+class LogisticsConsumer(BaseOrgConsumer):
+    topic_prefix = "logistics_user"
+
+
+class AgricultureConsumer(BaseOrgConsumer):
+    topic_prefix = "agri_user"

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from ..models import Kitchen, MealRecord, PreparationRecord, SurplusFood, KitchenInventory, KitchenAlert, Ingredient
+from ..models import Kitchen, MealRecord, PreparationRecord, SurplusFood, KitchenInventory, Ingredient
 from ..decorators import require_role, require_org_role, _organization_required, require_sector
 
 @login_required
@@ -48,7 +48,7 @@ def kitchen_dashboard(request):
     count_completed = meals_today.filter(status='COMPLETED').count()
 
     # Alerts & Needs Attention
-    alerts = KitchenAlert.objects.filter(kitchen=kitchen, is_resolved=False).order_by('-created_at')
+    alerts = []
     
     # Today's Production Table
     # Using meals_today directly

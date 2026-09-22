@@ -100,7 +100,7 @@ def agri_farm_list(request):
         return redirect('role_selection')
     
     if getattr(request.user, 'is_superuser', False) or request.user.profile.role in ['SUPER_ADMIN', 'ADMIN']:
-        farms = Farm.objects.all()
+        farms = Farm.objects.filter(organization=request.organization)
     elif request.user.profile.role == 'FARMER':
         farms = Farm.objects.filter(owner=request.user)
     elif request.user.profile.role == 'FPO':
@@ -154,7 +154,7 @@ def agri_field_list(request):
     
     farm_id = request.GET.get('farm_id')
     if getattr(request.user, 'is_superuser', False) or request.user.profile.role in ['SUPER_ADMIN', 'ADMIN']:
-        fields = FarmField.objects.all()
+        fields = FarmField.objects.filter(farm__organization=request.organization)
     elif request.user.profile.role == 'FARMER':
         fields = FarmField.objects.filter(farm__owner=request.user)
     elif request.user.profile.role == 'FPO':
@@ -223,9 +223,9 @@ def agri_calendar(request):
     farm_id = request.GET.get('farm_id')
     
     if getattr(request.user, 'is_superuser', False) or role in ['SUPER_ADMIN', 'ADMIN']:
-        events = FarmEvent.objects.all()
-        activities = FieldActivity.objects.all()
-        farms = Farm.objects.all()
+        events = FarmEvent.objects.filter(farm__organization=request.organization)
+        activities = FieldActivity.objects.filter(field__farm__organization=request.organization)
+        farms = Farm.objects.filter(organization=request.organization)
     elif role == 'FARMER':
         events = FarmEvent.objects.filter(farm__owner=request.user)
         activities = FieldActivity.objects.filter(field__farm__owner=request.user)
@@ -284,7 +284,7 @@ def agri_produce_list(request):
         return redirect('role_selection')
     
     if getattr(request.user, 'is_superuser', False) or request.user.profile.role in ['SUPER_ADMIN', 'ADMIN']:
-        produce_list = AgriculturalProduce.objects.all().order_by('-harvest_date')
+        produce_list = AgriculturalProduce.objects.filter(owner=request.organization).order_by('-harvest_date')
     elif request.user.profile.role == 'FARMER':
         produce_list = AgriculturalProduce.objects.filter(owner=request.user).order_by('-harvest_date')
     elif request.user.profile.role == 'FPO':
@@ -541,7 +541,7 @@ def generate_weather_advisory(city):
 
 @login_required
 def agri_market_trends(request):
-    trends = CropMarketTrend.objects.all().order_by('-record_date')
+    trends = CropMarketTrend.objects.all().order_by('-record_date')[:100]
     return render(request, 'agri_market_trends.html', {'trends': trends})
 
 @login_required
@@ -771,34 +771,45 @@ def agri_crop_recommendation(request):
 @login_required
 def agri_weather_page(request):
     """Renders a dedicated agriculture weather dashboard with Crop Risk logic."""
-    from .api import _weather
+    from ..services.weather.cache import WeatherCacheManager
+    from ..services.weather.agricultural import AgriculturalWeatherEngine
     from ..models import Farm
     
-    city = 'Delhi' 
-    org_member = request.user.organization_memberships.filter(is_active=True).first()
-    if org_member:
-        farm = Farm.objects.filter(organization=org_member.organization).first()
-        if farm and farm.location:
+    city = '' 
+    org_member = request.user.organization_memberships.filter(status='ACTIVE').first()
+    org = org_member.organization if org_member else None
+    
+    farm = None
+    lat = None
+    lon = None
+    
+    if org:
+        farm = Farm.objects.filter(organization=org).first()
+        if farm:
+            lat = farm.latitude
+            lon = farm.longitude
             city = farm.location
             
-    weather_info = _weather(city)
+    if not city and not (lat and lon):
+        city = 'Delhi' # Global fallback for dashboard display if completely unset
+        
+    weather_info = WeatherCacheManager.get_current_weather(organization=org, farm=farm, lat=lat, lon=lon, city=city)
+    
     crop_risk = None
     advisory = None
+    insights = []
+    alerts = []
     
     if weather_info:
-        temp = weather_info.get('temperature', 25.0)
-        humidity = weather_info.get('humidity', 50.0)
+        insights, alerts = AgriculturalWeatherEngine.get_insights(weather_info, crop_type='general')
         
-        # Crop Risk AI Logic (Heuristic)
-        if temp > 38.0:
-            crop_risk = "HIGH: Extreme heat stress potential. Requires immediate irrigation verification."
-            advisory = "High heat alert. Increase irrigation frequency."
-        elif temp < 5.0:
-            crop_risk = "HIGH: Frost risk detected. Potential crop damage if unprotected."
-            advisory = "Frost warning. Cover sensitive crops."
-        elif humidity > 85.0 and temp > 25.0:
-            crop_risk = "MEDIUM: Fungal disease risk elevated due to high humidity and temperature."
-            advisory = "High humidity detected. Monitor for fungal diseases."
+        # Legacy template mappings
+        if alerts and any(a['severity'] == 'CRITICAL' for a in alerts):
+            crop_risk = f"HIGH: {alerts[0]['message']}"
+            advisory = alerts[0]['message']
+        elif alerts:
+            crop_risk = f"MEDIUM: {alerts[0]['message']}"
+            advisory = alerts[0]['message']
         else:
             crop_risk = "LOW: Weather conditions are optimal for general crops."
             advisory = "Weather is optimal."
@@ -807,7 +818,9 @@ def agri_weather_page(request):
         'weather_info': weather_info,
         'city': city,
         'crop_risk': crop_risk,
-        'advisory': advisory
+        'advisory': advisory,
+        'insights': insights,
+        'alerts': alerts
     })
 
 from ..models import IoTTemperatureReading, SmartAlert
@@ -952,7 +965,7 @@ def agri_subsidy_finder(request):
     produce = AgriculturalProduce.objects.filter(producer=request.user.organization_memberships.first().organization if request.user.organization_memberships.exists() else None)
     my_crop_types.extend([p.name.lower() for p in produce])
     my_crop_types = set(my_crop_types)
-    all_schemes = GovernmentScheme.objects.all()
+    all_schemes = GovernmentScheme.objects.all()[:100]
     matched_schemes = []
     other_schemes = []
     for scheme in all_schemes:
@@ -989,7 +1002,7 @@ def agri_equipment_add(request):
 @login_required
 def agri_ai_advisor(request):
     from feedly.models import MarketPricePrediction, FieldActivity, FarmEvent
-    predictions = MarketPricePrediction.objects.all().order_by('-updated_at')
+    predictions = MarketPricePrediction.objects.all().order_by('-updated_at')[:100]
     
 
     # Bring in context for AI Advisor to make personalized suggestions
@@ -1144,7 +1157,7 @@ def model_monitoring(request):
         messages.error(request, "Access denied. Only Researchers and Admins can view Model Performance.")
         return redirect('agri_intelligence')
         
-    models = AIModelRegistry.objects.all()
+    models = AIModelRegistry.objects.all()[:100]
     recent_logs = AIAuditLog.objects.order_by('-timestamp')[:50]
     
     context = {

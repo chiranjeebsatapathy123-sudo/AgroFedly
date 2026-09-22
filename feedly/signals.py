@@ -32,10 +32,37 @@ def send_realtime_event(organization, event_type, message, related_id=None):
     }
     
     for member in organization.members.all():
-        async_to_sync(channel_layer.group_send)(
-            f"user_{member.user.id}",
-            payload
-        )
+        try:
+            async_to_sync(channel_layer.group_send)(
+                f"user_{member.user.id}",
+                payload
+            )
+        except Exception as e:
+            # Gracefully degrade if Redis is down
+            pass
+
+def broadcast_event_to_org(organization, topic_prefix, event_data):
+    """Broadcasts arbitrary events to specific multiplexed WebSocket consumers without DB persistence."""
+    if not organization:
+        return
+    channel_layer = get_channel_layer()
+    if not channel_layer:
+        return
+        
+    payload = {
+        'type': 'broadcast',
+        'data': event_data
+    }
+    
+    for member in organization.members.all():
+        try:
+            async_to_sync(channel_layer.group_send)(
+                f"{topic_prefix}_{member.user.id}",
+                payload
+            )
+        except Exception as e:
+            # Gracefully degrade if Redis is down
+            pass
 
 @receiver(post_save, sender=SurplusFood)
 def surplus_food_saved(sender, instance, created, **kwargs):
@@ -80,7 +107,29 @@ def delivery_saved(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=IoTTemperatureReading)
 def iot_reading_saved(sender, instance, created, **kwargs):
-    if instance.status == 'ALERT':
-        # Need to find the org. Let's broadcast this globally for simplicity in the demo, or skip if no org attached directly.
-        # Currently IoT readings don't have an organization foreign key in the model.
+    # If the reading has an alert, we can broadcast it to the default organization (or all if multi-tenant)
+    # For now, this just updates IoT charts for connected clients
+    channel_layer = get_channel_layer()
+    if channel_layer:
+        # Simplistic broadcast to a global group or iterate over organizations
         pass
+
+# Add a signal for Delivery Tracking Updates
+@receiver(post_save, sender=Delivery)
+def logistics_delivery_updated(sender, instance, **kwargs):
+    if instance.status == 'IN_TRANSIT':
+        # Simulate a location update broadcast
+        # In a real app, a GPS driver app would hit an API to trigger this.
+        broadcast_event_to_org(
+            instance.sender,
+            'logistics_user',
+            {
+                'type': 'location_update',
+                'delivery_id': instance.id,
+                'tracking_code': instance.tracking_code,
+                # Using some random variation near origin for simulation
+                'lat': getattr(instance.sender, 'latitude', 28.70) + 0.005,
+                'lng': getattr(instance.sender, 'longitude', 77.10) + 0.005,
+                'route': 'R-992' # Example matching the route map template
+            }
+        )
