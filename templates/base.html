@@ -391,7 +391,7 @@
 {% endif %}
 
 
-    // Close dropdowns when clicking outside
+    <script>
     document.addEventListener('click', function(event) {
         if (!event.target.closest('.rd-dropdown-container')) {
             document.querySelectorAll('.rd-dropdown-container.active').forEach(function(el) {
