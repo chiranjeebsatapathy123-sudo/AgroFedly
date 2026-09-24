@@ -6,8 +6,7 @@
       "config": {
         "includeFiles": [
           "templates/**",
-          "staticfiles/**",
-          "db.sqlite3"
+          "staticfiles/**"
         ]
       }
     }
