@@ -123,26 +123,7 @@ if DATABASE_URL:
         )
     }
 else:
-    if not DEBUG:
-        # Bypassing strict check to allow Vercel build to complete
-        pass
-
-    if os.getenv("VERCEL") == "1":
-        import shutil
-        src_db = BASE_DIR / "db.sqlite3"
-        tmp_db = "/tmp/db.sqlite3"
-        if not os.path.exists(tmp_db) and src_db.exists():
-            shutil.copy2(src_db, tmp_db)
-        db_path = tmp_db
-    else:
-        db_path = BASE_DIR / "db.sqlite3"
-        
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": db_path,
-        }
-    }
+    raise ValueError("FATAL ERROR: DATABASE_URL is not set. PostgreSQL is strictly required for this project. SQLite fallback has been disabled.")
 
 AUTH_PASSWORD_VALIDATORS = []
 
