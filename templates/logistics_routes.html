@@ -116,11 +116,13 @@
         map.fitBounds(pendingPath.getBounds(), {padding: [50, 50]});
 
         // Wait for liveDataManager WebSocket events to move the truck.
-        window.agrofedlyLive.connectWebSocket('logistics', '/ws/logistics/', (data) => {
-            if (data.type === 'location_update' && data.route === 'R-992') {
-                truckMarker.setLatLng([data.lat, data.lng]);
-            }
-        });
+        if (window.agrofedlyLive) {
+            window.agrofedlyLive.connectWebSocket('logistics', '/ws/logistics/', (data) => {
+                if (data.type === 'location_update' && data.route === 'R-992') {
+                    truckMarker.setLatLng([data.lat, data.lng]);
+                }
+            });
+        }
     });
 </script>
 

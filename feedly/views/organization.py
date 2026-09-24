@@ -52,7 +52,7 @@ def organization_dashboard(request):
     outgoing = Delivery.objects.filter(sender=org).aggregate(v=Sum('quantity'))['v'] or 0
     incoming = Delivery.objects.filter(receiver=org).aggregate(v=Sum('quantity'))['v'] or 0
     others = OrganizationMember.objects.select_related('organization').filter(user=request.user, status='ACTIVE', organization__is_active=True).exclude(organization=org).order_by('organization__name')
-    return render(request, 'organization_dashboard.html', {'organization': org, 'membership': request.membership, 'members': members, 'member_count': members.count(), 'deliveries': deliveries, 'outgoing_quantity': outgoing, 'incoming_quantity': incoming, 'others': others})
+    return render(request, 'organization_dashboard.html', {'organization': org, 'membership': request.org_membership, 'members': members, 'member_count': members.count(), 'deliveries': deliveries, 'outgoing_quantity': outgoing, 'incoming_quantity': incoming, 'others': others})
 
 def register_organization(request):
     """Register a new organization.
@@ -123,7 +123,7 @@ def organization_details_json(request, organization_id):
 
 @_organization_required
 def organization_edit(request):
-    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in {'OWNER', 'ADMIN'}:
+    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and (not hasattr(request, 'org_membership') or request.org_membership is None or request.org_membership.role not in {'OWNER', 'ADMIN'}):
         messages.error(request, 'Only the owner or administrator can edit organization details.')
         return redirect('organization_dashboard')
     if request.method == 'POST':
@@ -138,7 +138,7 @@ def organization_edit(request):
 
 @_organization_required
 def organization_add_member(request):
-    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in {'OWNER', 'ADMIN'}:
+    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and (not hasattr(request, 'org_membership') or request.org_membership is None or request.org_membership.role not in {'OWNER', 'ADMIN'}):
         messages.error(request, 'Only the owner or administrator can manage members.')
         return redirect('organization_dashboard')
     form = MemberForm(request.POST or None)
@@ -160,7 +160,7 @@ def organization_add_member(request):
 
 @_organization_required
 def organization_remove_member(request, member_id):
-    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and request.membership.role not in {'OWNER', 'ADMIN'}:
+    if not (getattr(request.user, 'is_superuser', False) or getattr(request.user, 'profile', None) and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']) and (not hasattr(request, 'org_membership') or request.org_membership is None or request.org_membership.role not in {'OWNER', 'ADMIN'}):
         messages.error(request, 'Permission denied.')
         return redirect('organization_dashboard')
     member = get_object_or_404(OrganizationMember, id=member_id, organization=request.organization)
@@ -290,7 +290,7 @@ def data_quality_center(request):
     missing_harvest = AgriculturalProduce.objects.filter(supplier=org, harvest_date__isnull=True).count()
     
     # 2. Unknown Quality Produce
-    unknown_quality = AgriculturalProduce.objects.filter(supplier=org, quality_grade='').count()
+    unknown_quality = AgriculturalProduce.objects.filter(supplier=org, quality_status='').count()
     
     # 3. Recipients Missing Capacity
     missing_capacity = Recipient.objects.filter(organization=org, capacity=0).count()
@@ -301,7 +301,7 @@ def data_quality_center(request):
     stale_deliveries = Delivery.objects.filter(
         sender=org, 
         status='IN_TRANSIT', 
-        dispatched_at__lt=timezone.now() - timedelta(days=2)
+        updated_at__lt=timezone.now() - timedelta(days=2)
     ).count()
 
     context = {
@@ -320,8 +320,7 @@ def ai_operations_center(request):
     """Unified AI Operations Center for Platform Health and Explainability."""
     from feedly.models import AIRecommendation, AIAuditLog, AIModelRegistry
     
-    # 1. AI Health / Models
-    models = AIModelRegistry.objects.filter(is_active=True).order_by('name')
+    models = AIModelRegistry.objects.filter(status='ACTIVE').order_by('model_name')
     
     # 2. Activity / Recommendations
     recent_recs = AIRecommendation.objects.filter(organization=request.organization).order_by('-created_at')[:5]
@@ -497,14 +496,73 @@ def export_report(request):
         return HttpResponse("PDF Export not configured. Please use CSV.", status=501)
 
 @login_required
+@login_required
 def admin_users(request):
     """Phase 49: Admin Users."""
-    return render(request, 'admin_users.html', {})
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    users = User.objects.all().order_by('-id')
+    return render(request, 'admin_users.html', {'users': users})
+
+@login_required
+def admin_user_edit(request, user_id):
+    """Admin feature to edit any user"""
+    from django.contrib.auth import get_user_model
+    from feedly.forms import ProfileForm
+    from django.shortcuts import get_object_or_404
+    
+    User = get_user_model()
+    target_user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=target_user.profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'User {target_user.username} updated.')
+            return redirect('admin_users')
+    else:
+        form = ProfileForm(instance=target_user.profile)
+    return render(request, 'kitchen_profile_update.html', {'form': form, 'title': f'Edit {target_user.username}'})
 
 @login_required
 def admin_organizations(request):
     """Phase 49: Admin Organizations."""
-    return render(request, 'admin_organizations.html', {})
+    from feedly.models import Organization
+    
+    if request.method == 'POST':
+        org_name = request.POST.get('org_name')
+        org_type = request.POST.get('org_type')
+        org_email = request.POST.get('org_email')
+        
+        if org_name and org_type and org_email:
+            Organization.objects.create(
+                name=org_name,
+                organization_type=org_type,
+                email=org_email,
+                is_active=True
+            )
+            messages.success(request, f'Organization "{org_name}" successfully added.')
+            return redirect('admin_organizations')
+            
+    organizations = Organization.objects.all().order_by('-id')
+    return render(request, 'admin_organizations.html', {'organizations': organizations})
+
+@login_required
+def admin_organization_edit(request, org_id):
+    """Admin feature to edit any organization"""
+    from feedly.models import Organization
+    from feedly.forms import OrganizationForm
+    from django.shortcuts import get_object_or_404
+    
+    org = get_object_or_404(Organization, id=org_id)
+    if request.method == 'POST':
+        form = OrganizationForm(request.POST, instance=org)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Organization {org.name} details updated.')
+            return redirect('admin_organizations')
+    else:
+        form = OrganizationForm(instance=org)
+    return render(request, 'organization_edit.html', {'form': form, 'organization': org})
 
 @login_required
 def admin_roles(request):

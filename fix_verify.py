@@ -1,14 +1,11 @@
-{% extends 'base.html' %}
-{% load i18n %}
-{% block title %}Verification | AgroFedly{% endblock %}
-{% block content %}
-<div class="rd-container">
-    <div class="rd-header">
-        <h1 class="rd-title">Proof of Delivery</h1>
-        <p class="rd-subtitle">{% trans "Verify and log completed food transfers." %}</p>
-    </div>
-    
-    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+import re
+
+with open('templates/redistribution_verification.html', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+new_content = re.sub(
+    r'<div style="display:flex; gap:20px; flex-wrap:wrap;">.*?</div>\s*</div>\s*</div>\s*{% endblock %}',
+    '''<div style="display:flex; gap:20px; flex-wrap:wrap;">
         <div class="form-card" style="flex:1; min-width:300px;">
             {% if deliveries %}
             {% with d=deliveries.first %}
@@ -59,4 +56,10 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock %}''',
+    content,
+    flags=re.DOTALL
+)
+
+with open('templates/redistribution_verification.html', 'w', encoding='utf-8') as f:
+    f.write(new_content)

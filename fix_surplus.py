@@ -1,17 +1,12 @@
-{% extends 'base.html' %}
-{% load i18n %}
-{% block title %}Surplus Inventory | AgroFedly{% endblock %}
-{% block content %}
-<div class="rd-container">
-    <div class="rd-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
-        <div>
-            <h1 class="rd-title">Available Surplus</h1>
-            <p class="rd-subtitle">{% trans "Claim surplus produce before it expires." %}</p>
-        </div>
-        <button class="btn primary"><i class="fas fa-plus"></i> Post Surplus</button>
-    </div>
-    
-    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;">
+import re
+
+with open('templates/redistribution_surplus.html', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# Replace the entire grid container with a dynamic loop
+new_content = re.sub(
+    r'<div style="display:grid; grid-template-columns:repeat\(auto-fill, minmax\(280px, 1fr\)\); gap:20px;">.*?</div>\s*</div>\s*{% endblock %}',
+    '''<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;">
         {% for item in surplus_items %}
         <div class="form-card" style="display:flex; flex-direction:column; justify-content:space-between; padding:20px;">
             <div>
@@ -38,4 +33,10 @@
         {% endfor %}
     </div>
 </div>
-{% endblock %}
+{% endblock %}''',
+    content,
+    flags=re.DOTALL
+)
+
+with open('templates/redistribution_surplus.html', 'w', encoding='utf-8') as f:
+    f.write(new_content)

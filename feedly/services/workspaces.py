@@ -76,7 +76,7 @@ WORKSPACE_CONFIGS = {
         'icon': 'fas fa-cogs',
         'sidebar': [
             {'label': _('Dashboard'), 'url_name': 'workspace_admin_dashboard', 'icon': 'fas fa-chart-pie'},
-            {'label': _('Users'), 'url_name': 'admin_users', 'icon': 'fas fa-user'},
+            {'label': _('Users'), 'url_name': 'organization_admin_members', 'icon': 'fas fa-user'},
             {'label': _('Organizations'), 'url_name': 'admin_organizations', 'icon': 'fas fa-building'},
             {'label': _('Roles & Permissions'), 'url_name': 'admin_roles', 'icon': 'fas fa-key'},
             {'label': _('Workspace Access'), 'url_name': 'admin_workspace_access', 'icon': 'fas fa-door-open'},

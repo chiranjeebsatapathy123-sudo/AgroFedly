@@ -67,6 +67,7 @@ class Organization(models.Model):
         ("NGO", "NGO / Non-Profit"),
         ("INSTITUTION", "Other Institution"),
         ("SUPPLIER", "Agricultural Supplier / Farmer"),
+        ("LOGISTICS", "Logistics & Transport"),
     ]
 
     name = models.CharField(max_length=200)

@@ -55,6 +55,8 @@ def get_permitted_workspaces(user):
             permitted.add('KITCHEN')
         elif org_type == 'NGO':
             permitted.add('REDISTRIBUTION')
+        elif org_type == 'LOGISTICS':
+            permitted.add('LOGISTICS')
             
         if org_role in ['OWNER', 'ADMIN']:
             permitted.add('ADMIN')
