@@ -111,7 +111,7 @@ DATABASE_URL = (
     or os.getenv("POSTGRES_PRISMA_URL")
     or os.getenv("POSTGRES_URL_NON_POOLING")
     or os.getenv("DB_URL")
-    or ""
+    or "postgresql://neondb_owner:npg_9aSRETUfcCs6@ep-purple-breeze-b4vptup7-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 ).strip().strip("'\"")
 
 if DATABASE_URL:
