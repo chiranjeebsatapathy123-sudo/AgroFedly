@@ -186,6 +186,7 @@ LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+CARTO_API_KEY = os.getenv("CARTO_API_KEY", "")
 API_KEY = os.getenv("API_KEY")
 if not API_KEY:
     if not DEBUG:

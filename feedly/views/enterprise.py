@@ -22,7 +22,7 @@ def custom_roles_list(request):
 def approval_inbox(request):
     """Inbox for users to see approvals assigned to them or their roles."""
     org = request.organization
-    member = request.membership
+    member = request.org_membership
 
     # Find approvals where status is PENDING and this user can approve it
     # This involves checking if the workflow step matches their role or specific user

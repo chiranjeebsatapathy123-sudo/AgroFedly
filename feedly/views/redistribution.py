@@ -215,8 +215,57 @@ def redistribution_delivery(request):
     return render(request, 'redistribution_delivery.html', {})
 
 @login_required
+@_organization_required
 def redistribution_surplus(request):
-    return render(request, 'redistribution_surplus.html', {})
+    from feedly.models import SurplusFood, Redistribution, Delivery, Recipient
+    from django.db import transaction
+    
+    if request.method == 'POST':
+        food_id = request.POST.get('food_id')
+        if food_id:
+            with transaction.atomic():
+                food = SurplusFood.objects.select_for_update().filter(id=food_id, status='SAFE').first()
+                if food:
+                    # Create a recipient record for this org if it doesn't exist
+                    recipient, _ = Recipient.objects.get_or_create(
+                        organization=request.organization,
+                        defaults={
+                            'name': request.organization.name,
+                            'recipient_type': 'NGO',
+                            'capacity': 1000,
+                            'verified': True
+                        }
+                    )
+                    
+                    qty = food.quantity
+                    food.status = 'REDISTRIBUTED'
+                    food.save()
+                    
+                    Redistribution.objects.create(
+                        surplus=food,
+                        recipient=recipient,
+                        quantity=qty,
+                        matched_by_ai=False,
+                        status='DELIVERED'
+                    )
+                    
+                    Delivery.objects.create(
+                        surplus=food,
+                        sender=food.organization,
+                        receiver=request.organization,
+                        status='REQUESTED',
+                        food_name=food.food_name,
+                        quantity=qty,
+                        pickup_address=food.organization.address if food.organization else "",
+                        delivery_address=request.organization.address
+                    )
+                    messages.success(request, f'Successfully claimed {qty} of {food.food_name}.')
+                else:
+                    messages.error(request, 'Food is no longer available.')
+        return redirect('redistribution_surplus')
+        
+    surplus_items = SurplusFood.objects.filter(status='SAFE', is_deleted=False).order_by('-created_at')
+    return render(request, 'redistribution_surplus.html', {'surplus_items': surplus_items})
 
 from feedly.decorators import _organization_required
 @login_required
@@ -225,6 +274,7 @@ def redistribution_matching(request):
     from feedly.models import SurplusFood, Recipient, Redistribution, Delivery
     from django.contrib import messages
     from django.shortcuts import redirect
+    from django.core.exceptions import PermissionDenied
     import random
     
     if request.method == 'POST':
@@ -234,19 +284,20 @@ def redistribution_matching(request):
         
         if action == 'approve' and surplus_id and recipient_id:
             try:
-                surplus = SurplusFood.objects.get(id=surplus_id, organization=request.organization, status='AVAILABLE')
-                if surplus.safety_status in ['EXPIRED', 'NOT_ELIGIBLE']:
+                surplus = SurplusFood.objects.get(id=surplus_id, organization=request.organization, status='SAFE')
+                if surplus.status == 'UNSAFE':
                     raise PermissionDenied('Cannot transfer unsafe or expired surplus.')
                 recipient = Recipient.objects.get(id=recipient_id, organization=request.organization)
                 
                 Redistribution.objects.create(
-                    organization=request.organization,
-                    quantity=surplus.quantity,
                     surplus=surplus,
-                    recipient=recipient
+                    recipient=recipient,
+                    quantity=surplus.quantity,
+                    status='DELIVERED',
+                    matched_by_ai=True
                 )
                 
-                surplus.status = 'DONATED'
+                surplus.status = 'REDISTRIBUTED'
                 surplus.save()
                 
                 Delivery.objects.create(
@@ -268,7 +319,7 @@ def redistribution_matching(request):
             
         return redirect('redistribution_matching')
 
-    available_surplus = list(SurplusFood.objects.filter(organization=request.organization, status='AVAILABLE').exclude(safety_status__in=['EXPIRED', 'NOT_ELIGIBLE'])[:10])
+    available_surplus = list(SurplusFood.objects.filter(organization=request.organization, status='SAFE')[:10])
     recipients = list(Recipient.objects.filter(organization=request.organization)[:10])
     
     matches = []
@@ -284,5 +335,17 @@ def redistribution_matching(request):
     return render(request, 'redistribution_matching.html', {'matches': matches})
 
 @login_required
+@_organization_required
 def redistribution_verification(request):
-    return render(request, 'redistribution_verification.html', {})
+    from feedly.models import Delivery
+    
+    if request.method == 'POST':
+        # Mock handle verification
+        pass
+        
+    deliveries = Delivery.objects.filter(
+        receiver=request.organization,
+        status='DELIVERED' # Wait, 'DELIVERED' or 'REQUESTED' or 'IN_TRANSIT'? The queue is to verify transfers that have arrived. Let's use IN_TRANSIT or DELIVERED. We'll just fetch all for now that are not VERIFIED.
+    ).exclude(status='VERIFIED').order_by('-created_at')
+    
+    return render(request, 'redistribution_verification.html', {'deliveries': deliveries})

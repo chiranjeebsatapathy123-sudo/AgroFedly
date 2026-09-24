@@ -61,7 +61,8 @@ def agri_dashboard(request):
     
     # Phase 43: Enhanced Agriculture Dashboard Context
     total_farms = farms.count()
-    fields = FarmField.objects.filter(farm__organization=org)
+    from django.db.models import Q
+    fields = FarmField.objects.filter(Q(organization=org) | Q(farm__organization=org))
     total_fields = fields.count()
     total_area = fields.aggregate(total=Sum('area_acres'))['total'] or 0
     
@@ -832,8 +833,8 @@ def agri_iot_dashboard(request):
     Renders the IoT Sensor Fleet dashboard for the agriculture module.
     Only displays actual telemetry (Phase 5).
     """
-    recent_alerts = SmartAlert.objects.filter(resolved=False).order_by('-created_at')[:5]
-    sensors = IoTTemperatureReading.objects.values('device_id').distinct()
+    recent_alerts = SmartAlert.objects.filter(is_resolved=False).order_by('-created_at')[:5]
+    sensors = IoTTemperatureReading.objects.values('sensor_name').distinct()
     sensor_count = sensors.count()
     
     context = {

@@ -1,64 +1,451 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Members - {{ active_org.name }}{% endblock %}
 
 {% block content %}
-<div class="p-6 max-w-7xl mx-auto mt-16">
-    <div class="mb-8 flex justify-between items-center">
-        <div>
-            <h1 class="text-3xl font-bold text-white mb-2">Members</h1>
-            <p class="text-gray-400">Manage access and roles for your organization.</p>
+<style>
+    :root {
+        --primary: #3b82f6;
+        --primary-dark: #2563eb;
+        --primary-rgb: 59, 130, 246;
+        --text-color: #1e293b;
+        --text-muted: #64748b;
+        --color-border: #e2e8f0;
+        --surface-color: #ffffff;
+    }
+
+    /* Premium Page Styles */
+    .members-hero {
+        position: relative;
+        padding: 30px 40px;
+        background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1) 0%, rgba(var(--primary-rgb), 0.05) 100%);
+        border-radius: 24px;
+        overflow: hidden;
+        margin-bottom: 30px;
+        border: 1px solid rgba(var(--primary-rgb), 0.2);
+        box-shadow: 0 10px 40px -10px rgba(var(--primary-rgb), 0.1);
+    }
+    
+    .members-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .members-hero-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .members-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin: 0 0 10px 0;
+        background: linear-gradient(90deg, var(--text-color) 0%, var(--primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
+    }
+    
+    .members-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0;
+        line-height: 1.6;
+    }
+    
+    .premium-btn {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, #0b5ed7) 100%);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.05rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        box-shadow: 0 8px 20px -6px rgba(var(--primary-rgb), 0.5);
+    }
+    
+    .premium-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px -6px rgba(var(--primary-rgb), 0.6);
+        color: white;
+    }
+    
+    /* Glassmorphism Table Cards */
+    .glass-card {
+        background: var(--surface-color, rgba(255, 255, 255, 0.05));
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--color-border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 30px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .glass-card:hover {
+        box-shadow: 0 20px 45px rgba(0,0,0,0.08);
+    }
+    
+    .glass-header {
+        padding: 24px 30px;
+        border-bottom: 1px solid var(--color-border);
+        background: rgba(0,0,0,0.02);
+    }
+    
+    .glass-header h3 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .premium-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .premium-table th {
+        padding: 24px 30px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: var(--surface-color, #ffffff);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 2px solid var(--color-border);
+    }
+    
+    .premium-table td {
+        padding: 20px 30px;
+        border-top: 1px solid var(--color-border);
+        vertical-align: middle;
+        transition: background 0.2s ease;
+    }
+    
+    .premium-table tr:hover td {
+        background: rgba(var(--primary-rgb), 0.02);
+    }
+    
+    /* User Profile Cell */
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .user-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        font-weight: 700;
+        box-shadow: 0 6px 15px rgba(var(--primary-rgb), 0.3);
+    }
+    
+    .user-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .user-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text-color);
+        margin-bottom: 3px;
+    }
+    
+    .user-email {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+    
+    /* Roles Badges */
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .role-owner { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3); }
+    .role-admin { background: rgba(13, 110, 253, 0.15); color: #0d6efd; border: 1px solid rgba(13, 110, 253, 0.3); }
+    .role-manager { background: rgba(21, 150, 83, 0.15); color: #159653; border: 1px solid rgba(21, 150, 83, 0.3); }
+    .role-staff { background: rgba(108, 117, 125, 0.15); color: #6c757d; border: 1px solid rgba(108, 117, 125, 0.3); }
+    
+    /* Action Buttons */
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: transparent;
+        border: 1px solid var(--color-border);
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .action-btn:hover {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        transform: scale(1.05);
+    }
+    
+    /* Premium Modal */
+    .premium-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+    }
+    
+    .premium-modal-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    
+    .premium-modal {
+        background: var(--surface-color, #fff);
+        width: 100%;
+        max-width: 500px;
+        border-radius: 24px;
+        padding: 40px;
+        border: 1px solid var(--color-border);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        transform: translateY(30px) scale(0.95);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .premium-modal-overlay.active .premium-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.8rem;
+        margin: 0;
+        font-weight: 800;
+        color: var(--text-color);
+    }
+    
+    .modal-close {
+        background: rgba(0,0,0,0.05);
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text-muted);
+        transition: all 0.2s ease;
+        font-size: 1.2rem;
+    }
+    
+    .modal-close:hover {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        transform: rotate(90deg);
+    }
+    
+    .premium-input {
+        width: 100%;
+        padding: 16px 20px;
+        background: rgba(0,0,0,0.02);
+        border: 2px solid var(--color-border);
+        border-radius: 14px;
+        font-size: 1rem;
+        color: var(--text-color);
+        transition: all 0.3s ease;
+        margin-top: 8px;
+    }
+    
+    .premium-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: transparent;
+        box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+    }
+    
+    .input-group {
+        margin-bottom: 24px;
+    }
+    
+    .input-label {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 40px;
+    }
+    
+    .btn-cancel {
+        padding: 14px 24px;
+        border-radius: 12px;
+        border: 2px solid var(--color-border);
+        background: transparent;
+        color: var(--text-color);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-cancel:hover {
+        background: rgba(0,0,0,0.05);
+        border-color: var(--text-muted);
+    }
+
+    /* Animations */
+    @keyframes slideInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-in {
+        animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+    }
+</style>
+
+<div class="rd-container" style="max-width: 1200px; margin: 0 auto; padding-top: 20px;">
+    
+    <!-- Premium Hero Section -->
+    <div class="members-hero animate-in">
+        <div class="members-hero-content">
+            <div>
+                <h1 class="members-title">Organization Members</h1>
+                <p class="members-subtitle">Manage access, roles, and privileges for <strong>{{ active_org.name }}</strong>. Invite colleagues to collaborate on operations and strategy.</p>
+            </div>
+            <button onclick="document.getElementById('inviteModal').classList.add('active')" class="premium-btn">
+                <i class="fas fa-user-plus"></i> Invite New Member
+            </button>
         </div>
-        <button onclick="document.getElementById('inviteModal').classList.remove('hidden')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors">
-            <i class="fas fa-user-plus mr-2"></i> Invite Member
-        </button>
     </div>
 
-    <!-- Active Members -->
-    <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden mb-8">
-        <div class="px-6 py-4 border-b border-white/10">
-            <h3 class="text-lg font-bold text-white">Active Members</h3>
+    <!-- Active Members Card -->
+    <div class="glass-card animate-in" style="animation-delay: 0.1s;">
+        <div class="glass-header">
+            <h3><i class="fas fa-users" style="color: var(--primary);"></i> Active Members</h3>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead class="bg-black/20 text-gray-400 text-sm">
+        <div style="overflow-x: auto;">
+            <table class="premium-table">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 font-medium">User</th>
-                        <th class="px-6 py-3 font-medium">Role</th>
-                        <th class="px-6 py-3 font-medium">Joined</th>
-                        <th class="px-6 py-3 font-medium text-right">Actions</th>
+                        <th>User Profile</th>
+                        <th>Assigned Role</th>
+                        <th>Join Date</th>
+                        <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/10 text-gray-300">
+                <tbody>
                     {% for member in members %}
-                    <tr class="hover:bg-white/5 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center">
-                                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mr-3 font-bold">
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar" style="{% if forloop.counter|divisibleby:2 %}background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);{% endif %}{% if forloop.counter|divisibleby:3 %}background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);{% endif %}">
                                     {{ member.user.username|slice:":1"|upper }}
                                 </div>
-                                <div>
-                                    <div class="font-medium text-white">{{ member.user.username }}</div>
-                                    <div class="text-xs text-gray-500">{{ member.user.email }}</div>
+                                <div class="user-info">
+                                    <span class="user-name">{{ member.user.username }}</span>
+                                    <span class="user-email">{{ member.user.email }}</span>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                {% if member.role == 'OWNER' %}bg-purple-100 text-purple-800
-                                {% elif member.role == 'ADMIN' %}bg-blue-100 text-blue-800
-                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        <td>
+                            <span class="role-badge 
+                                {% if member.role == 'OWNER' %}role-owner
+                                {% elif member.role == 'ADMIN' %}role-admin
+                                {% elif member.role == 'MANAGER' %}role-manager
+                                {% else %}role-staff{% endif %}">
+                                <i class="fas {% if member.role == 'OWNER' %}fa-crown{% elif member.role == 'ADMIN' %}fa-shield-alt{% else %}fa-user-tag{% endif %}" style="margin-right: 6px;"></i> 
                                 {{ member.get_role_display }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-sm">{{ member.joined_at|date:"M d, Y" }}</td>
-                        <td class="px-6 py-4 text-right">
+                        <td style="color: var(--text-muted); font-weight: 500;">
+                            {{ member.joined_at|date:"M d, Y" }}
+                        </td>
+                        <td style="text-align: right;">
                             {% if member.role != 'OWNER' or active_membership.role == 'OWNER' %}
-                            <button class="text-gray-400 hover:text-white"><i class="fas fa-ellipsis-v"></i></button>
+                            <button class="action-btn" title="Edit Member">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="action-btn" style="margin-left: 8px; color: #dc3545;" title="Remove Member">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                             {% endif %}
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">No members found.</td></tr>
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                            <div style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"><i class="fas fa-user-slash"></i></div>
+                            <h3 style="margin:0 0 10px 0; color:var(--text-color);">No members found</h3>
+                            <p style="margin:0;">There are no active members in this organization yet.</p>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -67,27 +454,42 @@
 
     <!-- Pending Invitations -->
     {% if invitations %}
-    <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-        <div class="px-6 py-4 border-b border-white/10">
-            <h3 class="text-lg font-bold text-white">Pending Invitations</h3>
+    <div class="glass-card animate-in" style="animation-delay: 0.2s;">
+        <div class="glass-header">
+            <h3><i class="fas fa-paper-plane" style="color: #f59e0b;"></i> Pending Invitations</h3>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead class="bg-black/20 text-gray-400 text-sm">
+        <div style="overflow-x: auto;">
+            <table class="premium-table">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 font-medium">Email</th>
-                        <th class="px-6 py-3 font-medium">Role</th>
-                        <th class="px-6 py-3 font-medium">Invited By</th>
-                        <th class="px-6 py-3 font-medium">Expires</th>
+                        <th>Email Address</th>
+                        <th>Invited Role</th>
+                        <th>Invited By</th>
+                        <th>Expires On</th>
+                        <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/10 text-gray-300">
+                <tbody>
                     {% for inv in invitations %}
-                    <tr class="hover:bg-white/5 transition-colors">
-                        <td class="px-6 py-4">{{ inv.email }}</td>
-                        <td class="px-6 py-4">{{ inv.get_role_display }}</td>
-                        <td class="px-6 py-4 text-sm">{{ inv.invited_by.username }}</td>
-                        <td class="px-6 py-4 text-sm">{{ inv.expires_at|date:"M d, Y" }}</td>
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600; color: var(--text-color);">{{ inv.email }}</div>
+                        </td>
+                        <td>
+                            <span class="role-badge role-staff">
+                                {{ inv.get_role_display }}
+                            </span>
+                        </td>
+                        <td style="color: var(--text-muted);">{{ inv.invited_by.username }}</td>
+                        <td style="color: var(--text-muted);">{{ inv.expires_at|date:"M d, Y" }}</td>
+                        <td style="text-align: right;">
+                            <button class="action-btn" title="Resend">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="action-btn" style="margin-left: 8px; color: #dc3545;" title="Revoke">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -95,40 +497,57 @@
         </div>
     </div>
     {% endif %}
+
 </div>
 
-<!-- Invite Modal -->
-<div id="inviteModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
-    <div class="bg-[#1e2330] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold text-white">Invite Member</h3>
-            <button onclick="document.getElementById('inviteModal').classList.add('hidden')" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+<!-- Premium Invite Modal -->
+<div id="inviteModal" class="premium-modal-overlay">
+    <div class="premium-modal">
+        <div class="modal-header">
+            <h3>Invite Member</h3>
+            <button type="button" onclick="document.getElementById('inviteModal').classList.remove('active')" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
+        
         <form method="POST">
             {% csrf_token %}
             <input type="hidden" name="action" value="invite">
             
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-300 mb-1">Email Address</label>
-                <input type="email" name="email" required class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500">
+            <div class="input-group">
+                <label class="input-label"><i class="fas fa-envelope" style="color:var(--primary);"></i> Email Address</label>
+                <input type="email" name="email" required placeholder="colleague@example.com" class="premium-input">
             </div>
             
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-300 mb-1">Role</label>
-                <select name="role" class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500">
-                    <option value="STAFF">Staff</option>
-                    <option value="MANAGER">Manager</option>
-                    <option value="ADMIN">Admin</option>
-                    <option value="VIEWER">Viewer</option>
-                </select>
-                <p class="text-xs text-gray-500 mt-2">Admins can manage settings. Managers can handle operations. Staff execute assigned tasks.</p>
+            <div class="input-group">
+                <label class="input-label"><i class="fas fa-user-shield" style="color:var(--primary);"></i> Assign Role</label>
+                <div style="position: relative;">
+                    <select name="role" class="premium-input" style="appearance: none; -webkit-appearance: none; cursor: pointer;">
+                        <option value="STAFF">Staff (Execute assigned tasks)</option>
+                        <option value="MANAGER">Manager (Handle daily operations)</option>
+                        <option value="ADMIN">Admin (Manage settings and members)</option>
+                        <option value="VIEWER">Viewer (Read-only access)</option>
+                    </select>
+                    <i class="fas fa-chevron-down" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);"></i>
+                </div>
             </div>
             
-            <div class="flex justify-end gap-3">
-                <button type="button" onclick="document.getElementById('inviteModal').classList.add('hidden')" class="px-4 py-2 bg-transparent text-gray-300 hover:text-white font-medium rounded-lg">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg shadow">Send Invitation</button>
+            <div class="form-actions">
+                <button type="button" onclick="document.getElementById('inviteModal').classList.remove('active')" class="btn-cancel">Cancel</button>
+                <button type="submit" class="premium-btn">
+                    <i class="fas fa-paper-plane"></i> Send Invitation
+                </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    // Close modal when clicking outside
+    document.getElementById('inviteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+</script>
 {% endblock %}

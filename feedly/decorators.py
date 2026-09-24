@@ -38,7 +38,7 @@ def require_role(roles):
         @wraps(view_func)
         @require_organization
         def _wrapped_view(request, *args, **kwargs):
-            if getattr(request.user, 'is_superuser', False):
+            if getattr(request.user, 'is_superuser', False) or (hasattr(request.user, 'profile') and getattr(request.user.profile, 'role', '') in ['SUPER_ADMIN', 'ADMIN']):
                 return view_func(request, *args, **kwargs)
             if not hasattr(request, 'org_membership') or not request.org_membership or request.org_membership.role not in roles:
                 messages.error(request, f"Permission denied. Required role: {', '.join(roles)}")
@@ -113,6 +113,8 @@ def get_organization_sector(organization):
         return 'REDISTRIBUTION'
     elif org_type in ['COMPANY', 'HOSPITAL', 'SCHOOL', 'COLLEGE', 'INSTITUTION']:
         return 'KITCHEN'
+    elif org_type == 'LOGISTICS':
+        return 'LOGISTICS'
     return 'UNKNOWN'
 
 def require_sector(sector):

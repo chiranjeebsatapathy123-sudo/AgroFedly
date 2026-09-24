@@ -260,7 +260,7 @@ def waste_prevention_center(request):
         return redirect('kitchen_waste_prevention')
     
     # 1. Expiring / Expired Inventory
-    now = timezone.now()
+    now = timezone.now().date()
     expiring = KitchenInventory.objects.filter(
         kitchen__organization=request.organization,
         expiry_date__lte=now + timedelta(days=2),
@@ -306,9 +306,12 @@ def preparation_optimizer(request):
     return render(request, 'kitchen/preparation_optimizer.html', context)
 
 @login_required
+@_organization_required
 def kitchen_demand_forecast(request):
     """Phase 49: Kitchen Demand Forecast."""
-    return render(request, 'kitchen_demand_forecast.html', {})
+    from feedly.models import DemandForecast
+    forecasts = DemandForecast.objects.filter(organization=request.organization).order_by('date')[:7]
+    return render(request, 'kitchen_demand_forecast.html', {'forecasts': forecasts})
 
 @login_required
 def kitchen_food_safety(request):
