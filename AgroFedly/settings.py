@@ -121,6 +121,7 @@ if DATABASE_URL:
             conn_max_age=int(os.getenv("DJANGO_CONN_MAX_AGE", "0")),
             conn_health_checks=True,
         )
+    }
 else:
     # Dummy SQLite fallback to allow Vercel's build process (collectstatic) to complete successfully
     # without crashing, even if DATABASE_URL isn't fully injected during the build step.
