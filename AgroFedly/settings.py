@@ -116,8 +116,8 @@ DATABASE_URL = (
 
 if DATABASE_URL:
     DATABASES = {
-        "default": dj_database_url.config(
-            default=DATABASE_URL,
+        "default": dj_database_url.parse(
+            DATABASE_URL,
             conn_max_age=int(os.getenv("DJANGO_CONN_MAX_AGE", "0")),
             conn_health_checks=True,
         )
